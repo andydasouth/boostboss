@@ -14,7 +14,13 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
 
   try {
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+    // Service role client for admin operations (bypasses RLS, can confirm users)
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const supabaseAdmin = createClient(process.env.SUPABASE_URL, serviceKey);
+
+    // Anon client for user-facing auth (login sessions)
+    const supabaseAnon = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+
     const action = req.query.action || req.body.action;
 
     // ── SIGNUP ──
@@ -25,20 +31,21 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: "Missing email, password, or role (advertiser|developer)" });
       }
 
-      // Create Supabase Auth user
-      const { data: authData, error: authErr } = await supabase.auth.signUp({
+      // Create user via admin API — auto-confirms email
+      const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
         email,
         password,
-        options: { data: { role, company_name, app_name } },
+        email_confirm: true,
+        user_metadata: { role, company_name, app_name },
       });
 
       if (authErr) return res.status(400).json({ error: authErr.message });
 
       const userId = authData.user?.id;
 
-      // Create profile record
+      // Create profile record (using admin client to bypass RLS)
       if (role === "advertiser") {
-        const { error } = await supabase.from("advertisers").insert({
+        const { error } = await supabaseAdmin.from("advertisers").insert({
           id: userId,
           email,
           company_name: company_name || email.split("@")[0],
@@ -46,7 +53,7 @@ module.exports = async function handler(req, res) {
         });
         if (error) console.error("[Auth] Advertiser insert error:", error.message);
       } else if (role === "developer") {
-        const { error } = await supabase.from("developers").insert({
+        const { error } = await supabaseAdmin.from("developers").insert({
           id: userId,
           email,
           app_name: app_name || "My AI App",
@@ -54,10 +61,22 @@ module.exports = async function handler(req, res) {
         if (error) console.error("[Auth] Developer insert error:", error.message);
       }
 
+      // Sign in to get a session token
+      const { data: signInData, error: signInErr } = await supabaseAnon.auth.signInWithPassword({
+        email,
+        password,
+      });
+
       return res.json({
         success: true,
         user: { id: userId, email, role },
-        session: authData.session,
+        profile: role === "advertiser"
+          ? { company_name: company_name || email.split("@")[0] }
+          : { app_name: app_name || "My AI App" },
+        session: signInErr ? null : {
+          access_token: signInData.session.access_token,
+          refresh_token: signInData.session.refresh_token,
+        },
       });
     }
 
@@ -69,7 +88,7 @@ module.exports = async function handler(req, res) {
         return res.status(400).json({ error: "Missing email or password" });
       }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabaseAnon.auth.signInWithPassword({ email, password });
       if (error) return res.status(401).json({ error: error.message });
 
       // Determine role
@@ -77,10 +96,10 @@ module.exports = async function handler(req, res) {
       let profile = null;
 
       if (role === "advertiser") {
-        const { data: adv } = await supabase.from("advertisers").select("*").eq("id", data.user.id).single();
+        const { data: adv } = await supabaseAdmin.from("advertisers").select("*").eq("id", data.user.id).single();
         profile = adv;
       } else if (role === "developer") {
-        const { data: dev } = await supabase.from("developers").select("*").eq("id", data.user.id).single();
+        const { data: dev } = await supabaseAdmin.from("developers").select("*").eq("id", data.user.id).single();
         profile = dev;
       }
 
@@ -97,17 +116,17 @@ module.exports = async function handler(req, res) {
       const token = (req.headers.authorization || "").replace("Bearer ", "");
       if (!token) return res.status(401).json({ error: "No token" });
 
-      const { data: { user }, error } = await supabase.auth.getUser(token);
+      const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
       if (error || !user) return res.status(401).json({ error: "Invalid token" });
 
       const role = user.user_metadata?.role || "unknown";
       let profile = null;
 
       if (role === "advertiser") {
-        const { data } = await supabase.from("advertisers").select("*").eq("id", user.id).single();
+        const { data } = await supabaseAdmin.from("advertisers").select("*").eq("id", user.id).single();
         profile = data;
       } else if (role === "developer") {
-        const { data } = await supabase.from("developers").select("*").eq("id", user.id).single();
+        const { data } = await supabaseAdmin.from("developers").select("*").eq("id", user.id).single();
         profile = data;
       }
 
