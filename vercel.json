@@ -4,7 +4,7 @@
   "routes": [
     { "src": "/advertiser", "dest": "/public/advertiser.html" },
     { "src": "/developer", "dest": "/public/developer.html" },
-    { "src": "/demo", "dest": "/sdk/boostboss-sdk-demo.html" },
+    { "src": "/demo", "dest": "/public/demo.html" },
     { "src": "/sdk.js", "dest": "/public/sdk.js", "headers": { "Content-Type": "application/javascript", "Cache-Control": "public, max-age=3600" } },
     { "src": "/api/mcp", "dest": "/api/mcp.js" },
     { "src": "/api/track", "dest": "/api/track.js" },
