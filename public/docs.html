@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boost Boss Docs — API reference &amp; SDK guide</title>
+<meta name="description" content="Complete API reference, SDK guides, ad format specs, and webhook reference for the Boost Boss ad network.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --pink: #FF2D78; --pink-dark: #E01E65;
+    --cyan: #04BEFE; --yellow: #FFE600;
+    --ink: #1A1A2E; --ink-soft: #4B4B5E;
+    --muted: #6B7280; --line: #EAEAEF;
+    --bg: #FFFFFF; --bg-soft: #FAFAF7;
+    --code-bg: #1A1A2E;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.6; -webkit-font-smoothing: antialiased; font-size: 15px;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+  h1, h2, h3, h4, h5 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+  code { font-family: 'JetBrains Mono', monospace; font-size: 0.88em; }
+
+  /* NAV */
+  nav.top {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; max-width: 1400px; margin: 0 auto; padding: 0 28px;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 32px; height: 32px; flex-shrink: 0; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.4px; color: var(--ink); }
+  .brand-sub {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 600; color: var(--ink);
+    padding: 3px 8px; border-radius: 6px; background: var(--yellow);
+    margin-left: 4px; letter-spacing: 0.3px;
+  }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-ctas { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 13.5px;
+    padding: 7px 14px; border-radius: 7px;
+    border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s;
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn-ghost { color: var(--ink); background: transparent; }
+  .btn-ghost:hover { background: var(--bg-soft); }
+  .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-primary:hover { background: var(--pink); border-color: var(--pink); }
+
+  /* SEARCH */
+  .search {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px; background: var(--bg-soft);
+    border: 1px solid var(--line); border-radius: 8px;
+    width: 240px; color: var(--muted); font-size: 13px;
+    cursor: text;
+  }
+  .search .kbd {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 4px; padding: 1px 6px; margin-left: auto; color: var(--ink);
+  }
+
+  /* LAYOUT */
+  .docs-layout {
+    max-width: 1400px; margin: 0 auto;
+    display: grid; grid-template-columns: 260px 1fr 240px;
+    gap: 48px; padding: 0 28px;
+  }
+
+  /* SIDEBAR */
+  aside.sidebar {
+    position: sticky; top: 64px;
+    align-self: start;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding: 32px 0 48px;
+  }
+  .side-group { margin-bottom: 28px; }
+  .side-group h5 {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .side-group h5 .chip {
+    display: inline-flex; width: 6px; height: 6px; border-radius: 50%;
+  }
+  .side-group h5 .chip.pink { background: var(--pink); }
+  .side-group h5 .chip.cyan { background: var(--cyan); }
+  .side-group h5 .chip.yellow { background: var(--yellow); }
+  .side-group h5 .chip.ink { background: var(--ink); }
+  .side-links { list-style: none; }
+  .side-links li a {
+    display: block; padding: 6px 10px;
+    font-size: 13.5px; color: var(--ink-soft);
+    border-radius: 6px; margin-bottom: 1px;
+    border-left: 2px solid transparent;
+    transition: all 0.1s;
+  }
+  .side-links li a:hover { background: var(--bg-soft); color: var(--ink); }
+  .side-links li a.active {
+    color: var(--ink); font-weight: 600;
+    border-left-color: var(--pink);
+    background: #FFE6EE;
+  }
+  .method-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px; font-weight: 700;
+    padding: 1px 5px; border-radius: 3px;
+    margin-right: 6px; letter-spacing: 0.3px;
+  }
+  .method-tag.get { background: #D6F5FE; color: #0195CC; }
+  .method-tag.post { background: #D1FADF; color: #027A48; }
+  .method-tag.patch { background: #FFF3D6; color: #8A6A00; }
+  .method-tag.del { background: #FFE6EE; color: var(--pink); }
+
+  /* CONTENT */
+  main.content {
+    padding: 40px 0 80px;
+    min-width: 0;
+  }
+  .crumbs { font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+  .crumbs a { color: var(--ink-soft); }
+  .crumbs a:hover { color: var(--pink); }
+  main h1 {
+    font-size: 40px; font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 14px;
+  }
+  main h2 {
+    font-size: 26px; font-weight: 700;
+    margin: 56px 0 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+    letter-spacing: -0.02em;
+  }
+  main h2:first-of-type { border-top: none; padding-top: 0; margin-top: 48px; }
+  main h3 {
+    font-size: 19px; font-weight: 700;
+    margin: 32px 0 10px; letter-spacing: -0.01em;
+  }
+  main h4 {
+    font-size: 15px; font-weight: 700;
+    margin: 24px 0 8px;
+  }
+  main p { font-size: 15px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.65; }
+  main p code, main li code {
+    background: var(--bg-soft); border: 1px solid var(--line);
+    padding: 1px 6px; border-radius: 4px;
+    font-size: 13px; color: var(--pink);
+  }
+  main a.inline-link { color: var(--pink); font-weight: 500; border-bottom: 1px dashed var(--pink); }
+  main a.inline-link:hover { background: #FFE6EE; }
+  main ul { margin-bottom: 16px; padding-left: 22px; }
+  main ul li { font-size: 15px; color: var(--ink-soft); margin-bottom: 6px; line-height: 1.6; }
+  main strong { color: var(--ink); }
+
+  /* HERO */
+  .docs-hero {
+    background: var(--bg-soft);
+    border: 1.5px solid var(--ink); border-radius: 16px;
+    padding: 28px 32px; margin-bottom: 48px;
+    box-shadow: 6px 6px 0 var(--ink);
+    position: relative; overflow: hidden;
+  }
+  .docs-hero h1 { font-size: 32px; margin-bottom: 8px; }
+  .docs-hero p { font-size: 16px; color: var(--ink-soft); margin-bottom: 0; }
+  .docs-hero .deco {
+    position: absolute; right: -20px; top: -20px;
+    width: 120px; height: 120px; opacity: 0.9;
+  }
+
+  /* CODE BLOCKS */
+  .code-block {
+    background: var(--code-bg); color: #E5E7EB;
+    border-radius: 10px; padding: 18px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.75;
+    overflow-x: auto; margin: 14px 0 18px;
+    border: 1px solid var(--ink);
+  }
+  .code-block.with-head { padding: 0; overflow: hidden; }
+  .code-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; background: #111122;
+    border-bottom: 1px solid #2A2A3E;
+    font-size: 11px; color: #A0A0B0;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .code-head .lang { font-weight: 600; color: #fff; }
+  .code-head .copy {
+    color: var(--cyan); cursor: pointer; font-weight: 500;
+    padding: 2px 8px; border-radius: 4px; transition: background 0.1s;
+  }
+  .code-head .copy:hover { background: rgba(4,190,254,0.15); }
+  .code-block pre {
+    padding: 16px 20px; font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.75; white-space: pre;
+  }
+  .k { color: var(--pink); }
+  .s { color: var(--yellow); }
+  .c { color: #6B7280; font-style: italic; }
+  .f { color: var(--cyan); }
+  .n { color: #F9FAFB; }
+  .b { color: #A78BFA; }
+
+  /* ENDPOINT CARD */
+  .endpoint {
+    border: 1.5px solid var(--ink); border-radius: 10px;
+    padding: 14px 16px; margin-bottom: 14px;
+    background: #fff;
+    display: flex; align-items: center; gap: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .endpoint .method {
+    font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px;
+    letter-spacing: 0.3px; flex-shrink: 0;
+  }
+  .endpoint .method.post { background: #D1FADF; color: #027A48; }
+  .endpoint .method.get { background: #D6F5FE; color: #0195CC; }
+  .endpoint .method.patch { background: #FFF3D6; color: #8A6A00; }
+  .endpoint .method.del { background: #FFE6EE; color: var(--pink); }
+  .endpoint .path { font-size: 14px; color: var(--ink); font-weight: 600; }
+  .endpoint .desc { margin-left: auto; font-size: 12.5px; color: var(--muted); font-family: 'Inter', sans-serif; }
+
+  /* PARAMS TABLE */
+  .params {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin: 14px 0 20px;
+    border: 1px solid var(--line); border-radius: 10px;
+    overflow: hidden; font-size: 14px;
+  }
+  .params thead { background: var(--bg-soft); }
+  .params th {
+    text-align: left; padding: 10px 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--muted); border-bottom: 1px solid var(--line);
+  }
+  .params td {
+    padding: 12px 14px; vertical-align: top;
+    border-bottom: 1px solid var(--line);
+    font-size: 13.5px;
+  }
+  .params tbody tr:last-child td { border-bottom: none; }
+  .params td.param-name { font-family: 'JetBrains Mono', monospace; color: var(--ink); font-weight: 600; }
+  .params td.param-type { color: var(--pink); font-family: 'JetBrains Mono', monospace; font-size: 12.5px; }
+  .params td.param-desc { color: var(--ink-soft); }
+  .params .required { display: inline-block; font-size: 10px; font-weight: 700; background: var(--pink); color: #fff; padding: 1px 5px; border-radius: 3px; margin-left: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
+
+  /* CALLOUT */
+  .callout {
+    display: flex; gap: 14px;
+    padding: 14px 18px; border-radius: 10px;
+    margin: 16px 0;
+    font-size: 14px; color: var(--ink-soft);
+    border: 1.5px solid;
+  }
+  .callout .icon {
+    flex-shrink: 0; width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+  }
+  .callout.info { background: #F0FBFF; border-color: var(--cyan); }
+  .callout.info .icon { background: var(--cyan); color: var(--ink); }
+  .callout.warn { background: #FFFBEB; border-color: var(--yellow); }
+  .callout.warn .icon { background: var(--yellow); color: var(--ink); }
+  .callout.tip { background: #FFE6EE; border-color: var(--pink); }
+  .callout.tip .icon { background: var(--pink); color: #fff; }
+
+  /* TOC RIGHT */
+  aside.toc {
+    position: sticky; top: 64px;
+    align-self: start; padding: 40px 0 48px;
+    height: calc(100vh - 64px); overflow-y: auto;
+  }
+  .toc h6 {
+    font-family: 'Inter', sans-serif;
+    font-size: 11px; font-weight: 700;
+    color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+  .toc ul { list-style: none; }
+  .toc a {
+    display: block; padding: 4px 10px;
+    font-size: 13px; color: var(--muted);
+    border-left: 2px solid var(--line);
+    transition: all 0.1s;
+  }
+  .toc a:hover { color: var(--ink); border-left-color: var(--pink); }
+  .toc a.active { color: var(--pink); border-left-color: var(--pink); font-weight: 600; }
+
+  /* CARD GRID */
+  .card-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+    margin: 20px 0;
+  }
+  .doc-card {
+    border: 1.5px solid var(--ink); border-radius: 12px;
+    padding: 22px; background: #fff;
+    transition: all 0.15s; cursor: pointer;
+  }
+  .doc-card:hover { transform: translateY(-2px); box-shadow: 4px 4px 0 var(--ink); }
+  .doc-card .chip {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 36px; height: 36px; border-radius: 8px;
+    font-size: 18px; margin-bottom: 12px;
+    font-weight: 700;
+  }
+  .doc-card .chip.pink { background: var(--pink); color: #fff; }
+  .doc-card .chip.cyan { background: var(--cyan); color: var(--ink); }
+  .doc-card .chip.yellow { background: var(--yellow); color: var(--ink); }
+  .doc-card .chip.ink { background: var(--ink); color: #fff; }
+  .doc-card h3 { font-size: 17px; margin-bottom: 6px; }
+  .doc-card p { font-size: 14px; color: var(--ink-soft); margin-bottom: 0; }
+
+  /* FOOT NAV */
+  .foot-nav {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin-top: 64px; padding-top: 32px; border-top: 1px solid var(--line);
+  }
+  .foot-nav a {
+    padding: 16px 20px; border: 1.5px solid var(--line);
+    border-radius: 10px; transition: all 0.15s;
+  }
+  .foot-nav a:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .foot-nav .dir { font-size: 11px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+  .foot-nav .ttl { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; color: var(--ink); }
+  .foot-nav a.next { text-align: right; }
+
+  /* RESPONSE TABS */
+  .resp-tabs { display: flex; gap: 2px; padding: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; width: fit-content; margin-bottom: 0; }
+  .resp-tab {
+    padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    color: var(--muted); cursor: pointer; border: none; background: transparent;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .resp-tab.active { background: var(--ink); color: #fff; }
+
+  /* RESPONSIVE */
+  @media (max-width: 1100px) {
+    .docs-layout { grid-template-columns: 240px 1fr; }
+    aside.toc { display: none; }
+  }
+  @media (max-width: 768px) {
+    .docs-layout { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
+    aside.sidebar { display: none; }
+    .nav-links { display: none; }
+    .search { display: none; }
+    .card-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="top">
+  <div class="nav-inner">
+    <a class="brand" href="/docs.html">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/>
+        <rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/>
+        <g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g>
+        <text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text>
+        <path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-sub">DOCS</span>
+    </a>
+    <div class="nav-links">
+      <a href="/ads.html">Advertisers</a>
+      <a href="/publish.html">Publishers</a>
+      <a href="/demo.html">Demo</a>
+      <a href="/">boostboss.ai ↗</a>
+    </div>
+    <div style="display: flex; gap: 12px; align-items: center;">
+      <div class="search"><span>🔍</span><span>Search docs...</span><span class="kbd">⌘K</span></div>
+      <div class="nav-ctas">
+        <a class="btn btn-primary" href="/developer.html">Get API key</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- LAYOUT -->
+<div class="docs-layout">
+
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar">
+    <div class="side-group">
+      <h5><span class="chip ink"></span>Getting started</h5>
+      <ul class="side-links">
+        <li><a href="#introduction" class="active">Introduction</a></li>
+        <li><a href="#quickstart">Quickstart</a></li>
+        <li><a href="#authentication">Authentication</a></li>
+        <li><a href="#environments">Environments</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <h5><span class="chip cyan"></span>SDKs</h5>
+      <ul class="side-links">
+        <li><a href="#sdk-typescript">TypeScript / JS</a></li>
+        <li><a href="#sdk-python">Python</a></li>
+        <li><a href="#sdk-go">Go</a></li>
+        <li><a href="#sdk-swift">Swift</a></li>
+        <li><a href="#sdk-kotlin">Kotlin</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <h5><span class="chip pink"></span>API reference</h5>
+      <ul class="side-links">
+        <li><a href="#api-fetch-ad"><span class="method-tag post">POST</span>Fetch ad</a></li>
+        <li><a href="#api-impression"><span class="method-tag post">POST</span>Impression beacon</a></li>
+        <li><a href="#api-click"><span class="method-tag post">POST</span>Click beacon</a></li>
+        <li><a href="#api-conversion"><span class="method-tag post">POST</span>Conversion beacon</a></li>
+        <li><a href="#api-campaigns"><span class="method-tag get">GET</span>List campaigns</a></li>
+        <li><a href="#api-create-campaign"><span class="method-tag post">POST</span>Create campaign</a></li>
+        <li><a href="#api-update-campaign"><span class="method-tag patch">PATCH</span>Update campaign</a></li>
+        <li><a href="#api-stats"><span class="method-tag get">GET</span>Get stats</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <h5><span class="chip yellow"></span>Guides</h5>
+      <ul class="side-links">
+        <li><a href="#ad-formats">Ad formats</a></li>
+        <li><a href="#ai-targeting">AI-native targeting</a></li>
+        <li><a href="#mcp-integration">MCP integration</a></li>
+        <li><a href="#webhooks">Webhooks</a></li>
+        <li><a href="#rate-limits">Rate limits</a></li>
+        <li><a href="#errors">Error codes</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="content">
+    <div class="crumbs"><a href="/docs.html">Docs</a> / <span>Introduction</span></div>
+
+    <div class="docs-hero">
+      <svg class="deco" viewBox="0 0 80 80" fill="none">
+        <rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/>
+        <rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/>
+        <g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g>
+        <text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text>
+      </svg>
+      <h1 id="introduction">Boost Boss API</h1>
+      <p>The monetization and advertising API for the AI era. REST-based, JSON everywhere, sub-50ms median latency.</p>
+    </div>
+
+    <p>The Boost Boss API lets you <strong>fetch ads</strong>, <strong>beacon events</strong>, and <strong>manage campaigns</strong> programmatically. This reference covers every endpoint, every parameter, and every response field. The API is organized around REST — predictable URLs, standard HTTP verbs, standard status codes, JSON request and response bodies.</p>
+
+    <p>If you're monetizing an AI app, start with the <a href="#sdk-typescript" class="inline-link">SDK quickstart</a>. If you're running campaigns, skip to <a href="#api-create-campaign" class="inline-link">Create campaign</a>. If you're integrating via OpenRTB, see our <a href="#" class="inline-link">exchange docs</a>.</p>
+
+    <div class="card-grid">
+      <a class="doc-card" href="#quickstart">
+        <div class="chip cyan">⚡</div>
+        <h3>Quickstart</h3>
+        <p>Get your first ad served in under 5 minutes. No backend required.</p>
+      </a>
+      <a class="doc-card" href="#api-fetch-ad">
+        <div class="chip pink">API</div>
+        <h3>API reference</h3>
+        <p>Full reference for every endpoint — fetch, beacon, campaigns, stats.</p>
+      </a>
+      <a class="doc-card" href="#ai-targeting">
+        <div class="chip yellow">🎯</div>
+        <h3>AI-native targeting</h3>
+        <p>Target by intent signals, MCP tools, and session context — not cookies.</p>
+      </a>
+      <a class="doc-card" href="#webhooks">
+        <div class="chip ink">🔔</div>
+        <h3>Webhooks</h3>
+        <p>Real-time event notifications for impressions, clicks, and conversions.</p>
+      </a>
+    </div>
+
+    <!-- QUICKSTART -->
+    <h2 id="quickstart">Quickstart</h2>
+    <p>Install the SDK, set your API key, fetch your first ad.</p>
+
+    <h4>1. Install</h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">bash</span><span class="copy">Copy</span></div>
+      <pre><span class="n">npm install @boostboss/sdk</span>
+<span class="c"># or</span>
+<span class="n">pip install boostboss</span>
+<span class="c"># or</span>
+<span class="n">go get github.com/boostboss/go-sdk</span></pre>
+    </div>
+
+    <h4>2. Initialize the client</h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+
+<span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({
+  apiKey: process.env.<span class="n">BB_API_KEY</span>,
+  environment: <span class="s">'live'</span>, <span class="c">// or 'test'</span>
+});</pre>
+    </div>
+
+    <h4>3. Fetch an ad</h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
+<pre><span class="k">const</span> ad = <span class="k">await</span> bb.<span class="f">fetch</span>({
+  format: <span class="s">'native'</span>,
+  context: <span class="s">"help me refactor this python script"</span>,
+  audience: <span class="s">'ai-native'</span>,
+});
+
+<span class="c">// ad.headline  → "Ship better code 10× faster"</span>
+<span class="c">// ad.body      → "The AI coding assistant..."</span>
+<span class="c">// ad.cta_url   → "https://cursor.com/?ref=bb"</span>
+<span class="c">// ad.beacons   → { impression, click, convert }</span></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="icon">✦</span>
+      <div><strong>Tip:</strong> the SDK automatically fires the impression beacon when you render the ad. You only need to call <code>ad.trackClick()</code> when the user clicks through.</div>
+    </div>
+
+    <!-- AUTHENTICATION -->
+    <h2 id="authentication">Authentication</h2>
+    <p>Boost Boss uses <strong>bearer tokens</strong> for authentication. Your API key must be passed in the <code>Authorization</code> header on every request.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">HTTP</span><span class="copy">Copy</span></div>
+<pre><span class="k">Authorization:</span> Bearer bb_sk_live_1a2b3c4d5e6f...</pre>
+    </div>
+
+    <p>You have two key types:</p>
+    <ul>
+      <li><code>bb_sk_live_*</code> — production secret key. <strong>Never ship to client code.</strong></li>
+      <li><code>bb_pk_live_*</code> — production publishable key. Safe to expose in browser bundles.</li>
+    </ul>
+
+    <div class="callout warn">
+      <span class="icon">!</span>
+      <div><strong>Key hygiene:</strong> rotate keys from the dashboard → Settings → API keys. Old keys are revoked instantly. We send a webhook and an email when a key is rotated or suspected of being exposed.</div>
+    </div>
+
+    <!-- ENVIRONMENTS -->
+    <h2 id="environments">Environments</h2>
+    <p>Two environments. Both use the same SDKs and endpoints — you switch by using the corresponding keys.</p>
+
+    <table class="params">
+      <thead><tr><th>Environment</th><th>Key prefix</th><th>Base URL</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">test</td><td class="param-type">bb_sk_test_*</td><td>api.boostboss.ai</td><td class="param-desc">No real spend. No real payouts. Mock ads.</td></tr>
+        <tr><td class="param-name">live</td><td class="param-type">bb_sk_live_*</td><td>api.boostboss.ai</td><td class="param-desc">Real auctions. Real spend. Real earnings.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- SDK TS -->
+    <h2 id="sdk-typescript">TypeScript / JavaScript SDK</h2>
+    <p>The recommended client for browsers, Node, and Deno. Zero dependencies, 8kb gzipped.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> { BoostBoss, <span class="n">NativeAd</span> } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+
+<span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({ apiKey: <span class="s">'bb_sk_live_***'</span> });
+
+<span class="k">const</span> ad: NativeAd = <span class="k">await</span> bb.<span class="f">fetch</span>({
+  format: <span class="s">'native'</span>,
+  context: userMessage,
+  mcpTools: [<span class="s">'filesystem'</span>, <span class="s">'github'</span>],
+  model: <span class="s">'claude-sonnet-4'</span>,
+});
+
+<span class="c">// Render the ad in your UI</span>
+<span class="f">renderCard</span>({
+  headline: ad.headline,
+  body: ad.body,
+  cta: ad.cta_text,
+  onClick: () =&gt; ad.<span class="f">trackClick</span>(),
+});</pre>
+    </div>
+
+    <!-- SDK Python -->
+    <h2 id="sdk-python">Python SDK</h2>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">Python</span><span class="copy">Copy</span></div>
+<pre><span class="k">from</span> <span class="n">boostboss</span> <span class="k">import</span> BoostBoss
+
+bb = BoostBoss(api_key=<span class="s">"bb_sk_live_***"</span>)
+
+ad = bb.<span class="f">fetch</span>(
+    format=<span class="s">"native"</span>,
+    context=user_message,
+    mcp_tools=[<span class="s">"filesystem"</span>, <span class="s">"github"</span>],
+    model=<span class="s">"claude-sonnet-4"</span>,
+)
+
+<span class="k">if</span> ad:
+    render_card(ad.headline, ad.body, ad.cta_text)
+    ad.<span class="f">track_click</span>()  <span class="c"># on user click</span></pre>
+    </div>
+
+    <!-- SDK Go -->
+    <h2 id="sdk-go">Go SDK</h2>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">Go</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> <span class="s">"github.com/boostboss/go-sdk"</span>
+
+bb := boostboss.<span class="f">New</span>(<span class="s">"bb_sk_live_***"</span>)
+
+ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
+    Format:   <span class="s">"native"</span>,
+    Context:  userMessage,
+    McpTools: []<span class="k">string</span>{<span class="s">"filesystem"</span>, <span class="s">"github"</span>},
+    Model:    <span class="s">"claude-sonnet-4"</span>,
+})
+<span class="k">if</span> err != <span class="b">nil</span> { <span class="f">log</span>.<span class="f">Fatal</span>(err) }</pre>
+    </div>
+
+    <!-- SDK Swift -->
+    <h2 id="sdk-swift">Swift SDK</h2>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">Swift</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> BoostBoss
+
+<span class="k">let</span> bb = BoostBoss(apiKey: <span class="s">"bb_sk_live_***"</span>)
+
+<span class="k">let</span> ad = <span class="k">try await</span> bb.<span class="f">fetch</span>(
+    format: .native,
+    context: userMessage,
+    mcpTools: [<span class="s">"filesystem"</span>, <span class="s">"github"</span>]
+)</pre>
+    </div>
+
+    <!-- SDK Kotlin -->
+    <h2 id="sdk-kotlin">Kotlin SDK</h2>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">Kotlin</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> ai.boostboss.BoostBoss
+
+<span class="k">val</span> bb = BoostBoss(apiKey = <span class="s">"bb_sk_live_***"</span>)
+
+<span class="k">val</span> ad = bb.<span class="f">fetch</span>(
+    format = <span class="s">"native"</span>,
+    context = userMessage,
+    mcpTools = <span class="f">listOf</span>(<span class="s">"filesystem"</span>, <span class="s">"github"</span>)
+)</pre>
+    </div>
+
+    <!-- FETCH AD -->
+    <h2 id="api-fetch-ad">Fetch ad</h2>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/ads/fetch</span><span class="desc">Run an auction and return the winning ad.</span></div>
+
+    <p>Runs a real-time auction against your targeting parameters and returns the winning ad creative with signed beacon URLs. Median latency: <strong>47ms p50</strong>, <strong>180ms p99</strong>.</p>
+
+    <h4>Request body</h4>
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">format<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">One of <code>native</code>, <code>tool_result</code>, <code>agent_suggestion</code>, <code>display</code>.</td></tr>
+        <tr><td class="param-name">context</td><td class="param-type">string</td><td class="param-desc">Free-form user intent or session snippet. Up to 2000 chars.</td></tr>
+        <tr><td class="param-name">audience</td><td class="param-type">string</td><td class="param-desc">Audience tier: <code>ai-native</code>, <code>prosumer</code>, or <code>broad</code>.</td></tr>
+        <tr><td class="param-name">mcp_tools</td><td class="param-type">string[]</td><td class="param-desc">Active MCP tool IDs in this session.</td></tr>
+        <tr><td class="param-name">model</td><td class="param-type">string</td><td class="param-desc">Model in use: <code>claude-opus-4</code>, <code>claude-sonnet-4</code>, <code>gpt-5</code>, etc.</td></tr>
+        <tr><td class="param-name">user_id</td><td class="param-type">string</td><td class="param-desc">Stable anonymous user identifier (hashed, not PII).</td></tr>
+        <tr><td class="param-name">frequency_cap</td><td class="param-type">object</td><td class="param-desc">Caps: <code>{ per_session: 3, per_day: 10 }</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Example request</h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
+<pre><span class="f">curl</span> https://api.boostboss.ai/v1/ads/fetch \
+  -H <span class="s">"Authorization: Bearer bb_sk_live_***"</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "format": "native",
+    "context": "refactor this python function to use async",
+    "audience": "ai-native",
+    "mcp_tools": ["filesystem", "github"],
+    "model": "claude-sonnet-4"
+  }'</span></pre>
+    </div>
+
+    <h4>Example response</h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"id"</span>: <span class="s">"ad_3Xc9wZ8fK4"</span>,
+  <span class="s">"format"</span>: <span class="s">"native"</span>,
+  <span class="s">"headline"</span>: <span class="s">"Ship better code 10× faster"</span>,
+  <span class="s">"body"</span>: <span class="s">"The AI coding assistant that actually reads your codebase."</span>,
+  <span class="s">"cta_text"</span>: <span class="s">"Try Cursor free"</span>,
+  <span class="s">"cta_url"</span>: <span class="s">"https://cursor.com/?ref=bb"</span>,
+  <span class="s">"advertiser"</span>: { <span class="s">"name"</span>: <span class="s">"Cursor"</span>, <span class="s">"verified"</span>: <span class="b">true</span> },
+  <span class="s">"beacons"</span>: {
+    <span class="s">"impression"</span>: <span class="s">"https://api.boostboss.ai/v1/beacon/imp/..."</span>,
+    <span class="s">"click"</span>:      <span class="s">"https://api.boostboss.ai/v1/beacon/clk/..."</span>,
+    <span class="s">"convert"</span>:    <span class="s">"https://api.boostboss.ai/v1/beacon/cvt/..."</span>
+  },
+  <span class="s">"bid_cpm"</span>: <span class="n">3.42</span>,
+  <span class="s">"match_score"</span>: <span class="n">0.91</span>,
+  <span class="s">"latency_ms"</span>: <span class="n">47</span>
+}</pre>
+    </div>
+
+    <!-- IMPRESSION -->
+    <h2 id="api-impression">Impression beacon</h2>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/beacon/imp/:token</span><span class="desc">Fire when the ad becomes visible.</span></div>
+    <p>The SDK fires this for you automatically on render. If you're hitting the API directly, fire this beacon the first time the ad is visible in the viewport (≥50% pixels, ≥1 second). Idempotent — duplicates are deduped server-side.</p>
+
+    <!-- CLICK -->
+    <h2 id="api-click">Click beacon</h2>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/beacon/clk/:token</span><span class="desc">Fire when the user clicks the ad.</span></div>
+    <p>Fire before redirecting to the CTA URL. Returns 302 to the verified advertiser destination — so you can use it as the anchor's <code>href</code> directly.</p>
+
+    <!-- CONVERSION -->
+    <h2 id="api-conversion">Conversion beacon</h2>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/beacon/cvt/:token</span><span class="desc">Fire when the user completes the advertiser's goal.</span></div>
+    <p>Advertisers use this to report conversions back — signup complete, purchase made, install confirmed. Used by CPA bidders to pay per outcome.</p>
+
+    <!-- LIST CAMPAIGNS -->
+    <h2 id="api-campaigns">List campaigns</h2>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/campaigns</span><span class="desc">List all campaigns for the authenticated advertiser.</span></div>
+
+    <table class="params">
+      <thead><tr><th>Query param</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">status</td><td class="param-type">string</td><td class="param-desc">Filter: <code>active</code>, <code>paused</code>, <code>review</code>, <code>ended</code>.</td></tr>
+        <tr><td class="param-name">limit</td><td class="param-type">int</td><td class="param-desc">Page size. Default 20, max 100.</td></tr>
+        <tr><td class="param-name">starting_after</td><td class="param-type">string</td><td class="param-desc">Cursor ID for pagination.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- CREATE CAMPAIGN -->
+    <h2 id="api-create-campaign">Create campaign</h2>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/campaigns</span><span class="desc">Launch a new ad campaign.</span></div>
+
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">name<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Human-readable campaign name.</td></tr>
+        <tr><td class="param-name">format<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Ad format to serve.</td></tr>
+        <tr><td class="param-name">headline<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Ad headline, max 60 chars.</td></tr>
+        <tr><td class="param-name">body</td><td class="param-type">string</td><td class="param-desc">Supporting copy, max 200 chars.</td></tr>
+        <tr><td class="param-name">cta_text<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Call-to-action button text.</td></tr>
+        <tr><td class="param-name">cta_url<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Destination URL.</td></tr>
+        <tr><td class="param-name">billing_model<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">One of <code>cpm</code>, <code>cpc</code>, <code>cpa</code>.</td></tr>
+        <tr><td class="param-name">bid_amount<span class="required">req</span></td><td class="param-type">number</td><td class="param-desc">Max bid per unit (CPM, CPC, or CPA target).</td></tr>
+        <tr><td class="param-name">daily_budget<span class="required">req</span></td><td class="param-type">number</td><td class="param-desc">Maximum daily spend in USD.</td></tr>
+        <tr><td class="param-name">intent_signals</td><td class="param-type">string[]</td><td class="param-desc">AI-native intent targets. See <a href="#ai-targeting" class="inline-link">AI targeting</a>.</td></tr>
+        <tr><td class="param-name">host_apps</td><td class="param-type">string[]</td><td class="param-desc">Target AI apps: <code>claude</code>, <code>cursor</code>, etc.</td></tr>
+        <tr><td class="param-name">mcp_tools</td><td class="param-type">string[]</td><td class="param-desc">Target active MCP tools.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- UPDATE CAMPAIGN -->
+    <h2 id="api-update-campaign">Update campaign</h2>
+    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/v1/campaigns/:id</span><span class="desc">Modify a running campaign.</span></div>
+    <p>Any field from Create campaign can be patched. Patching <code>status</code> to <code>paused</code> halts spend immediately. Patching <code>creative</code> triggers automatic creative re-review (typically under 15 minutes).</p>
+
+    <!-- STATS -->
+    <h2 id="api-stats">Get stats</h2>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/stats</span><span class="desc">Aggregate performance metrics.</span></div>
+    <p>Returns impressions, clicks, conversions, spend, and derived rates (CTR, CVR, eCPA) across the time range. Break down by <code>campaign</code>, <code>format</code>, <code>host_app</code>, <code>intent_signal</code>, or <code>day</code>.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"range"</span>: { <span class="s">"from"</span>: <span class="s">"2026-04-01"</span>, <span class="s">"to"</span>: <span class="s">"2026-04-15"</span> },
+  <span class="s">"totals"</span>: {
+    <span class="s">"impressions"</span>: <span class="n">4_812_400</span>,
+    <span class="s">"clicks"</span>:      <span class="n">218_600</span>,
+    <span class="s">"conversions"</span>: <span class="n">12_840</span>,
+    <span class="s">"spend_usd"</span>:   <span class="n">24810.00</span>,
+    <span class="s">"ctr"</span>:         <span class="n">0.0454</span>,
+    <span class="s">"cvr"</span>:         <span class="n">0.0587</span>,
+    <span class="s">"ecpa_usd"</span>:    <span class="n">1.93</span>
+  },
+  <span class="s">"breakdown"</span>: [ ... ]
+}</pre>
+    </div>
+
+    <!-- AD FORMATS -->
+    <h2 id="ad-formats">Ad formats</h2>
+    <p>Boost Boss serves four native-first ad formats. Each is rendered by your app — we return the content, you render the chrome that matches your UI.</p>
+
+    <table class="params">
+      <thead><tr><th>Format</th><th>Max chars</th><th>Use case</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">native</td><td class="param-desc">Headline 60 · body 200</td><td class="param-desc">Inline card inside chat / agent output.</td></tr>
+        <tr><td class="param-name">tool_result</td><td class="param-desc">Headline 60 · body 140</td><td class="param-desc">Shown after a tool call returns results.</td></tr>
+        <tr><td class="param-name">agent_suggestion</td><td class="param-desc">Headline 40 · body 100</td><td class="param-desc">"Try this tool" suggestion from an agent.</td></tr>
+        <tr><td class="param-name">display</td><td class="param-desc">Image 300×250 / 728×90</td><td class="param-desc">Traditional IAB banner for legacy contexts.</td></tr>
+      </tbody>
+    </table>
+
+    <!-- AI TARGETING -->
+    <h2 id="ai-targeting">AI-native targeting</h2>
+    <p>Boost Boss replaces cookie-based targeting with three session-level signals gathered from the MCP layer. All signals are anonymized and aggregated — <strong>no PII ever leaves the client</strong>.</p>
+
+    <h4>Intent signals</h4>
+    <p>Free-form intent extracted from the current user request. Examples: <code>"debugging python"</code>, <code>"writing pitch deck"</code>, <code>"refactoring code"</code>. Advertisers bid on the intents that match what they sell.</p>
+
+    <h4>Tool context</h4>
+    <p>Which MCP tools are active in the session — <code>filesystem</code>, <code>github</code>, <code>terminal</code>, <code>browser</code>, <code>slack</code>, etc. Strong proxy for user activity type.</p>
+
+    <h4>Model context</h4>
+    <p>Which AI model is in use — <code>claude-opus-4</code>, <code>gpt-5</code>, <code>gemini-3</code>, etc. Useful for advertisers with model-specific integrations.</p>
+
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>No PII, ever.</strong> User identifiers are SHA-256 hashed before they leave the client. Intent strings are matched against a vocabulary server-side; raw text is dropped after matching. See our <a href="#" class="inline-link">Privacy white paper</a> for the full protocol.</div>
+    </div>
+
+    <!-- MCP INTEGRATION -->
+    <h2 id="mcp-integration">MCP integration</h2>
+    <p>The SDK hooks into your MCP client automatically. On initialization, it registers a listener for tool calls and user messages, uses those signals as <code>context</code> and <code>mcp_tools</code> when fetching ads, and otherwise gets out of your way.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+<span class="k">import</span> { McpClient } <span class="k">from</span> <span class="s">'@modelcontextprotocol/sdk'</span>;
+
+<span class="k">const</span> mcp = <span class="f">new</span> <span class="f">McpClient</span>({ /* ... */ });
+<span class="k">const</span> bb  = <span class="f">new</span> <span class="f">BoostBoss</span>({
+  apiKey: <span class="s">'bb_sk_live_***'</span>,
+  mcpClient: mcp, <span class="c">// ← just pass it in</span>
+});
+
+<span class="c">// The SDK now reads context from MCP automatically</span>
+<span class="k">const</span> ad = <span class="k">await</span> bb.<span class="f">fetch</span>({ format: <span class="s">'native'</span> });</pre>
+    </div>
+
+    <!-- WEBHOOKS -->
+    <h2 id="webhooks">Webhooks</h2>
+    <p>Receive real-time notifications for platform events. Configure endpoints in the dashboard → Settings → Webhooks.</p>
+
+    <table class="params">
+      <thead><tr><th>Event</th><th>Fires when</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">ad.served</td><td class="param-desc">A fetch request returned an ad for one of your campaigns.</td></tr>
+        <tr><td class="param-name">ad.impression</td><td class="param-desc">Impression beacon fired.</td></tr>
+        <tr><td class="param-name">ad.click</td><td class="param-desc">User clicked the ad.</td></tr>
+        <tr><td class="param-name">ad.conversion</td><td class="param-desc">Conversion beacon fired.</td></tr>
+        <tr><td class="param-name">campaign.approved</td><td class="param-desc">Campaign passed review and is now live.</td></tr>
+        <tr><td class="param-name">campaign.rejected</td><td class="param-desc">Campaign was rejected. Reason in payload.</td></tr>
+        <tr><td class="param-name">campaign.ended</td><td class="param-desc">Campaign finished (budget exhausted or end date reached).</td></tr>
+        <tr><td class="param-name">payout.initiated</td><td class="param-desc">A weekly publisher payout started processing.</td></tr>
+        <tr><td class="param-name">payout.completed</td><td class="param-desc">Payout landed in the publisher's bank / wallet.</td></tr>
+      </tbody>
+    </table>
+
+    <h4>Signature verification</h4>
+    <p>Every webhook is signed with HMAC-SHA256. Verify with the signing secret from your dashboard:</p>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">Node</span><span class="copy">Copy</span></div>
+<pre><span class="k">import</span> crypto <span class="k">from</span> <span class="s">'crypto'</span>;
+
+<span class="k">const</span> sig = req.headers[<span class="s">'bb-signature'</span>];
+<span class="k">const</span> expected = crypto.<span class="f">createHmac</span>(<span class="s">'sha256'</span>, SECRET)
+  .<span class="f">update</span>(req.rawBody).<span class="f">digest</span>(<span class="s">'hex'</span>);
+
+<span class="k">if</span> (crypto.<span class="f">timingSafeEqual</span>(
+  <span class="n">Buffer</span>.<span class="f">from</span>(sig),
+  <span class="n">Buffer</span>.<span class="f">from</span>(expected)
+)) {
+  <span class="c">// ✓ verified — process event</span>
+}</pre>
+    </div>
+
+    <!-- RATE LIMITS -->
+    <h2 id="rate-limits">Rate limits</h2>
+    <p>We rate-limit per API key to protect both us and you. Limits are applied at the second and minute level with a rolling window.</p>
+
+    <table class="params">
+      <thead><tr><th>Endpoint</th><th>Limit</th><th>Burst</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">POST /v1/ads/fetch</td><td class="param-desc">500/s per key</td><td class="param-desc">1000 over 10s</td></tr>
+        <tr><td class="param-name">POST /v1/beacon/*</td><td class="param-desc">Unlimited</td><td class="param-desc">—</td></tr>
+        <tr><td class="param-name">POST /v1/campaigns</td><td class="param-desc">30/min per key</td><td class="param-desc">—</td></tr>
+        <tr><td class="param-name">GET /v1/stats</td><td class="param-desc">60/min per key</td><td class="param-desc">—</td></tr>
+      </tbody>
+    </table>
+
+    <p>Responses include three headers on every request:</p>
+    <div class="code-block">
+<pre><span class="f">X-RateLimit-Limit</span>:      <span class="n">500</span>
+<span class="f">X-RateLimit-Remaining</span>:  <span class="n">487</span>
+<span class="f">X-RateLimit-Reset</span>:      <span class="n">1760521200</span></pre>
+    </div>
+
+    <!-- ERRORS -->
+    <h2 id="errors">Error codes</h2>
+    <p>Errors return a JSON body with a machine-readable <code>code</code>, a human <code>message</code>, and a <code>request_id</code> you can cite when contacting support.</p>
+
+    <table class="params">
+      <thead><tr><th>HTTP</th><th>Code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="param-type">400</td><td class="param-name">invalid_request</td><td class="param-desc">Malformed body or missing required field.</td></tr>
+        <tr><td class="param-type">401</td><td class="param-name">invalid_api_key</td><td class="param-desc">Key missing, revoked, or for the wrong environment.</td></tr>
+        <tr><td class="param-type">402</td><td class="param-name">billing_required</td><td class="param-desc">No payment method on file.</td></tr>
+        <tr><td class="param-type">403</td><td class="param-name">forbidden</td><td class="param-desc">Authenticated but not authorized for this resource.</td></tr>
+        <tr><td class="param-type">404</td><td class="param-name">not_found</td><td class="param-desc">Resource does not exist.</td></tr>
+        <tr><td class="param-type">409</td><td class="param-name">conflict</td><td class="param-desc">State conflict (e.g. editing a campaign under review).</td></tr>
+        <tr><td class="param-type">429</td><td class="param-name">rate_limited</td><td class="param-desc">Too many requests. Back off and retry with jitter.</td></tr>
+        <tr><td class="param-type">500</td><td class="param-name">server_error</td><td class="param-desc">Something broke on our side. Auto-retried up to 3×.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="foot-nav">
+      <a href="/publish.html" class="prev">
+        <div class="dir">← Overview</div>
+        <div class="ttl">Boost Boss Publish</div>
+      </a>
+      <a href="/developer.html" class="next">
+        <div class="dir">Next →</div>
+        <div class="ttl">Get your API key</div>
+      </a>
+    </div>
+  </main>
+
+  <!-- RIGHT TOC -->
+  <aside class="toc">
+    <h6>On this page</h6>
+    <ul>
+      <li><a href="#introduction" class="active">Introduction</a></li>
+      <li><a href="#quickstart">Quickstart</a></li>
+      <li><a href="#authentication">Authentication</a></li>
+      <li><a href="#environments">Environments</a></li>
+      <li><a href="#sdk-typescript">SDKs</a></li>
+      <li><a href="#api-fetch-ad">Fetch ad</a></li>
+      <li><a href="#api-campaigns">Campaigns</a></li>
+      <li><a href="#api-stats">Stats</a></li>
+      <li><a href="#ad-formats">Ad formats</a></li>
+      <li><a href="#ai-targeting">AI targeting</a></li>
+      <li><a href="#webhooks">Webhooks</a></li>
+      <li><a href="#rate-limits">Rate limits</a></li>
+      <li><a href="#errors">Errors</a></li>
+    </ul>
+  </aside>
+</div>
+
+<script>
+  // Scroll-spy for TOC
+  const tocLinks = document.querySelectorAll('aside.toc a');
+  const sideLinks = document.querySelectorAll('aside.sidebar .side-links a');
+  const headings = document.querySelectorAll('main h2, main h1');
+
+  function onScroll() {
+    let current = 'introduction';
+    headings.forEach(h => {
+      const rect = h.getBoundingClientRect();
+      if (rect.top < 180) current = h.id;
+    });
+    [...tocLinks, ...sideLinks].forEach(a => {
+      const href = a.getAttribute('href');
+      a.classList.toggle('active', href === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  // Copy-button placeholder
+  document.querySelectorAll('.copy').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const block = btn.closest('.code-block');
+      const text = block.querySelector('pre').innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => btn.textContent = orig, 1400);
+      });
+    });
+  });
+</script>
+
+</body>
+</html>

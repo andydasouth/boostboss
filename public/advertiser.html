@@ -733,6 +733,156 @@
             color: var(--accent-orange);
         }
 
+        /* AI Targeting Section */
+        .ai-targeting-section {
+            background: linear-gradient(180deg, #FFF5F8 0%, #F0FBFF 100%);
+            border: 1.5px solid #1A1A2E;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 4px 4px 0 #1A1A2E;
+        }
+        .ai-targeting-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+        .ai-targeting-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1A1A2E;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .ai-targeting-title .spark {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px; height: 22px;
+            background: #FFE600;
+            border: 1.5px solid #1A1A2E;
+            border-radius: 50%;
+            font-size: 12px;
+        }
+        .ai-targeting-badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: #FF2D78;
+            color: #fff;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .targeting-block { margin-bottom: 1.25rem; }
+        .targeting-block:last-child { margin-bottom: 0; }
+        .targeting-label {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #4B4B5E;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .targeting-label .hint {
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
+            color: #6B7280;
+            font-size: 11px;
+        }
+        .target-pills-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .target-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border: 1.5px solid #1A1A2E;
+            background: #fff;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #1A1A2E;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.1s;
+        }
+        .target-pill:hover { background: #FAFAF7; }
+        .target-pill.selected {
+            background: #1A1A2E;
+            color: #fff;
+        }
+        .target-pill.selected.pink { background: #FF2D78; border-color: #FF2D78; }
+        .target-pill.selected.cyan { background: #04BEFE; border-color: #04BEFE; color: #1A1A2E; }
+        .target-pill.selected.yellow { background: #FFE600; border-color: #FFE600; color: #1A1A2E; }
+        .intent-input-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .intent-input-row input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            background: #fff;
+        }
+        .intent-input-row input:focus { border-color: #FF2D78; }
+        .intent-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            background: #FFE6EE;
+            color: #FF2D78;
+            border-radius: 100px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 0 4px 4px 0;
+        }
+        .intent-chip .x { cursor: pointer; font-weight: 700; }
+        .reach-estimator {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1.5px dashed #1A1A2E;
+        }
+        .reach-stat {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+        .reach-stat .label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #6B7280;
+            margin-bottom: 4px;
+        }
+        .reach-stat .value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1A1A2E;
+            letter-spacing: -0.02em;
+        }
+        .reach-stat .value.pink { color: #FF2D78; }
+        .reach-stat .value.cyan { color: #0195CC; }
+
         .checkbox-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -984,11 +1134,95 @@
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
                     </div>
 
-                    <!-- Target Keywords -->
-                    <div class="form-group">
-                        <label class="form-label">Target Keywords</label>
-                        <div class="tags-input" id="tagsInput">
-                            <input type="text" placeholder="Type keywords and press Enter" id="keywordInput">
+                    <!-- AI Targeting Section -->
+                    <div class="ai-targeting-section">
+                        <div class="ai-targeting-header">
+                            <div class="ai-targeting-title">
+                                <span class="spark">✦</span>
+                                AI-native targeting
+                            </div>
+                            <span class="ai-targeting-badge">Boost Boss AI</span>
+                        </div>
+
+                        <!-- Intent signals -->
+                        <div class="targeting-block">
+                            <div class="targeting-label">
+                                Intent signals
+                                <span class="hint">— what users are trying to do</span>
+                            </div>
+                            <div class="intent-input-row">
+                                <input type="text" id="intentInput" placeholder="e.g. debugging python, writing a pitch deck">
+                                <button type="button" class="target-pill" id="intentAddBtn">+ Add</button>
+                            </div>
+                            <div id="intentChips"></div>
+                            <div class="target-pills-row" id="intentSuggestions" style="margin-top: 6px;">
+                                <span class="hint" style="font-size: 11px; color: #6B7280; width: 100%; margin-bottom: 4px;">Suggested:</span>
+                            </div>
+                        </div>
+
+                        <!-- Host apps -->
+                        <div class="targeting-block">
+                            <div class="targeting-label">
+                                Host apps
+                                <span class="hint">— where your ad appears</span>
+                            </div>
+                            <div class="target-pills-row" id="hostAppsRow">
+                                <div class="target-pill" data-value="claude" data-color="pink">Claude</div>
+                                <div class="target-pill" data-value="chatgpt" data-color="pink">ChatGPT</div>
+                                <div class="target-pill" data-value="cursor" data-color="pink">Cursor</div>
+                                <div class="target-pill" data-value="perplexity" data-color="pink">Perplexity</div>
+                                <div class="target-pill" data-value="replit" data-color="pink">Replit</div>
+                                <div class="target-pill" data-value="windsurf" data-color="pink">Windsurf</div>
+                            </div>
+                        </div>
+
+                        <!-- MCP tools -->
+                        <div class="targeting-block">
+                            <div class="targeting-label">
+                                Active MCP tools
+                                <span class="hint">— session context</span>
+                            </div>
+                            <div class="target-pills-row" id="mcpToolsRow">
+                                <div class="target-pill" data-value="filesystem" data-color="cyan">filesystem</div>
+                                <div class="target-pill" data-value="github" data-color="cyan">github</div>
+                                <div class="target-pill" data-value="terminal" data-color="cyan">terminal</div>
+                                <div class="target-pill" data-value="browser" data-color="cyan">browser</div>
+                                <div class="target-pill" data-value="slack" data-color="cyan">slack</div>
+                                <div class="target-pill" data-value="notion" data-color="cyan">notion</div>
+                                <div class="target-pill" data-value="figma" data-color="cyan">figma</div>
+                                <div class="target-pill" data-value="linear" data-color="cyan">linear</div>
+                            </div>
+                        </div>
+
+                        <!-- AI models -->
+                        <div class="targeting-block">
+                            <div class="targeting-label">
+                                AI model
+                                <span class="hint">— optional</span>
+                            </div>
+                            <div class="target-pills-row" id="aiModelsRow">
+                                <div class="target-pill" data-value="claude-opus" data-color="yellow">Claude Opus</div>
+                                <div class="target-pill" data-value="claude-sonnet" data-color="yellow">Claude Sonnet</div>
+                                <div class="target-pill" data-value="gpt-4" data-color="yellow">GPT-4</div>
+                                <div class="target-pill" data-value="gpt-5" data-color="yellow">GPT-5</div>
+                                <div class="target-pill" data-value="gemini" data-color="yellow">Gemini</div>
+                            </div>
+                        </div>
+
+                        <!-- Reach estimator -->
+                        <div class="reach-estimator">
+                            <div class="reach-stat">
+                                <div class="label">Daily reach</div>
+                                <div class="value pink" id="reachDaily">420K–480K</div>
+                            </div>
+                            <div class="reach-stat">
+                                <div class="label">Match score</div>
+                                <div class="value cyan" id="reachMatch">Broad</div>
+                            </div>
+                            <div class="reach-stat">
+                                <div class="label">Est. eCPA</div>
+                                <div class="value" id="reachEcpa">$2.40</div>
+                            </div>
                         </div>
                     </div>
 
@@ -1083,8 +1317,16 @@
         const chartContainer = document.getElementById('chartContainer');
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
-        const tagsInput = document.getElementById('tagsInput');
-        const keywordInput = document.getElementById('keywordInput');
+        // AI targeting state
+        const intentInput = document.getElementById('intentInput');
+        const intentAddBtn = document.getElementById('intentAddBtn');
+        const intentChips = document.getElementById('intentChips');
+        const intentSuggestions = document.getElementById('intentSuggestions');
+        const INTENT_SUGGESTIONS = [
+            'debugging python','writing tests','refactoring code',
+            'writing pitch deck','summarizing docs','generating SQL',
+            'drafting email','code review','searching documentation'
+        ];
 
         let authMode = 'login';
 
@@ -1185,22 +1427,36 @@
                 }
             });
 
-            // Tags input
-            keywordInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && keywordInput.value.trim()) {
+            // AI targeting — intent input
+            intentInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && intentInput.value.trim()) {
                     e.preventDefault();
-                    addTag(keywordInput.value.trim());
-                    keywordInput.value = '';
+                    addIntentChip(intentInput.value.trim());
+                    intentInput.value = '';
+                    updateReachEstimate();
+                }
+            });
+            intentAddBtn.addEventListener('click', () => {
+                if (intentInput.value.trim()) {
+                    addIntentChip(intentInput.value.trim());
+                    intentInput.value = '';
+                    updateReachEstimate();
                 }
             });
 
-            keywordInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Backspace' && keywordInput.value === '') {
-                    const tags = tagsInput.querySelectorAll('.tag');
-                    if (tags.length > 0) {
-                        tags[tags.length - 1].remove();
+            // Render intent suggestions
+            renderIntentSuggestions();
+
+            // Target pill toggles
+            document.querySelectorAll('#hostAppsRow .target-pill, #mcpToolsRow .target-pill, #aiModelsRow .target-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    const color = pill.getAttribute('data-color');
+                    pill.classList.toggle('selected');
+                    if (color) {
+                        pill.classList.toggle(color);
                     }
-                }
+                    updateReachEstimate();
+                });
             });
 
             // Escape key to close modal
@@ -1454,7 +1710,11 @@
             campaignModal.classList.remove('active');
             document.body.style.overflow = 'auto';
             campaignForm.reset();
-            tagsInput.querySelectorAll('.tag').forEach(tag => tag.remove());
+            intentChips.innerHTML = '';
+            document.querySelectorAll('#hostAppsRow .target-pill, #mcpToolsRow .target-pill, #aiModelsRow .target-pill').forEach(p => {
+                p.classList.remove('selected','pink','cyan','yellow');
+            });
+            updateReachEstimate();
             uploadArea.innerHTML = `
                 <div class="upload-icon">📁</div>
                 <div class="upload-text">Drag & drop your file here</div>
@@ -1462,13 +1722,68 @@
             `;
         }
 
-        // Tag functions
-        function addTag(text) {
-            const tag = document.createElement('div');
-            tag.className = 'tag';
-            tag.innerHTML = `${text}<span class="tag-remove">×</span>`;
-            tag.querySelector('.tag-remove').addEventListener('click', () => tag.remove());
-            tagsInput.insertBefore(tag, keywordInput);
+        // AI targeting — helpers
+        function addIntentChip(text) {
+            if (!text) return;
+            // prevent duplicates
+            const existing = Array.from(intentChips.querySelectorAll('.intent-chip'))
+                .map(c => c.getAttribute('data-value'));
+            if (existing.includes(text.toLowerCase())) return;
+            const chip = document.createElement('span');
+            chip.className = 'intent-chip';
+            chip.setAttribute('data-value', text.toLowerCase());
+            chip.innerHTML = `${text}<span class="x">×</span>`;
+            chip.querySelector('.x').addEventListener('click', () => {
+                chip.remove();
+                updateReachEstimate();
+            });
+            intentChips.appendChild(chip);
+        }
+        function renderIntentSuggestions() {
+            intentSuggestions.innerHTML = '<span class="hint" style="font-size: 11px; color: #6B7280; width: 100%; margin-bottom: 4px;">Suggested:</span>';
+            INTENT_SUGGESTIONS.forEach(s => {
+                const pill = document.createElement('div');
+                pill.className = 'target-pill';
+                pill.textContent = '+ ' + s;
+                pill.style.fontSize = '12px';
+                pill.style.padding = '4px 10px';
+                pill.addEventListener('click', () => {
+                    addIntentChip(s);
+                    updateReachEstimate();
+                });
+                intentSuggestions.appendChild(pill);
+            });
+        }
+        function getTargetingSelections() {
+            const intents = Array.from(intentChips.querySelectorAll('.intent-chip'))
+                .map(c => c.getAttribute('data-value'));
+            const hostApps = Array.from(document.querySelectorAll('#hostAppsRow .target-pill.selected'))
+                .map(p => p.getAttribute('data-value'));
+            const mcpTools = Array.from(document.querySelectorAll('#mcpToolsRow .target-pill.selected'))
+                .map(p => p.getAttribute('data-value'));
+            const aiModels = Array.from(document.querySelectorAll('#aiModelsRow .target-pill.selected'))
+                .map(p => p.getAttribute('data-value'));
+            return { intents, hostApps, mcpTools, aiModels };
+        }
+        function updateReachEstimate() {
+            const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
+            const signalCount = intents.length + hostApps.length + mcpTools.length + aiModels.length;
+            // Base daily pool scales down as targeting narrows
+            let baseMin = 1_200_000, baseMax = 1_400_000;
+            const narrowFactor = Math.pow(0.72, signalCount);
+            const lo = Math.round(baseMin * narrowFactor);
+            const hi = Math.round(baseMax * narrowFactor);
+            const fmt = n => n >= 1_000_000 ? (n/1_000_000).toFixed(1).replace(/\.0$/,'') + 'M'
+                           : n >= 1_000 ? Math.round(n/1000) + 'K' : n.toString();
+            document.getElementById('reachDaily').textContent = `${fmt(lo)}–${fmt(hi)}`;
+            let matchLabel = 'Broad';
+            if (signalCount >= 6) matchLabel = 'Laser';
+            else if (signalCount >= 3) matchLabel = 'Focused';
+            else if (signalCount >= 1) matchLabel = 'Targeted';
+            document.getElementById('reachMatch').textContent = matchLabel;
+            // eCPA improves as targeting tightens (to a floor)
+            const ecpa = Math.max(1.80, 3.20 - signalCount * 0.18);
+            document.getElementById('reachEcpa').textContent = '$' + ecpa.toFixed(2);
         }
 
         function updateUploadAreaText(fileName) {
@@ -1483,9 +1798,7 @@
         async function handleCreateCampaign(e) {
             e.preventDefault();
 
-            const keywords = Array.from(tagsInput.querySelectorAll('.tag'))
-                .map(tag => tag.textContent.replace('×', '').trim());
-
+            const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const formData = new FormData(campaignForm);
 
             const campaignData = {
@@ -1495,7 +1808,13 @@
                 headline: formData.get('headline'),
                 media_url: 'https://via.placeholder.com/300x250',
                 cta_url: formData.get('cta_url'),
-                target_keywords: keywords,
+                // Intent signals double as target keywords for backward compat with current backend schema
+                target_keywords: intents,
+                // AI-native targeting (new fields — backend may ignore until schema updated)
+                intent_signals: intents,
+                host_apps: hostApps,
+                mcp_tools: mcpTools,
+                ai_models: aiModels,
                 billing_model: formData.get('billing_model'),
                 bid_amount: parseFloat(formData.get('bid_amount')),
                 daily_budget: parseFloat(formData.get('daily_budget')),
