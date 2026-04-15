@@ -1113,6 +1113,17 @@
             if (token && userData) {
                 currentUser = JSON.parse(token);
                 currentUserData = JSON.parse(userData);
+
+                // If session is corrupted (missing user_id), force re-login
+                if (!currentUserData.user_id || !currentUser.token) {
+                    localStorage.removeItem('bb_session_token');
+                    localStorage.removeItem('bb_user_data');
+                    currentUser = null;
+                    currentUserData = null;
+                    showAuthForm();
+                    return;
+                }
+
                 showDashboard();
                 loadStats();
                 loadCampaigns();
