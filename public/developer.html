@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Developer Dashboard - Boost Boss</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif;
+            background-color: #050505;
+            color: #e5e5e5;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            background-color: #0a0a0a;
+            border-bottom: 1px solid #1a1a1a;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .logo-mark {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.2rem;
+        }
+
+        .nav-center {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-title {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .app-name {
+            color: #e5e5e5;
+            font-weight: 600;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1rem;
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background-color: #252525;
+            border-color: #3a3a3a;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            border-color: #2a2a2a;
+            background-color: #0f0f0f;
+        }
+
+        .stat-label {
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+
+        .stat-value.earnings {
+            color: #22c55e;
+        }
+
+        .stat-value.default {
+            color: #e5e5e5;
+        }
+
+        .stat-trend {
+            font-size: 0.85rem;
+            color: #22c55e;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .stat-trend.down {
+            color: #ef4444;
+        }
+
+        .stat-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #1a1a1a;
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22c55e, #16a34a);
+            border-radius: 2px;
+        }
+
+        /* Chart Section */
+        .section {
+            background-color: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        .chart-container {
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 0.5rem;
+            padding: 1rem 0;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, #22c55e, #16a34a);
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            filter: brightness(1.2);
+        }
+
+        .chart-bar-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #1a1a1a;
+            color: #22c55e;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .chart-bar:hover .chart-bar-tooltip {
+            opacity: 1;
+        }
+
+        /* Code Block */
+        .code-block {
+            background-color: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow-x: auto;
+        }
+
+        .code-block pre {
+            color: #e5e5e5;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0;
+        }
+
+        .code-block code {
+            color: #e5e5e5;
+        }
+
+        .code-copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.5rem 1rem;
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e5e5e5;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .code-copy-btn:hover {
+            background-color: #252525;
+            border-color: #3a3a3a;
+        }
+
+        .code-copy-btn.copied {
+            background-color: #22c55e;
+            border-color: #22c55e;
+            color: #050505;
+        }
+
+        /* Integration Steps */
+        .integration-steps {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .integration-step {
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background-color: #050505;
+        }
+
+        .integration-step h3 {
+            color: #22c55e;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .step-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            border-radius: 50%;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        /* API Keys Section */
+        .key-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .key-info {
+            flex: 1;
+        }
+
+        .key-label {
+            color: #888;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .key-value {
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #e5e5e5;
+            word-break: break-all;
+        }
+
+        .key-value.masked {
+            color: #888;
+        }
+
+        .reveal-btn, .regenerate-btn, .payout-btn {
+            padding: 0.5rem 1rem;
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #e5e5e5;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .reveal-btn:hover, .regenerate-btn:hover, .payout-btn:hover {
+            background-color: #252525;
+            border-color: #3a3a3a;
+        }
+
+        .regenerate-btn {
+            grid-column: 1 / -1;
+            width: 100%;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            border: none;
+            color: white;
+            font-weight: 600;
+            margin-top: 1rem;
+            padding: 0.75rem;
+        }
+
+        .regenerate-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Ad Format Controls */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .control-item {
+            background-color: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .control-info h3 {
+            margin-bottom: 0.5rem;
+            color: #e5e5e5;
+        }
+
+        .control-info p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Toggle Switch */
+        .toggle {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            flex-shrink: 0;
+            margin-top: 0.25rem;
+        }
+
+        .toggle input {
+            display: none;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #1a1a1a;
+            transition: 0.3s;
+            border-radius: 14px;
+            border: 1px solid #2a2a2a;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 3px;
+            background-color: #666;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle input:checked + .toggle-slider {
+            background-color: #22c55e;
+            border-color: #22c55e;
+        }
+
+        .toggle input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+            background-color: #050505;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: #050505;
+            border-bottom: 1px solid #1a1a1a;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            color: #888;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #1a1a1a;
+            color: #e5e5e5;
+        }
+
+        tbody tr:hover {
+            background-color: #0a0a0a;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-paid {
+            background-color: #166534;
+            color: #22c55e;
+        }
+
+        .status-pending {
+            background-color: #78350f;
+            color: #fbbf24;
+        }
+
+        /* Payout Section */
+        .payout-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .payout-card {
+            background-color: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .payout-card .key-label {
+            margin-bottom: 0.75rem;
+        }
+
+        .payout-card .key-value {
+            font-size: 1.1rem;
+        }
+
+        .payout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .payout-btn:hover {
+            filter: brightness(1.1);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid #1a1a1a;
+            margin-top: 3rem;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .integration-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-item {
+                flex-direction: column;
+            }
+
+            nav {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-left, .nav-center, .nav-right {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .section {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-card, .section {
+            animation: slideIn 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-left">
+            <div class="logo">
+                <div class="logo-mark">B</div>
+                <span>Boost Boss</span>
+            </div>
+        </div>
+        <div class="nav-center">
+            <span class="nav-title">Developer Dashboard</span>
+        </div>
+        <div class="nav-right">
+            <span class="app-name">MyAI App</span>
+            <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1>Developer Dashboard</h1>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Earnings</div>
+                <div class="stat-value earnings">$8,241.60</div>
+                <div class="stat-trend">↑ 12.5% from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Impressions</div>
+                <div class="stat-value default">547,129</div>
+                <div class="stat-trend">↑ 8.2% from last month</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Your Share</div>
+                <div class="stat-value default">65%</div>
+                <div class="stat-bar">
+                    <div class="stat-bar-fill" style="width: 65%"></div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">RPM</div>
+                <div class="stat-value default">$15.06</div>
+                <div class="stat-trend down">↓ 2.1% from last month</div>
+            </div>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="section">
+            <div class="section-title">Revenue Over Last 14 Days</div>
+            <div class="chart-container">
+                <div class="chart-bar" style="height: 45%;"><div class="chart-bar-tooltip">$285</div></div>
+                <div class="chart-bar" style="height: 62%;"><div class="chart-bar-tooltip">$412</div></div>
+                <div class="chart-bar" style="height: 58%;"><div class="chart-bar-tooltip">$389</div></div>
+                <div class="chart-bar" style="height: 71%;"><div class="chart-bar-tooltip">$485</div></div>
+                <div class="chart-bar" style="height: 68%;"><div class="chart-bar-tooltip">$468</div></div>
+                <div class="chart-bar" style="height: 75%;"><div class="chart-bar-tooltip">$520</div></div>
+                <div class="chart-bar" style="height: 52%;"><div class="chart-bar-tooltip">$356</div></div>
+                <div class="chart-bar" style="height: 80%;"><div class="chart-bar-tooltip">$565</div></div>
+                <div class="chart-bar" style="height: 78%;"><div class="chart-bar-tooltip">$548</div></div>
+                <div class="chart-bar" style="height: 85%;"><div class="chart-bar-tooltip">$612</div></div>
+                <div class="chart-bar" style="height: 82%;"><div class="chart-bar-tooltip">$589</div></div>
+                <div class="chart-bar" style="height: 90%;"><div class="chart-bar-tooltip">$658</div></div>
+                <div class="chart-bar" style="height: 88%;"><div class="chart-bar-tooltip">$641</div></div>
+                <div class="chart-bar" style="height: 95%;"><div class="chart-bar-tooltip">$695</div></div>
+            </div>
+        </div>
+
+        <!-- Integration Guide -->
+        <div class="section">
+            <div class="section-title">Integration Guide</div>
+            <div class="integration-steps">
+                <div class="integration-step">
+                    <h3>
+                        <div class="step-number">1</div>
+                        Add MCP Server
+                    </h3>
+                    <p style="color: #888; margin-bottom: 1rem;">Configure your MCP server endpoint in your AI application.</p>
+                    <div class="code-block">
+                        <button class="code-copy-btn" onclick="copyCode(this, 'step1-code')">Copy</button>
+                        <pre id="step1-code">{
+  "mcp_server": {
+    "type": "sse",
+    "url": "https://api.boostboss.ai/mcp",
+    "api_key": "bb_dev_xxx_your_key_here"
+  }
+}</pre>
+                    </div>
+                </div>
+                <div class="integration-step">
+                    <h3>
+                        <div class="step-number">2</div>
+                        Add SDK
+                    </h3>
+                    <p style="color: #888; margin-bottom: 1rem;">Include the Boost Boss SDK in your application.</p>
+                    <div class="code-block">
+                        <button class="code-copy-btn" onclick="copyCode(this, 'step2-code')">Copy</button>
+                        <pre id="step2-code">&lt;script src="https://cdn.boostboss.ai/sdk/v1/boost-boss.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  BoostBoss.init({
+    apiKey: 'bb_dev_xxx_your_key_here',
+    appId: 'app_1234567890'
+  });
+&lt;/script&gt;</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Keys Section -->
+        <div class="section">
+            <div class="section-title">API Keys & Credentials</div>
+            <div class="key-item">
+                <div class="key-info">
+                    <div class="key-label">API Key</div>
+                    <div class="key-value masked" id="api-key">bb_dev_sk••••••••••••••••••</div>
+                </div>
+                <button class="reveal-btn" onclick="toggleAPIKey()">Reveal</button>
+            </div>
+            <div class="key-item">
+                <div class="key-info">
+                    <div class="key-label">App ID</div>
+                    <div class="key-value">app_3f7k9m2lq0x8v5n1p4r</div>
+                </div>
+                <button class="reveal-btn" onclick="copyValue('app_3f7k9m2lq0x8v5n1p4r')">Copy</button>
+            </div>
+            <div class="key-item">
+                <div class="key-info">
+                    <div class="key-label">MCP Endpoint URL</div>
+                    <div class="key-value">https://api.boostboss.ai/mcp</div>
+                </div>
+                <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')">Copy</button>
+            </div>
+            <button class="regenerate-btn" onclick="regenerateKey()">Regenerate API Key</button>
+        </div>
+
+        <!-- Ad Format Controls -->
+        <div class="section">
+            <div class="section-title">Ad Format Controls</div>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <div class="control-info">
+                        <h3>Corner Popup</h3>
+                        <p>Compact ads in corner of interface</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" checked onchange="logToggle('Corner Popup', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="control-item">
+                    <div class="control-info">
+                        <h3>Fullscreen</h3>
+                        <p>Full-screen immersive ad experience</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" checked onchange="logToggle('Fullscreen', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="control-item">
+                    <div class="control-info">
+                        <h3>Video</h3>
+                        <p>30-60 second video advertisements</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" checked onchange="logToggle('Video', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="control-item">
+                    <div class="control-info">
+                        <h3>Native In-Chat</h3>
+                        <p>Seamless ads within conversation flow</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" checked onchange="logToggle('Native In-Chat', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Earnings History Table -->
+        <div class="section">
+            <div class="section-title">Earnings History</div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Impressions</th>
+                            <th>Your Earnings</th>
+                            <th>Clicks</th>
+                            <th>RPM</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Apr 14, 2026</td>
+                            <td>58,291</td>
+                            <td>$695.00</td>
+                            <td>248</td>
+                            <td>$11.92</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 13, 2026</td>
+                            <td>56,104</td>
+                            <td>$641.50</td>
+                            <td>215</td>
+                            <td>$11.43</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 12, 2026</td>
+                            <td>61,273</td>
+                            <td>$658.25</td>
+                            <td>267</td>
+                            <td>$10.74</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 11, 2026</td>
+                            <td>63,428</td>
+                            <td>$589.75</td>
+                            <td>298</td>
+                            <td>$9.32</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 10, 2026</td>
+                            <td>71,849</td>
+                            <td>$612.50</td>
+                            <td>328</td>
+                            <td>$8.52</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 9, 2026</td>
+                            <td>70,132</td>
+                            <td>$565.25</td>
+                            <td>301</td>
+                            <td>$8.06</td>
+                            <td><span class="status-badge status-pending">Pending</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 8, 2026</td>
+                            <td>59,384</td>
+                            <td>$520.00</td>
+                            <td>267</td>
+                            <td>$8.75</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                        <tr>
+                            <td>Apr 7, 2026</td>
+                            <td>63,916</td>
+                            <td>$485.50</td>
+                            <td>284</td>
+                            <td>$7.59</td>
+                            <td><span class="status-badge status-paid">Paid</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payout Section -->
+        <div class="section">
+            <div class="section-title">Payout Settings</div>
+            <div class="payout-grid">
+                <div class="payout-card">
+                    <div class="key-label">Next Payout Date</div>
+                    <div class="key-value">May 1, 2026</div>
+                </div>
+                <div class="payout-card">
+                    <div class="key-label">Payout Method</div>
+                    <div class="key-value">Stripe</div>
+                </div>
+                <div class="payout-card">
+                    <div class="key-label">Minimum Threshold</div>
+                    <div class="key-value">$100.00</div>
+                </div>
+            </div>
+            <button class="payout-btn" onclick="requestPayout()">Request Payout</button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Boost Boss © 2026 · Developer Portal
+    </footer>
+
+    <script>
+        let apiKeyRevealed = false;
+        const actualApiKey = 'bb_dev_sk_7x2k9m1q5n8v3p0r4l6w';
+
+        function toggleAPIKey() {
+            const keyElement = document.getElementById('api-key');
+            const btn = event.target;
+
+            apiKeyRevealed = !apiKeyRevealed;
+
+            if (apiKeyRevealed) {
+                keyElement.textContent = actualApiKey;
+                keyElement.classList.remove('masked');
+                btn.textContent = 'Hide';
+            } else {
+                keyElement.textContent = 'bb_dev_sk••••••••••••••••••';
+                keyElement.classList.add('masked');
+                btn.textContent = 'Reveal';
+            }
+        }
+
+        function copyCode(button, codeId) {
+            const codeElement = document.getElementById(codeId);
+            const text = codeElement.textContent;
+
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        function copyValue(value) {
+            const btn = event.target;
+            navigator.clipboard.writeText(value).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#22c55e';
+                btn.style.color = '#050505';
+
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                }, 2000);
+            });
+        }
+
+        function regenerateKey() {
+            if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
+                const newKey = 'bb_dev_sk_' + Math.random().toString(36).substr(2, 18);
+                document.getElementById('api-key').textContent = 'bb_dev_sk••••••••••••••••••';
+                apiKeyRevealed = false;
+                alert('API key regenerated successfully! Your new key is: ' + newKey);
+            }
+        }
+
+        function logToggle(name, enabled) {
+            console.log(`${name} format ${enabled ? 'enabled' : 'disabled'}`);
+        }
+
+        function requestPayout() {
+            alert('Payout request submitted! You will receive your earnings by May 1, 2026.');
+        }
+
+        function handleLogout() {
+            if (confirm('Are you sure you want to log out?')) {
+                alert('You have been logged out.');
+            }
+        }
+
+        // Add smooth scroll behavior
+        document.documentElement.style.scrollBehavior = 'smooth';
+    </script>
+</body>
+</html>

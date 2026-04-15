@@ -1,0 +1,14 @@
+{
+  "name": "boostboss",
+  "version": "1.0.0",
+  "description": "Boost Boss — The MCP-powered ad network for AI applications",
+  "private": true,
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vercel": "^39.0.0"
+  }
+}

@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boost Boss - Advertiser Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #050505;
+            --bg-surface: #0a0a0a;
+            --border: #1a1a1a;
+            --text: #e5e5e5;
+            --text-secondary: #999999;
+            --accent-gradient: linear-gradient(135deg, #f97316, #ef4444);
+            --accent-orange: #f97316;
+            --accent-red: #ef4444;
+            --success: #22c55e;
+            --warning: #eab308;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        header {
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.25rem;
+            color: white;
+        }
+
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-title {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .account-info {
+            text-align: right;
+        }
+
+        .account-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .account-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .logout-btn {
+            padding: 0.5rem 1.25rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--border);
+            border-color: var(--accent-orange);
+        }
+
+        /* Main Content */
+        main {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--accent-orange);
+            background-color: rgba(249, 115, 22, 0.02);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .stat-trend.positive {
+            color: var(--success);
+        }
+
+        .stat-trend.negative {
+            color: #ef4444;
+        }
+
+        .trend-arrow {
+            font-size: 1.2rem;
+        }
+
+        /* Chart Section */
+        .chart-section {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 0.5rem;
+            padding: 2rem 1rem;
+            background: linear-gradient(to top, rgba(249, 115, 22, 0.05), transparent);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--accent-gradient);
+            border-radius: 4px 4px 0 0;
+            min-height: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            opacity: 0.8;
+        }
+
+        .chart-bar:hover {
+            opacity: 1;
+            filter: brightness(1.1);
+        }
+
+        .chart-bar:nth-child(1) { height: 60%; }
+        .chart-bar:nth-child(2) { height: 75%; }
+        .chart-bar:nth-child(3) { height: 45%; }
+        .chart-bar:nth-child(4) { height: 85%; }
+        .chart-bar:nth-child(5) { height: 70%; }
+        .chart-bar:nth-child(6) { height: 90%; }
+        .chart-bar:nth-child(7) { height: 65%; }
+        .chart-bar:nth-child(8) { height: 80%; }
+        .chart-bar:nth-child(9) { height: 55%; }
+        .chart-bar:nth-child(10) { height: 88%; }
+        .chart-bar:nth-child(11) { height: 72%; }
+        .chart-bar:nth-child(12) { height: 78%; }
+        .chart-bar:nth-child(13) { height: 82%; }
+        .chart-bar:nth-child(14) { height: 92%; }
+
+        /* Campaigns Section */
+        .campaigns-section {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .campaigns-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .campaigns-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .new-campaign-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .new-campaign-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3);
+        }
+
+        .new-campaign-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Table */
+        .campaigns-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .campaigns-table thead {
+            border-bottom: 2px solid var(--border);
+        }
+
+        .campaigns-table th {
+            padding: 1rem;
+            text-align: left;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+        }
+
+        .campaigns-table td {
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .campaigns-table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        .campaigns-table tbody tr:hover {
+            background-color: rgba(249, 115, 22, 0.05);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: capitalize;
+        }
+
+        .badge.live {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .badge.paused {
+            background-color: rgba(234, 179, 8, 0.2);
+            color: var(--warning);
+        }
+
+        .badge.review {
+            background-color: rgba(249, 115, 22, 0.2);
+            color: var(--accent-orange);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 0.4rem 0.8rem;
+            background-color: var(--border);
+            color: var(--text);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--accent-orange);
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--accent-orange);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .radio-option,
+        .checkbox-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .radio-option input,
+        .checkbox-option input {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            accent-color: var(--accent-orange);
+        }
+
+        .radio-option label,
+        .checkbox-option label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent-orange);
+            background-color: rgba(249, 115, 22, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--accent-orange);
+            background-color: rgba(249, 115, 22, 0.1);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .upload-text {
+            color: var(--text);
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-subtext {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+        }
+
+        .tags-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            min-height: 44px;
+            align-items: center;
+        }
+
+        .tags-input:focus-within {
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .tags-input input {
+            flex: 1;
+            min-width: 100px;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 0.95rem;
+        }
+
+        .tags-input input:focus {
+            outline: none;
+        }
+
+        .tag {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 0.35rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tag-remove {
+            cursor: pointer;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .launch-btn {
+            width: 100%;
+            padding: 0.875rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
+        }
+
+        .launch-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-top: 3rem;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-orange);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-left">
+            <a href="#" class="logo">
+                <div class="logo-icon">B</div>
+                <div class="logo-text">Boost Boss</div>
+            </a>
+            <div class="header-title">Advertiser Dashboard</div>
+        </div>
+        <div class="header-right">
+            <div class="account-info">
+                <div class="account-label">Account</div>
+                <div class="account-name">Acme Corp</div>
+            </div>
+            <button class="logout-btn">Logout</button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-label">Total Impressions</div>
+                <div class="stat-value">847,293</div>
+                <div class="stat-trend positive">
+                    <span class="trend-arrow">↑</span>
+                    <span>12.5% from last week</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Clicks</div>
+                <div class="stat-value">12,409</div>
+                <div class="stat-trend positive">
+                    <span class="trend-arrow">↑</span>
+                    <span>8.3% from last week</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Click-Through Rate</div>
+                <div class="stat-value">1.46%</div>
+                <div class="stat-trend negative">
+                    <span class="trend-arrow">↓</span>
+                    <span>0.2% from last week</span>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Spend</div>
+                <div class="stat-value">$4,128.50</div>
+                <div class="stat-trend positive">
+                    <span class="trend-arrow">↑</span>
+                    <span>Budget increased 15%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Chart -->
+        <div class="chart-section">
+            <div class="chart-title">Daily Impressions (Last 14 Days)</div>
+            <div class="chart-container">
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+                <div class="chart-bar"></div>
+            </div>
+        </div>
+
+        <!-- Campaigns Section -->
+        <div class="campaigns-section">
+            <div class="campaigns-header">
+                <div class="campaigns-title">Campaigns</div>
+                <button class="new-campaign-btn" onclick="openModal()">+ New Campaign</button>
+            </div>
+
+            <table class="campaigns-table">
+                <thead>
+                    <tr>
+                        <th>Campaign Name</th>
+                        <th>Status</th>
+                        <th>Format</th>
+                        <th>Impressions</th>
+                        <th>Clicks</th>
+                        <th>CTR</th>
+                        <th>Spend</th>
+                        <th>Budget</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Summer Sale 2026</strong></td>
+                        <td><span class="badge live">Live</span></td>
+                        <td>Image</td>
+                        <td>324,582</td>
+                        <td>5,234</td>
+                        <td>1.61%</td>
+                        <td>$1,847.30</td>
+                        <td>$5,000.00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn">Pause</button>
+                                <button class="action-btn">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Product Launch Q2</strong></td>
+                        <td><span class="badge live">Live</span></td>
+                        <td>Video</td>
+                        <td>298,456</td>
+                        <td>4,521</td>
+                        <td>1.51%</td>
+                        <td>$1,654.20</td>
+                        <td>$4,000.00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn">Pause</button>
+                                <button class="action-btn">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Brand Awareness Campaign</strong></td>
+                        <td><span class="badge review">In Review</span></td>
+                        <td>Native</td>
+                        <td>145,823</td>
+                        <td>2,134</td>
+                        <td>1.46%</td>
+                        <td>$432.00</td>
+                        <td>$2,000.00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Retargeting Campaign</strong></td>
+                        <td><span class="badge paused">Paused</span></td>
+                        <td>Image</td>
+                        <td>78,432</td>
+                        <td>520</td>
+                        <td>0.66%</td>
+                        <td>$194.00</td>
+                        <td>$1,000.00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn">Resume</button>
+                                <button class="action-btn">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Holiday Season Promo</strong></td>
+                        <td><span class="badge live">Live</span></td>
+                        <td>Image</td>
+                        <td>201,234</td>
+                        <td>3,654</td>
+                        <td>1.82%</td>
+                        <td>$839.00</td>
+                        <td>$3,000.00</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn">Pause</button>
+                                <button class="action-btn">Edit</button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <!-- Create Campaign Modal -->
+    <div id="campaignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">New Campaign</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+
+            <form id="campaignForm">
+                <!-- Campaign Name -->
+                <div class="form-group">
+                    <label class="form-label">Campaign Name</label>
+                    <input type="text" class="form-input" placeholder="Enter campaign name" required>
+                </div>
+
+                <!-- Format Selector -->
+                <div class="form-group">
+                    <label class="form-label">Creative Format</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="format-image" name="format" value="image" required checked>
+                            <label for="format-image">Image</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="format-video" name="format" value="video" required>
+                            <label for="format-video">Video</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="format-native" name="format" value="native" required>
+                            <label for="format-native">Native</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- File Upload -->
+                <div class="form-group">
+                    <label class="form-label">Upload Creative</label>
+                    <div class="file-upload-area" id="uploadArea">
+                        <div class="upload-icon">📁</div>
+                        <div class="upload-text">Drag & drop your file here</div>
+                        <div class="upload-subtext">or click to browse</div>
+                    </div>
+                    <input type="file" class="file-input" id="fileInput" accept="image/*,video/*">
+                </div>
+
+                <!-- Headline -->
+                <div class="form-group">
+                    <label class="form-label">Headline</label>
+                    <input type="text" class="form-input" placeholder="Enter ad headline" required>
+                </div>
+
+                <!-- Subtext -->
+                <div class="form-group">
+                    <label class="form-label">Subtext</label>
+                    <input type="text" class="form-input" placeholder="Enter additional text" required>
+                </div>
+
+                <!-- CTA Button Text -->
+                <div class="form-group">
+                    <label class="form-label">CTA Button Text</label>
+                    <input type="text" class="form-input" placeholder="e.g., Learn More, Shop Now" required>
+                </div>
+
+                <!-- CTA URL -->
+                <div class="form-group">
+                    <label class="form-label">CTA URL</label>
+                    <input type="url" class="form-input" placeholder="https://example.com" required>
+                </div>
+
+                <!-- Target Keywords -->
+                <div class="form-group">
+                    <label class="form-label">Target Keywords</label>
+                    <div class="tags-input" id="tagsInput">
+                        <input type="text" placeholder="Type keywords and press Enter" id="keywordInput">
+                    </div>
+                </div>
+
+                <!-- Target Regions -->
+                <div class="form-group">
+                    <label class="form-label">Target Regions</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="region-global" name="regions" value="global">
+                            <label for="region-global">Global</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="region-us" name="regions" value="us">
+                            <label for="region-us">United States</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="region-eu" name="regions" value="eu">
+                            <label for="region-eu">Europe</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="region-apac" name="regions" value="apac">
+                            <label for="region-apac">Asia Pacific</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="region-latam" name="regions" value="latam">
+                            <label for="region-latam">Latin America</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Target Languages -->
+                <div class="form-group">
+                    <label class="form-label">Target Languages</label>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="lang-english" name="languages" value="english">
+                            <label for="lang-english">English</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="lang-chinese" name="languages" value="chinese">
+                            <label for="lang-chinese">Chinese</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="lang-spanish" name="languages" value="spanish">
+                            <label for="lang-spanish">Spanish</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="lang-japanese" name="languages" value="japanese">
+                            <label for="lang-japanese">Japanese</label>
+                        </div>
+                        <div class="checkbox-option">
+                            <input type="checkbox" id="lang-korean" name="languages" value="korean">
+                            <label for="lang-korean">Korean</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Billing Model -->
+                <div class="form-group">
+                    <label class="form-label">Billing Model</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="billing-cpm" name="billing" value="cpm" required checked>
+                            <label for="billing-cpm">CPM (Cost Per Mille)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="billing-cpc" name="billing" value="cpc" required>
+                            <label for="billing-cpc">CPC (Cost Per Click)</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="billing-cpv" name="billing" value="cpv" required>
+                            <label for="billing-cpv">CPV (Cost Per View)</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Daily Budget -->
+                <div class="form-group">
+                    <label class="form-label">Daily Budget</label>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <span style="color: var(--text); font-weight: 600;">$</span>
+                        <input type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required>
+                    </div>
+                </div>
+
+                <!-- Launch Button -->
+                <button type="submit" class="launch-btn">Launch Campaign</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        Boost Boss © 2026 · Advertiser Portal
+    </footer>
+
+    <script>
+        const modal = document.getElementById('campaignModal');
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const tagsInput = document.getElementById('tagsInput');
+        const keywordInput = document.getElementById('keywordInput');
+        const campaignForm = document.getElementById('campaignForm');
+
+        // Modal Management
+        function openModal() {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on outside click
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('active')) {
+                closeModal();
+            }
+        });
+
+        // File Upload Area
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                updateUploadAreaText(files[0].name);
+            }
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                updateUploadAreaText(e.target.files[0].name);
+            }
+        });
+
+        function updateUploadAreaText(fileName) {
+            uploadArea.innerHTML = `
+                <div class="upload-icon">✓</div>
+                <div class="upload-text">${fileName}</div>
+                <div class="upload-subtext">Click to replace file</div>
+            `;
+        }
+
+        // Tags Input Management
+        keywordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && keywordInput.value.trim()) {
+                e.preventDefault();
+                addTag(keywordInput.value.trim());
+                keywordInput.value = '';
+            }
+        });
+
+        keywordInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace' && keywordInput.value === '') {
+                const tags = tagsInput.querySelectorAll('.tag');
+                if (tags.length > 0) {
+                    tags[tags.length - 1].remove();
+                }
+            }
+        });
+
+        function addTag(text) {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `
+                ${text}
+                <span class="tag-remove">×</span>
+            `;
+            tag.querySelector('.tag-remove').addEventListener('click', () => {
+                tag.remove();
+            });
+            tagsInput.insertBefore(tag, keywordInput);
+        }
+
+        // Form Submission
+        campaignForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            // Collect form data
+            const formData = new FormData(campaignForm);
+            const keywords = Array.from(tagsInput.querySelectorAll('.tag')).map(tag =>
+                tag.textContent.replace('×', '').trim()
+            );
+            const regions = Array.from(campaignForm.querySelectorAll('input[name="regions"]:checked')).map(r => r.value);
+            const languages = Array.from(campaignForm.querySelectorAll('input[name="languages"]:checked')).map(l => l.value);
+
+            console.log('Campaign Data:', {
+                name: formData.get('campaign-name') || campaignForm.querySelector('input[placeholder*="campaign name"]').value,
+                format: formData.get('format'),
+                keywords: keywords,
+                regions: regions,
+                languages: languages,
+                billing: formData.get('billing'),
+            });
+
+            // Show success message
+            alert('Campaign launched successfully!');
+
+            // Reset form
+            campaignForm.reset();
+            tagsInput.querySelectorAll('.tag').forEach(tag => tag.remove());
+            uploadArea.innerHTML = `
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drag & drop your file here</div>
+                <div class="upload-subtext">or click to browse</div>
+            `;
+
+            closeModal();
+        });
+
+        // Action buttons for campaign table
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = btn.textContent.trim();
+                const campaignName = btn.closest('tr').querySelector('strong').textContent;
+                console.log(`${action} campaign: ${campaignName}`);
+            });
+        });
+    </script>
+</body>
+</html>
