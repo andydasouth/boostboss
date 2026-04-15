@@ -1346,7 +1346,8 @@
 
                 if (!response.ok) throw new Error('Failed to load campaigns');
 
-                const campaigns = await response.json();
+                const data = await response.json();
+                const campaigns = data.campaigns || data || [];
 
                 campaignTableBody.innerHTML = '';
 
