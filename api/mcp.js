@@ -1,160 +1,58 @@
-/**
- * Boost Boss — MCP Ad Server
- *
- * Vercel Serverless Function
- * Handles MCP protocol handshake + ad serving
- *
- * Endpoint: POST /api/mcp
- */
+const { createClient } = require("@supabase/supabase-js");
 
-// In production, these come from Supabase
-const AD_CATALOG = [
-  {
-    id: "bb_001",
-    advertiser: "Framer",
-    type: "image",
-    headline: "Build stunning sites — no code needed",
-    subtext: "Framer · Free for 30 days · 2M+ creators",
-    media_url: "https://placehold.co/540x304/f97316/ffffff?text=Framer",
-    cta_label: "Try Free →",
-    cta_url: "https://framer.com",
-    skippable_after_sec: 3,
-    targeting: {
-      keywords: ["landing page", "design", "website", "no-code", "UI", "builder", "startup"],
-      regions: ["global"],
-      languages: ["en", "zh", "es", "ja"],
-    },
-    budget_remaining: 500,
-    cpm: 5.00,
-    cpc: 0.50,
-    status: "active",
-  },
-  {
-    id: "bb_002",
-    advertiser: "Vercel",
-    type: "image",
-    headline: "Deploy in seconds. Scale forever.",
-    subtext: "Vercel · Free hobby plan · Netflix, Uber, GitHub trust us",
-    media_url: "https://placehold.co/540x304/000000/ffffff?text=Vercel",
-    cta_label: "Deploy Now →",
-    cta_url: "https://vercel.com",
-    skippable_after_sec: 3,
-    targeting: {
-      keywords: ["deploy", "hosting", "server", "scale", "frontend", "next.js", "react"],
-      regions: ["global"],
-      languages: ["en"],
-    },
-    budget_remaining: 800,
-    cpm: 6.00,
-    cpc: 0.60,
-    status: "active",
-  },
-  {
-    id: "bb_003",
-    advertiser: "Cursor",
-    type: "video",
-    headline: "Code 10x faster with AI",
-    subtext: "Cursor · AI-first IDE · 1M+ developers",
-    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
-    poster_url: "https://placehold.co/540x304/6366f1/ffffff?text=Cursor+AI",
-    cta_label: "Download Free →",
-    cta_url: "https://cursor.com",
-    skippable_after_sec: 5,
-    targeting: {
-      keywords: ["code", "programming", "IDE", "developer", "python", "javascript", "build", "debug"],
-      regions: ["global"],
-      languages: ["en", "zh", "ja"],
-    },
-    budget_remaining: 1200,
-    cpm: 8.00,
-    cpc: 0.80,
-    status: "active",
-  },
-  {
-    id: "bb_004",
-    advertiser: "Notion",
-    type: "image",
-    headline: "All your work. One tool. AI-powered.",
-    subtext: "Notion · Free for personal · 30M+ teams",
-    media_url: "https://placehold.co/540x304/0ea5e9/ffffff?text=Notion+AI",
-    cta_label: "Get Notion Free →",
-    cta_url: "https://notion.so",
-    skippable_after_sec: 3,
-    targeting: {
-      keywords: ["notes", "organize", "project", "team", "wiki", "document", "plan", "manage"],
-      regions: ["global"],
-      languages: ["en", "zh", "es", "ja", "ko"],
-    },
-    budget_remaining: 600,
-    cpm: 4.50,
-    cpc: 0.40,
-    status: "active",
-  },
-];
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-// Rate limiting: track sessions
-const sessionLastServed = new Map();
-const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes between ads per session
-
-/**
- * Match the best ad to the conversation context
- */
-function matchAd(context, userRegion, userLanguage) {
-  const contextLower = (context || "").toLowerCase();
-  const activeAds = AD_CATALOG.filter(ad => ad.status === "active" && ad.budget_remaining > 0);
-
-  // Score each ad by keyword relevance
-  const scored = activeAds.map(ad => {
-    let score = 0;
-
-    // Keyword matching
-    for (const kw of ad.targeting.keywords) {
-      if (contextLower.includes(kw.toLowerCase())) {
-        score += 10;
-      }
-    }
-
-    // Region match bonus
-    if (ad.targeting.regions.includes("global") || ad.targeting.regions.includes(userRegion)) {
-      score += 5;
-    }
-
-    // Language match bonus
-    if (ad.targeting.languages.includes(userLanguage)) {
-      score += 3;
-    }
-
-    // Budget priority — higher budget remaining = slight boost
-    score += ad.budget_remaining / 1000;
-
-    return { ad, score };
-  });
-
-  // Sort by score descending, return best match
-  scored.sort((a, b) => b.score - a.score);
-  return scored.length > 0 && scored[0].score > 0 ? scored[0].ad : null;
+function getSupabase() {
+  return createClient(supabaseUrl, supabaseKey);
 }
 
-/**
- * Handle MCP Protocol
- */
-export default async function handler(req, res) {
-  // CORS
+// Rate limiting per session
+const sessionCache = new Map();
+const RATE_LIMIT_MS = 3 * 60 * 1000;
+
+function scoreCampaign(campaign, context, userRegion, userLanguage) {
+  const ctx = (context || "").toLowerCase();
+  let score = 0;
+
+  // Keyword matching
+  const keywords = campaign.target_keywords || [];
+  for (const kw of keywords) {
+    if (ctx.includes(kw.toLowerCase())) score += 10;
+  }
+
+  // Region
+  const regions = campaign.target_regions || ["global"];
+  if (regions.includes("global") || regions.includes(userRegion)) {
+    score += 5;
+  } else {
+    score -= 10;
+  }
+
+  // Language
+  const langs = campaign.target_languages || ["en"];
+  if (langs.includes(userLanguage)) score += 3;
+
+  // Budget remaining
+  const left = (campaign.total_budget || 0) - (campaign.spent_total || 0);
+  if (left > 0) score += Math.min(left / 500, 5);
+
+  // Daily cap
+  if ((campaign.spent_today || 0) >= (campaign.daily_budget || 0)) score = -999;
+
+  return score;
+}
+
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
-
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
-  }
+  if (req.method === "OPTIONS") return res.status(200).end();
+  if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const body = req.body;
 
-  // ── MCP Handshake ──
+  // ── initialize ──
   if (body.method === "initialize") {
     return res.json({
       jsonrpc: "2.0",
@@ -162,16 +60,12 @@ export default async function handler(req, res) {
       result: {
         protocolVersion: "2024-11-05",
         capabilities: { tools: {} },
-        serverInfo: {
-          name: "boostboss-ad-server",
-          version: "1.0.0",
-          description: "Boost Boss — MCP Ad Network for AI Applications",
-        },
+        serverInfo: { name: "boostboss-mcp", version: "1.0.0", description: "Boost Boss — MCP Ad Network", url: "https://boostboss.ai" },
       },
     });
   }
 
-  // ── List Tools ──
+  // ── tools/list ──
   if (body.method === "tools/list") {
     return res.json({
       jsonrpc: "2.0",
@@ -180,50 +74,32 @@ export default async function handler(req, res) {
         tools: [
           {
             name: "get_sponsored_content",
-            description: "Get a contextually relevant sponsored recommendation for the current conversation. Returns targeted content that may be useful to the user.",
+            description: "Get a contextually relevant sponsored recommendation matched to conversation context.",
             inputSchema: {
               type: "object",
               properties: {
-                context_summary: {
-                  type: "string",
-                  description: "A brief summary of what the user is currently working on or asking about",
-                },
-                user_region: {
-                  type: "string",
-                  description: "User's region/timezone (e.g., 'US', 'EU', 'APAC')",
-                },
-                user_language: {
-                  type: "string",
-                  description: "User's language code (e.g., 'en', 'zh', 'es')",
-                },
-                session_id: {
-                  type: "string",
-                  description: "Unique session identifier for rate limiting",
-                },
-                format_preference: {
-                  type: "string",
-                  enum: ["image", "video", "native", "any"],
-                  description: "Preferred ad format. Default: any",
-                },
+                context_summary: { type: "string", description: "What the user is currently working on or asking about" },
+                user_region: { type: "string", description: "Region: US, EU, APAC, LATAM, global" },
+                user_language: { type: "string", description: "Language: en, zh, es, ja, ko" },
+                session_id: { type: "string", description: "Unique session ID" },
+                developer_api_key: { type: "string", description: "Developer Boost Boss API key" },
+                format_preference: { type: "string", enum: ["image", "video", "native", "any"] },
               },
               required: ["context_summary"],
             },
           },
           {
-            name: "track_ad_event",
-            description: "Track an ad event (impression, click, close, video_complete)",
+            name: "track_event",
+            description: "Track ad event: impression, click, close, video_complete, skip",
             inputSchema: {
               type: "object",
               properties: {
-                event: {
-                  type: "string",
-                  enum: ["impression", "click", "close", "video_complete", "skip"],
-                },
-                ad_id: { type: "string" },
+                event: { type: "string", enum: ["impression", "click", "close", "video_complete", "skip"] },
+                campaign_id: { type: "string" },
                 session_id: { type: "string" },
-                developer_id: { type: "string" },
+                developer_api_key: { type: "string" },
               },
-              required: ["event", "ad_id"],
+              required: ["event", "campaign_id"],
             },
           },
         ],
@@ -231,102 +107,92 @@ export default async function handler(req, res) {
     });
   }
 
-  // ── Call Tool ──
+  // ── tools/call ──
   if (body.method === "tools/call") {
     const toolName = body.params?.name;
     const args = body.params?.arguments || {};
+    const supabase = getSupabase();
 
-    // ── Get Sponsored Content ──
     if (toolName === "get_sponsored_content") {
-      const sessionId = args.session_id || "anonymous";
+      const sessionId = args.session_id || "anon_" + Date.now();
 
-      // Rate limit check
-      const lastServed = sessionLastServed.get(sessionId);
-      if (lastServed && Date.now() - lastServed < RATE_LIMIT_MS) {
-        return res.json({
-          jsonrpc: "2.0",
-          id: body.id,
-          result: {
-            content: [
-              {
-                type: "text",
-                text: JSON.stringify({ sponsored: null, reason: "rate_limited", next_eligible_ms: RATE_LIMIT_MS - (Date.now() - lastServed) }),
+      // Rate limit
+      const last = sessionCache.get(sessionId);
+      if (last && Date.now() - last < RATE_LIMIT_MS) {
+        return res.json({ jsonrpc: "2.0", id: body.id, result: { content: [{ type: "text", text: JSON.stringify({ sponsored: null, reason: "rate_limited" }) }] } });
+      }
+
+      // Resolve developer
+      let developerId = null;
+      if (args.developer_api_key) {
+        const { data: dev } = await supabase.from("developers").select("id").eq("api_key", args.developer_api_key).eq("status", "active").single();
+        if (dev) developerId = dev.id;
+      }
+
+      // Fetch active campaigns
+      const { data: campaigns, error } = await supabase.from("campaigns").select("*").eq("status", "active");
+      if (error || !campaigns || campaigns.length === 0) {
+        return res.json({ jsonrpc: "2.0", id: body.id, result: { content: [{ type: "text", text: JSON.stringify({ sponsored: null, reason: "no_campaigns" }) }] } });
+      }
+
+      // Score & rank
+      const region = args.user_region || "global";
+      const lang = args.user_language || "en";
+      const ranked = campaigns
+        .map(c => ({ c, score: scoreCampaign(c, args.context_summary, region, lang) }))
+        .filter(x => x.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+      if (ranked.length === 0) {
+        return res.json({ jsonrpc: "2.0", id: body.id, result: { content: [{ type: "text", text: JSON.stringify({ sponsored: null, reason: "no_match" }) }] } });
+      }
+
+      const w = ranked[0].c;
+      sessionCache.set(sessionId, Date.now());
+
+      const baseTrack = `https://boostboss.ai/api/track?campaign_id=${w.id}&session=${sessionId}&dev=${developerId || ""}`;
+
+      return res.json({
+        jsonrpc: "2.0",
+        id: body.id,
+        result: {
+          content: [{
+            type: "text",
+            text: JSON.stringify({
+              sponsored: {
+                campaign_id: w.id,
+                type: w.format,
+                headline: w.headline,
+                subtext: w.subtext,
+                media_url: w.media_url,
+                poster_url: w.poster_url || null,
+                cta_label: w.cta_label,
+                cta_url: w.cta_url,
+                skippable_after_sec: w.skippable_after_sec || 3,
+                tracking: {
+                  impression: `${baseTrack}&event=impression`,
+                  click: `${baseTrack}&event=click`,
+                  close: `${baseTrack}&event=close`,
+                  video_complete: `${baseTrack}&event=video_complete`,
+                },
               },
-            ],
-          },
-        });
-      }
-
-      // Match ad
-      const ad = matchAd(
-        args.context_summary,
-        args.user_region || "global",
-        args.user_language || "en"
-      );
-
-      if (!ad) {
-        return res.json({
-          jsonrpc: "2.0",
-          id: body.id,
-          result: {
-            content: [{ type: "text", text: JSON.stringify({ sponsored: null, reason: "no_match" }) }],
-          },
-        });
-      }
-
-      // Record serving
-      sessionLastServed.set(sessionId, Date.now());
-
-      // Return ad payload (SDK will render this)
-      const payload = {
-        sponsored: {
-          ad_id: ad.id,
-          advertiser: ad.advertiser,
-          type: ad.type,
-          headline: ad.headline,
-          subtext: ad.subtext,
-          media_url: ad.media_url,
-          poster_url: ad.poster_url || null,
-          cta_label: ad.cta_label,
-          cta_url: ad.cta_url,
-          skippable_after_sec: ad.skippable_after_sec,
-          format_suggestion: args.format_preference === "any" ? (ad.type === "video" ? "corner" : "corner") : null,
-          tracking: {
-            impression_url: `https://api.boostboss.ai/api/track?event=impression&ad_id=${ad.id}&session=${sessionId}`,
-            click_url: `https://api.boostboss.ai/api/track?event=click&ad_id=${ad.id}&session=${sessionId}`,
-          },
-        },
-      };
-
-      return res.json({
-        jsonrpc: "2.0",
-        id: body.id,
-        result: {
-          content: [{ type: "text", text: JSON.stringify(payload) }],
+            }),
+          }],
         },
       });
     }
 
-    // ── Track Event ──
-    if (toolName === "track_ad_event") {
-      // In production: write to Supabase
-      console.log("[BoostBoss Track]", args);
-
-      return res.json({
-        jsonrpc: "2.0",
-        id: body.id,
-        result: {
-          content: [{ type: "text", text: JSON.stringify({ tracked: true, event: args.event, ad_id: args.ad_id }) }],
-        },
+    if (toolName === "track_event") {
+      const { error } = await supabase.from("events").insert({
+        event_type: args.event,
+        campaign_id: args.campaign_id,
+        session_id: args.session_id || null,
       });
+      return res.json({ jsonrpc: "2.0", id: body.id, result: { content: [{ type: "text", text: JSON.stringify({ tracked: !error }) }] } });
     }
 
-    return res.status(400).json({
-      jsonrpc: "2.0",
-      id: body.id,
-      error: { code: -32601, message: `Unknown tool: ${toolName}` },
-    });
+    return res.status(400).json({ jsonrpc: "2.0", id: body.id, error: { code: -32601, message: `Unknown tool: ${toolName}` } });
   }
 
   return res.status(400).json({ error: "Unknown MCP method" });
-}
+};

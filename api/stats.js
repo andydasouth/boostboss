@@ -1,0 +1,101 @@
+const { createClient } = require("@supabase/supabase-js");
+
+/**
+ * Boost Boss — Stats API
+ * GET /api/stats?type=advertiser&id=xxx  → advertiser campaign stats
+ * GET /api/stats?type=developer&key=xxx  → developer earnings stats
+ */
+module.exports = async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  if (req.method === "OPTIONS") return res.status(200).end();
+
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+  const { type, id, key } = req.query;
+
+  // ── Advertiser Stats ──
+  if (type === "advertiser" && id) {
+    const { data: campaigns } = await supabase
+      .from("campaigns")
+      .select("*")
+      .eq("advertiser_id", id)
+      .order("created_at", { ascending: false });
+
+    const { data: dailyStats } = await supabase
+      .from("daily_stats")
+      .select("*")
+      .in("campaign_id", (campaigns || []).map(c => c.id))
+      .order("date", { ascending: true })
+      .limit(60);
+
+    // Aggregates
+    let totalImpressions = 0, totalClicks = 0, totalSpend = 0;
+    for (const s of dailyStats || []) {
+      totalImpressions += s.impressions || 0;
+      totalClicks += s.clicks || 0;
+      totalSpend += parseFloat(s.spend || 0);
+    }
+
+    return res.json({
+      campaigns: campaigns || [],
+      daily: dailyStats || [],
+      totals: {
+        impressions: totalImpressions,
+        clicks: totalClicks,
+        ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : "0.00",
+        spend: totalSpend.toFixed(2),
+      },
+    });
+  }
+
+  // ── Developer Stats ──
+  if (type === "developer" && key) {
+    const { data: dev } = await supabase
+      .from("developers")
+      .select("*")
+      .eq("api_key", key)
+      .single();
+
+    if (!dev) return res.status(404).json({ error: "Developer not found" });
+
+    const { data: dailyStats } = await supabase
+      .from("daily_stats")
+      .select("*")
+      .eq("developer_id", dev.id)
+      .order("date", { ascending: true })
+      .limit(60);
+
+    let totalImpressions = 0, totalClicks = 0, totalEarnings = 0;
+    for (const s of dailyStats || []) {
+      totalImpressions += s.impressions || 0;
+      totalClicks += s.clicks || 0;
+      totalEarnings += parseFloat(s.developer_earnings || 0);
+    }
+
+    return res.json({
+      developer: {
+        id: dev.id,
+        app_name: dev.app_name,
+        api_key: dev.api_key,
+        app_id: dev.app_id,
+        revenue_share_pct: dev.revenue_share_pct,
+        formats: {
+          corner: dev.format_corner,
+          fullscreen: dev.format_fullscreen,
+          video: dev.format_video,
+          native: dev.format_native,
+        },
+      },
+      daily: dailyStats || [],
+      totals: {
+        impressions: totalImpressions,
+        clicks: totalClicks,
+        earnings: totalEarnings.toFixed(2),
+        rpm: totalImpressions > 0 ? ((totalEarnings / totalImpressions) * 1000).toFixed(2) : "0.00",
+      },
+    });
+  }
+
+  return res.status(400).json({ error: "Missing type (advertiser|developer) and id/key" });
+};
