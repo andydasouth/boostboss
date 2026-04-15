@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benna — The optimization engine for AI-native advertising</title>
+<meta name="description" content="Benna is the AI optimization engine powering the Boost Boss network. It predicts conversion probability on every impression inside MCP-enabled applications and auto-optimizes bids in real time.">
+<meta property="og:title" content="Benna — The optimization engine for AI-native advertising">
+<meta property="og:description" content="The AI optimization engine powering the Boost Boss network. Predicts conversion on every MCP-native impression in real time.">
+<meta property="og:url" content="https://benna.ai">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0A0A14;
+    --bg-2: #12121F;
+    --bg-3: #1A1A2E;
+    --line: #26263D;
+    --line-2: #33334A;
+    --text: #F5F5F7;
+    --text-2: #A1A1B3;
+    --text-3: #6B6B83;
+    --violet: #9D7AFF;
+    --violet-glow: rgba(157, 122, 255, 0.15);
+    --pink: #FF5E9C;
+    --cyan: #50E3FE;
+    --green: #4DF0A1;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    font-size: 15.5px;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--text); font-weight: 600; }
+  code, pre, .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Background grain */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background-image:
+      radial-gradient(circle at 20% 10%, var(--violet-glow) 0%, transparent 45%),
+      radial-gradient(circle at 80% 60%, rgba(80, 227, 254, 0.06) 0%, transparent 45%);
+  }
+  main, nav, footer { position: relative; z-index: 1; }
+
+  /* NAV */
+  nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10, 10, 20, 0.75);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    height: 62px; max-width: 1160px; margin: 0 auto; padding: 0 24px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Space Grotesk', sans-serif; font-weight: 700;
+    font-size: 18px; color: var(--text); letter-spacing: -0.3px;
+  }
+  .brand-mark {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--violet) 0%, #C76AFF 100%);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--bg); font-weight: 800; font-size: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    box-shadow: 0 0 20px var(--violet-glow);
+  }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a {
+    font-size: 14px; font-weight: 500; color: var(--text-2); transition: color 0.15s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px;
+    padding: 8px 16px; border-radius: 8px;
+    border: 1px solid transparent; cursor: pointer; transition: all 0.15s;
+  }
+  .btn-ghost { color: var(--text); background: transparent; border-color: var(--line-2); }
+  .btn-ghost:hover { background: var(--bg-2); border-color: var(--text-3); }
+  .btn-primary {
+    background: var(--text); color: var(--bg);
+  }
+  .btn-primary:hover { background: white; }
+  .btn-lg { padding: 12px 22px; font-size: 15px; border-radius: 10px; }
+
+  /* HERO */
+  .hero { padding: 120px 0 80px; }
+  .pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 100px;
+    background: var(--bg-2); border: 1px solid var(--line);
+    font-size: 12.5px; font-weight: 500; color: var(--text-2);
+    margin-bottom: 32px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green); box-shadow: 0 0 10px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .hero h1 {
+    font-size: clamp(42px, 6.5vw, 82px);
+    line-height: 1.02; letter-spacing: -0.04em;
+    max-width: 920px; margin-bottom: 28px;
+    font-weight: 600;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(135deg, var(--violet) 0%, #E4A5FF 60%, #FFC3DF 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero .sub {
+    font-size: clamp(16px, 1.5vw, 19px);
+    color: var(--text-2); max-width: 640px; margin-bottom: 40px;
+    line-height: 1.55;
+  }
+  .hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* TERMINAL */
+  .terminal-wrap {
+    margin-top: 80px; position: relative;
+  }
+  .terminal {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px; line-height: 1.8;
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--violet-glow);
+  }
+  .term-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--bg-3);
+  }
+  .term-head .light {
+    width: 11px; height: 11px; border-radius: 50%; background: #33334A;
+  }
+  .term-head .title {
+    color: var(--text-3); font-size: 11.5px; margin-left: auto;
+    letter-spacing: 0.5px;
+  }
+  .term-body { padding: 24px 28px; overflow-x: auto; }
+  .term-body .line { white-space: pre; }
+  .term-body .c { color: var(--text-3); }
+  .term-body .k { color: var(--pink); }
+  .term-body .s { color: var(--green); }
+  .term-body .n { color: var(--cyan); }
+  .term-body .p { color: var(--violet); }
+  .term-body .out { color: var(--text-2); }
+  .term-body .prompt { color: var(--violet); }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px; background: var(--line);
+    margin: 80px 0; max-width: 1160px; margin-left: auto; margin-right: auto;
+    padding: 0 24px;
+  }
+
+  /* STATS */
+  .stats { padding: 64px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+  }
+  .stat {
+    padding: 16px 24px; border-right: 1px solid var(--line);
+  }
+  .stat:last-child { border-right: none; }
+  .stat .v {
+    font-family: 'Space Grotesk', sans-serif; font-size: 40px; font-weight: 600;
+    letter-spacing: -0.03em; line-height: 1;
+    background: linear-gradient(135deg, var(--text) 0%, var(--text-2) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 8px;
+  }
+  .stat .l {
+    font-size: 12.5px; color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    text-transform: uppercase; letter-spacing: 0.5px;
+  }
+
+  /* SECTION */
+  .section { padding: 100px 0; }
+  .section-label {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; color: var(--violet);
+    text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 20px;
+  }
+  .section-label::before { content: '[ '; }
+  .section-label::after { content: ' ]'; }
+  .section h2 {
+    font-size: clamp(32px, 4.5vw, 52px);
+    line-height: 1.08; letter-spacing: -0.03em;
+    margin-bottom: 20px; max-width: 780px;
+    font-weight: 600;
+  }
+  .section .lead {
+    font-size: 17px; color: var(--text-2);
+    max-width: 680px; margin-bottom: 56px;
+    line-height: 1.55;
+  }
+
+  /* SIGNALS */
+  .signals-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
+  }
+  .signals-list {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden;
+  }
+  .signal-row {
+    padding: 18px 24px; border-bottom: 1px solid var(--line);
+    display: flex; align-items: center; gap: 16px;
+  }
+  .signal-row:last-child { border-bottom: none; }
+  .signal-row .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 600;
+    padding: 3px 8px; border-radius: 4px;
+    background: var(--bg-3); color: var(--violet);
+    border: 1px solid var(--line-2);
+    white-space: nowrap; letter-spacing: 0.5px;
+  }
+  .signal-row .name {
+    font-size: 14.5px; color: var(--text); flex: 1;
+  }
+  .signal-row .example {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px; color: var(--text-3);
+  }
+  .signals-text h3 {
+    font-size: 22px; margin-bottom: 14px;
+  }
+  .signals-text p {
+    color: var(--text-2); font-size: 15px; margin-bottom: 18px;
+  }
+  .signals-text p strong { color: var(--text); font-weight: 600; }
+
+  /* FLOW */
+  .flow-wrap {
+    margin-top: 64px; padding: 48px;
+    background: var(--bg-2); border: 1px solid var(--line); border-radius: 16px;
+  }
+  .flow {
+    display: grid; grid-template-columns: 1fr 40px 1fr 40px 1fr;
+    align-items: center; gap: 16px;
+  }
+  .flow-node {
+    background: var(--bg); border: 1px solid var(--line-2); border-radius: 10px;
+    padding: 24px 20px;
+  }
+  .flow-node.center {
+    background: linear-gradient(180deg, var(--bg) 0%, rgba(157, 122, 255, 0.06) 100%);
+    border-color: var(--violet);
+    box-shadow: 0 0 40px var(--violet-glow);
+  }
+  .flow-node h4 { font-size: 15px; margin-bottom: 8px; font-weight: 600; }
+  .flow-node p {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px;
+    color: var(--text-3); line-height: 1.55;
+  }
+  .flow-arrow {
+    color: var(--violet); font-family: 'JetBrains Mono', monospace;
+    font-size: 24px; text-align: center;
+  }
+
+  /* PERFORMANCE */
+  .perf-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+  }
+  .perf-card {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 32px 28px;
+    position: relative; overflow: hidden;
+  }
+  .perf-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 100% 0%, var(--violet-glow) 0%, transparent 40%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .perf-card:hover::before { opacity: 1; }
+  .perf-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px;
+  }
+  .perf-card .value {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 56px; font-weight: 600; line-height: 1;
+    letter-spacing: -0.04em; color: var(--text); margin-bottom: 12px;
+  }
+  .perf-card .value .unit { font-size: 32px; color: var(--violet); }
+  .perf-card .desc {
+    color: var(--text-2); font-size: 14px; line-height: 1.55;
+  }
+
+  /* INTEGRATE */
+  .integrate-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;
+  }
+  .int-card {
+    background: var(--bg-2); border: 1px solid var(--line);
+    border-radius: 12px; padding: 28px;
+    transition: border-color 0.15s;
+  }
+  .int-card:hover { border-color: var(--violet); }
+  .int-card .surface {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px; color: var(--violet);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+  }
+  .int-card h4 { font-size: 17px; margin-bottom: 10px; font-weight: 600; }
+  .int-card p { color: var(--text-2); font-size: 14px; margin-bottom: 16px; }
+  .int-card a.more {
+    font-size: 13px; color: var(--violet);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .int-card a.more:hover { text-decoration: underline; }
+
+  /* RESEARCH */
+  .research-card {
+    background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg-3) 100%);
+    border: 1px solid var(--line);
+    border-radius: 16px; padding: 56px;
+    margin-top: 48px;
+  }
+  .research-card h3 {
+    font-size: 28px; margin-bottom: 16px;
+  }
+  .research-card p {
+    color: var(--text-2); font-size: 16px;
+    max-width: 640px; margin-bottom: 24px;
+  }
+  .research-paper {
+    display: inline-flex; align-items: center; gap: 14px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 1px solid var(--line-2);
+    border-radius: 10px;
+    transition: all 0.15s;
+  }
+  .research-paper:hover { border-color: var(--violet); }
+  .research-paper .icon {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: var(--violet-glow); color: var(--violet);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700;
+  }
+  .research-paper .info .t {
+    font-size: 14.5px; color: var(--text); font-weight: 500;
+  }
+  .research-paper .info .m {
+    font-size: 12px; color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 2px;
+  }
+
+  /* CTA */
+  .cta-box {
+    text-align: center;
+    padding: 80px 24px;
+    background: radial-gradient(circle at 50% 50%, var(--violet-glow) 0%, transparent 60%);
+    margin: 80px auto 0;
+  }
+  .cta-box h2 {
+    font-size: clamp(32px, 4.5vw, 52px);
+    margin-bottom: 20px; max-width: 720px; margin-left: auto; margin-right: auto;
+  }
+  .cta-box p {
+    color: var(--text-2); font-size: 17px; margin-bottom: 32px;
+    max-width: 560px; margin-left: auto; margin-right: auto;
+  }
+  .cta-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--line);
+    padding: 48px 0 32px;
+  }
+  .foot-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    flex-wrap: wrap; gap: 24px;
+  }
+  .foot-brand {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text-2); font-size: 13px;
+  }
+  .foot-links { display: flex; gap: 28px; flex-wrap: wrap; }
+  .foot-links a {
+    font-size: 13px; color: var(--text-2);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .foot-links a:hover { color: var(--text); }
+  .foot-meta {
+    margin-top: 32px; padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--text-3);
+    font-family: 'JetBrains Mono', monospace;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+  }
+
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .hero { padding: 72px 0 48px; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    .stat { border-right: none; border-bottom: 1px solid var(--line); }
+    .signals-grid, .integrate-grid, .perf-grid { grid-template-columns: 1fr; }
+    .flow { grid-template-columns: 1fr; }
+    .flow-arrow { transform: rotate(90deg); }
+    .research-card { padding: 36px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <div class="brand-mark">B</div>
+      <span>benna</span>
+    </a>
+    <div class="nav-links">
+      <a href="#signals">Signals</a>
+      <a href="#how">How it works</a>
+      <a href="#performance">Performance</a>
+      <a href="#integrate">Integration</a>
+      <a href="#research">Research</a>
+    </div>
+    <div class="nav-ctas">
+      <a class="btn btn-ghost" href="https://boostboss.ai" target="_blank">Boost Boss ↗</a>
+      <a class="btn btn-primary" href="#contact">Request access</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="pill"><span class="dot"></span>v1.4 · serving 220B+ decisions/mo</div>
+    <h1>
+      The optimization engine for<br>
+      <span class="grad">AI-native advertising.</span>
+    </h1>
+    <p class="sub">
+      Benna is the learning layer that powers the Boost Boss network. On every impression inside an MCP-enabled application, Benna predicts conversion probability, selects the winning ad, and auto-optimizes bids in real time — using signals no legacy DSP can see.
+    </p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="#contact">Request access →</a>
+      <a class="btn btn-ghost btn-lg" href="#research">Read the tech ↗</a>
+    </div>
+
+    <!-- TERMINAL -->
+    <div class="terminal-wrap">
+      <div class="terminal">
+        <div class="term-head">
+          <div class="light"></div>
+          <div class="light"></div>
+          <div class="light"></div>
+          <div class="title">benna.predict — real-time bid decision</div>
+        </div>
+        <div class="term-body">
+<span class="line"><span class="c">// incoming bid request</span></span>
+<span class="line"><span class="p">&gt;</span> <span class="k">benna</span>.<span class="n">predict</span>({</span>
+<span class="line">    <span class="p">surface</span>: <span class="s">"cursor.editor.inline"</span>,</span>
+<span class="line">    <span class="p">prompt_intent</span>: <span class="s">"debugging_python"</span>,</span>
+<span class="line">    <span class="p">mcp_tools</span>: [<span class="s">"shell.exec"</span>, <span class="s">"fs.read"</span>],</span>
+<span class="line">    <span class="p">model</span>: <span class="s">"claude-sonnet-4-6"</span>,</span>
+<span class="line">    <span class="p">turn</span>: <span class="n">3</span>,</span>
+<span class="line">    <span class="p">session_ctx</span>: <span class="s">"established_dev"</span></span>
+<span class="line">  })</span>
+<span class="line"></span>
+<span class="line"><span class="out">← </span><span class="c">// predicted in 4.2ms</span></span>
+<span class="line"><span class="out">{</span></span>
+<span class="line"><span class="out">  </span><span class="p">p_convert</span><span class="out">: </span><span class="n">0.1847</span><span class="out">,</span>    <span class="c">// 12.4x baseline</span></span>
+<span class="line"><span class="out">  </span><span class="p">winning_ad</span><span class="out">: </span><span class="s">"sentry_io_free_trial"</span><span class="out">,</span></span>
+<span class="line"><span class="out">  </span><span class="p">suggested_bid_cpm</span><span class="out">: </span><span class="n">4.12</span><span class="out">,</span></span>
+<span class="line"><span class="out">  </span><span class="p">confidence</span><span class="out">: </span><span class="n">0.91</span></span>
+<span class="line"><span class="out">}</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat">
+        <div class="v">220B+</div>
+        <div class="l">Decisions / month</div>
+      </div>
+      <div class="stat">
+        <div class="v">4.2ms</div>
+        <div class="l">Median inference</div>
+      </div>
+      <div class="stat">
+        <div class="v">+47%</div>
+        <div class="l">eCPM lift vs baseline</div>
+      </div>
+      <div class="stat">
+        <div class="v">0.91</div>
+        <div class="l">AUC on held-out</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SIGNALS -->
+<section class="section" id="signals">
+  <div class="wrap">
+    <span class="section-label">01 · Signals</span>
+    <h2>Signals legacy DSPs never see.</h2>
+    <p class="lead">Every bid request on the Boost Boss network carries a <strong>bb_context</strong> object populated by the host application's MCP layer. Benna learns from every dimension in real time — and none of it relies on cookies, device IDs, or third-party data.</p>
+
+    <div class="signals-grid">
+      <div class="signals-list">
+        <div class="signal-row">
+          <span class="tag">INTENT</span>
+          <span class="name">Prompt intent</span>
+          <span class="example">debugging_python</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">MCP</span>
+          <span class="name">Tool call chain</span>
+          <span class="example">[shell, fs.read, git]</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">MODEL</span>
+          <span class="name">Model vendor + version</span>
+          <span class="example">claude-sonnet-4-6</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">TURN</span>
+          <span class="name">Conversation depth</span>
+          <span class="example">turn_3 / established</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">COHORT</span>
+          <span class="name">Session cohort</span>
+          <span class="example">ai_native_developer</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">APP</span>
+          <span class="name">Host application</span>
+          <span class="example">cursor.editor.inline</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">TIME</span>
+          <span class="name">Temporal context</span>
+          <span class="example">weekday_evening_utc</span>
+        </div>
+        <div class="signal-row">
+          <span class="tag">HIST</span>
+          <span class="name">Session history embedding</span>
+          <span class="example">vec[128] · 0.87 sim</span>
+        </div>
+      </div>
+      <div class="signals-text">
+        <h3>Intent is a first-class feature.</h3>
+        <p>On a news site, all you know is that a 34-year-old in Austin clicked "read more." On an MCP surface, we know they just asked Claude <strong>"why is my pytest failing on the CI runner"</strong> — and that's a completely different person to bid on.</p>
+        <p>Benna treats the prompt as a signal, the tool chain as a signal, and the conversational stage as a signal. All three together produce a prediction that is <strong>12x more predictive</strong> of conversion than any cookie-based segment we benchmarked against.</p>
+        <p>Every signal is privacy-preserving: no PII leaves the host application. Embeddings are computed on-device where possible and transmitted as anonymous vectors to the Benna inference gateway.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how">
+  <div class="wrap">
+    <span class="section-label">02 · Architecture</span>
+    <h2>A 3-stage pipeline, end-to-end in under 50ms.</h2>
+    <p class="lead">Benna receives a bid request, encodes the context into a dense embedding, runs a two-tower ranking model over candidate ads, and returns a winning ad with a calibrated bid — all before the user's next token renders.</p>
+
+    <div class="flow-wrap">
+      <div class="flow">
+        <div class="flow-node">
+          <h4>1 · Encode</h4>
+          <p>bb_context → ctx_embed[512]<br>p99 &lt; 3ms</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node center">
+          <h4>2 · Predict</h4>
+          <p>Two-tower ranking<br>p99 &lt; 8ms</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node">
+          <h4>3 · Calibrate</h4>
+          <p>Isotonic + floor check<br>p99 &lt; 2ms</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PERFORMANCE -->
+<section class="section" id="performance">
+  <div class="wrap">
+    <span class="section-label">03 · Performance</span>
+    <h2>Measurable lift from the first impression.</h2>
+    <p class="lead">Benna is benchmarked weekly against a holdout group served by rule-based bidding. Lift numbers below are median values across all campaigns on the network over the trailing 30 days.</p>
+
+    <div class="perf-grid">
+      <div class="perf-card">
+        <div class="label">eCPA reduction</div>
+        <div class="value">−38<span class="unit">%</span></div>
+        <div class="desc">Advertisers on Benna-optimized bidding see a 38% lower effective cost-per-acquisition vs fixed-bid campaigns with the same budget.</div>
+      </div>
+      <div class="perf-card">
+        <div class="label">Publisher eCPM</div>
+        <div class="value">+47<span class="unit">%</span></div>
+        <div class="desc">Publishers earn 47% more per impression when Benna selects the winning ad vs a round-robin waterfall on the same inventory.</div>
+      </div>
+      <div class="perf-card">
+        <div class="label">Holdout AUC</div>
+        <div class="value">0.91</div>
+        <div class="desc">Area under the ROC curve on a 5M-impression holdout set, predicting click-through and downstream conversion.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATION -->
+<section class="section" id="integrate">
+  <div class="wrap">
+    <span class="section-label">04 · Integration</span>
+    <h2>Benna runs underneath all three Boost Boss surfaces.</h2>
+    <p class="lead">You don't integrate Benna directly. It's the inference layer that powers the auction inside the Boost Boss ad network. Sign up for the surface you need and Benna comes on by default.</p>
+
+    <div class="integrate-grid">
+      <div class="int-card">
+        <div class="surface">Advertiser</div>
+        <h4>Boost Boss Ads</h4>
+        <p>Benna auto-optimizes your bid on every impression. Set a target CPA or ROAS — Benna does the rest. No manual bid management required.</p>
+        <a class="more" href="https://boostboss.ai/ads.html" target="_blank">boostboss.ai/ads →</a>
+      </div>
+      <div class="int-card">
+        <div class="surface">Publisher</div>
+        <h4>Boost Boss Publish</h4>
+        <p>Benna selects the highest-revenue ad for every impression on your app. No waterfall tuning. No mediation configs. Just maximum yield.</p>
+        <a class="more" href="https://boostboss.ai/publish.html" target="_blank">boostboss.ai/publish →</a>
+      </div>
+      <div class="int-card">
+        <div class="surface">Exchange</div>
+        <h4>Boost Boss Exchange</h4>
+        <p>Benna annotates every OpenRTB bid request with AI-native context features, giving your DSP more signal than any cookie-based exchange provides.</p>
+        <a class="more" href="https://boostboss.ai/exchange.html" target="_blank">boostboss.ai/exchange →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESEARCH -->
+<section class="section" id="research">
+  <div class="wrap">
+    <span class="section-label">05 · Research</span>
+    <h2>How Benna learns.</h2>
+    <p class="lead">Benna is trained on every bid, impression, click, and conversion that flows through the Boost Boss network. The ranking model is a two-tower retrieval architecture with a conversion head — a design that has become standard in high-throughput recommendation systems.</p>
+
+    <div class="research-card">
+      <h3>Context-aware bidding in AI-native applications</h3>
+      <p>A technical note on how Benna models user intent inside MCP-enabled surfaces, including loss formulation, embedding strategy, and calibration approach. Released openly for the research community.</p>
+      <a class="research-paper" href="#" target="_blank">
+        <div class="icon">PDF</div>
+        <div class="info">
+          <div class="t">Context-aware bidding in AI-native applications</div>
+          <div class="m">Benna research · 2026-Q2 · 18 pages</div>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section id="contact">
+  <div class="wrap">
+    <div class="cta-box">
+      <h2>Get Benna on your next campaign.</h2>
+      <p>Benna powers every decision on the Boost Boss network by default. To access it, sign up for an advertiser, publisher, or exchange seat — or reach out to the team for enterprise access.</p>
+      <div class="cta-ctas">
+        <a class="btn btn-primary btn-lg" href="https://boostboss.ai/ads.html" target="_blank">Run a campaign →</a>
+        <a class="btn btn-ghost btn-lg" href="mailto:benna@boostboss.ai">benna@boostboss.ai</a>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <div class="brand-mark">B</div>
+        <span>benna &nbsp;·&nbsp; part of the <a href="https://boostboss.ai" target="_blank" style="color: var(--text);">Boost Boss</a> network</span>
+      </div>
+      <div class="foot-links">
+        <a href="#signals">Signals</a>
+        <a href="#how">How it works</a>
+        <a href="#performance">Performance</a>
+        <a href="#research">Research</a>
+        <a href="https://boostboss.ai/docs.html" target="_blank">Docs</a>
+      </div>
+    </div>
+    <div class="foot-meta">
+      <span>© 2026 Boost Boss Labs, Inc. · benna.ai</span>
+      <span>v1.4 · serving 220B+ decisions/mo</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
