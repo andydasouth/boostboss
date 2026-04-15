@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boost Boss - Advertiser Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -13,16 +14,18 @@
         }
 
         :root {
-            --bg-primary: #050505;
-            --bg-surface: #0a0a0a;
-            --border: #1a1a1a;
-            --text: #e5e5e5;
-            --text-secondary: #999999;
-            --accent-gradient: linear-gradient(135deg, #f97316, #ef4444);
-            --accent-orange: #f97316;
-            --accent-red: #ef4444;
-            --success: #22c55e;
-            --warning: #eab308;
+            --bg-primary: #FAFAFA;
+            --bg-surface: #FFFFFF;
+            --border: #E5E7EB;
+            --text: #1A1A2E;
+            --text-secondary: #6B7280;
+            --accent-gradient: linear-gradient(135deg, #FF2D78, #04BEFE);
+            --accent-primary: #FF2D78;
+            --accent-secondary: #04BEFE;
+            --accent-yellow: #FFE600;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --error: #EF4444;
         }
 
         body {
@@ -39,7 +42,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 2rem;
-            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(239, 68, 68, 0.1));
+            background: linear-gradient(135deg, rgba(255, 45, 120, 0.05), rgba(4, 190, 254, 0.05));
         }
 
         .auth-form-wrapper {
@@ -49,7 +52,7 @@
             padding: 2rem;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(255, 45, 120, 0.08);
         }
 
         .auth-header {
@@ -90,7 +93,7 @@
             display: flex;
             gap: 0;
             margin-bottom: 1.5rem;
-            background-color: var(--bg-primary);
+            background-color: #F3F4F6;
             border-radius: 6px;
             overflow: hidden;
         }
@@ -109,8 +112,8 @@
 
         .auth-toggle-btn.active {
             color: var(--text);
-            border-bottom-color: var(--accent-orange);
-            background-color: rgba(249, 115, 22, 0.1);
+            border-bottom-color: var(--accent-primary);
+            background-color: rgba(255, 45, 120, 0.05);
         }
 
         .form-group {
@@ -128,7 +131,7 @@
         .form-input {
             width: 100%;
             padding: 0.75rem;
-            background-color: var(--bg-primary);
+            background-color: var(--bg-surface);
             border: 1px solid var(--border);
             border-radius: 6px;
             color: var(--text);
@@ -139,8 +142,8 @@
 
         .form-input:focus {
             outline: none;
-            border-color: var(--accent-orange);
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.1);
         }
 
         .form-input::placeholder {
@@ -157,7 +160,7 @@
             background: var(--accent-gradient);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -167,7 +170,7 @@
 
         .auth-submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3);
+            box-shadow: 0 8px 16px rgba(255, 45, 120, 0.3);
         }
 
         .auth-submit-btn:active {
@@ -177,7 +180,7 @@
         .auth-error {
             background-color: rgba(239, 68, 68, 0.1);
             border: 1px solid rgba(239, 68, 68, 0.3);
-            color: #ff9999;
+            color: #EF4444;
             padding: 0.75rem;
             border-radius: 6px;
             margin-bottom: 1.5rem;
