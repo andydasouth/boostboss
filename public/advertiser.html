@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Boost Boss - Advertiser Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -29,6 +30,172 @@
             background-color: var(--bg-primary);
             color: var(--text);
             line-height: 1.6;
+        }
+
+        /* Auth Layer */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(239, 68, 68, 0.1));
+        }
+
+        .auth-form-wrapper {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent-gradient);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.75rem;
+            color: white;
+            margin: 0 auto 1rem;
+        }
+
+        .auth-logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 0;
+            margin-bottom: 1.5rem;
+            background-color: var(--bg-primary);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .auth-toggle-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: none;
+            background-color: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .auth-toggle-btn.active {
+            color: var(--text);
+            border-bottom-color: var(--accent-orange);
+            background-color: rgba(249, 115, 22, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-family: inherit;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-orange);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .form-group.hidden {
+            display: none;
+        }
+
+        .auth-submit-btn {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--accent-gradient);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            margin-top: 1rem;
+        }
+
+        .auth-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3);
+        }
+
+        .auth-submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .auth-error {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ff9999;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .auth-error.active {
+            display: block;
+        }
+
+        /* Dashboard Container */
+        .dashboard-container {
+            display: none;
+        }
+
+        .dashboard-container.active {
+            display: block;
         }
 
         /* Header */
@@ -233,20 +400,26 @@
             filter: brightness(1.1);
         }
 
-        .chart-bar:nth-child(1) { height: 60%; }
-        .chart-bar:nth-child(2) { height: 75%; }
-        .chart-bar:nth-child(3) { height: 45%; }
-        .chart-bar:nth-child(4) { height: 85%; }
-        .chart-bar:nth-child(5) { height: 70%; }
-        .chart-bar:nth-child(6) { height: 90%; }
-        .chart-bar:nth-child(7) { height: 65%; }
-        .chart-bar:nth-child(8) { height: 80%; }
-        .chart-bar:nth-child(9) { height: 55%; }
-        .chart-bar:nth-child(10) { height: 88%; }
-        .chart-bar:nth-child(11) { height: 72%; }
-        .chart-bar:nth-child(12) { height: 78%; }
-        .chart-bar:nth-child(13) { height: 82%; }
-        .chart-bar:nth-child(14) { height: 92%; }
+        .chart-bar-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: var(--text);
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .chart-bar:hover .chart-bar-tooltip {
+            opacity: 1;
+        }
 
         /* Campaigns Section */
         .campaigns-section {
@@ -433,19 +606,6 @@
             color: var(--accent-orange);
         }
 
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: var(--text);
-            font-weight: 600;
-            font-size: 0.95rem;
-        }
-
-        .form-input,
         .form-textarea,
         .form-select {
             width: 100%;
@@ -459,16 +619,11 @@
             transition: all 0.3s ease;
         }
 
-        .form-input:focus,
         .form-textarea:focus,
         .form-select:focus {
             outline: none;
             border-color: var(--accent-orange);
             box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-        }
-
-        .form-input::placeholder {
-            color: var(--text-secondary);
         }
 
         .radio-group,
@@ -500,12 +655,6 @@
             flex: 1;
         }
 
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
         .file-upload-area {
             border: 2px dashed var(--border);
             border-radius: 8px;
@@ -513,44 +662,44 @@
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
+            background-color: rgba(249, 115, 22, 0.05);
         }
 
         .file-upload-area:hover {
             border-color: var(--accent-orange);
-            background-color: rgba(249, 115, 22, 0.05);
+            background-color: rgba(249, 115, 22, 0.1);
         }
 
         .file-upload-area.dragover {
             border-color: var(--accent-orange);
-            background-color: rgba(249, 115, 22, 0.1);
+            background-color: rgba(249, 115, 22, 0.15);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-text {
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.25rem;
+        }
+
+        .upload-subtext {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
         .file-input {
             display: none;
         }
 
-        .upload-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: var(--text-secondary);
-        }
-
-        .upload-text {
-            color: var(--text);
-            font-weight: 600;
-            margin-bottom: 0.25rem;
-        }
-
-        .upload-subtext {
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-        }
-
         .tags-input {
             display: flex;
             flex-wrap: wrap;
             gap: 0.5rem;
-            padding: 0.75rem;
+            padding: 0.5rem;
             background-color: var(--bg-primary);
             border: 1px solid var(--border);
             border-radius: 6px;
@@ -558,510 +707,734 @@
             align-items: center;
         }
 
-        .tags-input:focus-within {
-            border-color: var(--accent-orange);
-            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
-        }
-
         .tags-input input {
             flex: 1;
-            min-width: 100px;
-            background: none;
+            min-width: 150px;
+            background: transparent;
             border: none;
             color: var(--text);
+            outline: none;
+            font-family: inherit;
             font-size: 0.95rem;
         }
 
-        .tags-input input:focus {
-            outline: none;
+        .tags-input input::placeholder {
+            color: var(--text-secondary);
         }
 
         .tag {
-            background: var(--accent-gradient);
-            color: white;
-            padding: 0.35rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+            background-color: var(--border);
+            padding: 0.4rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: var(--text);
         }
 
         .tag-remove {
             cursor: pointer;
-            font-size: 1.1rem;
-            line-height: 1;
+            font-weight: bold;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+        }
+
+        .tag-remove:hover {
+            color: var(--accent-orange);
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
         }
 
         .launch-btn {
             width: 100%;
-            padding: 0.875rem;
+            padding: 0.75rem;
             background: var(--accent-gradient);
             color: white;
             border: none;
             border-radius: 6px;
-            font-weight: 700;
-            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 0.95rem;
+            margin-top: 1.5rem;
         }
 
         .launch-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(249, 115, 22, 0.3);
+            box-shadow: 0 8px 16px rgba(249, 115, 22, 0.3);
         }
 
         .launch-btn:active {
             transform: translateY(0);
         }
 
+        /* Loading & Empty States */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-secondary);
+        }
+
         /* Footer */
         footer {
-            background-color: var(--bg-surface);
-            border-top: 1px solid var(--border);
-            padding: 2rem;
             text-align: center;
+            padding: 2rem;
+            border-top: 1px solid var(--border);
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-top: 3rem;
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-primary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--border);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-orange);
+            font-size: 0.85rem;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="header-left">
-            <a href="#" class="logo">
-                <div class="logo-icon">B</div>
-                <div class="logo-text">Boost Boss</div>
-            </a>
-            <div class="header-title">Advertiser Dashboard</div>
-        </div>
-        <div class="header-right">
-            <div class="account-info">
-                <div class="account-label">Account</div>
-                <div class="account-name">Acme Corp</div>
-            </div>
-            <button class="logout-btn">Logout</button>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-        <!-- Stats Row -->
-        <div class="stats-row">
-            <div class="stat-card">
-                <div class="stat-label">Total Impressions</div>
-                <div class="stat-value">847,293</div>
-                <div class="stat-trend positive">
-                    <span class="trend-arrow">↑</span>
-                    <span>12.5% from last week</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Clicks</div>
-                <div class="stat-value">12,409</div>
-                <div class="stat-trend positive">
-                    <span class="trend-arrow">↑</span>
-                    <span>8.3% from last week</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Click-Through Rate</div>
-                <div class="stat-value">1.46%</div>
-                <div class="stat-trend negative">
-                    <span class="trend-arrow">↓</span>
-                    <span>0.2% from last week</span>
-                </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Total Spend</div>
-                <div class="stat-value">$4,128.50</div>
-                <div class="stat-trend positive">
-                    <span class="trend-arrow">↑</span>
-                    <span>Budget increased 15%</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Performance Chart -->
-        <div class="chart-section">
-            <div class="chart-title">Daily Impressions (Last 14 Days)</div>
-            <div class="chart-container">
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-                <div class="chart-bar"></div>
-            </div>
-        </div>
-
-        <!-- Campaigns Section -->
-        <div class="campaigns-section">
-            <div class="campaigns-header">
-                <div class="campaigns-title">Campaigns</div>
-                <button class="new-campaign-btn" onclick="openModal()">+ New Campaign</button>
+    <!-- Auth Container -->
+    <div id="authContainer" class="auth-container">
+        <div class="auth-form-wrapper">
+            <div class="auth-header">
+                <div class="auth-logo-icon">B</div>
+                <div class="auth-logo-text">Boost Boss</div>
+                <div class="auth-subtitle">Advertiser Portal</div>
             </div>
 
-            <table class="campaigns-table">
-                <thead>
-                    <tr>
-                        <th>Campaign Name</th>
-                        <th>Status</th>
-                        <th>Format</th>
-                        <th>Impressions</th>
-                        <th>Clicks</th>
-                        <th>CTR</th>
-                        <th>Spend</th>
-                        <th>Budget</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td><strong>Summer Sale 2026</strong></td>
-                        <td><span class="badge live">Live</span></td>
-                        <td>Image</td>
-                        <td>324,582</td>
-                        <td>5,234</td>
-                        <td>1.61%</td>
-                        <td>$1,847.30</td>
-                        <td>$5,000.00</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn">Pause</button>
-                                <button class="action-btn">Edit</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Product Launch Q2</strong></td>
-                        <td><span class="badge live">Live</span></td>
-                        <td>Video</td>
-                        <td>298,456</td>
-                        <td>4,521</td>
-                        <td>1.51%</td>
-                        <td>$1,654.20</td>
-                        <td>$4,000.00</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn">Pause</button>
-                                <button class="action-btn">Edit</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Brand Awareness Campaign</strong></td>
-                        <td><span class="badge review">In Review</span></td>
-                        <td>Native</td>
-                        <td>145,823</td>
-                        <td>2,134</td>
-                        <td>1.46%</td>
-                        <td>$432.00</td>
-                        <td>$2,000.00</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn">Edit</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Retargeting Campaign</strong></td>
-                        <td><span class="badge paused">Paused</span></td>
-                        <td>Image</td>
-                        <td>78,432</td>
-                        <td>520</td>
-                        <td>0.66%</td>
-                        <td>$194.00</td>
-                        <td>$1,000.00</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn">Resume</button>
-                                <button class="action-btn">Edit</button>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td><strong>Holiday Season Promo</strong></td>
-                        <td><span class="badge live">Live</span></td>
-                        <td>Image</td>
-                        <td>201,234</td>
-                        <td>3,654</td>
-                        <td>1.82%</td>
-                        <td>$839.00</td>
-                        <td>$3,000.00</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn">Pause</button>
-                                <button class="action-btn">Edit</button>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </main>
+            <div class="auth-error" id="authError"></div>
 
-    <!-- Create Campaign Modal -->
-    <div id="campaignModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">New Campaign</h2>
-                <button class="modal-close" onclick="closeModal()">×</button>
+            <div class="auth-toggle">
+                <button class="auth-toggle-btn active" data-mode="login">Login</button>
+                <button class="auth-toggle-btn" data-mode="signup">Sign Up</button>
             </div>
 
-            <form id="campaignForm">
-                <!-- Campaign Name -->
+            <form id="authForm">
                 <div class="form-group">
-                    <label class="form-label">Campaign Name</label>
-                    <input type="text" class="form-input" placeholder="Enter campaign name" required>
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" id="authEmail" placeholder="you@example.com" required>
                 </div>
 
-                <!-- Format Selector -->
                 <div class="form-group">
-                    <label class="form-label">Creative Format</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="format-image" name="format" value="image" required checked>
-                            <label for="format-image">Image</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="format-video" name="format" value="video" required>
-                            <label for="format-video">Video</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="format-native" name="format" value="native" required>
-                            <label for="format-native">Native</label>
-                        </div>
-                    </div>
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-input" id="authPassword" placeholder="••••••••" required>
                 </div>
 
-                <!-- File Upload -->
-                <div class="form-group">
-                    <label class="form-label">Upload Creative</label>
-                    <div class="file-upload-area" id="uploadArea">
-                        <div class="upload-icon">📁</div>
-                        <div class="upload-text">Drag & drop your file here</div>
-                        <div class="upload-subtext">or click to browse</div>
-                    </div>
-                    <input type="file" class="file-input" id="fileInput" accept="image/*,video/*">
+                <div class="form-group hidden" id="companyNameGroup">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" class="form-input" id="authCompanyName" placeholder="Your company name">
                 </div>
 
-                <!-- Headline -->
-                <div class="form-group">
-                    <label class="form-label">Headline</label>
-                    <input type="text" class="form-input" placeholder="Enter ad headline" required>
-                </div>
-
-                <!-- Subtext -->
-                <div class="form-group">
-                    <label class="form-label">Subtext</label>
-                    <input type="text" class="form-input" placeholder="Enter additional text" required>
-                </div>
-
-                <!-- CTA Button Text -->
-                <div class="form-group">
-                    <label class="form-label">CTA Button Text</label>
-                    <input type="text" class="form-input" placeholder="e.g., Learn More, Shop Now" required>
-                </div>
-
-                <!-- CTA URL -->
-                <div class="form-group">
-                    <label class="form-label">CTA URL</label>
-                    <input type="url" class="form-input" placeholder="https://example.com" required>
-                </div>
-
-                <!-- Target Keywords -->
-                <div class="form-group">
-                    <label class="form-label">Target Keywords</label>
-                    <div class="tags-input" id="tagsInput">
-                        <input type="text" placeholder="Type keywords and press Enter" id="keywordInput">
-                    </div>
-                </div>
-
-                <!-- Target Regions -->
-                <div class="form-group">
-                    <label class="form-label">Target Regions</label>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="region-global" name="regions" value="global">
-                            <label for="region-global">Global</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="region-us" name="regions" value="us">
-                            <label for="region-us">United States</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="region-eu" name="regions" value="eu">
-                            <label for="region-eu">Europe</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="region-apac" name="regions" value="apac">
-                            <label for="region-apac">Asia Pacific</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="region-latam" name="regions" value="latam">
-                            <label for="region-latam">Latin America</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Target Languages -->
-                <div class="form-group">
-                    <label class="form-label">Target Languages</label>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="lang-english" name="languages" value="english">
-                            <label for="lang-english">English</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="lang-chinese" name="languages" value="chinese">
-                            <label for="lang-chinese">Chinese</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="lang-spanish" name="languages" value="spanish">
-                            <label for="lang-spanish">Spanish</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="lang-japanese" name="languages" value="japanese">
-                            <label for="lang-japanese">Japanese</label>
-                        </div>
-                        <div class="checkbox-option">
-                            <input type="checkbox" id="lang-korean" name="languages" value="korean">
-                            <label for="lang-korean">Korean</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Billing Model -->
-                <div class="form-group">
-                    <label class="form-label">Billing Model</label>
-                    <div class="radio-group">
-                        <div class="radio-option">
-                            <input type="radio" id="billing-cpm" name="billing" value="cpm" required checked>
-                            <label for="billing-cpm">CPM (Cost Per Mille)</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="billing-cpc" name="billing" value="cpc" required>
-                            <label for="billing-cpc">CPC (Cost Per Click)</label>
-                        </div>
-                        <div class="radio-option">
-                            <input type="radio" id="billing-cpv" name="billing" value="cpv" required>
-                            <label for="billing-cpv">CPV (Cost Per View)</label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Daily Budget -->
-                <div class="form-group">
-                    <label class="form-label">Daily Budget</label>
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                        <span style="color: var(--text); font-weight: 600;">$</span>
-                        <input type="number" class="form-input" placeholder="0.00" min="0" step="0.01" required>
-                    </div>
-                </div>
-
-                <!-- Launch Button -->
-                <button type="submit" class="launch-btn">Launch Campaign</button>
+                <button type="submit" class="auth-submit-btn" id="authSubmitBtn">Login</button>
             </form>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        Boost Boss © 2026 · Advertiser Portal
-    </footer>
+    <!-- Dashboard Container -->
+    <div id="dashboardContainer" class="dashboard-container">
+        <header>
+            <div class="header-left">
+                <a href="#" class="logo">
+                    <div class="logo-icon">B</div>
+                    <div class="logo-text">Boost Boss</div>
+                </a>
+                <div class="header-title">Advertiser Dashboard</div>
+            </div>
+            <div class="header-right">
+                <div class="account-info">
+                    <div class="account-label">Account</div>
+                    <div class="account-name" id="companyDisplayName">Loading...</div>
+                </div>
+                <button class="logout-btn" id="logoutBtn">Logout</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Stats Row -->
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-label">Total Impressions</div>
+                    <div class="stat-value" id="totalImpressions">0</div>
+                    <div class="stat-trend positive">
+                        <span class="trend-arrow">↑</span>
+                        <span id="impressionsTrend">Loading...</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Clicks</div>
+                    <div class="stat-value" id="totalClicks">0</div>
+                    <div class="stat-trend positive">
+                        <span class="trend-arrow">↑</span>
+                        <span id="clicksTrend">Loading...</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Click-Through Rate</div>
+                    <div class="stat-value" id="ctrValue">0%</div>
+                    <div class="stat-trend negative">
+                        <span class="trend-arrow">↓</span>
+                        <span id="ctrTrend">Loading...</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Spend</div>
+                    <div class="stat-value" id="totalSpend">$0</div>
+                    <div class="stat-trend positive">
+                        <span class="trend-arrow">↑</span>
+                        <span id="spendTrend">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Chart -->
+            <div class="chart-section">
+                <div class="chart-title">Daily Impressions (Last 14 Days)</div>
+                <div class="chart-container" id="chartContainer">
+                    <div class="loading">Loading chart data...</div>
+                </div>
+            </div>
+
+            <!-- Campaigns Section -->
+            <div class="campaigns-section">
+                <div class="campaigns-header">
+                    <div class="campaigns-title">Campaigns</div>
+                    <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
+                </div>
+
+                <table class="campaigns-table">
+                    <thead>
+                        <tr>
+                            <th>Campaign Name</th>
+                            <th>Status</th>
+                            <th>Format</th>
+                            <th>Impressions</th>
+                            <th>Clicks</th>
+                            <th>CTR</th>
+                            <th>Spend</th>
+                            <th>Budget</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="campaignTableBody">
+                        <tr><td colspan="9" class="loading">Loading campaigns...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- Create Campaign Modal -->
+        <div id="campaignModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">New Campaign</h2>
+                    <button class="modal-close" id="modalCloseBtn">×</button>
+                </div>
+
+                <form id="campaignForm">
+                    <!-- Campaign Name -->
+                    <div class="form-group">
+                        <label class="form-label">Campaign Name</label>
+                        <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
+                    </div>
+
+                    <!-- Format Selector -->
+                    <div class="form-group">
+                        <label class="form-label">Creative Format</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="format-image" name="format" value="image" required checked>
+                                <label for="format-image">Image</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="format-video" name="format" value="video" required>
+                                <label for="format-video">Video</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="format-native" name="format" value="native" required>
+                                <label for="format-native">Native</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Upload Creative</label>
+                        <div class="file-upload-area" id="uploadArea">
+                            <div class="upload-icon">📁</div>
+                            <div class="upload-text">Drag & drop your file here</div>
+                            <div class="upload-subtext">or click to browse</div>
+                        </div>
+                        <input type="file" class="file-input" id="fileInput" accept="image/*,video/*">
+                    </div>
+
+                    <!-- Headline -->
+                    <div class="form-group">
+                        <label class="form-label">Headline</label>
+                        <input type="text" class="form-input campaign-field" name="headline" placeholder="Enter ad headline" required>
+                    </div>
+
+                    <!-- Subtext -->
+                    <div class="form-group">
+                        <label class="form-label">Subtext</label>
+                        <input type="text" class="form-input campaign-field" name="subtext" placeholder="Enter additional text">
+                    </div>
+
+                    <!-- CTA Button Text -->
+                    <div class="form-group">
+                        <label class="form-label">CTA Button Text</label>
+                        <input type="text" class="form-input campaign-field" name="cta_text" placeholder="e.g., Learn More, Shop Now" required>
+                    </div>
+
+                    <!-- CTA URL -->
+                    <div class="form-group">
+                        <label class="form-label">CTA URL</label>
+                        <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
+                    </div>
+
+                    <!-- Target Keywords -->
+                    <div class="form-group">
+                        <label class="form-label">Target Keywords</label>
+                        <div class="tags-input" id="tagsInput">
+                            <input type="text" placeholder="Type keywords and press Enter" id="keywordInput">
+                        </div>
+                    </div>
+
+                    <!-- Billing Model -->
+                    <div class="form-group">
+                        <label class="form-label">Billing Model</label>
+                        <div class="radio-group">
+                            <div class="radio-option">
+                                <input type="radio" id="billing-cpm" name="billing_model" value="cpm" required checked>
+                                <label for="billing-cpm">CPM (Cost Per Mille)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="billing-cpc" name="billing_model" value="cpc" required>
+                                <label for="billing-cpc">CPC (Cost Per Click)</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" id="billing-cpv" name="billing_model" value="cpv" required>
+                                <label for="billing-cpv">CPV (Cost Per View)</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bid Amount -->
+                    <div class="form-group">
+                        <label class="form-label">Bid Amount</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: var(--text); font-weight: 600;">$</span>
+                            <input type="number" class="form-input campaign-field" name="bid_amount" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Daily Budget -->
+                    <div class="form-group">
+                        <label class="form-label">Daily Budget</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: var(--text); font-weight: 600;">$</span>
+                            <input type="number" class="form-input campaign-field" name="daily_budget" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Total Budget -->
+                    <div class="form-group">
+                        <label class="form-label">Total Budget</label>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span style="color: var(--text); font-weight: 600;">$</span>
+                            <input type="number" class="form-input campaign-field" name="total_budget" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Launch Button -->
+                    <button type="submit" class="launch-btn" id="launchCampaignBtn">Launch Campaign</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            Boost Boss © 2026 · Advertiser Portal
+        </footer>
+    </div>
 
     <script>
-        const modal = document.getElementById('campaignModal');
+        // Supabase Configuration
+        const SUPABASE_URL = "https://glogijhwbrdkkjdsjujc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0";
+
+        // API Base URL (adjust if needed)
+        const API_BASE = window.location.origin;
+
+        // State
+        let currentUser = null;
+        let currentUserData = null;
+
+        // DOM Elements
+        const authContainer = document.getElementById('authContainer');
+        const dashboardContainer = document.getElementById('dashboardContainer');
+        const authForm = document.getElementById('authForm');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
+        const authCompanyName = document.getElementById('authCompanyName');
+        const companyNameGroup = document.getElementById('companyNameGroup');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const authError = document.getElementById('authError');
+        const authToggleBtns = document.querySelectorAll('.auth-toggle-btn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const newCampaignBtn = document.getElementById('newCampaignBtn');
+        const campaignModal = document.getElementById('campaignModal');
+        const modalCloseBtn = document.getElementById('modalCloseBtn');
+        const campaignForm = document.getElementById('campaignForm');
+        const companyDisplayName = document.getElementById('companyDisplayName');
+        const campaignTableBody = document.getElementById('campaignTableBody');
+        const chartContainer = document.getElementById('chartContainer');
         const fileInput = document.getElementById('fileInput');
         const uploadArea = document.getElementById('uploadArea');
         const tagsInput = document.getElementById('tagsInput');
         const keywordInput = document.getElementById('keywordInput');
-        const campaignForm = document.getElementById('campaignForm');
 
-        // Modal Management
+        let authMode = 'login';
+
+        // Initialize
+        function init() {
+            checkSession();
+            setupEventListeners();
+        }
+
+        // Check for existing session
+        function checkSession() {
+            const token = localStorage.getItem('bb_session_token');
+            const userData = localStorage.getItem('bb_user_data');
+
+            if (token && userData) {
+                currentUser = JSON.parse(token);
+                currentUserData = JSON.parse(userData);
+                showDashboard();
+                loadStats();
+                loadCampaigns();
+            } else {
+                showAuthForm();
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Auth toggle
+            authToggleBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    authToggleBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    authMode = btn.dataset.mode;
+
+                    if (authMode === 'signup') {
+                        companyNameGroup.classList.remove('hidden');
+                        authSubmitBtn.textContent = 'Sign Up';
+                    } else {
+                        companyNameGroup.classList.add('hidden');
+                        authSubmitBtn.textContent = 'Login';
+                    }
+                    authError.classList.remove('active');
+                });
+            });
+
+            // Auth form submission
+            authForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleAuth();
+            });
+
+            // Logout
+            logoutBtn.addEventListener('click', handleLogout);
+
+            // Modal
+            newCampaignBtn.addEventListener('click', openModal);
+            modalCloseBtn.addEventListener('click', closeModal);
+            campaignModal.addEventListener('click', (e) => {
+                if (e.target === campaignModal) closeModal();
+            });
+
+            // Campaign form
+            campaignForm.addEventListener('submit', handleCreateCampaign);
+
+            // File upload
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    updateUploadAreaText(files[0].name);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    updateUploadAreaText(e.target.files[0].name);
+                }
+            });
+
+            // Tags input
+            keywordInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && keywordInput.value.trim()) {
+                    e.preventDefault();
+                    addTag(keywordInput.value.trim());
+                    keywordInput.value = '';
+                }
+            });
+
+            keywordInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && keywordInput.value === '') {
+                    const tags = tagsInput.querySelectorAll('.tag');
+                    if (tags.length > 0) {
+                        tags[tags.length - 1].remove();
+                    }
+                }
+            });
+
+            // Escape key to close modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && campaignModal.classList.contains('active')) {
+                    closeModal();
+                }
+            });
+        }
+
+        // Auth handlers
+        async function handleAuth() {
+            const email = authEmail.value;
+            const password = authPassword.value;
+            const companyName = authMode === 'signup' ? authCompanyName.value : null;
+
+            authError.classList.remove('active');
+
+            try {
+                const payload = {
+                    email,
+                    password,
+                    role: 'advertiser'
+                };
+
+                if (authMode === 'signup') {
+                    payload.company_name = companyName;
+                }
+
+                const response = await fetch(`${API_BASE}/api/auth?action=${authMode}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Authentication failed');
+                }
+
+                // Store session
+                currentUser = { token: data.token, user_id: data.user_id };
+                currentUserData = {
+                    company_name: data.company_name,
+                    email: email,
+                    user_id: data.user_id
+                };
+
+                localStorage.setItem('bb_session_token', JSON.stringify(currentUser));
+                localStorage.setItem('bb_user_data', JSON.stringify(currentUserData));
+
+                showDashboard();
+                loadStats();
+                loadCampaigns();
+            } catch (error) {
+                authError.textContent = error.message;
+                authError.classList.add('active');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('bb_session_token');
+            localStorage.removeItem('bb_user_data');
+            currentUser = null;
+            currentUserData = null;
+            authForm.reset();
+            authEmail.value = '';
+            authPassword.value = '';
+            authCompanyName.value = '';
+            companyNameGroup.classList.add('hidden');
+            authToggleBtns[0].classList.add('active');
+            authToggleBtns[1].classList.remove('active');
+            authMode = 'login';
+            authSubmitBtn.textContent = 'Login';
+            authError.classList.remove('active');
+            showAuthForm();
+        }
+
+        // Load stats
+        async function loadStats() {
+            try {
+                const response = await fetch(
+                    `${API_BASE}/api/stats?type=advertiser&id=${currentUserData.user_id}`,
+                    {
+                        headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to load stats');
+
+                const stats = await response.json();
+
+                // Update stat cards
+                document.getElementById('totalImpressions').textContent =
+                    formatNumber(stats.total_impressions || 0);
+                document.getElementById('totalClicks').textContent =
+                    formatNumber(stats.total_clicks || 0);
+                document.getElementById('ctrValue').textContent =
+                    ((stats.total_clicks / (stats.total_impressions || 1)) * 100).toFixed(2) + '%';
+                document.getElementById('totalSpend').textContent =
+                    '$' + formatNumber(stats.total_spend || 0, true);
+
+                // Trends (mock for now)
+                document.getElementById('impressionsTrend').textContent = '12.5% from last week';
+                document.getElementById('clicksTrend').textContent = '8.3% from last week';
+                document.getElementById('ctrTrend').textContent = '0.2% from last week';
+                document.getElementById('spendTrend').textContent = 'Budget increased 15%';
+
+                // Render chart
+                renderChart(stats.daily || []);
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('totalImpressions').textContent = '0';
+                document.getElementById('totalClicks').textContent = '0';
+            }
+        }
+
+        // Load campaigns
+        async function loadCampaigns() {
+            try {
+                const response = await fetch(
+                    `${API_BASE}/api/campaigns?advertiser_id=${currentUserData.user_id}`,
+                    {
+                        headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                    }
+                );
+
+                if (!response.ok) throw new Error('Failed to load campaigns');
+
+                const campaigns = await response.json();
+
+                campaignTableBody.innerHTML = '';
+
+                if (campaigns.length === 0) {
+                    campaignTableBody.innerHTML = '<tr><td colspan="9" class="empty-state">No campaigns yet. Create one to get started!</td></tr>';
+                    return;
+                }
+
+                campaigns.forEach(campaign => {
+                    const ctr = ((campaign.clicks / (campaign.impressions || 1)) * 100).toFixed(2);
+                    const spent = campaign.spent_today || campaign.spent_total || 0;
+                    const budget = campaign.daily_budget || campaign.total_budget || 0;
+
+                    const statusBadge = campaign.status === 'live' ? 'live' :
+                                       campaign.status === 'paused' ? 'paused' : 'review';
+
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><strong>${campaign.name}</strong></td>
+                        <td><span class="badge ${statusBadge}">${campaign.status}</span></td>
+                        <td>${campaign.format || 'N/A'}</td>
+                        <td>${formatNumber(campaign.impressions || 0)}</td>
+                        <td>${formatNumber(campaign.clicks || 0)}</td>
+                        <td>${ctr}%</td>
+                        <td>$${formatNumber(spent, true)}</td>
+                        <td>$${formatNumber(budget, true)}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="action-btn" data-action="${campaign.status === 'live' ? 'pause' : 'resume'}" data-campaign-id="${campaign.id}">
+                                    ${campaign.status === 'live' ? 'Pause' : 'Resume'}
+                                </button>
+                                <button class="action-btn" data-action="edit" data-campaign-id="${campaign.id}">Edit</button>
+                            </div>
+                        </td>
+                    `;
+
+                    row.querySelectorAll('.action-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const action = btn.dataset.action;
+                            const campaignId = btn.dataset.campaignId;
+                            const campaignName = campaign.name;
+                            console.log(`${action} campaign: ${campaignName}`);
+                        });
+                    });
+
+                    campaignTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading campaigns:', error);
+                campaignTableBody.innerHTML = '<tr><td colspan="9" class="loading">Error loading campaigns</td></tr>';
+            }
+        }
+
+        // Render chart with real data
+        function renderChart(dailyData) {
+            chartContainer.innerHTML = '';
+
+            if (!dailyData || dailyData.length === 0) {
+                // Create 14 placeholder bars
+                dailyData = Array(14).fill(0).map((_, i) => ({
+                    date: new Date(Date.now() - (14 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                    impressions: Math.floor(Math.random() * 100000) + 50000
+                }));
+            }
+
+            const maxImpressions = Math.max(...dailyData.map(d => d.impressions || 0), 1);
+
+            dailyData.slice(-14).forEach(day => {
+                const height = ((day.impressions || 0) / maxImpressions) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = height + '%';
+                bar.innerHTML = `<div class="chart-bar-tooltip">${formatNumber(day.impressions || 0)} impressions</div>`;
+                chartContainer.appendChild(bar);
+            });
+        }
+
+        // Modal functions
         function openModal() {
-            modal.classList.add('active');
+            campaignModal.classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
         function closeModal() {
-            modal.classList.remove('active');
+            campaignModal.classList.remove('active');
             document.body.style.overflow = 'auto';
+            campaignForm.reset();
+            tagsInput.querySelectorAll('.tag').forEach(tag => tag.remove());
+            uploadArea.innerHTML = `
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Drag & drop your file here</div>
+                <div class="upload-subtext">or click to browse</div>
+            `;
         }
 
-        // Close modal on outside click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // Close modal on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && modal.classList.contains('active')) {
-                closeModal();
-            }
-        });
-
-        // File Upload Area
-        uploadArea.addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        uploadArea.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            uploadArea.classList.add('dragover');
-        });
-
-        uploadArea.addEventListener('dragleave', () => {
-            uploadArea.classList.remove('dragover');
-        });
-
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                updateUploadAreaText(files[0].name);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                updateUploadAreaText(e.target.files[0].name);
-            }
-        });
+        // Tag functions
+        function addTag(text) {
+            const tag = document.createElement('div');
+            tag.className = 'tag';
+            tag.innerHTML = `${text}<span class="tag-remove">×</span>`;
+            tag.querySelector('.tag-remove').addEventListener('click', () => tag.remove());
+            tagsInput.insertBefore(tag, keywordInput);
+        }
 
         function updateUploadAreaText(fileName) {
             uploadArea.innerHTML = `
@@ -1071,80 +1444,75 @@
             `;
         }
 
-        // Tags Input Management
-        keywordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && keywordInput.value.trim()) {
-                e.preventDefault();
-                addTag(keywordInput.value.trim());
-                keywordInput.value = '';
-            }
-        });
+        // Create campaign
+        async function handleCreateCampaign(e) {
+            e.preventDefault();
 
-        keywordInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && keywordInput.value === '') {
-                const tags = tagsInput.querySelectorAll('.tag');
-                if (tags.length > 0) {
-                    tags[tags.length - 1].remove();
+            const keywords = Array.from(tagsInput.querySelectorAll('.tag'))
+                .map(tag => tag.textContent.replace('×', '').trim());
+
+            const formData = new FormData(campaignForm);
+
+            const campaignData = {
+                advertiser_id: currentUserData.user_id,
+                name: formData.get('name'),
+                format: formData.get('format'),
+                headline: formData.get('headline'),
+                media_url: 'https://via.placeholder.com/300x250',
+                cta_url: formData.get('cta_url'),
+                target_keywords: keywords,
+                billing_model: formData.get('billing_model'),
+                bid_amount: parseFloat(formData.get('bid_amount')),
+                daily_budget: parseFloat(formData.get('daily_budget')),
+                total_budget: parseFloat(formData.get('total_budget')),
+                status: 'review'
+            };
+
+            try {
+                const response = await fetch(`${API_BASE}/api/campaigns`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify(campaignData)
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to create campaign');
                 }
-            }
-        });
 
-        function addTag(text) {
-            const tag = document.createElement('div');
-            tag.className = 'tag';
-            tag.innerHTML = `
-                ${text}
-                <span class="tag-remove">×</span>
-            `;
-            tag.querySelector('.tag-remove').addEventListener('click', () => {
-                tag.remove();
-            });
-            tagsInput.insertBefore(tag, keywordInput);
+                alert('Campaign created successfully!');
+                closeModal();
+                loadCampaigns();
+                loadStats();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
         }
 
-        // Form Submission
-        campaignForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            // Collect form data
-            const formData = new FormData(campaignForm);
-            const keywords = Array.from(tagsInput.querySelectorAll('.tag')).map(tag =>
-                tag.textContent.replace('×', '').trim()
-            );
-            const regions = Array.from(campaignForm.querySelectorAll('input[name="regions"]:checked')).map(r => r.value);
-            const languages = Array.from(campaignForm.querySelectorAll('input[name="languages"]:checked')).map(l => l.value);
+        // Utility functions
+        function formatNumber(num, isDecimal = false) {
+            if (isDecimal) {
+                return num.toFixed(2);
+            }
+            return num.toLocaleString();
+        }
 
-            console.log('Campaign Data:', {
-                name: formData.get('campaign-name') || campaignForm.querySelector('input[placeholder*="campaign name"]').value,
-                format: formData.get('format'),
-                keywords: keywords,
-                regions: regions,
-                languages: languages,
-                billing: formData.get('billing'),
-            });
+        function showAuthForm() {
+            authContainer.style.display = 'flex';
+            dashboardContainer.classList.remove('active');
+        }
 
-            // Show success message
-            alert('Campaign launched successfully!');
+        function showDashboard() {
+            authContainer.style.display = 'none';
+            dashboardContainer.classList.add('active');
+            companyDisplayName.textContent = currentUserData.company_name || 'Advertiser';
+        }
 
-            // Reset form
-            campaignForm.reset();
-            tagsInput.querySelectorAll('.tag').forEach(tag => tag.remove());
-            uploadArea.innerHTML = `
-                <div class="upload-icon">📁</div>
-                <div class="upload-text">Drag & drop your file here</div>
-                <div class="upload-subtext">or click to browse</div>
-            `;
-
-            closeModal();
-        });
-
-        // Action buttons for campaign table
-        document.querySelectorAll('.action-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const action = btn.textContent.trim();
-                const campaignName = btn.closest('tr').querySelector('strong').textContent;
-                console.log(`${action} campaign: ${campaignName}`);
-            });
-        });
+        // Start app
+        init();
     </script>
 </body>
 </html>

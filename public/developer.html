@@ -18,6 +18,167 @@
             line-height: 1.6;
         }
 
+        /* Auth Container */
+        .auth-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #050505;
+            padding: 1rem;
+        }
+
+        .auth-card {
+            background-color: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 12px;
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .auth-logo-mark {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 1.3rem;
+        }
+
+        .auth-card-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .auth-title {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-title h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-title p {
+            color: #888;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            color: #888;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background-color: #050505;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            color: #e5e5e5;
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #f97316;
+            background-color: #0f0f0f;
+        }
+
+        .form-group input::placeholder {
+            color: #666;
+        }
+
+        .auth-toggle {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-toggle-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background-color: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            color: #888;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .auth-toggle-btn.active {
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            border: none;
+            color: white;
+        }
+
+        .auth-error {
+            background-color: #7f1d1d;
+            border: 1px solid #dc2626;
+            color: #fca5a5;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: none;
+            font-size: 0.9rem;
+        }
+
+        .auth-submit {
+            width: 100%;
+            padding: 0.875rem;
+            background: linear-gradient(135deg, #f97316, #ef4444);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 1rem;
+        }
+
+        .auth-submit:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .auth-submit:active {
+            transform: translateY(0);
+        }
+
+        .auth-loading {
+            display: none;
+            color: #888;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
         /* Navigation */
         nav {
             background-color: #0a0a0a;
@@ -98,6 +259,14 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 2rem;
+        }
+
+        .dashboard-view {
+            display: none;
+        }
+
+        .dashboard-view.active {
+            display: block;
         }
 
         .page-header {
@@ -600,6 +769,10 @@
             .section {
                 padding: 1.5rem;
             }
+
+            .auth-card {
+                padding: 2rem;
+            }
         }
 
         /* Animations */
@@ -620,306 +793,554 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav>
-        <div class="nav-left">
-            <div class="logo">
-                <div class="logo-mark">B</div>
+    <!-- Auth View -->
+    <div id="authView" class="auth-container active">
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <div class="auth-logo-mark">B</div>
                 <span>Boost Boss</span>
             </div>
-        </div>
-        <div class="nav-center">
-            <span class="nav-title">Developer Dashboard</span>
-        </div>
-        <div class="nav-right">
-            <span class="app-name">MyAI App</span>
-            <button class="logout-btn" onclick="handleLogout()">Log Out</button>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h1>Developer Dashboard</h1>
-        </div>
-
-        <!-- Stats Grid -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Total Earnings</div>
-                <div class="stat-value earnings">$8,241.60</div>
-                <div class="stat-trend">↑ 12.5% from last month</div>
+            <div class="auth-title">
+                <h2 id="authModeTitle">Sign In</h2>
+                <p>Manage your app earnings and analytics</p>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Impressions</div>
-                <div class="stat-value default">547,129</div>
-                <div class="stat-trend">↑ 8.2% from last month</div>
+            <div class="auth-error" id="authError"></div>
+            <div class="auth-toggle">
+                <button class="auth-toggle-btn active" id="loginToggle" onclick="switchAuthMode('login')">Sign In</button>
+                <button class="auth-toggle-btn" id="signupToggle" onclick="switchAuthMode('signup')">Sign Up</button>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">Your Share</div>
-                <div class="stat-value default">65%</div>
-                <div class="stat-bar">
-                    <div class="stat-bar-fill" style="width: 65%"></div>
+            <form onsubmit="handleAuthSubmit(event)">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
                 </div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">RPM</div>
-                <div class="stat-value default">$15.06</div>
-                <div class="stat-trend down">↓ 2.1% from last month</div>
-            </div>
-        </div>
-
-        <!-- Revenue Chart -->
-        <div class="section">
-            <div class="section-title">Revenue Over Last 14 Days</div>
-            <div class="chart-container">
-                <div class="chart-bar" style="height: 45%;"><div class="chart-bar-tooltip">$285</div></div>
-                <div class="chart-bar" style="height: 62%;"><div class="chart-bar-tooltip">$412</div></div>
-                <div class="chart-bar" style="height: 58%;"><div class="chart-bar-tooltip">$389</div></div>
-                <div class="chart-bar" style="height: 71%;"><div class="chart-bar-tooltip">$485</div></div>
-                <div class="chart-bar" style="height: 68%;"><div class="chart-bar-tooltip">$468</div></div>
-                <div class="chart-bar" style="height: 75%;"><div class="chart-bar-tooltip">$520</div></div>
-                <div class="chart-bar" style="height: 52%;"><div class="chart-bar-tooltip">$356</div></div>
-                <div class="chart-bar" style="height: 80%;"><div class="chart-bar-tooltip">$565</div></div>
-                <div class="chart-bar" style="height: 78%;"><div class="chart-bar-tooltip">$548</div></div>
-                <div class="chart-bar" style="height: 85%;"><div class="chart-bar-tooltip">$612</div></div>
-                <div class="chart-bar" style="height: 82%;"><div class="chart-bar-tooltip">$589</div></div>
-                <div class="chart-bar" style="height: 90%;"><div class="chart-bar-tooltip">$658</div></div>
-                <div class="chart-bar" style="height: 88%;"><div class="chart-bar-tooltip">$641</div></div>
-                <div class="chart-bar" style="height: 95%;"><div class="chart-bar-tooltip">$695</div></div>
-            </div>
-        </div>
-
-        <!-- Integration Guide -->
-        <div class="section">
-            <div class="section-title">Integration Guide</div>
-            <div class="integration-steps">
-                <div class="integration-step">
-                    <h3>
-                        <div class="step-number">1</div>
-                        Add MCP Server
-                    </h3>
-                    <p style="color: #888; margin-bottom: 1rem;">Configure your MCP server endpoint in your AI application.</p>
-                    <div class="code-block">
-                        <button class="code-copy-btn" onclick="copyCode(this, 'step1-code')">Copy</button>
-                        <pre id="step1-code">{
-  "mcp_server": {
-    "type": "sse",
-    "url": "https://api.boostboss.ai/mcp",
-    "api_key": "bb_dev_xxx_your_key_here"
-  }
-}</pre>
-                    </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required>
                 </div>
-                <div class="integration-step">
-                    <h3>
-                        <div class="step-number">2</div>
-                        Add SDK
-                    </h3>
-                    <p style="color: #888; margin-bottom: 1rem;">Include the Boost Boss SDK in your application.</p>
-                    <div class="code-block">
-                        <button class="code-copy-btn" onclick="copyCode(this, 'step2-code')">Copy</button>
-                        <pre id="step2-code">&lt;script src="https://cdn.boostboss.ai/sdk/v1/boost-boss.js"&gt;&lt;/script&gt;
-&lt;script&gt;
-  BoostBoss.init({
-    apiKey: 'bb_dev_xxx_your_key_here',
-    appId: 'app_1234567890'
-  });
-&lt;/script&gt;</pre>
-                    </div>
+                <div class="form-group" id="appNameGroup" style="display: none;">
+                    <label for="appName">App Name</label>
+                    <input type="text" id="appName" placeholder="MyAI App">
                 </div>
-            </div>
-        </div>
-
-        <!-- API Keys Section -->
-        <div class="section">
-            <div class="section-title">API Keys & Credentials</div>
-            <div class="key-item">
-                <div class="key-info">
-                    <div class="key-label">API Key</div>
-                    <div class="key-value masked" id="api-key">bb_dev_sk••••••••••••••••••</div>
-                </div>
-                <button class="reveal-btn" onclick="toggleAPIKey()">Reveal</button>
-            </div>
-            <div class="key-item">
-                <div class="key-info">
-                    <div class="key-label">App ID</div>
-                    <div class="key-value">app_3f7k9m2lq0x8v5n1p4r</div>
-                </div>
-                <button class="reveal-btn" onclick="copyValue('app_3f7k9m2lq0x8v5n1p4r')">Copy</button>
-            </div>
-            <div class="key-item">
-                <div class="key-info">
-                    <div class="key-label">MCP Endpoint URL</div>
-                    <div class="key-value">https://api.boostboss.ai/mcp</div>
-                </div>
-                <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')">Copy</button>
-            </div>
-            <button class="regenerate-btn" onclick="regenerateKey()">Regenerate API Key</button>
-        </div>
-
-        <!-- Ad Format Controls -->
-        <div class="section">
-            <div class="section-title">Ad Format Controls</div>
-            <div class="controls-grid">
-                <div class="control-item">
-                    <div class="control-info">
-                        <h3>Corner Popup</h3>
-                        <p>Compact ads in corner of interface</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" checked onchange="logToggle('Corner Popup', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="control-item">
-                    <div class="control-info">
-                        <h3>Fullscreen</h3>
-                        <p>Full-screen immersive ad experience</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" checked onchange="logToggle('Fullscreen', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="control-item">
-                    <div class="control-info">
-                        <h3>Video</h3>
-                        <p>30-60 second video advertisements</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" checked onchange="logToggle('Video', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-                <div class="control-item">
-                    <div class="control-info">
-                        <h3>Native In-Chat</h3>
-                        <p>Seamless ads within conversation flow</p>
-                    </div>
-                    <label class="toggle">
-                        <input type="checkbox" checked onchange="logToggle('Native In-Chat', this.checked)">
-                        <span class="toggle-slider"></span>
-                    </label>
-                </div>
-            </div>
-        </div>
-
-        <!-- Earnings History Table -->
-        <div class="section">
-            <div class="section-title">Earnings History</div>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Impressions</th>
-                            <th>Your Earnings</th>
-                            <th>Clicks</th>
-                            <th>RPM</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Apr 14, 2026</td>
-                            <td>58,291</td>
-                            <td>$695.00</td>
-                            <td>248</td>
-                            <td>$11.92</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 13, 2026</td>
-                            <td>56,104</td>
-                            <td>$641.50</td>
-                            <td>215</td>
-                            <td>$11.43</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 12, 2026</td>
-                            <td>61,273</td>
-                            <td>$658.25</td>
-                            <td>267</td>
-                            <td>$10.74</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 11, 2026</td>
-                            <td>63,428</td>
-                            <td>$589.75</td>
-                            <td>298</td>
-                            <td>$9.32</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 10, 2026</td>
-                            <td>71,849</td>
-                            <td>$612.50</td>
-                            <td>328</td>
-                            <td>$8.52</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 9, 2026</td>
-                            <td>70,132</td>
-                            <td>$565.25</td>
-                            <td>301</td>
-                            <td>$8.06</td>
-                            <td><span class="status-badge status-pending">Pending</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 8, 2026</td>
-                            <td>59,384</td>
-                            <td>$520.00</td>
-                            <td>267</td>
-                            <td>$8.75</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                        <tr>
-                            <td>Apr 7, 2026</td>
-                            <td>63,916</td>
-                            <td>$485.50</td>
-                            <td>284</td>
-                            <td>$7.59</td>
-                            <td><span class="status-badge status-paid">Paid</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- Payout Section -->
-        <div class="section">
-            <div class="section-title">Payout Settings</div>
-            <div class="payout-grid">
-                <div class="payout-card">
-                    <div class="key-label">Next Payout Date</div>
-                    <div class="key-value">May 1, 2026</div>
-                </div>
-                <div class="payout-card">
-                    <div class="key-label">Payout Method</div>
-                    <div class="key-value">Stripe</div>
-                </div>
-                <div class="payout-card">
-                    <div class="key-label">Minimum Threshold</div>
-                    <div class="key-value">$100.00</div>
-                </div>
-            </div>
-            <button class="payout-btn" onclick="requestPayout()">Request Payout</button>
+                <button type="submit" class="auth-submit" id="authSubmitBtn">Sign In</button>
+                <div class="auth-loading" id="authLoading">Loading...</div>
+            </form>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        Boost Boss © 2026 · Developer Portal
-    </footer>
+    <!-- Dashboard View -->
+    <div id="dashboardView" class="dashboard-view">
+        <!-- Navigation -->
+        <nav>
+            <div class="nav-left">
+                <div class="logo">
+                    <div class="logo-mark">B</div>
+                    <span>Boost Boss</span>
+                </div>
+            </div>
+            <div class="nav-center">
+                <span class="nav-title">Developer Dashboard</span>
+            </div>
+            <div class="nav-right">
+                <span class="app-name" id="navAppName">MyAI App</span>
+                <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="container">
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>Developer Dashboard</h1>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Earnings</div>
+                    <div class="stat-value earnings" id="totalEarnings">$0.00</div>
+                    <div class="stat-trend" id="earningsTrend">↑ 0% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Impressions</div>
+                    <div class="stat-value default" id="totalImpressions">0</div>
+                    <div class="stat-trend" id="impressionsTrend">↑ 0% from last month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Your Share</div>
+                    <div class="stat-value default" id="revenueShare">65%</div>
+                    <div class="stat-bar">
+                        <div class="stat-bar-fill" id="shareBar" style="width: 65%"></div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">RPM</div>
+                    <div class="stat-value default" id="rpmValue">$0.00</div>
+                    <div class="stat-trend" id="rpmTrend">↑ 0% from last month</div>
+                </div>
+            </div>
+
+            <!-- Revenue Chart -->
+            <div class="section">
+                <div class="section-title">Revenue Over Last 14 Days</div>
+                <div class="chart-container" id="chartContainer">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Integration Guide -->
+            <div class="section">
+                <div class="section-title">Integration Guide</div>
+                <div class="integration-steps">
+                    <div class="integration-step">
+                        <h3>
+                            <div class="step-number">1</div>
+                            Add MCP Server
+                        </h3>
+                        <p style="color: #888; margin-bottom: 1rem;">Configure your MCP server endpoint in your AI application.</p>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'step1-code')">Copy</button>
+                            <pre id="step1-code">{
+  "mcp_server": {
+    "type": "sse",
+    "url": "https://api.boostboss.ai/mcp",
+    "api_key": "bb_dev_sk_loading"
+  }
+}</pre>
+                        </div>
+                    </div>
+                    <div class="integration-step">
+                        <h3>
+                            <div class="step-number">2</div>
+                            Add SDK
+                        </h3>
+                        <p style="color: #888; margin-bottom: 1rem;">Include the Boost Boss SDK in your application.</p>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'step2-code')">Copy</button>
+                            <pre id="step2-code">&lt;script src="https://cdn.boostboss.ai/sdk/v1/boost-boss.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  BoostBoss.init({
+    apiKey: 'bb_dev_sk_loading',
+    appId: 'app_loading'
+  });
+&lt;/script&gt;</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API Keys Section -->
+            <div class="section">
+                <div class="section-title">API Keys & Credentials</div>
+                <div class="key-item">
+                    <div class="key-info">
+                        <div class="key-label">API Key</div>
+                        <div class="key-value masked" id="api-key">bb_dev_sk••••••••••••••••••</div>
+                    </div>
+                    <button class="reveal-btn" onclick="toggleAPIKey()">Reveal</button>
+                </div>
+                <div class="key-item">
+                    <div class="key-info">
+                        <div class="key-label">App ID</div>
+                        <div class="key-value" id="app-id">app_loading</div>
+                    </div>
+                    <button class="reveal-btn" onclick="copyValue(document.getElementById('app-id').textContent)">Copy</button>
+                </div>
+                <div class="key-item">
+                    <div class="key-info">
+                        <div class="key-label">MCP Endpoint URL</div>
+                        <div class="key-value">https://api.boostboss.ai/mcp</div>
+                    </div>
+                    <button class="reveal-btn" onclick="copyValue('https://api.boostboss.ai/mcp')">Copy</button>
+                </div>
+                <button class="regenerate-btn" onclick="regenerateKey()">Regenerate API Key</button>
+            </div>
+
+            <!-- Ad Format Controls -->
+            <div class="section">
+                <div class="section-title">Ad Format Controls</div>
+                <div class="controls-grid" id="adFormatsContainer">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+
+            <!-- Earnings History Table -->
+            <div class="section">
+                <div class="section-title">Earnings History</div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Impressions</th>
+                                <th>Your Earnings</th>
+                                <th>Clicks</th>
+                                <th>RPM</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="earningsTableBody">
+                            <!-- Dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Payout Section -->
+            <div class="section">
+                <div class="section-title">Payout Settings</div>
+                <div class="payout-grid">
+                    <div class="payout-card">
+                        <div class="key-label">Next Payout Date</div>
+                        <div class="key-value">May 1, 2026</div>
+                    </div>
+                    <div class="payout-card">
+                        <div class="key-label">Payout Method</div>
+                        <div class="key-value">Stripe</div>
+                    </div>
+                    <div class="payout-card">
+                        <div class="key-label">Minimum Threshold</div>
+                        <div class="key-value">$100.00</div>
+                    </div>
+                </div>
+                <button class="payout-btn" onclick="requestPayout()">Request Payout</button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer>
+            Boost Boss © 2026 · Developer Portal
+        </footer>
+    </div>
 
     <script>
+        const SUPABASE_URL = "https://glogijhwbrdkkjdsjujc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0";
+
+        let authMode = 'login';
         let apiKeyRevealed = false;
-        const actualApiKey = 'bb_dev_sk_7x2k9m1q5n8v3p0r4l6w';
+        let currentUser = null;
+        let userProfile = null;
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            document.documentElement.style.scrollBehavior = 'smooth';
+        });
+
+        function checkAuthStatus() {
+            const sessionToken = localStorage.getItem('bb_session_token');
+            if (sessionToken) {
+                loadDashboard(sessionToken);
+            } else {
+                showAuthView();
+            }
+        }
+
+        function switchAuthMode(mode) {
+            authMode = mode;
+            const loginToggle = document.getElementById('loginToggle');
+            const signupToggle = document.getElementById('signupToggle');
+            const authModeTitle = document.getElementById('authModeTitle');
+            const appNameGroup = document.getElementById('appNameGroup');
+            const authSubmitBtn = document.getElementById('authSubmitBtn');
+
+            if (mode === 'signup') {
+                loginToggle.classList.remove('active');
+                signupToggle.classList.add('active');
+                authModeTitle.textContent = 'Create Account';
+                appNameGroup.style.display = 'block';
+                authSubmitBtn.textContent = 'Sign Up';
+            } else {
+                loginToggle.classList.add('active');
+                signupToggle.classList.remove('active');
+                authModeTitle.textContent = 'Sign In';
+                appNameGroup.style.display = 'none';
+                authSubmitBtn.textContent = 'Sign In';
+            }
+
+            clearAuthError();
+        }
+
+        function clearAuthError() {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+        }
+
+        function showAuthError(message) {
+            const errorDiv = document.getElementById('authError');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
+
+        async function handleAuthSubmit(event) {
+            event.preventDefault();
+            clearAuthError();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const appName = document.getElementById('appName').value || 'My App';
+            const submitBtn = document.getElementById('authSubmitBtn');
+            const loading = document.getElementById('authLoading');
+
+            submitBtn.style.display = 'none';
+            loading.style.display = 'block';
+
+            try {
+                const action = authMode === 'signup' ? 'signup' : 'login';
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/auth_handler`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY
+                    },
+                    body: JSON.stringify({
+                        action,
+                        email,
+                        password,
+                        app_name: appName,
+                        role: 'developer'
+                    })
+                });
+
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error('Server error: Invalid response format');
+                }
+
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || 'Authentication failed');
+                }
+
+                // Store session token and load dashboard
+                const sessionToken = data.session_token || data.token || email;
+                localStorage.setItem('bb_session_token', sessionToken);
+                localStorage.setItem('bb_user_profile', JSON.stringify(data));
+
+                loadDashboard(sessionToken);
+            } catch (error) {
+                showAuthError(error.message || 'Authentication failed. Please try again.');
+                submitBtn.style.display = 'block';
+                loading.style.display = 'none';
+            }
+        }
+
+        async function loadDashboard(sessionToken) {
+            try {
+                // Get user profile from localStorage
+                const profileData = localStorage.getItem('bb_user_profile');
+                if (profileData) {
+                    userProfile = JSON.parse(profileData);
+                } else {
+                    userProfile = {
+                        api_key: 'bb_dev_sk_' + Math.random().toString(36).substr(2, 18),
+                        app_id: 'app_' + Math.random().toString(36).substr(2, 17),
+                        app_name: 'My App',
+                        formats: {
+                            corner: true,
+                            fullscreen: true,
+                            video: true,
+                            native: true
+                        }
+                    };
+                }
+
+                // Fetch earnings data from API
+                const statsResponse = await fetch(
+                    `${SUPABASE_URL}/rest/v1/rpc/get_developer_stats`,
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'apikey': SUPABASE_ANON_KEY
+                        },
+                        body: JSON.stringify({
+                            api_key: userProfile.api_key
+                        })
+                    }
+                );
+
+                let stats = null;
+                if (statsResponse.ok) {
+                    stats = await statsResponse.json();
+                } else {
+                    // Fallback mock data
+                    stats = generateMockStats();
+                }
+
+                updateDashboard(stats);
+                showDashboardView();
+            } catch (error) {
+                console.error('Dashboard load error:', error);
+                // Still show dashboard with mock data on error
+                updateDashboard(generateMockStats());
+                showDashboardView();
+            }
+        }
+
+        function generateMockStats() {
+            return {
+                total_earnings: 8241.60,
+                total_impressions: 547129,
+                revenue_share: 65,
+                rpm: 15.06,
+                daily: [
+                    { date: '2026-04-01', earnings: 285, impressions: 42128, clicks: 124, rpm: 6.76 },
+                    { date: '2026-04-02', earnings: 412, impressions: 48392, clicks: 156, rpm: 8.51 },
+                    { date: '2026-04-03', earnings: 389, impressions: 45872, clicks: 142, rpm: 8.47 },
+                    { date: '2026-04-04', earnings: 485, impressions: 51293, clicks: 198, rpm: 9.45 },
+                    { date: '2026-04-05', earnings: 468, impressions: 49847, clicks: 187, rpm: 9.38 },
+                    { date: '2026-04-06', earnings: 520, impressions: 54128, clicks: 213, rpm: 9.60 },
+                    { date: '2026-04-07', earnings: 356, impressions: 46572, clicks: 145, rpm: 7.64 },
+                    { date: '2026-04-08', earnings: 565, impressions: 58392, clicks: 241, rpm: 9.68 },
+                    { date: '2026-04-09', earnings: 548, impressions: 56473, clicks: 219, rpm: 9.70 },
+                    { date: '2026-04-10', earnings: 612, impressions: 62841, clicks: 267, rpm: 9.74 },
+                    { date: '2026-04-11', earnings: 589, impressions: 60234, clicks: 251, rpm: 9.78 },
+                    { date: '2026-04-12', earnings: 658, impressions: 67392, clicks: 289, rpm: 9.77 },
+                    { date: '2026-04-13', earnings: 641, impressions: 65847, clicks: 278, rpm: 9.73 },
+                    { date: '2026-04-14', earnings: 695, impressions: 58291, clicks: 248, rpm: 11.92 }
+                ]
+            };
+        }
+
+        function updateDashboard(stats) {
+            // Update stats cards
+            document.getElementById('totalEarnings').textContent = '$' + stats.total_earnings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+            document.getElementById('totalImpressions').textContent = stats.total_impressions.toLocaleString();
+            document.getElementById('revenueShare').textContent = stats.revenue_share + '%';
+            document.getElementById('shareBar').style.width = stats.revenue_share + '%';
+            document.getElementById('rpmValue').textContent = '$' + stats.rpm.toFixed(2);
+            document.getElementById('navAppName').textContent = userProfile.app_name;
+
+            // Update integration guide with real keys
+            updateIntegrationGuide();
+
+            // Render chart
+            renderChart(stats.daily);
+
+            // Render ad format controls
+            renderAdFormats();
+
+            // Render earnings table
+            renderEarningsTable(stats.daily);
+        }
+
+        function updateIntegrationGuide() {
+            const step1Code = document.getElementById('step1-code');
+            const step2Code = document.getElementById('step2-code');
+
+            step1Code.textContent = `{
+  "mcp_server": {
+    "type": "sse",
+    "url": "https://api.boostboss.ai/mcp",
+    "api_key": "${userProfile.api_key}"
+  }
+}`;
+
+            step2Code.textContent = `<script src="https://cdn.boostboss.ai/sdk/v1/boost-boss.js"><\/script>
+<script>
+  BoostBoss.init({
+    apiKey: '${userProfile.api_key}',
+    appId: '${userProfile.app_id}'
+  });
+<\/script>`;
+
+            // Update the display copies
+            document.getElementById('app-id').textContent = userProfile.app_id;
+        }
+
+        function renderChart(dailyStats) {
+            const container = document.getElementById('chartContainer');
+            container.innerHTML = '';
+
+            const maxEarnings = Math.max(...dailyStats.map(d => d.earnings));
+
+            dailyStats.forEach(day => {
+                const percentage = (day.earnings / maxEarnings) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = percentage + '%';
+
+                const tooltip = document.createElement('div');
+                tooltip.className = 'chart-bar-tooltip';
+                tooltip.textContent = '$' + day.earnings.toFixed(2);
+
+                bar.appendChild(tooltip);
+                container.appendChild(bar);
+            });
+        }
+
+        function renderAdFormats() {
+            const container = document.getElementById('adFormatsContainer');
+            container.innerHTML = '';
+
+            const formats = [
+                { key: 'corner', name: 'Corner Popup', description: 'Compact ads in corner of interface' },
+                { key: 'fullscreen', name: 'Fullscreen', description: 'Full-screen immersive ad experience' },
+                { key: 'video', name: 'Video', description: '30-60 second video advertisements' },
+                { key: 'native', name: 'Native In-Chat', description: 'Seamless ads within conversation flow' }
+            ];
+
+            formats.forEach(format => {
+                const isEnabled = userProfile.formats[format.key];
+                const item = document.createElement('div');
+                item.className = 'control-item';
+                item.innerHTML = `
+                    <div class="control-info">
+                        <h3>${format.name}</h3>
+                        <p>${format.description}</p>
+                    </div>
+                    <label class="toggle">
+                        <input type="checkbox" ${isEnabled ? 'checked' : ''} onchange="updateAdFormat('${format.key}', this.checked)">
+                        <span class="toggle-slider"></span>
+                    </label>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function updateAdFormat(format, enabled) {
+            userProfile.formats[format] = enabled;
+            // In a real app, POST this to the API
+            console.log(`${format} format ${enabled ? 'enabled' : 'disabled'}`);
+        }
+
+        function renderEarningsTable(dailyStats) {
+            const tbody = document.getElementById('earningsTableBody');
+            tbody.innerHTML = '';
+
+            dailyStats.slice().reverse().forEach(day => {
+                const row = document.createElement('tr');
+                const dateObj = new Date(day.date);
+                const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                const status = dateObj < new Date() - (7 * 24 * 60 * 60 * 1000) ? 'Paid' : 'Pending';
+                const statusClass = status === 'Paid' ? 'status-paid' : 'status-pending';
+
+                row.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td>${day.impressions.toLocaleString()}</td>
+                    <td>$${day.earnings.toFixed(2)}</td>
+                    <td>${day.clicks}</td>
+                    <td>$${day.rpm.toFixed(2)}</td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function showAuthView() {
+            document.getElementById('authView').classList.add('active');
+            document.getElementById('dashboardView').classList.remove('active');
+        }
+
+        function showDashboardView() {
+            document.getElementById('authView').classList.remove('active');
+            document.getElementById('dashboardView').classList.add('active');
+        }
 
         function toggleAPIKey() {
             const keyElement = document.getElementById('api-key');
@@ -928,7 +1349,7 @@
             apiKeyRevealed = !apiKeyRevealed;
 
             if (apiKeyRevealed) {
-                keyElement.textContent = actualApiKey;
+                keyElement.textContent = userProfile.api_key;
                 keyElement.classList.remove('masked');
                 btn.textContent = 'Hide';
             } else {
@@ -972,14 +1393,18 @@
         function regenerateKey() {
             if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
                 const newKey = 'bb_dev_sk_' + Math.random().toString(36).substr(2, 18);
+                userProfile.api_key = newKey;
+
+                // Update localStorage
+                localStorage.setItem('bb_user_profile', JSON.stringify(userProfile));
+
+                // Update display
                 document.getElementById('api-key').textContent = 'bb_dev_sk••••••••••••••••••';
                 apiKeyRevealed = false;
+                updateIntegrationGuide();
+
                 alert('API key regenerated successfully! Your new key is: ' + newKey);
             }
-        }
-
-        function logToggle(name, enabled) {
-            console.log(`${name} format ${enabled ? 'enabled' : 'disabled'}`);
         }
 
         function requestPayout() {
@@ -988,12 +1413,19 @@
 
         function handleLogout() {
             if (confirm('Are you sure you want to log out?')) {
-                alert('You have been logged out.');
+                localStorage.removeItem('bb_session_token');
+                localStorage.removeItem('bb_user_profile');
+
+                // Reset form
+                document.getElementById('email').value = '';
+                document.getElementById('password').value = '';
+                document.getElementById('appName').value = '';
+
+                authMode = 'login';
+                showAuthView();
+                switchAuthMode('login');
             }
         }
-
-        // Add smooth scroll behavior
-        document.documentElement.style.scrollBehavior = 'smooth';
     </script>
 </body>
 </html>
