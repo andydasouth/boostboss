@@ -19,7 +19,7 @@
             --border: #E5E7EB;
             --text: #1A1A2E;
             --text-secondary: #6B7280;
-            --accent-gradient: linear-gradient(135deg, #FF2D78, #04BEFE);
+            --accent-gradient: #FF2D78;
             --accent-primary: #FF2D78;
             --accent-secondary: #04BEFE;
             --accent-yellow: #FFE600;
@@ -42,7 +42,7 @@
             align-items: center;
             min-height: 100vh;
             padding: 2rem;
-            background: linear-gradient(135deg, rgba(255, 45, 120, 0.05), rgba(4, 190, 254, 0.05));
+            background: #FAFAF7;
         }
 
         .auth-form-wrapper {
@@ -63,24 +63,17 @@
         .auth-logo-icon {
             width: 60px;
             height: 60px;
-            background: var(--accent-gradient);
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 1.75rem;
-            color: white;
             margin: 0 auto 1rem;
         }
+        .auth-logo-icon svg { width: 100%; height: 100%; }
 
         .auth-logo-text {
             font-size: 1.5rem;
             font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
             margin-bottom: 0.5rem;
         }
 
@@ -231,23 +224,16 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: var(--accent-gradient);
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 1.25rem;
-            color: white;
         }
+        .logo-icon svg { width: 100%; height: 100%; }
 
         .logo-text {
             font-size: 1.25rem;
             font-weight: 700;
-            background: var(--accent-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--text);
         }
 
         .header-title {
@@ -382,7 +368,7 @@
             align-items: flex-end;
             gap: 0.5rem;
             padding: 2rem 1rem;
-            background: linear-gradient(to top, rgba(249, 115, 22, 0.05), transparent);
+            background: transparent;
             border-radius: 8px;
             border: 1px solid var(--border);
         }
@@ -804,7 +790,7 @@
     <div id="authContainer" class="auth-container">
         <div class="auth-form-wrapper">
             <div class="auth-header">
-                <div class="auth-logo-icon">B</div>
+                <div class="auth-logo-icon"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/><rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/><g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g><text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text><path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
                 <div class="auth-logo-text">Boost Boss</div>
                 <div class="auth-subtitle">Advertiser Portal</div>
             </div>
@@ -842,7 +828,7 @@
         <header>
             <div class="header-left">
                 <a href="#" class="logo">
-                    <div class="logo-icon">B</div>
+                    <div class="logo-icon"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/><rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/><g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g><text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text><path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
                     <div class="logo-text">Boost Boss</div>
                 </a>
                 <div class="header-title">Advertiser Dashboard</div>

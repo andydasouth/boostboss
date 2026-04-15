@@ -23,8 +23,8 @@
             --text-secondary: #6B7280;
             --border-light: #E5E7EB;
             --border-hover: #D1D5DB;
-            --gradient-primary: linear-gradient(135deg, #FF2D78, #04BEFE);
-            --gradient-accent: linear-gradient(135deg, #04BEFE, #FFE600);
+            --gradient-primary: #FF2D78;
+            --gradient-accent: #04BEFE;
             --shadow-card: 0 4px 20px rgba(255,45,120,0.08);
             --shadow-card-hover: 0 8px 30px rgba(255,45,120,0.15);
             --success: #10B981;
@@ -46,7 +46,7 @@
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, rgba(255, 45, 120, 0.05), rgba(4, 190, 254, 0.05));
+            background: #FAFAF7;
             padding: 1rem;
         }
 
@@ -69,19 +69,13 @@
         }
 
         .auth-logo-mark {
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
-            background: var(--gradient-primary);
+            width: 48px;
+            height: 48px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 900;
-            font-size: 1.1rem;
-            letter-spacing: -1px;
-            box-shadow: 0 4px 14px rgba(255,45,120,0.3);
         }
+        .auth-logo-mark svg { width: 100%; height: 100%; }
 
         .auth-card-header h1,
         .auth-card-header span {
@@ -243,17 +237,11 @@
         .logo-mark {
             width: 36px;
             height: 36px;
-            border-radius: 10px;
-            background: var(--gradient-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-weight: 900;
-            font-size: 1rem;
-            letter-spacing: -1px;
-            box-shadow: 0 2px 10px rgba(255,45,120,0.25);
         }
+        .logo-mark svg { width: 100%; height: 100%; }
 
         .nav-center {
             display: flex;
@@ -374,10 +362,7 @@
         }
 
         .stat-value.earnings {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #FF2D78;
         }
 
         .stat-value.default {
@@ -541,10 +526,7 @@
         }
 
         .integration-step h3 {
-            background: var(--gradient-primary);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
+            color: #FF2D78;
             margin-bottom: 1rem;
             font-size: 1.1rem;
             font-weight: 800;
@@ -890,7 +872,7 @@
     <div id="authView" class="auth-container active">
         <div class="auth-card">
             <div class="auth-card-header">
-                <div class="auth-logo-mark">BB</div>
+                <div class="auth-logo-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/><rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/><g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g><text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text><path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
                 <span>Boost Boss</span>
             </div>
             <div class="auth-title">
@@ -927,7 +909,7 @@
         <nav>
             <div class="nav-left">
                 <div class="logo">
-                    <div class="logo-mark">BB</div>
+                    <div class="logo-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/><rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/><g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g><text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text><path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
                     <span>Boost Boss</span>
                 </div>
             </div>

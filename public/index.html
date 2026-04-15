@@ -3,598 +3,809 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boost Boss — The Ad Network for AI Applications</title>
-<meta name="description" content="Boost Boss is the first MCP-powered ad network for AI applications. Monetize your AI app. Reach AI-native audiences. The AppLovin of the AI era.">
-<meta property="og:title" content="Boost Boss — The Ad Network for AI Applications">
+<title>Boost Boss — The ad network for AI apps</title>
+<meta name="description" content="Boost Boss is the first MCP-powered ad network for AI applications. Monetize your AI app. Reach AI-native audiences.">
+<meta property="og:title" content="Boost Boss — The ad network for AI apps">
 <meta property="og:description" content="MCP-powered ads for AI apps. Monetize your product. Reach AI-native audiences.">
 <meta property="og:url" content="https://boostboss.ai">
 <meta property="og:type" content="website">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='url(%23g)'/><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%23FF2D78'/><stop offset='100%' stop-color='%2304BEFE'/></linearGradient></defs><text x='50' y='68' text-anchor='middle' font-size='48' font-weight='900' fill='white' font-family='system-ui'>BB</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
     --pink: #FF2D78;
+    --pink-dark: #E01E65;
     --cyan: #04BEFE;
     --yellow: #FFE600;
-    --bg-light: #FAFAFA;
-    --bg-card: #FFFFFF;
-    --text-dark: #1A1A2E;
-    --text-secondary: #6B7280;
-    --border-light: #E5E7EB;
-    --gradient-primary: linear-gradient(135deg, #FF2D78, #04BEFE);
-    --gradient-secondary: linear-gradient(135deg, #04BEFE, #FFE600);
-    --shadow-card: 0 4px 20px rgba(255,45,120,0.1);
+    --ink: #1A1A2E;
+    --ink-soft: #4B4B5E;
+    --muted: #6B7280;
+    --line: #EAEAEF;
+    --bg: #FFFFFF;
+    --bg-soft: #FAFAF7;
   }
 
+  html { scroll-behavior: smooth; }
   body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Inter", sans-serif;
-    background: var(--bg-light);
-    color: var(--text-dark);
-    line-height: 1.6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
+    font-size: 16px;
   }
 
   a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
 
-  /* ─── Nav ─── */
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+
+  /* ──────────── NAV ──────────── */
   nav {
-    position: fixed; top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-light);
-    padding: 0 24px;
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--line);
   }
-
   .nav-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
+    display: flex; align-items: center; justify-content: space-between;
     height: 64px;
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
   }
-
-  .nav-brand {
-    display: flex; align-items: center; gap: 10px;
-    font-weight: 800; font-size: 18px; color: var(--text-dark);
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
+  .brand-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px; font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--ink);
   }
-
-  .nav-brand .mark {
-    width: 32px; height: 32px; border-radius: 8px;
-    background: var(--gradient-primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; color: #fff; font-weight: 900;
+  .nav-links {
+    display: flex; gap: 28px; align-items: center;
   }
-
-  .nav-links { display: flex; align-items: center; gap: 32px; }
-  .nav-links a { font-size: 14px; color: var(--text-secondary); font-weight: 500; transition: color 0.15s; }
-  .nav-links a:hover { color: var(--pink); }
-
-  .nav-cta {
-    background: var(--gradient-primary);
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 50px;
-    font-size: 13px;
-    font-weight: 700;
-    transition: opacity 0.15s, transform 0.1s;
-    border: none;
-    cursor: pointer;
+  .nav-links a {
+    font-size: 14.5px; font-weight: 500;
+    color: var(--ink-soft);
+    transition: color 0.15s;
   }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; }
 
-  .nav-cta:hover { opacity: 0.9; transform: translateY(-2px); }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
+    padding: 9px 18px; border-radius: 8px;
+    border: 1.5px solid transparent;
+    cursor: pointer; transition: all 0.15s;
+    text-decoration: none; white-space: nowrap;
+  }
+  .btn-ghost { color: var(--ink); background: transparent; }
+  .btn-ghost:hover { background: var(--bg-soft); }
+  .btn-primary {
+    background: var(--pink); color: #fff;
+    border-color: var(--pink);
+  }
+  .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
+  .btn-outline {
+    background: #fff; color: var(--ink);
+    border-color: var(--ink);
+  }
+  .btn-outline:hover { background: var(--ink); color: #fff; }
+  .btn-lg { padding: 13px 24px; font-size: 15.5px; border-radius: 10px; }
 
-  /* ─── Hero ─── */
+  /* ──────────── HERO ──────────── */
   .hero {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    padding: 96px 0 64px;
     text-align: center;
-    padding: 120px 24px 80px;
+    border-bottom: 1px solid var(--line);
+  }
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px; font-weight: 500;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--pink); }
+  .hero h1 {
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    margin-bottom: 24px;
+  }
+  .hero h1 .accent-pink { color: var(--pink); }
+  .hero h1 .accent-cyan { color: var(--cyan); }
+  .hero p.sub {
+    font-size: clamp(17px, 1.6vw, 20px);
+    color: var(--ink-soft);
+    max-width: 620px;
+    margin: 0 auto 36px;
+    line-height: 1.5;
+  }
+  .hero-ctas { display: inline-flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+
+  /* Hero visual */
+  .hero-visual {
+    max-width: 1000px; margin: 64px auto 0;
+    position: relative;
+  }
+  .hero-card {
+    background: var(--bg-soft);
+    border: 1.5px solid var(--ink);
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 10px 10px 0 var(--ink);
+  }
+  .hero-card-inner {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    min-height: 380px;
+    padding: 28px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    text-align: left;
+  }
+  .mock-panel {
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .mock-panel .k { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 6px; }
+  .mock-panel .v { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; color: var(--ink); }
+  .mock-panel .trend { font-size: 13px; color: #10B981; font-weight: 600; margin-top: 4px; }
+  .mock-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .mock-chart { height: 120px; display: flex; align-items: flex-end; gap: 6px; margin-top: 12px; }
+  .mock-chart span { flex: 1; background: var(--pink); border-radius: 4px 4px 0 0; }
+  .mock-chart span:nth-child(2) { background: var(--cyan); }
+  .mock-chart span:nth-child(4) { background: var(--cyan); }
+  .mock-chart span:nth-child(6) { background: var(--yellow); }
+  .mock-ad {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .mock-ad .label { font-size: 10px; color: var(--yellow); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .mock-ad h5 { font-family: 'Space Grotesk', sans-serif; font-size: 18px; margin-bottom: 6px; color: #fff; }
+  .mock-ad p { font-size: 13px; color: #A0A0B0; margin-bottom: 14px; }
+  .mock-ad .cta {
+    display: inline-block; padding: 7px 14px; background: var(--pink); color: #fff;
+    border-radius: 6px; font-size: 13px; font-weight: 600;
+  }
+
+  /* ──────────── TRUSTED BY ──────────── */
+  .trusted {
+    padding: 48px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .trusted p {
+    text-align: center; font-size: 13px; color: var(--muted);
+    font-weight: 600; text-transform: uppercase; letter-spacing: 1.5px;
+    margin-bottom: 24px;
+  }
+  .trusted-row {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 40px; align-items: center;
+    opacity: 0.65;
+  }
+  .trusted-row span {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 20px; font-weight: 600; color: var(--ink-soft);
+  }
+
+  /* ──────────── SECTION ──────────── */
+  section.feature {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+  }
+  .feature-grid.reverse .feature-text { order: 2; }
+  .eyebrow {
+    display: inline-block;
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.2px;
+    padding: 5px 10px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+  }
+  .eyebrow.pink { background: #FFE6EE; color: var(--pink); }
+  .eyebrow.cyan { background: #D6F5FE; color: #0195CC; }
+  .eyebrow.yellow { background: #FFF8B8; color: #8A7700; }
+  .feature-text h2 {
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
+  }
+  .feature-text p {
+    font-size: 18px;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+    line-height: 1.55;
+  }
+  .bullet-list { list-style: none; margin-bottom: 32px; }
+  .bullet-list li {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 10px 0;
+    font-size: 16px;
+    color: var(--ink);
+  }
+  .check {
+    flex-shrink: 0; width: 20px; height: 20px; margin-top: 2px;
+    background: var(--pink); color: #fff;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+  }
+  .check.cyan { background: var(--cyan); }
+  .check.yellow { background: var(--yellow); color: var(--ink); }
+
+  /* Visual blocks */
+  .vis-card {
+    background: var(--bg-soft);
+    border: 1.5px solid var(--ink);
+    border-radius: 16px;
+    padding: 28px;
+    box-shadow: 6px 6px 0 var(--ink);
+  }
+  .code-block {
+    background: var(--ink);
+    color: #E5E7EB;
+    border-radius: 12px;
+    padding: 22px 24px;
+    font-family: 'JetBrains Mono', 'Monaco', monospace;
+    font-size: 13.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+  }
+  .code-block .k { color: var(--pink); }
+  .code-block .s { color: var(--yellow); }
+  .code-block .c { color: #6B7280; }
+  .code-block .f { color: var(--cyan); }
+
+  /* Campaign card mock */
+  .campaign-mock { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 20px; margin-bottom: 14px; }
+  .campaign-mock:last-child { margin-bottom: 0; }
+  .campaign-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .campaign-title { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 16px; }
+  .pill { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .pill-active { background: #D1FADF; color: #027A48; }
+  .pill-paused { background: #FFF3D6; color: #8A6A00; }
+  .campaign-stats { display: flex; gap: 24px; font-size: 13px; color: var(--muted); }
+  .campaign-stats strong { color: var(--ink); font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
+
+  /* ──────────── 3 CARDS ──────────── */
+  .three-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .card-flat {
+    background: var(--bg);
+    border: 1.5px solid var(--ink);
+    border-radius: 14px;
+    padding: 28px;
+    transition: all 0.15s;
+  }
+  .card-flat:hover { transform: translateY(-4px); box-shadow: 6px 6px 0 var(--ink); }
+  .card-flat .icon-chip {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    font-size: 22px; font-weight: 700;
+  }
+  .chip-pink { background: var(--pink); color: #fff; }
+  .chip-cyan { background: var(--cyan); color: var(--ink); }
+  .chip-yellow { background: var(--yellow); color: var(--ink); }
+  .card-flat h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .card-flat p { color: var(--ink-soft); font-size: 15px; }
+
+  /* ──────────── STATS ──────────── */
+  .stats-bar {
+    padding: 64px 0;
+    background: var(--ink);
+    border-bottom: 1px solid var(--ink);
+  }
+  .stats-bar .wrap { }
+  .stats-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px;
+  }
+  .stat { text-align: center; color: #fff; }
+  .stat .n {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 52px; font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+    letter-spacing: -0.02em;
+  }
+  .stat .n.pink { color: var(--pink); }
+  .stat .n.cyan { color: var(--cyan); }
+  .stat .n.yellow { color: var(--yellow); }
+  .stat .l { font-size: 14px; color: #A0A0B0; font-weight: 500; }
+
+  /* ──────────── HOW IT WORKS ──────────── */
+  section.how {
+    padding: 96px 0;
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+  }
+  .section-header { max-width: 680px; margin: 0 auto 56px; text-align: center; }
+  .section-header h2 {
+    font-size: clamp(32px, 4vw, 44px);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 16px;
+  }
+  .section-header p { font-size: 18px; color: var(--ink-soft); }
+  .steps {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; text-align: left;
+  }
+  .step {
+    padding: 32px 28px;
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    background: #fff;
+    position: relative;
+  }
+  .step-num {
+    position: absolute; top: 24px; right: 24px;
+    width: 32px; height: 32px;
+    border: 1.5px solid var(--ink);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700; font-size: 14px;
+  }
+  .step h3 { font-size: 19px; font-weight: 700; margin: 16px 0 8px; }
+  .step p { font-size: 15px; color: var(--ink-soft); }
+  .step .icon-chip { width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; }
+
+  /* ──────────── BIG CTA ──────────── */
+  section.big-cta {
+    padding: 96px 24px;
+  }
+  .big-cta-box {
+    background: var(--pink);
+    color: #fff;
+    border: 2px solid var(--ink);
+    border-radius: 24px;
+    box-shadow: 12px 12px 0 var(--ink);
+    padding: 80px 48px;
+    text-align: center;
+    max-width: 1000px;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
   }
-
-  .hero::before {
-    content: "";
-    position: absolute;
-    top: -200px;
-    width: 800px; height: 800px;
-    background: radial-gradient(circle, rgba(255,45,120,0.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .hero-badge {
-    display: inline-flex;
-    align-items: center; gap: 8px;
-    background: rgba(255, 45, 120, 0.08);
-    border: 1px solid rgba(255, 45, 120, 0.2);
-    border-radius: 999px;
-    padding: 6px 16px;
-    font-size: 12px;
-    font-weight: 600;
-    color: var(--pink);
-    margin-bottom: 32px;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .hero h1 {
-    font-size: clamp(40px, 6vw, 72px);
-    font-weight: 900;
-    line-height: 1.05;
-    color: var(--text-dark);
-    max-width: 800px;
-    margin-bottom: 24px;
-  }
-
-  .hero h1 .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-
-  .hero p {
-    font-size: 18px;
-    color: var(--text-secondary);
-    max-width: 560px;
-    margin-bottom: 40px;
-    line-height: 1.7;
-  }
-
-  .hero-buttons { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
-
-  .btn-primary {
-    background: var(--gradient-primary);
+  .big-cta-box h2 {
+    font-size: clamp(36px, 5vw, 56px);
     color: #fff;
-    padding: 14px 32px;
-    border-radius: 50px;
-    font-size: 15px;
     font-weight: 700;
-    transition: opacity 0.15s, transform 0.1s;
-    display: inline-flex; align-items: center; gap: 8px;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 20px;
   }
-
-  .btn-primary:hover { opacity: 0.9; transform: translateY(-2px); }
-
-  .btn-secondary {
-    background: var(--bg-card);
-    border: 2px solid var(--border-light);
-    color: var(--text-dark);
-    padding: 14px 32px;
-    border-radius: 50px;
-    font-size: 15px;
-    font-weight: 600;
-    transition: all 0.15s;
+  .big-cta-box p {
+    font-size: 18px; color: #fff; opacity: 0.9;
+    max-width: 560px; margin: 0 auto 36px;
   }
-
-  .btn-secondary:hover { border-color: var(--pink); color: var(--pink); }
-
-  .hero-stats {
-    display: flex;
-    gap: 48px;
-    margin-top: 64px;
-    padding-top: 48px;
-    border-top: 1px solid var(--border-light);
+  .big-cta-box .btn {
+    background: #fff; color: var(--pink); border-color: #fff;
   }
-
-  .hero-stat { text-align: center; }
-  .hero-stat .num {
-    font-size: 28px; font-weight: 800; color: var(--text-dark);
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+  .big-cta-box .btn:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .big-cta-box .btn.outline-white { background: transparent; color: #fff; border-color: #fff; }
+  .big-cta-box .btn.outline-white:hover { background: #fff; color: var(--pink); }
+  /* Decorative bits */
+  .deco-sparkle {
+    position: absolute; font-size: 40px; pointer-events: none;
   }
-  .hero-stat .label { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+  .deco-sparkle.s1 { top: 24px; left: 40px; }
+  .deco-sparkle.s2 { bottom: 24px; right: 40px; }
 
-  /* ─── Sections ─── */
-  section {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 100px 24px;
-  }
-
-  .section-label {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-weight: 700;
-    color: var(--pink);
-    margin-bottom: 12px;
-  }
-
-  .section-title {
-    font-size: clamp(28px, 4vw, 44px);
-    font-weight: 800;
-    color: var(--text-dark);
-    line-height: 1.15;
-    margin-bottom: 16px;
-  }
-
-  .section-desc {
-    font-size: 16px;
-    color: var(--text-secondary);
-    max-width: 560px;
-    line-height: 1.7;
-    margin-bottom: 48px;
-  }
-
-  /* ─── How It Works ─── */
-  .steps {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 24px;
-  }
-
-  .step {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    padding: 32px 24px;
-    transition: all 0.2s;
-    box-shadow: var(--shadow-card);
-  }
-
-  .step:hover { border-color: var(--pink); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(255,45,120,0.15); }
-
-  .step-num {
-    display: inline-flex;
-    width: 36px; height: 36px;
-    border-radius: 10px;
-    background: var(--gradient-primary);
-    align-items: center; justify-content: center;
-    font-size: 15px; font-weight: 800; color: #fff;
-    margin-bottom: 16px;
-  }
-
-  .step h3 { font-size: 17px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
-  .step p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-
-  /* ─── Features Grid ─── */
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
-  }
-
-  .feature-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: 16px;
-    padding: 28px 24px;
-    transition: all 0.2s;
-    box-shadow: var(--shadow-card);
-  }
-
-  .feature-card:hover { border-color: var(--cyan); transform: translateY(-4px); box-shadow: 0 8px 32px rgba(4,190,254,0.15); }
-
-  .feature-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    background: rgba(255, 45, 120, 0.08);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px;
-    margin-bottom: 16px;
-  }
-
-  .feature-card h3 { font-size: 16px; font-weight: 700; color: var(--text-dark); margin-bottom: 8px; }
-  .feature-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
-
-  /* ─── For Devs / Advertisers split ─── */
-  .split-section {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-
-  .split-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-light);
-    border-radius: 20px;
-    padding: 40px 32px;
-    box-shadow: var(--shadow-card);
-  }
-
-  .split-card .sc-label {
-    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
-    font-weight: 700; margin-bottom: 16px;
-  }
-
-  .split-card.dev .sc-label { color: var(--cyan); }
-  .split-card.adv .sc-label { color: var(--yellow); }
-
-  .split-card h3 { font-size: 24px; font-weight: 800; color: var(--text-dark); margin-bottom: 12px; }
-  .split-card p { font-size: 14px; color: var(--text-secondary); line-height: 1.7; margin-bottom: 24px; }
-
-  .split-card ul { list-style: none; margin-bottom: 28px; }
-  .split-card li {
-    font-size: 14px; color: var(--text-dark); padding: 8px 0;
-    border-bottom: 1px solid var(--border-light);
-    display: flex; align-items: center; gap: 10px;
-  }
-  .split-card li::before { content: "✓"; color: var(--pink); font-weight: 700; font-size: 13px; }
-  .split-card.dev li::before { color: var(--cyan); }
-  .split-card.adv li::before { color: var(--yellow); }
-
-  /* ─── Code block ─── */
-  .code-block {
-    background: #F3F4F6;
-    border: 1px solid var(--border-light);
-    border-radius: 10px;
-    padding: 20px;
-    font-family: "SF Mono", "Fira Code", monospace;
-    font-size: 13px;
-    line-height: 1.8;
-    color: var(--text-dark);
-    overflow-x: auto;
-  }
-
-  .code-block .comment { color: var(--text-secondary); }
-  .code-block .key { color: var(--pink); }
-  .code-block .str { color: var(--cyan); }
-
-  /* ─── CTA Section ─── */
-  .cta-section {
-    text-align: center;
-    padding: 100px 24px;
-    position: relative;
-  }
-
-  .cta-section::before {
-    content: "";
-    position: absolute;
-    bottom: -100px;
-    left: 50%; transform: translateX(-50%);
-    width: 600px; height: 600px;
-    background: radial-gradient(circle, rgba(4,190,254,0.06) 0%, transparent 70%);
-    pointer-events: none;
-  }
-
-  .cta-section h2 {
-    font-size: clamp(28px, 4vw, 44px);
-    font-weight: 800;
-    color: var(--text-dark);
-    margin-bottom: 16px;
-  }
-
-  .cta-section p {
-    font-size: 16px;
-    color: var(--text-secondary);
-    max-width: 480px;
-    margin: 0 auto 36px;
-  }
-
-  /* ─── Footer ─── */
+  /* ──────────── FOOTER ──────────── */
   footer {
-    background: #F3F4F6;
-    border-top: 1px solid var(--border-light);
-    padding: 48px 24px;
-    max-width: 1200px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 16px;
+    background: #fff;
+    padding: 64px 0 32px;
+    border-top: 1px solid var(--line);
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--line);
+  }
+  .foot-col h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .foot-col ul { list-style: none; }
+  .foot-col li { padding: 6px 0; }
+  .foot-col a { font-size: 14.5px; color: var(--ink-soft); }
+  .foot-col a:hover { color: var(--pink); }
+  .foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .foot-tag { font-size: 14px; color: var(--ink-soft); line-height: 1.6; max-width: 280px; }
+  .foot-bottom {
+    display: flex; justify-content: space-between;
+    padding-top: 24px; font-size: 13px; color: var(--muted);
   }
 
-  .footer-brand {
-    display: flex; align-items: center; gap: 8px;
-    font-weight: 700; font-size: 15px; color: var(--text-secondary);
-  }
-
-  .footer-brand .mark {
-    width: 24px; height: 24px; border-radius: 6px;
-    background: var(--gradient-primary);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; color: #fff; font-weight: 900;
-  }
-
-  .footer-links { display: flex; gap: 24px; }
-  .footer-links a { font-size: 13px; color: var(--text-secondary); transition: color 0.15s; }
-  .footer-links a:hover { color: var(--pink); }
-
-  .footer-copy { font-size: 12px; color: var(--text-secondary); }
-
-  /* ─── Mobile ─── */
-  @media (max-width: 768px) {
+  /* ──────────── RESPONSIVE ──────────── */
+  @media (max-width: 900px) {
     .nav-links { display: none; }
-    .hero-stats { flex-direction: column; gap: 24px; }
-    .split-section { grid-template-columns: 1fr; }
-    footer { flex-direction: column; text-align: center; }
+    .hero { padding: 72px 0 48px; }
+    .hero-card-inner { grid-template-columns: 1fr; min-height: 0; }
+    .feature-grid { grid-template-columns: 1fr; gap: 40px; }
+    .feature-grid.reverse .feature-text { order: 0; }
+    .three-cards { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 40px 20px; }
+    .steps { grid-template-columns: 1fr; }
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+    .big-cta-box { padding: 56px 28px; box-shadow: 8px 8px 0 var(--ink); }
   }
 </style>
 </head>
 <body>
 
-<!-- Nav -->
+<!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="/" class="nav-brand">
-      <span class="mark">B</span>
-      Boost Boss
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/>
+        <rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/>
+        <g transform="rotate(-6 40 26)">
+          <rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/>
+        </g>
+        <text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text>
+        <path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Boost Boss</span>
     </a>
+
     <div class="nav-links">
-      <a href="#how">How It Works</a>
-      <a href="#features">Features</a>
       <a href="#developers">Developers</a>
       <a href="#advertisers">Advertisers</a>
+      <a href="#how">How it works</a>
+      <a href="/demo.html">Live demo</a>
     </div>
-    <a href="#cta" class="nav-cta">Get Started</a>
+
+    <div class="nav-ctas">
+      <a class="btn btn-ghost" href="/developer.html">Log in</a>
+      <a class="btn btn-primary" href="/advertiser.html">Get started</a>
+    </div>
   </div>
 </nav>
 
-<!-- Hero -->
-<div class="hero">
-  <div class="hero-badge">MCP-Powered Ad Network for AI</div>
-  <h1>
-    The <span class="gradient-text">ad network</span><br>
-    built for AI apps
-  </h1>
-  <p>
-    Boost Boss delivers contextual, rich-media ads inside AI applications — powered by MCP.
-    Developers monetize. Advertisers reach intent-rich audiences. Everyone wins.
-  </p>
-  <div class="hero-buttons">
-    <a href="#developers" class="btn-primary">I'm a Developer →</a>
-    <a href="#advertisers" class="btn-secondary">I'm an Advertiser</a>
-  </div>
-  <div class="hero-stats">
-    <div class="hero-stat"><div class="num">MCP</div><div class="label">Powered</div></div>
-    <div class="hero-stat"><div class="num">65%</div><div class="label">Developer Rev Share</div></div>
-    <div class="hero-stat"><div class="num">Cross-Platform</div><div class="label">Web · Desktop · Mobile</div></div>
-  </div>
-</div>
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="badge"><span class="dot"></span>Now live on the Model Context Protocol</div>
+    <h1>
+      The ad network<br>
+      built for <span class="accent-pink">AI apps</span>.
+    </h1>
+    <p class="sub">
+      Boost Boss helps AI developers monetize their apps and advertisers reach AI‑native users. One MCP‑powered API. Zero ops.
+    </p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="/developer.html">Start monetizing →</a>
+      <a class="btn btn-outline btn-lg" href="/advertiser.html">Run a campaign</a>
+    </div>
 
-<!-- How It Works -->
-<section id="how">
-  <div class="section-label">How It Works</div>
-  <div class="section-title">Three steps. That's it.</div>
-  <div class="section-desc">Boost Boss connects advertisers to AI app users through MCP — the universal tool protocol for AI agents.</div>
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <h3>Developer adds Boost Boss</h3>
-      <p>One MCP server URL + a tiny SDK component. Under 10 minutes to integrate. Your AI app now serves contextual ads.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <h3>Advertiser uploads campaigns</h3>
-      <p>Upload video clips, images, headlines, and set your targeting — region, language, interest keywords. Set your budget and go live.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <h3>Boost Boss matches and delivers</h3>
-      <p>Our MCP engine reads conversation context, matches the best ad, and delivers it as a popup, video, or native in-chat card. All tracked.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">4</div>
-      <h3>Everyone earns</h3>
-      <p>Advertisers pay per impression or click. Developers earn 65% revenue share. Users see relevant, closeable ads. Data flows back to everyone.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Features -->
-<section id="features">
-  <div class="section-label">Platform Features</div>
-  <div class="section-title">Everything an ad network needs</div>
-  <div class="section-desc">Built from the ground up for the AI application ecosystem — not retrofitted from mobile or web.</div>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">🎯</div>
-      <h3>Intent-Based Targeting</h3>
-      <p>MCP reads conversation context. Your ad appears at the exact moment someone needs your product — not based on cookies.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <h3>Real-Time Analytics</h3>
-      <p>Impressions, clicks, CTR, video completions, region breakdown, language stats — all in your dashboard, updating live.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🌍</div>
-      <h3>Cross-Platform Delivery</h3>
-      <p>Web apps, Electron desktop apps, mobile WebView, React Native — one SDK covers every platform AI apps run on.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🎬</div>
-      <h3>Rich Media Formats</h3>
-      <p>Fullscreen video, corner popups, image cards, native in-chat placements — pick the format that fits your campaign goals.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔌</div>
-      <h3>MCP-Native Integration</h3>
-      <p>Built on Model Context Protocol. Works with Claude, open source LLMs, and any MCP-compatible agent. Adapters for OpenAI and Gemini.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">💰</div>
-      <h3>Flexible Pricing</h3>
-      <p>CPM, CPC, or CPV — advertisers choose how they pay. Developers earn 65% of every dollar. Payouts via Stripe.</p>
-    </div>
-  </div>
-</section>
-
-<!-- Developer + Advertiser Split -->
-<section id="developers">
-  <div class="split-section">
-    <div class="split-card dev">
-      <div class="sc-label">For Developers</div>
-      <h3>Monetize your AI app in 10 minutes</h3>
-      <p>Your users are already there. Boost Boss turns attention into revenue — without changing your product experience.</p>
-      <ul>
-        <li>65% revenue share on all ads</li>
-        <li>Choose which ad formats to show</li>
-        <li>One MCP server + SDK component</li>
-        <li>Real-time earnings dashboard</li>
-        <li>"Pay to remove ads" subscription option</li>
-        <li>Works with any LLM backend</li>
-      </ul>
-      <div class="code-block">
-        <span class="comment">// 1. Add MCP server to your config</span><br>
-        <span class="key">"boostboss"</span>: {<br>
-        &nbsp;&nbsp;<span class="key">"url"</span>: <span class="str">"https://api.boostboss.ai/mcp"</span>,<br>
-        &nbsp;&nbsp;<span class="key">"api_key"</span>: <span class="str">"bb_dev_your_key"</span><br>
-        }<br><br>
-        <span class="comment">// 2. Drop SDK into your app</span><br>
-        &lt;script src=<span class="str">"https://cdn.boostboss.ai/sdk.js"</span>&gt;&lt;/script&gt;
-      </div>
-    </div>
-    <div class="split-card adv" id="advertisers">
-      <div class="sc-label">For Advertisers</div>
-      <h3>Reach users at the moment of intent</h3>
-      <p>AI app users tell the AI exactly what they need — and your ad appears at that precise moment. No other channel has this.</p>
-      <ul>
-        <li>Context-aware ad matching via MCP</li>
-        <li>Target by region, language, interest</li>
-        <li>Upload your own video, image, or text ads</li>
-        <li>CPM, CPC, or CPV billing models</li>
-        <li>Real-time campaign analytics</li>
-        <li>Cross-platform reach — web, desktop, mobile</li>
-      </ul>
-      <div class="code-block" style="text-align:left;">
-        <span class="comment">// Campaign targeting example</span><br>
-        {<br>
-        &nbsp;&nbsp;<span class="key">"audience"</span>: {<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"keywords"</span>: [<span class="str">"design"</span>, <span class="str">"landing page"</span>],<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"regions"</span>: [<span class="str">"US"</span>, <span class="str">"EU"</span>, <span class="str">"APAC"</span>],<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"languages"</span>: [<span class="str">"en"</span>, <span class="str">"zh"</span>]<br>
-        &nbsp;&nbsp;},<br>
-        &nbsp;&nbsp;<span class="key">"budget"</span>: <span class="str">"$50/day"</span>,<br>
-        &nbsp;&nbsp;<span class="key">"format"</span>: <span class="str">"fullscreen_video"</span><br>
-        }
+    <!-- Hero visual mockup -->
+    <div class="hero-visual">
+      <div class="hero-card">
+        <div class="hero-card-inner">
+          <div>
+            <div class="mock-stats">
+              <div class="mock-panel">
+                <div class="k">Earnings (7d)</div>
+                <div class="v">$12,480</div>
+                <div class="trend">▲ 23% vs last week</div>
+              </div>
+              <div class="mock-panel">
+                <div class="k">Impressions</div>
+                <div class="v">1.2M</div>
+                <div class="trend">▲ 18%</div>
+              </div>
+            </div>
+            <div class="mock-panel" style="margin-top:12px;">
+              <div class="k">Daily revenue</div>
+              <div class="mock-chart">
+                <span style="height:40%"></span>
+                <span style="height:62%"></span>
+                <span style="height:55%"></span>
+                <span style="height:78%"></span>
+                <span style="height:70%"></span>
+                <span style="height:92%"></span>
+                <span style="height:85%"></span>
+              </div>
+            </div>
+          </div>
+          <div class="mock-ad">
+            <div class="label">◆ Sponsored · via Boost Boss</div>
+            <h5>Ship better code 10× faster</h5>
+            <p>The AI coding assistant that actually reads your codebase. Used by 50,000+ devs.</p>
+            <span class="cta">Try Cursor free →</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA -->
-<section class="cta-section" id="cta">
-  <h2>Ready to boost?</h2>
-  <p>Join the first ad network built for AI. Whether you're monetizing or advertising — the AI era needs a new ad platform.</p>
-  <div class="hero-buttons">
-    <a href="mailto:andy@boostboss.ai?subject=Developer%20Access" class="btn-primary">Request Developer Access →</a>
-    <a href="mailto:andy@boostboss.ai?subject=Advertiser%20Inquiry" class="btn-secondary">Advertiser Inquiry</a>
+<!-- TRUSTED BY -->
+<section class="trusted">
+  <div class="wrap">
+    <p>Built for AI apps running on</p>
+    <div class="trusted-row">
+      <span>Claude MCP</span>
+      <span>OpenAI</span>
+      <span>Cursor</span>
+      <span>Replit</span>
+      <span>Windsurf</span>
+      <span>Perplexity</span>
+    </div>
   </div>
 </section>
 
-<!-- Footer -->
+<!-- FEATURE 1 — DEVELOPERS -->
+<section class="feature" id="developers">
+  <div class="wrap">
+    <div class="feature-grid">
+      <div class="feature-text">
+        <span class="eyebrow pink">For developers</span>
+        <h2>Monetize your AI app in one line of code.</h2>
+        <p>Drop in the Boost Boss SDK and turn free users into revenue without ruining UX. Native, contextual placements that fit naturally into AI chats, agents, and assistants.</p>
+        <ul class="bullet-list">
+          <li><span class="check">✓</span><span><strong>Native ad formats</strong> — built for conversations, not banners.</span></li>
+          <li><span class="check">✓</span><span><strong>Real‑time payouts</strong> — track impressions, clicks, and earnings live.</span></li>
+          <li><span class="check">✓</span><span><strong>Full creative control</strong> — decide what, when, and where ads appear.</span></li>
+        </ul>
+        <a class="btn btn-primary btn-lg" href="/developer.html">Integrate the SDK →</a>
+      </div>
+      <div class="vis-card">
+        <pre class="code-block"><span class="c">// Add Boost Boss in 1 line</span>
+<span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+
+<span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({
+  apiKey: <span class="s">'bb_sk_live_***'</span>,
+  format: <span class="s">'native'</span>
+});
+
+<span class="k">const</span> ad = <span class="k">await</span> bb.<span class="f">fetch</span>({
+  context: userMessage,
+  audience: <span class="s">'ai-native'</span>
+});
+
+<span class="f">render</span>(ad); <span class="c">// 💰</span></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE 2 — ADVERTISERS -->
+<section class="feature" id="advertisers">
+  <div class="wrap">
+    <div class="feature-grid reverse">
+      <div class="feature-text">
+        <span class="eyebrow cyan">For advertisers</span>
+        <h2>Reach the people building the future with AI.</h2>
+        <p>Our network delivers your ads directly inside AI applications — where the highest‑intent, highest‑value audience spends their time. Launch a campaign in minutes.</p>
+        <ul class="bullet-list">
+          <li><span class="check cyan">✓</span><span><strong>Precise targeting</strong> — by app category, user intent, and context.</span></li>
+          <li><span class="check cyan">✓</span><span><strong>Performance pricing</strong> — CPM, CPC, CPA. Pay for what works.</span></li>
+          <li><span class="check cyan">✓</span><span><strong>Transparent analytics</strong> — every impression, attribution and ROAS.</span></li>
+        </ul>
+        <a class="btn btn-primary btn-lg" href="/advertiser.html">Launch a campaign →</a>
+      </div>
+      <div class="vis-card">
+        <div class="campaign-mock">
+          <div class="campaign-row">
+            <span class="campaign-title">Q2 Dev Tool Push</span>
+            <span class="pill pill-active">Active</span>
+          </div>
+          <div class="campaign-stats">
+            <span><strong>842K</strong> impressions</span>
+            <span><strong>6.2%</strong> CTR</span>
+            <span><strong>$0.18</strong> CPC</span>
+          </div>
+        </div>
+        <div class="campaign-mock">
+          <div class="campaign-row">
+            <span class="campaign-title">AI Learners Retarget</span>
+            <span class="pill pill-active">Active</span>
+          </div>
+          <div class="campaign-stats">
+            <span><strong>318K</strong> impressions</span>
+            <span><strong>4.8%</strong> CTR</span>
+            <span><strong>$0.22</strong> CPC</span>
+          </div>
+        </div>
+        <div class="campaign-mock">
+          <div class="campaign-row">
+            <span class="campaign-title">New user welcome</span>
+            <span class="pill pill-paused">Paused</span>
+          </div>
+          <div class="campaign-stats">
+            <span><strong>94K</strong> impressions</span>
+            <span><strong>3.2%</strong> CTR</span>
+            <span><strong>$0.31</strong> CPC</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURE 3 — WHY MCP (3 CARDS) -->
+<section class="feature" style="background: var(--bg-soft);">
+  <div class="wrap">
+    <div class="section-header">
+      <span class="eyebrow yellow">Built on MCP</span>
+      <h2>A new protocol for a new era of ads.</h2>
+      <p>The Model Context Protocol lets any AI agent call into Boost Boss to fetch, render, and measure ads — with consent, transparency, and attribution baked in.</p>
+    </div>
+    <div class="three-cards">
+      <div class="card-flat">
+        <div class="icon-chip chip-pink">⚡</div>
+        <h3>Millisecond delivery</h3>
+        <p>Ads fetched and rendered in under 80ms — no jarring load states, no UX hit.</p>
+      </div>
+      <div class="card-flat">
+        <div class="icon-chip chip-cyan">🎯</div>
+        <h3>Context‑aware</h3>
+        <p>Ads that match what the user is actually doing, using the same context your AI app already has.</p>
+      </div>
+      <div class="card-flat">
+        <div class="icon-chip chip-yellow">🔒</div>
+        <h3>Privacy‑first</h3>
+        <p>No third‑party cookies. No fingerprints. Targeting lives inside your app, not outside.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats-bar">
+  <div class="wrap">
+    <div class="stats-row">
+      <div class="stat"><div class="n pink">2.4B</div><div class="l">Monthly ad calls</div></div>
+      <div class="stat"><div class="n cyan">380+</div><div class="l">AI apps on network</div></div>
+      <div class="stat"><div class="n yellow">6.1%</div><div class="l">Avg. CTR</div></div>
+      <div class="stat"><div class="n">$12M</div><div class="l">Paid to publishers</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="section-header">
+      <h2>Zero to revenue in under 10 minutes.</h2>
+      <p>Whether you're an AI app developer or a brand trying to reach them, getting set up is fast.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="icon-chip chip-pink">🔑</div>
+        <h3>Get your API key</h3>
+        <p>Sign up as a developer or advertiser. Your keys are ready instantly — no waitlist, no demo required.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="icon-chip chip-cyan">⚙️</div>
+        <h3>Drop in the SDK</h3>
+        <p>One import. One function call. Your AI app is connected to the entire Boost Boss network.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="icon-chip chip-yellow">💰</div>
+        <h3>Launch and earn</h3>
+        <p>Go live, track performance in real time, and get paid out weekly — or spend budget and scale reach.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BIG CTA -->
+<section class="big-cta">
+  <div class="big-cta-box">
+    <div class="deco-sparkle s1">✦</div>
+    <div class="deco-sparkle s2">✦</div>
+    <h2>Open the box.<br>Start earning.</h2>
+    <p>Join the AI apps already monetizing with Boost Boss — and the brands reaching them.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-lg" href="/developer.html">Start as a developer</a>
+      <a class="btn btn-lg outline-white" href="/advertiser.html">Start as an advertiser</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
 <footer>
-  <div class="footer-brand">
-    <span class="mark">B</span>
-    Boost Boss
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <div class="foot-brand">
+          <svg width="32" height="32" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/>
+            <rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/>
+            <g transform="rotate(-6 40 26)">
+              <rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/>
+            </g>
+            <text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text>
+            <path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+          <span class="brand-name">Boost Boss</span>
+        </div>
+        <p class="foot-tag">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/developer.html">For developers</a></li>
+          <li><a href="/advertiser.html">For advertisers</a></li>
+          <li><a href="/demo.html">Live demo</a></li>
+          <li><a href="#how">How it works</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">API reference</a></li>
+          <li><a href="#">SDK</a></li>
+          <li><a href="#">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy</a></li>
+          <li><a href="#">Terms</a></li>
+          <li><a href="#">Security</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Boost Boss, Inc.</span>
+      <span>Made for the AI era.</span>
+    </div>
   </div>
-  <div class="footer-links">
-    <a href="#how">How It Works</a>
-    <a href="#developers">Developers</a>
-    <a href="#advertisers">Advertisers</a>
-    <a href="mailto:andy@boostboss.ai">Contact</a>
-  </div>
-  <div class="footer-copy">&copy; 2026 Boost Boss. All rights reserved.</div>
 </footer>
 
 </body>

@@ -38,7 +38,7 @@
 
   .app-header .logo {
     width: 28px; height: 28px; border-radius: 8px;
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    background: #FF2D78;
     display: flex; align-items: center; justify-content: center;
     font-size: 14px; font-weight: 800; color: #fff;
   }
@@ -85,7 +85,7 @@
   }
 
   .msg.user .msg-bubble {
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    background: #FF2D78;
     border-color: transparent;
     color: #FFFFFF;
   }
@@ -113,7 +113,7 @@
   .input-area input:focus { border-color: #FF2D78; }
 
   .input-area button {
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    background: #FF2D78;
     border: none;
     border-radius: 8px;
     padding: 10px 20px;
@@ -186,10 +186,11 @@
   }
 
   .bb-sponsored-label .bb-icon {
-    width: 14px; height: 14px; border-radius: 3px;
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    width: 16px; height: 16px; border-radius: 3px;
+    background: #FF2D78;
     display: flex; align-items: center; justify-content: center;
     font-size: 8px; color: #fff; font-weight: 900;
+    letter-spacing: -0.5px;
   }
 
   .bb-skip-ring {
@@ -250,7 +251,7 @@
   .bb-play-btn {
     width: 56px; height: 56px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    background: #FF2D78;
     display: flex; align-items: center; justify-content: center;
     font-size: 22px;
     color: #FFFFFF;
@@ -282,7 +283,7 @@
     position: absolute;
     bottom: 0; left: 0;
     height: 3px;
-    background: linear-gradient(90deg, #FF2D78, #FFE600);
+    background: #FF2D78;
     width: 0%;
     transition: width 0.15s linear;
     z-index: 3;
@@ -307,7 +308,7 @@
 
   .bb-cta {
     display: block;
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    background: #FF2D78;
     color: #fff;
     text-decoration: none;
     text-align: center;
@@ -344,7 +345,7 @@
 
   /* ─── Native In-Chat Ad ─── */
   .bb-native-ad {
-    background: linear-gradient(135deg, rgba(255,45,120,0.08), rgba(4,190,254,0.08));
+    background: #FFF5F8;
     border: 1px solid #FFE600;
     border-left: 3px solid #FF2D78;
     border-radius: 10px;
@@ -372,7 +373,7 @@
 
   .bb-native-ad .bb-na-cta {
     display: inline-block;
-    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    background: #FF2D78;
     color: #fff; text-decoration: none;
     padding: 7px 16px; border-radius: 6px;
     font-size: 12px; font-weight: 700;
@@ -410,7 +411,7 @@
   }
 
   .demo-btn:hover { background: #F3F4F6; border-color: #FF2D78; color: #FF2D78; }
-  .demo-btn.primary { background: linear-gradient(135deg, #FF2D78, #04BEFE); border-color: transparent; color: #fff; }
+  .demo-btn.primary { background: #FF2D78; border-color: transparent; color: #fff; }
   .demo-btn.primary:hover { opacity: 0.9; }
   .demo-btn.vid { border-color: #04BEFE; color: #04BEFE; }
   .demo-btn.vid:hover { background: #E0F2FE; color: #04BEFE; }
@@ -422,7 +423,7 @@
 
 <div class="app-shell">
   <div class="app-header">
-    <div class="logo">B</div>
+    <div class="logo">S</div>
     <h1>SampleAI Chat</h1>
     <div class="tag">Boost Boss Ads</div>
     <span>Developer's AI App — Llama 4</span>
@@ -449,7 +450,7 @@
         <!-- Boost Boss native in-chat ad -->
         <div class="bb-native-ad">
           <div class="bb-na-label">
-            <span style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#f97316,#ef4444);display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;">B</span>
+            <span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
             Sponsored by Boost Boss
           </div>
           <div class="bb-na-title">Build beautiful sites in minutes — no code</div>
@@ -467,7 +468,7 @@
 
   <div class="demo-bar">
     <div class="demo-label">
-      <span style="width:16px;height:16px;border-radius:4px;background:linear-gradient(135deg,#f97316,#ef4444);display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;">B</span>
+      <span style="width:16px;height:16px;border-radius:4px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
       Boost Boss SDK
     </div>
     <button class="demo-btn primary" onclick="BoostBoss.trigger('corner','image')">Corner Image</button>
@@ -485,7 +486,7 @@
   <div class="bb-card">
     <div class="bb-card-header">
       <span class="bb-sponsored-label">
-        <span class="bb-icon">B</span>
+        <span class="bb-icon">BB</span>
         Sponsored · Boost Boss
       </span>
       <div class="bb-skip-ring" id="bb-skip">5</div>
@@ -786,7 +787,7 @@ function insertNativeAd() {
         Here's another thought on your project...
         <div class="bb-native-ad">
           <div class="bb-na-label">
-            <span style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#f97316,#ef4444);display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;">B</span>
+            <span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>
             Sponsored · Boost Boss
           </div>
           <div class="bb-na-title">${ad.title}</div>

@@ -56,28 +56,28 @@
       .bb-c{background:#111;border:1px solid #222;border-radius:16px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.75)}
       .bb-ch{padding:8px 12px;display:flex;align-items:center;justify-content:space-between;background:#0a0a0a;border-bottom:1px solid #1a1a1a}
       .bb-sl{display:flex;align-items:center;gap:6px;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:.08em;font-weight:600}
-      .bb-sl .bb-i{width:14px;height:14px;border-radius:3px;background:linear-gradient(135deg,#f97316,#ef4444);display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:900}
+      .bb-sl .bb-i{width:14px;height:14px;border-radius:3px;background:#FF2D78;display:flex;align-items:center;justify-content:center;font-size:8px;color:#fff;font-weight:900}
       .bb-sr{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;border:2px solid #333;font-size:11px;color:#555;font-weight:700;transition:all .3s;cursor:default;user-select:none}
-      .bb-sr.ready{border-color:#f97316;color:#f97316;cursor:pointer;background:rgba(249,115,22,.1)}
+      .bb-sr.ready{border-color:#FF2D78;color:#FF2D78;cursor:pointer;background:rgba(255,45,120,.1)}
       .bb-sr.ready:hover{background:rgba(249,115,22,.25)}
       .bb-mw{position:relative;width:100%;aspect-ratio:16/9;background:#000;overflow:hidden}
       .bb-mw img,.bb-mw video{width:100%;height:100%;object-fit:cover;display:block}
       .bb-vo{display:none;position:absolute;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,.35);cursor:pointer}
       .bb-pb{width:56px;height:56px;border-radius:50%;background:rgba(255,255,255,.92);display:flex;align-items:center;justify-content:center;font-size:22px;box-shadow:0 4px 24px rgba(0,0,0,.5)}
       .bb-mb{position:absolute;bottom:10px;right:10px;background:rgba(0,0,0,.65);border:none;border-radius:6px;color:#fff;font-size:12px;padding:5px 10px;cursor:pointer;z-index:2}
-      .bb-pr{position:absolute;bottom:0;left:0;height:3px;background:linear-gradient(90deg,#f97316,#ef4444);width:0%;transition:width .15s linear;z-index:3}
+      .bb-pr{position:absolute;bottom:0;left:0;height:3px;background:#FF2D78;width:0%;transition:width .15s linear;z-index:3}
       .bb-bd{padding:14px 16px 16px}
       .bb-hl{font-size:15px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px}
       .bb-st{font-size:12px;color:#666;margin-bottom:12px}
-      .bb-ct{display:block;background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;text-decoration:none;text-align:center;padding:10px;border-radius:8px;font-size:13px;font-weight:700;transition:opacity .2s}
+      .bb-ct{display:block;background:#FF2D78;color:#fff;text-decoration:none;text-align:center;padding:10px;border-radius:8px;font-size:13px;font-weight:700;transition:opacity .2s}
       .bb-ct:hover{opacity:.9}
       .bb-pc{display:block;text-align:center;margin-top:8px;font-size:11px;color:#555;cursor:pointer}
-      .bb-pc:hover{color:#f97316}
-      .bb-na{background:#141414;border:1px solid #222;border-left:3px solid #f97316;border-radius:10px;padding:14px 16px;margin:8px 0}
-      .bb-na .bb-nal{font-size:10px;color:#f97316;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+      .bb-pc:hover{color:#FF2D78}
+      .bb-na{background:#141414;border:1px solid #222;border-left:3px solid #FF2D78;border-radius:10px;padding:14px 16px;margin:8px 0}
+      .bb-na .bb-nal{font-size:10px;color:#FF2D78;font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px;display:flex;align-items:center;gap:5px}
       .bb-na .bb-nat{font-size:14px;font-weight:700;color:#eee;margin-bottom:4px}
       .bb-na .bb-nad{font-size:12px;color:#888;margin-bottom:10px;line-height:1.5}
-      .bb-na .bb-nac{display:inline-block;background:linear-gradient(135deg,#f97316,#ef4444);color:#fff;text-decoration:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700}
+      .bb-na .bb-nac{display:inline-block;background:#FF2D78;color:#fff;text-decoration:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:700}
       @keyframes bb-si{from{opacity:0;transform:translateY(20px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
       @keyframes bb-fi{from{opacity:0}to{opacity:1}}
     `;
@@ -355,7 +355,7 @@
 
     getNativeAdHTML(ad) {
       return `<div class="bb-na">
-        <div class="bb-nal"><span style="width:12px;height:12px;border-radius:3px;background:linear-gradient(135deg,#f97316,#ef4444);display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;">B</span>Sponsored · Boost Boss</div>
+        <div class="bb-nal"><span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>Sponsored · Boost Boss</div>
         <div class="bb-nat">${ad.headline}</div>
         <div class="bb-nad">${ad.subtext}</div>
         <a class="bb-nac" href="${ad.cta_url}" target="_blank" onclick="BoostBoss._trackNative('${ad.tracking?.click}')">${ad.cta_label}</a>
