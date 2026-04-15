@@ -1242,12 +1242,16 @@
                     throw new Error(data.error || 'Authentication failed');
                 }
 
-                // Store session
-                currentUser = { token: data.token, user_id: data.user_id };
+                // Store session — map from API response shape
+                const userId = data.user?.id || data.user_id;
+                const token = data.session?.access_token || data.token;
+                const resolvedCompany = data.profile?.company_name || data.company_name || email.split('@')[0];
+
+                currentUser = { token: token, user_id: userId };
                 currentUserData = {
-                    company_name: data.company_name,
+                    company_name: resolvedCompany,
                     email: email,
-                    user_id: data.user_id
+                    user_id: userId
                 };
 
                 localStorage.setItem('bb_session_token', JSON.stringify(currentUser));
