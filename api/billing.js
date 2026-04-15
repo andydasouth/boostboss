@@ -19,7 +19,8 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {
-    const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const supabase = createClient(process.env.SUPABASE_URL, supabaseKey);
     const action = req.query.action || req.body?.action;
     const stripeKey = process.env.STRIPE_SECRET_KEY;
 
