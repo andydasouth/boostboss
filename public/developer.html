@@ -1014,8 +1014,8 @@
     </div>
 
     <script>
-        const SUPABASE_URL = "https://glogijhwbrdkkjdsjujc.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0";
+        // Use relative API endpoint instead of hardcoded credentials
+        const API_BASE = window.location.origin;
 
         let authMode = 'login';
         let apiKeyRevealed = false;
@@ -1029,12 +1029,29 @@
         });
 
         function checkAuthStatus() {
-            const sessionToken = localStorage.getItem('bb_session_token');
-            if (sessionToken) {
-                loadDashboard(sessionToken);
-            } else {
-                showAuthView();
+            const session = localStorage.getItem('bb_dev_session');
+            const userData = localStorage.getItem('bb_dev_data');
+
+            if (session && userData) {
+                try {
+                    const sessionData = JSON.parse(session);
+                    const data = JSON.parse(userData);
+
+                    // Validate session has user_id
+                    if (sessionData.token && sessionData.user_id) {
+                        userProfile = data;
+                        loadDashboard();
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Session parsing error:', e);
+                }
             }
+
+            // Clear invalid session and show auth
+            localStorage.removeItem('bb_dev_session');
+            localStorage.removeItem('bb_dev_data');
+            showAuthView();
         }
 
         function switchAuthMode(mode) {
@@ -1089,19 +1106,25 @@
 
             try {
                 const action = authMode === 'signup' ? 'signup' : 'login';
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/auth_handler`, {
+                const endpoint = `${API_BASE}/api/auth?action=${action}`;
+
+                const payload = {
+                    email,
+                    password
+                };
+
+                // Only send app_name and role for signup
+                if (action === 'signup') {
+                    payload.role = 'developer';
+                    payload.app_name = appName;
+                }
+
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'apikey': SUPABASE_ANON_KEY
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        action,
-                        email,
-                        password,
-                        app_name: appName,
-                        role: 'developer'
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 let data;
@@ -1115,12 +1138,34 @@
                     throw new Error(data.message || data.error || 'Authentication failed');
                 }
 
-                // Store session token and load dashboard
-                const sessionToken = data.session_token || data.token || email;
-                localStorage.setItem('bb_session_token', sessionToken);
-                localStorage.setItem('bb_user_profile', JSON.stringify(data));
+                // Map response to session and user data
+                // Expected response: { user: { id, role }, profile: { api_key, app_id, app_name, ... }, session: { access_token } }
+                const sessionData = {
+                    token: data.session?.access_token || data.token,
+                    user_id: data.user?.id
+                };
 
-                loadDashboard(sessionToken);
+                const profileData = {
+                    user_id: data.user?.id,
+                    email: email,
+                    app_name: data.profile?.app_name || appName,
+                    api_key: data.profile?.api_key,
+                    app_id: data.profile?.app_id,
+                    revenue_share_pct: data.profile?.revenue_share_pct || 0,
+                    formats: {
+                        corner: data.profile?.format_corner !== false,
+                        fullscreen: data.profile?.format_fullscreen !== false,
+                        video: data.profile?.format_video !== false,
+                        native: data.profile?.format_native !== false
+                    }
+                };
+
+                // Store session and user data
+                localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
+                localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
+
+                userProfile = profileData;
+                loadDashboard();
             } catch (error) {
                 showAuthError(error.message || 'Authentication failed. Please try again.');
                 submitBtn.style.display = 'block';
@@ -1128,82 +1173,74 @@
             }
         }
 
-        async function loadDashboard(sessionToken) {
+        async function loadStats() {
+            if (!userProfile || !userProfile.api_key) {
+                console.error('No API key available');
+                return null;
+            }
+
             try {
-                // Get user profile from localStorage
-                const profileData = localStorage.getItem('bb_user_profile');
-                if (profileData) {
-                    userProfile = JSON.parse(profileData);
-                } else {
-                    userProfile = {
-                        api_key: 'bb_dev_sk_' + Math.random().toString(36).substr(2, 18),
-                        app_id: 'app_' + Math.random().toString(36).substr(2, 17),
-                        app_name: 'My App',
-                        formats: {
-                            corner: true,
-                            fullscreen: true,
-                            video: true,
-                            native: true
-                        }
-                    };
+                const endpoint = `${API_BASE}/api/stats?type=developer&key=${encodeURIComponent(userProfile.api_key)}`;
+
+                const response = await fetch(endpoint, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    console.error('Stats API error:', response.status);
+                    return null;
                 }
 
-                // Fetch earnings data from API
-                const statsResponse = await fetch(
-                    `${SUPABASE_URL}/rest/v1/rpc/get_developer_stats`,
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'apikey': SUPABASE_ANON_KEY
-                        },
-                        body: JSON.stringify({
-                            api_key: userProfile.api_key
-                        })
-                    }
-                );
+                const data = await response.json();
 
-                let stats = null;
-                if (statsResponse.ok) {
-                    stats = await statsResponse.json();
-                } else {
-                    // Fallback mock data
-                    stats = generateMockStats();
+                // Map API response to internal format
+                // Expected: { developer: {...}, daily: [...], totals: { impressions, clicks, earnings, rpm } }
+                return {
+                    total_earnings: data.totals?.earnings || 0,
+                    total_impressions: data.totals?.impressions || 0,
+                    revenue_share: data.developer?.revenue_share_pct || 0,
+                    rpm: data.totals?.rpm || 0,
+                    daily: data.daily || []
+                };
+            } catch (error) {
+                console.error('Stats load error:', error);
+                return null;
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                // Load stats from API
+                let stats = await loadStats();
+
+                // If no stats or API failed, use empty data (not fake mock data)
+                if (!stats) {
+                    stats = {
+                        total_earnings: 0,
+                        total_impressions: 0,
+                        revenue_share: 0,
+                        rpm: 0,
+                        daily: []
+                    };
                 }
 
                 updateDashboard(stats);
                 showDashboardView();
             } catch (error) {
                 console.error('Dashboard load error:', error);
-                // Still show dashboard with mock data on error
-                updateDashboard(generateMockStats());
+                // Show dashboard with zero stats on error
+                updateDashboard({
+                    total_earnings: 0,
+                    total_impressions: 0,
+                    revenue_share: 0,
+                    rpm: 0,
+                    daily: []
+                });
                 showDashboardView();
             }
-        }
-
-        function generateMockStats() {
-            return {
-                total_earnings: 8241.60,
-                total_impressions: 547129,
-                revenue_share: 65,
-                rpm: 15.06,
-                daily: [
-                    { date: '2026-04-01', earnings: 285, impressions: 42128, clicks: 124, rpm: 6.76 },
-                    { date: '2026-04-02', earnings: 412, impressions: 48392, clicks: 156, rpm: 8.51 },
-                    { date: '2026-04-03', earnings: 389, impressions: 45872, clicks: 142, rpm: 8.47 },
-                    { date: '2026-04-04', earnings: 485, impressions: 51293, clicks: 198, rpm: 9.45 },
-                    { date: '2026-04-05', earnings: 468, impressions: 49847, clicks: 187, rpm: 9.38 },
-                    { date: '2026-04-06', earnings: 520, impressions: 54128, clicks: 213, rpm: 9.60 },
-                    { date: '2026-04-07', earnings: 356, impressions: 46572, clicks: 145, rpm: 7.64 },
-                    { date: '2026-04-08', earnings: 565, impressions: 58392, clicks: 241, rpm: 9.68 },
-                    { date: '2026-04-09', earnings: 548, impressions: 56473, clicks: 219, rpm: 9.70 },
-                    { date: '2026-04-10', earnings: 612, impressions: 62841, clicks: 267, rpm: 9.74 },
-                    { date: '2026-04-11', earnings: 589, impressions: 60234, clicks: 251, rpm: 9.78 },
-                    { date: '2026-04-12', earnings: 658, impressions: 67392, clicks: 289, rpm: 9.77 },
-                    { date: '2026-04-13', earnings: 641, impressions: 65847, clicks: 278, rpm: 9.73 },
-                    { date: '2026-04-14', earnings: 695, impressions: 58291, clicks: 248, rpm: 11.92 }
-                ]
-            };
         }
 
         function updateDashboard(stats) {
@@ -1218,14 +1255,22 @@
             // Update integration guide with real keys
             updateIntegrationGuide();
 
-            // Render chart
-            renderChart(stats.daily);
+            // Render chart (handle empty data)
+            if (stats.daily && stats.daily.length > 0) {
+                renderChart(stats.daily);
+            } else {
+                document.getElementById('chartContainer').innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No data yet</p>';
+            }
 
             // Render ad format controls
             renderAdFormats();
 
-            // Render earnings table
-            renderEarningsTable(stats.daily);
+            // Render earnings table (handle empty data)
+            if (stats.daily && stats.daily.length > 0) {
+                renderEarningsTable(stats.daily);
+            } else {
+                document.getElementById('earningsTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No earnings data yet</td></tr>';
+            }
         }
 
         function updateIntegrationGuide() {
@@ -1255,6 +1300,11 @@
         function renderChart(dailyStats) {
             const container = document.getElementById('chartContainer');
             container.innerHTML = '';
+
+            if (!dailyStats || dailyStats.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666; padding: 2rem;">No data yet</p>';
+                return;
+            }
 
             const maxEarnings = Math.max(...dailyStats.map(d => d.earnings));
 
@@ -1304,13 +1354,19 @@
 
         function updateAdFormat(format, enabled) {
             userProfile.formats[format] = enabled;
-            // In a real app, POST this to the API
+            // Save to localStorage for now (no API endpoint exists yet)
+            localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
             console.log(`${format} format ${enabled ? 'enabled' : 'disabled'}`);
         }
 
         function renderEarningsTable(dailyStats) {
             const tbody = document.getElementById('earningsTableBody');
             tbody.innerHTML = '';
+
+            if (!dailyStats || dailyStats.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No earnings data yet</td></tr>';
+                return;
+            }
 
             dailyStats.slice().reverse().forEach(day => {
                 const row = document.createElement('tr');
@@ -1396,7 +1452,7 @@
                 userProfile.api_key = newKey;
 
                 // Update localStorage
-                localStorage.setItem('bb_user_profile', JSON.stringify(userProfile));
+                localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
 
                 // Update display
                 document.getElementById('api-key').textContent = 'bb_dev_sk••••••••••••••••••';
@@ -1413,8 +1469,8 @@
 
         function handleLogout() {
             if (confirm('Are you sure you want to log out?')) {
-                localStorage.removeItem('bb_session_token');
-                localStorage.removeItem('bb_user_profile');
+                localStorage.removeItem('bb_dev_session');
+                localStorage.removeItem('bb_dev_data');
 
                 // Reset form
                 document.getElementById('email').value = '';

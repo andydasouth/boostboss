@@ -7,7 +7,7 @@ const { createClient } = require("@supabase/supabase-js");
  */
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   if (req.method === "OPTIONS") return res.status(200).end();
 
@@ -67,6 +67,36 @@ module.exports = async function handler(req, res) {
 
     if (error) return res.status(500).json({ error: error.message });
     return res.status(201).json({ campaign: data });
+  }
+
+  // ── Update campaign ──
+  if (req.method === "PATCH") {
+    const { id, status, name, headline, subtext, cta_label, cta_url, daily_budget, total_budget, bid_amount } = req.body;
+
+    if (!id) {
+      return res.status(400).json({ error: "Missing campaign id" });
+    }
+
+    const updateData = {};
+    if (status !== undefined) updateData.status = status;
+    if (name !== undefined) updateData.name = name;
+    if (headline !== undefined) updateData.headline = headline;
+    if (subtext !== undefined) updateData.subtext = subtext;
+    if (cta_label !== undefined) updateData.cta_label = cta_label;
+    if (cta_url !== undefined) updateData.cta_url = cta_url;
+    if (daily_budget !== undefined) updateData.daily_budget = daily_budget;
+    if (total_budget !== undefined) updateData.total_budget = total_budget;
+    if (bid_amount !== undefined) updateData.bid_amount = bid_amount;
+
+    const { data, error } = await supabase
+      .from("campaigns")
+      .update(updateData)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+    return res.json({ campaign: data });
   }
 
   return res.status(405).json({ error: "Method not allowed" });

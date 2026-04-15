@@ -1310,20 +1310,21 @@
                 const stats = await response.json();
 
                 // Update stat cards
+                const totals = stats.totals || {};
                 document.getElementById('totalImpressions').textContent =
-                    formatNumber(stats.total_impressions || 0);
+                    formatNumber(totals.impressions || 0);
                 document.getElementById('totalClicks').textContent =
-                    formatNumber(stats.total_clicks || 0);
+                    formatNumber(totals.clicks || 0);
                 document.getElementById('ctrValue').textContent =
-                    ((stats.total_clicks / (stats.total_impressions || 1)) * 100).toFixed(2) + '%';
+                    (totals.ctr || '0.00') + '%';
                 document.getElementById('totalSpend').textContent =
-                    '$' + formatNumber(stats.total_spend || 0, true);
+                    '$' + formatNumber(totals.spend || 0, true);
 
-                // Trends (mock for now)
-                document.getElementById('impressionsTrend').textContent = '12.5% from last week';
-                document.getElementById('clicksTrend').textContent = '8.3% from last week';
-                document.getElementById('ctrTrend').textContent = '0.2% from last week';
-                document.getElementById('spendTrend').textContent = 'Budget increased 15%';
+                // Trends (placeholder for now)
+                document.getElementById('impressionsTrend').textContent = '—';
+                document.getElementById('clicksTrend').textContent = '—';
+                document.getElementById('ctrTrend').textContent = '—';
+                document.getElementById('spendTrend').textContent = '—';
 
                 // Render chart
                 renderChart(stats.daily || []);
@@ -1385,11 +1386,40 @@
                     `;
 
                     row.querySelectorAll('.action-btn').forEach(btn => {
-                        btn.addEventListener('click', () => {
+                        btn.addEventListener('click', async () => {
                             const action = btn.dataset.action;
                             const campaignId = btn.dataset.campaignId;
                             const campaignName = campaign.name;
-                            console.log(`${action} campaign: ${campaignName}`);
+
+                            if (action === 'pause' || action === 'resume') {
+                                const newStatus = action === 'pause' ? 'paused' : 'live';
+                                try {
+                                    const response = await fetch(
+                                        `${API_BASE}/api/campaigns`,
+                                        {
+                                            method: 'PATCH',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${currentUser.token}`
+                                            },
+                                            body: JSON.stringify({
+                                                id: campaignId,
+                                                status: newStatus
+                                            })
+                                        }
+                                    );
+                                    if (response.ok) {
+                                        await loadCampaigns();
+                                    } else {
+                                        alert('Failed to update campaign status');
+                                    }
+                                } catch (error) {
+                                    console.error('Error updating campaign:', error);
+                                    alert('Error updating campaign');
+                                }
+                            } else if (action === 'edit') {
+                                alert('Edit coming soon');
+                            }
                         });
                     });
 

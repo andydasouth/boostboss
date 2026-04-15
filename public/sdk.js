@@ -296,7 +296,13 @@
         const text = data?.result?.content?.[0]?.text;
         if (!text) return null;
 
-        const parsed = JSON.parse(text);
+        let parsed;
+        try {
+          parsed = JSON.parse(text);
+        } catch (parseErr) {
+          console.error("[BoostBoss] Failed to parse ad response:", parseErr);
+          return null;
+        }
         if (!parsed.sponsored) {
           console.log("[BoostBoss] No ad:", parsed.reason);
           return null;
