@@ -90,7 +90,7 @@ function generateDailyStats(id, days = 30) {
 // ── Handler ───────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("x-stats-mode", HAS_SUPABASE ? "supabase" : "demo");
   if (req.method === "OPTIONS") return res.status(200).end();
@@ -106,6 +106,12 @@ module.exports = async function handler(req, res) {
     // ── Developer Stats ──
     if (type === "developer" && devKey) {
       return await handleDeveloperStats(devKey, req, res);
+    }
+
+    // ── Daily Stats ETL ── (POST /api/stats?type=aggregate)
+    // Rolls up events into daily_stats table. Designed to be called by cron.
+    if (type === "aggregate" && req.method === "POST") {
+      return await handleAggregate(req, res);
     }
 
     return res.status(400).json({ error: "Missing type (advertiser|developer) and id/key params" });
@@ -267,6 +273,117 @@ function formatDeveloper(dev) {
       native: dev.format_native,
     },
   };
+}
+
+// ── Daily Stats ETL ──────────────────────────────────────────────────
+// Aggregates the events table into daily_stats for a given date.
+// Idempotent: uses UPSERT on the (date, campaign_id, developer_id) unique key.
+// Call via: POST /api/stats?type=aggregate&date=2026-04-15
+// If no date param, defaults to yesterday (safe for cron at midnight).
+async function handleAggregate(req, res) {
+  const dateParam = (req.query && req.query.date) || (req.body && req.body.date);
+  const targetDate = dateParam || new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+
+  const sb = supa();
+  if (!sb) {
+    // Demo mode: aggregate from in-memory events
+    const events = demoEvents();
+    const buckets = new Map();
+    for (const ev of events) {
+      const evDate = (ev.created_at || "").slice(0, 10);
+      if (evDate !== targetDate) continue;
+      const key = `${ev.campaign_id}|${ev.developer_id || "none"}`;
+      const b = buckets.get(key) || {
+        date: targetDate, campaign_id: ev.campaign_id,
+        developer_id: ev.developer_id || null,
+        impressions: 0, clicks: 0, video_completes: 0, skips: 0, closes: 0,
+        spend: 0, developer_earnings: 0,
+      };
+      if (ev.event_type === "impression") b.impressions++;
+      if (ev.event_type === "click") b.clicks++;
+      if (ev.event_type === "video_complete") b.video_completes++;
+      if (ev.event_type === "skip") b.skips++;
+      if (ev.event_type === "close") b.closes++;
+      b.spend += ev.cost || 0;
+      b.developer_earnings += ev.developer_payout || 0;
+      buckets.set(key, b);
+    }
+    const rows = [...buckets.values()].map(b => ({
+      ...b, spend: +b.spend.toFixed(2), developer_earnings: +b.developer_earnings.toFixed(2),
+    }));
+    return res.json({
+      mode: "demo", date: targetDate, rows_upserted: rows.length, rows,
+    });
+  }
+
+  // Production: SQL aggregation + upsert into daily_stats
+  // Step 1: Aggregate events for the target date
+  const { data: agg, error: aggErr } = await sb.rpc("bbx_aggregate_daily_stats", {
+    p_date: targetDate,
+  });
+
+  if (aggErr) {
+    // If the RPC doesn't exist yet, fall back to client-side aggregation
+    if (aggErr.message && aggErr.message.includes("does not exist")) {
+      return await handleAggregateClientSide(sb, targetDate, res);
+    }
+    return res.status(500).json({ error: aggErr.message });
+  }
+
+  return res.json({
+    mode: "supabase", date: targetDate,
+    rows_upserted: Array.isArray(agg) ? agg.length : 1,
+    message: "Daily stats aggregated successfully",
+  });
+}
+
+// Client-side aggregation fallback (before the DB RPC is deployed)
+async function handleAggregateClientSide(sb, targetDate, res) {
+  const dayStart = `${targetDate}T00:00:00Z`;
+  const dayEnd = `${targetDate}T23:59:59.999Z`;
+
+  const { data: events, error } = await sb.from("events")
+    .select("event_type, campaign_id, developer_id, cost, developer_payout")
+    .gte("created_at", dayStart)
+    .lte("created_at", dayEnd);
+
+  if (error) return res.status(500).json({ error: error.message });
+
+  const buckets = new Map();
+  for (const ev of (events || [])) {
+    const key = `${ev.campaign_id}|${ev.developer_id || "null"}`;
+    const b = buckets.get(key) || {
+      date: targetDate, campaign_id: ev.campaign_id,
+      developer_id: ev.developer_id || null,
+      impressions: 0, clicks: 0, video_completes: 0, skips: 0, closes: 0,
+      spend: 0, developer_earnings: 0,
+    };
+    if (ev.event_type === "impression") b.impressions++;
+    if (ev.event_type === "click") b.clicks++;
+    if (ev.event_type === "video_complete") b.video_completes++;
+    if (ev.event_type === "skip") b.skips++;
+    if (ev.event_type === "close") b.closes++;
+    b.spend += parseFloat(ev.cost) || 0;
+    b.developer_earnings += parseFloat(ev.developer_payout) || 0;
+    buckets.set(key, b);
+  }
+
+  // Upsert each bucket into daily_stats
+  let upserted = 0;
+  for (const row of buckets.values()) {
+    row.spend = +row.spend.toFixed(2);
+    row.developer_earnings = +row.developer_earnings.toFixed(2);
+    const { error: uErr } = await sb.from("daily_stats").upsert(row, {
+      onConflict: "date,campaign_id,developer_id",
+    });
+    if (!uErr) upserted++;
+  }
+
+  return res.json({
+    mode: "supabase", date: targetDate,
+    rows_upserted: upserted,
+    message: "Daily stats aggregated (client-side fallback)",
+  });
 }
 
 // ── Exports for testing ───────────────────────────────────────────────

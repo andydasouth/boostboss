@@ -13,6 +13,9 @@ delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const assert = require("assert");
 const campaigns = require("../api/campaigns.js");
+const { signJwt } = require("../api/auth.js");
+const ADMIN_TOKEN = signJwt({ sub: "admin_test", role: "admin", email: "admin@test.com", exp: Math.floor(Date.now() / 1000) + 3600 });
+const ADMIN_HEADERS = { authorization: `Bearer ${ADMIN_TOKEN}` };
 
 function mockReqRes({ method = "POST", body = null, query = {}, headers = {} } = {}) {
   const res = {
@@ -164,7 +167,7 @@ async function test(name, fn) {
   campaigns._reset(); campaigns._seed();
   await test("review approve transitions in_review → active", async () => {
     const r = await run({
-      method: "POST", query: { action: "review" },
+      method: "POST", query: { action: "review" }, headers: ADMIN_HEADERS,
       body: { id: "cam_pending_001", decision: "approve", notes: "Looks good" },
     });
     assert.strictEqual(r._status, 200);
@@ -176,7 +179,7 @@ async function test(name, fn) {
   campaigns._reset(); campaigns._seed();
   await test("review reject transitions in_review → rejected", async () => {
     const r = await run({
-      method: "POST", query: { action: "review" },
+      method: "POST", query: { action: "review" }, headers: ADMIN_HEADERS,
       body: { id: "cam_pending_001", decision: "reject", notes: "Policy violation" },
     });
     assert.strictEqual(r._status, 200);
@@ -186,7 +189,7 @@ async function test(name, fn) {
 
   await test("review rejects already-active campaign", async () => {
     const r = await run({
-      method: "POST", query: { action: "review" },
+      method: "POST", query: { action: "review" }, headers: ADMIN_HEADERS,
       body: { id: "cam_cursor_001", decision: "approve" },
     });
     assert.strictEqual(r._status, 400);
@@ -195,7 +198,7 @@ async function test(name, fn) {
   await test("review rejects invalid decision value", async () => {
     campaigns._reset(); campaigns._seed();
     const r = await run({
-      method: "POST", query: { action: "review" },
+      method: "POST", query: { action: "review" }, headers: ADMIN_HEADERS,
       body: { id: "cam_pending_001", decision: "maybe" },
     });
     assert.strictEqual(r._status, 400);
@@ -203,7 +206,7 @@ async function test(name, fn) {
 
   await test("review rejects missing id", async () => {
     const r = await run({
-      method: "POST", query: { action: "review" },
+      method: "POST", query: { action: "review" }, headers: ADMIN_HEADERS,
       body: { decision: "approve" },
     });
     assert.strictEqual(r._status, 400);
@@ -211,8 +214,16 @@ async function test(name, fn) {
 
   // ── Review queue ───────────────────────────────────────────────────
   campaigns._reset(); campaigns._seed();
+  await test("review rejects unauthenticated request", async () => {
+    const r = await run({
+      method: "POST", query: { action: "review" },
+      body: { id: "cam_pending_001", decision: "approve" },
+    });
+    assert.strictEqual(r._status, 401);
+  });
+
   await test("review_queue returns only in_review campaigns with policy", async () => {
-    const r = await run({ method: "GET", query: { action: "review_queue" } });
+    const r = await run({ method: "GET", query: { action: "review_queue" }, headers: ADMIN_HEADERS });
     assert.strictEqual(r._status, 200);
     assert(r._body.queue.every(c => c.status === "in_review"));
     assert.strictEqual(r._body.count, 1); // cam_pending_001
@@ -222,10 +233,10 @@ async function test(name, fn) {
   await test("review_queue returns 0 after all approved", async () => {
     // Approve the pending one
     await run({
-      method: "POST", query: { action: "review" },
+      method: "POST", query: { action: "review" }, headers: ADMIN_HEADERS,
       body: { id: "cam_pending_001", decision: "approve" },
     });
-    const r = await run({ method: "GET", query: { action: "review_queue" } });
+    const r = await run({ method: "GET", query: { action: "review_queue" }, headers: ADMIN_HEADERS });
     assert.strictEqual(r._body.count, 0);
   });
 

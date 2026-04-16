@@ -163,14 +163,52 @@ async function handleHistory(req, res) {
     } catch (_) { /* table may not exist — fall through to demo */ }
   }
 
-  // Demo mode — generate plausible history from in-memory ledger
-  const a = ledger.getOrCreateAdvertiser(id);
+  // Demo mode — build real history from ledger + track events + demo deposits
+  const a = ensureDemoAdvertiser(id);
   const now = Date.now();
-  const transactions = [
-    { date: new Date(now).toISOString(), description: "Campaign spend", type: "spend", amount: -42.18, balance: a.balance, status: "settled" },
-    { date: new Date(now - 86400000).toISOString(), description: "Campaign spend", type: "spend", amount: -28.50, balance: a.balance + 42.18, status: "settled" },
-    { date: new Date(now - 86400000 * 3).toISOString(), description: "Deposit via Stripe", type: "deposit", amount: 500.00, balance: a.balance + 70.68, status: "completed" },
-  ];
+  const transactions = [];
+
+  // Pull real spend from track events
+  try {
+    const trackEvents = require("./track.js")._DEMO_EVENTS || [];
+    for (const ev of trackEvents) {
+      if (ev.cost > 0) {
+        // Match events to this advertiser's campaigns
+        let camps;
+        try { camps = require("./campaigns.js")._DEMO_CAMPAIGNS || new Map(); } catch (_) { camps = new Map(); }
+        const camp = typeof camps.get === "function" ? camps.get(ev.campaign_id) : null;
+        if (camp && camp.advertiser_id === id) {
+          transactions.push({
+            date: ev.created_at, description: `Ad spend: ${camp.name || ev.campaign_id}`,
+            type: "spend", amount: -ev.cost, status: "settled",
+          });
+        }
+      }
+    }
+  } catch (_) {}
+
+  // Add seeded history if no real events exist
+  if (transactions.length === 0) {
+    transactions.push(
+      { date: new Date(now - 86400000).toISOString(), description: "Campaign spend", type: "spend", amount: -42.18, status: "settled" },
+      { date: new Date(now - 86400000 * 2).toISOString(), description: "Campaign spend", type: "spend", amount: -28.50, status: "settled" },
+    );
+  }
+
+  // Always show a recent deposit
+  transactions.push({
+    date: new Date(now - 86400000 * 3).toISOString(), description: "Deposit via Stripe",
+    type: "deposit", amount: 500.00, status: "completed",
+  });
+
+  // Sort descending and add running balance
+  transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+  let bal = a.balance;
+  for (const tx of transactions) {
+    tx.balance = +bal.toFixed(2);
+    bal -= tx.amount; // reverse the transaction to compute prior balance
+  }
+
   return res.json({ transactions });
 }
 
@@ -508,15 +546,48 @@ async function handleWebhook(req, res) {
     if (advertiserId && amount > 0) {
       const sb = supa();
       if (sb) {
-        const { data: adv } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
-        if (adv) {
-          await sb.from("advertisers")
-            .update({ balance: parseFloat(adv.balance) + amount })
-            .eq("id", advertiserId);
+        // Atomic increment using RPC to avoid read-then-write race
+        const { error: rpcErr } = await sb.rpc("bbx_credit_advertiser_balance", {
+          p_advertiser_id: advertiserId,
+          p_amount_usd: amount,
+        });
+        // Fallback: if the RPC doesn't exist, do read-then-write
+        if (rpcErr && rpcErr.message && rpcErr.message.includes("does not exist")) {
+          const { data: adv } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
+          if (adv) {
+            await sb.from("advertisers")
+              .update({ balance: parseFloat(adv.balance) + amount })
+              .eq("id", advertiserId);
+          }
         }
+        // Also record the transaction for history
+        try {
+          await sb.from("transactions").insert({
+            advertiser_id: advertiserId, type: "deposit",
+            amount, description: "Stripe deposit",
+            stripe_session_id: session.id,
+            status: "completed",
+          });
+        } catch (_) { /* transactions table may not exist yet */ }
       } else {
         const a = ensureDemoAdvertiser(advertiserId);
         a.balance += amount;
+      }
+    }
+  }
+
+  // Handle Stripe Connect account updates (publisher onboarding completion)
+  if (event.type === "account.updated") {
+    const account = event.data.object;
+    if (account.charges_enabled && account.metadata && account.metadata.developer_id) {
+      const sb = supa();
+      if (sb) {
+        await sb.from("developers")
+          .update({ stripe_account_id: account.id, updated_at: new Date().toISOString() })
+          .eq("id", account.metadata.developer_id);
+      } else {
+        const d = ensureDemoDeveloper(account.metadata.developer_id);
+        d.stripe_account_id = account.id;
       }
     }
   }

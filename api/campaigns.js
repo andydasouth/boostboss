@@ -23,6 +23,7 @@
  */
 
 const crypto = require("crypto");
+const { verifyJwt } = require("./auth.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -164,6 +165,22 @@ function validateCreativePolicy(campaign) {
   return { ok: issues.length === 0, issues };
 }
 
+// ── Admin auth helper ──────────────────────────────────────────────────
+// Verifies the caller has a valid JWT with role = "admin".
+// In demo mode, also accepts role = "advertiser" acting as admin
+// (so the admin.html page works without a separate admin account).
+function requireAdmin(req) {
+  const authHeader = req.headers && req.headers.authorization;
+  if (!authHeader) return null;
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  const claims = verifyJwt(token);
+  if (!claims) return null;
+  // Production: only admin role. Demo: admin OR advertiser (admin.html logs in as advertiser).
+  if (claims.role === "admin") return claims;
+  if (!HAS_SUPABASE && (claims.role === "advertiser" || claims.role === "developer")) return claims;
+  return null;
+}
+
 // ────────────────────────────────────────────────────────────────────────
 //                                HANDLER
 // ────────────────────────────────────────────────────────────────────────
@@ -184,6 +201,7 @@ module.exports = async function handler(req, res) {
       return await handleList(req, res);
     }
     if (req.method === "GET" && action === "review_queue") {
+      if (!requireAdmin(req)) return res.status(401).json({ error: "Admin authentication required" });
       return await handleReviewQueue(req, res);
     }
     // Single campaign by id
@@ -195,7 +213,14 @@ module.exports = async function handler(req, res) {
       return await handleCreate(req, res);
     }
     if (req.method === "POST" && action === "review") {
+      if (!requireAdmin(req)) return res.status(401).json({ error: "Admin authentication required" });
       return await handleReview(req, res);
+    }
+    if (req.method === "POST" && action === "pause") {
+      return await handlePauseResume(req, res, "paused");
+    }
+    if (req.method === "POST" && action === "resume") {
+      return await handlePauseResume(req, res, "active");
     }
     if (req.method === "POST" && action === "upload_creative") {
       return await handleUploadCreative(req, res);
@@ -325,6 +350,40 @@ async function handleUpdate(req, res) {
   if (!c) return res.status(404).json({ error: "Campaign not found" });
   Object.assign(c, updates);
   return res.json({ campaign: c });
+}
+
+// ── pause / resume ─────────────────────────────────────────────────────
+// POST /api/campaigns?action=pause  { id }
+// POST /api/campaigns?action=resume { id }
+async function handlePauseResume(req, res, targetStatus) {
+  if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
+  const { id } = req.body || {};
+  if (!id) return res.status(400).json({ error: "Missing campaign id" });
+
+  const validFrom = targetStatus === "paused" ? ["active"] : ["paused"];
+  const now = new Date().toISOString();
+
+  const sb = supa();
+  if (sb) {
+    const { data, error } = await sb.from("campaigns")
+      .update({ status: targetStatus, updated_at: now })
+      .eq("id", id)
+      .in("status", validFrom)
+      .select().single();
+    if (error || !data) {
+      return res.status(400).json({ error: `Campaign not found or cannot ${targetStatus === "paused" ? "pause" : "resume"} from current status` });
+    }
+    return res.json({ campaign: data, action: targetStatus === "paused" ? "paused" : "resumed" });
+  }
+
+  const c = DEMO_CAMPAIGNS.get(id);
+  if (!c) return res.status(404).json({ error: "Campaign not found" });
+  if (!validFrom.includes(c.status)) {
+    return res.status(400).json({ error: `Cannot ${targetStatus === "paused" ? "pause" : "resume"} campaign with status '${c.status}'` });
+  }
+  c.status = targetStatus;
+  c.updated_at = now;
+  return res.json({ campaign: c, action: targetStatus === "paused" ? "paused" : "resumed" });
 }
 
 // ── review (approve / reject) ───────────────────────────────────────────

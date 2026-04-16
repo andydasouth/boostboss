@@ -147,6 +147,8 @@ create table if not exists public.rtb_bids (
   price_cpm       numeric(12,4) not null,
   adomain         text[] default '{}',
   cat             text[] default '{}',
+  developer_id    text,                             -- publisher who earned the revenue
+  developer_domain text,                            -- site_domain or app_bundle of the publisher
   status          text not null default 'pending'
                   check (status in ('pending','won','lost','expired')),
   won_price_cpm   numeric(12,4),
@@ -253,9 +255,75 @@ begin
   );
 end; $$;
 
--- ── 7. DAILY SPEND RESET (enable via Supabase pg_cron) ──────────────
+-- ── 6b. ATOMIC ADVERTISER BALANCE CREDIT RPC ────────────────────────
+-- Called by the Stripe webhook on checkout.session.completed.
+-- Atomic increment avoids read-then-write race on concurrent deposits.
+create or replace function public.bbx_credit_advertiser_balance(
+  p_advertiser_id text,
+  p_amount_usd numeric
+) returns jsonb
+language plpgsql as $$
+declare
+  new_balance numeric;
+begin
+  update public.advertisers
+     set balance = coalesce(balance, 0) + p_amount_usd,
+         updated_at = now()
+   where id::text = p_advertiser_id
+  returning balance into new_balance;
+
+  if not found then return null; end if;
+  return jsonb_build_object('balance', new_balance, 'credited', p_amount_usd);
+end; $$;
+
+-- ── 7a. DAILY STATS AGGREGATION RPC ──────────────────────────────────
+-- Called by: POST /api/stats?type=aggregate&date=YYYY-MM-DD
+-- Rolls up the events table into daily_stats for a given date.
+-- Idempotent: uses ON CONFLICT to upsert.
+create or replace function public.bbx_aggregate_daily_stats(
+  p_date date
+) returns jsonb
+language plpgsql as $$
+declare
+  row_count int;
+begin
+  insert into public.daily_stats (date, campaign_id, developer_id,
+    impressions, clicks, video_completes, skips, closes, spend, developer_earnings)
+  select
+    p_date,
+    e.campaign_id,
+    e.developer_id,
+    count(*) filter (where e.event_type = 'impression'),
+    count(*) filter (where e.event_type = 'click'),
+    count(*) filter (where e.event_type = 'video_complete'),
+    count(*) filter (where e.event_type = 'skip'),
+    count(*) filter (where e.event_type = 'close'),
+    coalesce(sum(e.cost), 0),
+    coalesce(sum(e.developer_payout), 0)
+  from public.events e
+  where e.created_at >= p_date::timestamp
+    and e.created_at < (p_date + interval '1 day')::timestamp
+  group by e.campaign_id, e.developer_id
+  on conflict (date, campaign_id, developer_id)
+  do update set
+    impressions = excluded.impressions,
+    clicks = excluded.clicks,
+    video_completes = excluded.video_completes,
+    skips = excluded.skips,
+    closes = excluded.closes,
+    spend = excluded.spend,
+    developer_earnings = excluded.developer_earnings;
+
+  get diagnostics row_count = row_count;
+  return jsonb_build_object('rows_upserted', row_count, 'date', p_date);
+end; $$;
+
+-- ── 7b. DAILY SPEND RESET (enable via Supabase pg_cron) ─────────────
 -- select cron.schedule('bbx-reset-daily-spend', '0 0 * * *',
 --        $$ update public.campaigns set spent_today = 0 $$);
+-- ── 7c. DAILY STATS CRON (enable via Supabase pg_cron) ──────────────
+-- select cron.schedule('bbx-daily-stats-etl', '5 0 * * *',
+--        $$ select bbx_aggregate_daily_stats((current_date - interval '1 day')::date) $$);
 
 -- ── 8. SPEND ROLLUP VIEW ────────────────────────────────────────────
 
