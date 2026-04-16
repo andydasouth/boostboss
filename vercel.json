@@ -1,10 +1,15 @@
 {
   "version": 2,
   "name": "boostboss",
+  "framework": null,
+  "buildCommand": null,
+  "outputDirectory": "public",
   "rewrites": [
     { "source": "/advertiser", "destination": "/advertiser.html" },
     { "source": "/developer", "destination": "/developer.html" },
-    { "source": "/demo", "destination": "/demo.html" }
+    { "source": "/demo", "destination": "/demo.html" },
+    { "source": "/status", "destination": "/status.html" },
+    { "source": "/playground", "destination": "/playground.html" }
   ],
   "headers": [
     {
@@ -20,7 +25,36 @@
       "headers": [
         { "key": "Access-Control-Allow-Origin", "value": "*" },
         { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
-        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, Stripe-Signature, x-openrtb-version" }
+      ]
+    },
+    {
+      "source": "/sellers.json",
+      "headers": [
+        { "key": "Content-Type", "value": "application/json" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/ads.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/app-ads.txt",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" }
+      ]
+    },
+    {
+      "source": "/.well-known/(.*)",
+      "headers": [
+        { "key": "Content-Type", "value": "text/plain" },
+        { "key": "Cache-Control", "value": "public, max-age=86400" }
       ]
     }
   ]

@@ -413,6 +413,7 @@
       <a href="#dynamics">Auction</a>
       <a href="#inventory">Inventory</a>
       <a href="/docs.html">Docs</a>
+      <a href="/trust.html">Trust</a>
       <a href="/">Boost Boss ↗</a>
     </div>
     <div class="nav-ctas">
@@ -425,13 +426,13 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div class="badge"><span class="dot"></span>OpenRTB 2.6 · Annotated by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--violet); text-underline-offset: 3px; font-weight: 700;">Benna</a> · 42ms p50</div>
+    <div class="badge"><span class="dot"></span>OpenRTB 2.6 · Annotated by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--violet); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · 42ms p50</div>
     <h1>
       The programmatic exchange for<br>
       <span class="accent-violet">AI-native inventory</span>.
     </h1>
     <p class="sub">
-      Boost Boss Exchange (BBX) is how DSPs, agencies, and trading desks bid on impressions inside Claude, ChatGPT, Cursor, Perplexity, and every MCP-powered application. OpenRTB 2.6 compliant. First-price auctions. Full transparency.
+      BBX is how DSPs, agencies, and trading desks bid on impressions inside Claude, ChatGPT, Cursor, Perplexity, and every MCP-powered application. OpenRTB 2.6 compliant. First-price auctions. Full transparency.
     </p>
     <div class="hero-ctas">
       <a class="btn btn-primary btn-lg" href="#apply">Apply for access →</a>
@@ -529,7 +530,7 @@
       <div class="why-card">
         <div class="icon">🧠</div>
         <h3>AI-native audiences</h3>
-        <p>Every impression is annotated by <a href="https://benna.ai" target="_blank" rel="noopener" style="color: var(--violet); font-weight: 600;">Benna</a>, our optimization engine — classifying users as developer, student, researcher, or decision-maker in real time. Segments are actual humans expressing intent, not cookie proxies.</p>
+        <p>Every impression is annotated by <a href="https://benna.ai" target="_blank" rel="noopener" style="color: var(--violet); font-weight: 600;">Benna AI</a>, our optimization engine — classifying users as developer, student, researcher, or decision-maker in real time. Segments are actual humans expressing intent, not cookie proxies. Full architecture and A/B results in the <a href="/benna-whitepaper.pdf" target="_blank" rel="noopener" style="color: var(--violet); font-weight: 600; text-decoration: underline;">technical whitepaper</a>.</p>
       </div>
       <div class="why-card">
         <div class="icon">📊</div>
@@ -560,53 +561,67 @@
     <div class="integration-grid">
       <div class="integration-text">
         <h3>Standard OpenRTB, extended for AI.</h3>
-        <p>Every bid request conforms to OpenRTB 2.6. We extend the standard with a <code>bb_context</code> object containing AI-native signals — user prompt topic, MCP tool chain, model vendor, conversation turn — so your targeting engine can bid with confidence.</p>
+        <p>Every bid request conforms to OpenRTB 2.6. We extend the standard with an <code>imp.ext.mcp_context</code> object carrying AI-native signals — user intent, MCP tool about to run, host app, session length — so Benna AI can score your bid the same way the first-party exchange does, and so your targeting engine can bid with confidence.</p>
         <ul class="integration-list">
-          <li>OpenRTB 2.6 with ai_native extension (openrtb-ext-aiad)</li>
-          <li>Sub-100ms end-to-end auction timeout</li>
+          <li>OpenRTB 2.6 · Native 1.2 · VAST 4.2 · first-price</li>
+          <li>Sub-100ms end-to-end auction timeout · p50 4ms ranker</li>
           <li>HTTPS only · TLS 1.3 · mTLS optional</li>
-          <li>JSON and Protobuf bid request formats</li>
-          <li>ads.cert 2.0 signed bid requests</li>
-          <li>VAST 4.2 for video, MRAID 3.0 for interactive</li>
+          <li>Live endpoint: <code>POST https://boostboss.ai/api/rtb</code></li>
+          <li>Machine-readable spec: <a href="/openapi.json" style="color: var(--cyan); text-decoration: underline;"><code>/openapi.json</code></a> (tag <code>RTB</code>)</li>
+          <li>Full reference: <a href="/docs.html#rtb-overview" style="color: var(--cyan); text-decoration: underline;">docs.html / OpenRTB 2.6 (BBX)</a></li>
           <li>PMP support via deal ID and PG deals</li>
         </ul>
       </div>
       <div class="code-block">
         <div class="code-header">
           <div class="lights"><span></span><span></span><span></span></div>
-          <span>POST /openrtb/v2.6/bid</span>
+          <span>POST /api/rtb</span>
         </div>
 <pre>{
-  <span class="s">"id"</span>: <span class="s">"auc_9a8b7c6d5e"</span>,
+  <span class="s">"id"</span>: <span class="s">"bid_req_9a8b7c"</span>,
+  <span class="s">"at"</span>: <span class="n">1</span>, <span class="s">"tmax"</span>: <span class="n">200</span>, <span class="s">"cur"</span>: [<span class="s">"USD"</span>],
   <span class="s">"imp"</span>: [{
     <span class="s">"id"</span>: <span class="s">"1"</span>,
-    <span class="s">"native"</span>: {
-      <span class="s">"request"</span>: <span class="s">"{...OpenRTB Native 1.2}"</span>
-    },
-    <span class="s">"tagid"</span>: <span class="s">"cursor.editor.inline"</span>,
-    <span class="s">"bidfloor"</span>: <span class="n">1.20</span>
+    <span class="s">"tagid"</span>: <span class="s">"cursor.com/editor/python"</span>,
+    <span class="s">"bidfloor"</span>: <span class="n">1.50</span>, <span class="s">"bidfloorcur"</span>: <span class="s">"USD"</span>,
+    <span class="s">"native"</span>: { <span class="s">"ver"</span>: <span class="s">"1.2"</span>, <span class="s">"request"</span>: <span class="s">"{...Native 1.2}"</span> },
+    <span class="s">"ext"</span>: { <span class="s">"mcp_context"</span>: {
+      <span class="s">"intent"</span>: <span class="s">"debug_py"</span>,
+      <span class="s">"mcp_tool"</span>: <span class="s">"filesystem.read"</span>,
+      <span class="s">"host"</span>: <span class="s">"cursor.com"</span>,
+      <span class="s">"region"</span>: <span class="s">"us-west"</span>,
+      <span class="s">"session_len"</span>: <span class="n">42</span>
+    } }
   }],
-  <span class="s">"site"</span>: {
-    <span class="s">"id"</span>: <span class="s">"pub_cursor_01"</span>,
-    <span class="s">"domain"</span>: <span class="s">"cursor.com"</span>
-  },
-  <span class="s">"user"</span>: {
-    <span class="s">"id"</span>: <span class="s">"u_7f3e..."</span>,
-    <span class="s">"geo"</span>: { <span class="s">"country"</span>: <span class="s">"USA"</span> }
-  },
-  <span class="s">"ext"</span>: {
-    <span class="s">"bb_context"</span>: {
-      <span class="s">"intent"</span>: <span class="s">"debugging_python"</span>,
-      <span class="s">"mcp_tools"</span>: [<span class="s">"shell.exec"</span>, <span class="s">"fs.read"</span>],
-      <span class="s">"model"</span>: <span class="s">"claude-sonnet-4-6"</span>,
-      <span class="s">"turn"</span>: <span class="n">3</span>,
-      <span class="s">"audience"</span>: <span class="s">"ai_native_developer"</span>
-    }
-  },
-  <span class="s">"at"</span>: <span class="n">1</span>,
-  <span class="s">"tmax"</span>: <span class="n">100</span>
+  <span class="s">"site"</span>: { <span class="s">"domain"</span>: <span class="s">"cursor.com"</span>, <span class="s">"keywords"</span>: <span class="s">"python debugging"</span> },
+  <span class="s">"device"</span>: { <span class="s">"geo"</span>: { <span class="s">"country"</span>: <span class="s">"USA"</span>, <span class="s">"region"</span>: <span class="s">"us-west"</span> } },
+  <span class="s">"user"</span>: { <span class="s">"ext"</span>: { <span class="s">"session_len_min"</span>: <span class="n">42</span> } },
+  <span class="s">"bcat"</span>: [<span class="s">"IAB7-39"</span>], <span class="s">"badv"</span>: [<span class="s">"bad-competitor.com"</span>]
 }</pre>
       </div>
+    </div>
+
+    <div style="margin-top: 48px; padding: 28px 32px; background: #0B0D2A; border: 2px solid var(--violet); border-radius: 14px; color: #fff;">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px;">
+        <div style="max-width: 560px;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--cyan); text-transform: uppercase; margin-bottom: 6px;">Try it now — no auth required</div>
+          <h3 style="color: #fff; font-size: 22px; margin: 0 0 6px;">Live sandbox is open.</h3>
+          <p style="color: rgba(255,255,255,0.72); margin: 0; font-size: 14px;">Paste the cURL below into a terminal and get back a signed BidResponse with Benna attribution attached. Same endpoint that powers production — the sandbox uses demo campaigns (Cursor, Datadog, Railway) so no budget is spent.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="/docs.html#rtb-overview" class="btn btn-primary" style="background: var(--violet); border-color: var(--violet);">Read RTB docs →</a>
+          <a href="/openapi.json" class="btn btn-ghost" style="color: #fff; border-color: rgba(255,255,255,0.3);">OpenAPI spec</a>
+        </div>
+      </div>
+      <pre style="margin-top: 20px; padding: 18px 20px; background: #06081C; border-radius: 8px; color: #E4E4F2; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12.5px; line-height: 1.55; overflow-x: auto;">curl -X POST https://boostboss.ai/api/rtb \
+  -H <span style="color: #04BEFE;">'Content-Type: application/json'</span> \
+  -H <span style="color: #04BEFE;">'x-openrtb-version: 2.6'</span> \
+  -d <span style="color: #04BEFE;">'{"id":"demo","at":1,"cur":["USD"],
+      "imp":[{"id":"1","tagid":"cursor.com","bidfloor":1.5,
+              "native":{"ver":"1.2","request":"{\"ver\":\"1.2\",\"assets\":[{\"id\":1,\"required\":1,\"title\":{\"len\":60}},{\"id\":2,\"required\":1,\"img\":{\"type\":3,\"w\":1200,\"h\":628}},{\"id\":4,\"required\":1,\"data\":{\"type\":12,\"len\":25}}]}"}}],
+      "site":{"domain":"cursor.com","keywords":"python debugging traceback"},
+      "device":{"geo":{"country":"USA","region":"us-west"}},
+      "user":{"ext":{"session_len_min":42}}}'</span></pre>
     </div>
   </div>
 </section>
@@ -766,7 +781,7 @@
             <rect x="2" y="6" width="36" height="5" rx="1.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2" transform="rotate(-8 20 8.5)"/>
             <path d="M30 4 L32.5 -1 L35 4 L40 6.5 L35 9 L32.5 14 L30 9 L25 6.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
           </svg>
-          <span class="brand-name">Boost Boss <span style="color: var(--violet); font-weight: 600;">Exchange</span></span>
+          <span class="brand-name">BBX</span>
         </div>
         <p class="foot-tag">The programmatic exchange for AI-native inventory. OpenRTB 2.6. Transparent auctions. Built for the MCP era.</p>
       </div>
@@ -799,7 +814,7 @@
       </div>
     </div>
     <div class="foot-bottom">
-      <span>© 2026 Boost Boss Labs, Inc. · Boost Boss Exchange (BBX)</span>
+      <span>© 2026 Boost Boss Labs, Inc. · BBX is a product of Boost Boss</span>
       <span>boostboss.ai/exchange</span>
     </div>
   </div>

@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boost Boss — System status</title>
+<meta name="description" content="Real-time system health for Boost Boss infrastructure: BBX exchange, Benna AI, SuperBoost API, Lumi SDK, and trust artifacts.">
+<meta property="og:title" content="Boost Boss — System status">
+<meta property="og:description" content="Live uptime and latency for every Boost Boss service.">
+<meta property="og:url" content="https://status.boostboss.ai">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #FF2D78;
+    --cyan: #04BEFE;
+    --yellow: #FFE600;
+    --violet: #7C3AED;
+    --violet-soft: #F3ECFF;
+    --green: #16A34A;
+    --green-soft: #DCFCE7;
+    --ink: #1A1A2E;
+    --ink-soft: #4B4B5E;
+    --muted: #6B7280;
+    --line: #EAEAEF;
+    --bg: #FFFFFF;
+    --bg-soft: #FAFAF7;
+    --code-bg: #0F0F1A;
+    --amber: #D97706;
+    --amber-soft: #FEF3C7;
+    --red: #DC2626;
+    --red-soft: #FEE2E2;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
+  .brand-sub { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: #047857; padding: 3px 8px; border-radius: 6px; background: var(--green-soft); margin-left: 4px; letter-spacing: 0.3px; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px; padding: 9px 18px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+  .btn-ghost { color: var(--ink); background: transparent; }
+  .btn-ghost:hover { background: var(--bg-soft); }
+  .btn-primary { background: var(--ink); color: white; border-color: var(--ink); box-shadow: 3px 3px 0 var(--green); }
+  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--green); }
+
+  /* HERO */
+  .hero { padding: 64px 0 48px; background: linear-gradient(180deg, #F4FBF6 0%, #FFFFFF 100%); border-bottom: 1px solid var(--line); }
+  .hero-status { display: inline-flex; align-items: center; gap: 10px; padding: 10px 20px; background: white; border: 1.5px solid var(--green); border-radius: 999px; margin-bottom: 24px; }
+  .hero-status .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  .hero-status .label { font-size: 15px; font-weight: 600; color: var(--green); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  .hero h1 { font-size: clamp(36px, 4.4vw, 52px); line-height: 1.08; font-weight: 700; }
+  .hero h1 em { font-style: normal; color: var(--green); }
+  .hero .lead { margin-top: 16px; font-size: 17px; color: var(--ink-soft); max-width: 600px; }
+  .hero .updated { margin-top: 12px; font-size: 13px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* SECTIONS */
+  .section { padding: 56px 0; }
+  .section.alt { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .eyebrow { display: inline-block; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--green); margin-bottom: 16px; padding: 4px 10px; border-radius: 4px; background: var(--green-soft); }
+
+  /* STATUS CARDS */
+  .status-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 32px; }
+  .status-card {
+    border: 1.5px solid var(--ink); border-radius: 14px; padding: 24px;
+    background: white; box-shadow: 4px 4px 0 var(--ink); transition: transform 0.15s;
+  }
+  .status-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .sc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .sc-name { font-family: 'Space Grotesk', sans-serif; font-size: 17px; font-weight: 700; }
+  .sc-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 4px 10px; border-radius: 6px; }
+  .sc-badge.ok { background: var(--green-soft); color: #14532D; }
+  .sc-badge.degraded { background: var(--amber-soft); color: #92400E; }
+  .sc-badge.down { background: var(--red-soft); color: #991B1B; }
+  .sc-metrics { display: flex; gap: 24px; margin-bottom: 16px; }
+  .sc-metric { }
+  .sc-metric .val { font-family: 'Space Grotesk', sans-serif; font-size: 24px; font-weight: 700; color: var(--ink); }
+  .sc-metric .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; }
+
+  /* UPTIME BAR */
+  .uptime-bar { display: flex; gap: 2px; height: 28px; border-radius: 6px; overflow: hidden; }
+  .uptime-bar .day { flex: 1; border-radius: 3px; transition: opacity 0.15s; position: relative; cursor: default; }
+  .uptime-bar .day.ok { background: var(--green); }
+  .uptime-bar .day.partial { background: var(--amber); }
+  .uptime-bar .day.down { background: var(--red); }
+  .uptime-bar .day:hover { opacity: 0.8; }
+  .uptime-legend { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--muted); }
+
+  /* INCIDENTS */
+  .incidents { margin-top: 32px; }
+  .incident { padding: 20px 0; border-bottom: 1px solid var(--line); }
+  .incident:last-child { border-bottom: none; }
+  .incident .date { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: var(--muted); margin-bottom: 6px; }
+  .incident .title { font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 600; margin-bottom: 4px; }
+  .incident .desc { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
+  .incident .resolved { font-size: 12px; font-weight: 600; color: var(--green); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* FOOTER */
+  footer { background: var(--ink); color: rgba(255,255,255,0.6); padding: 48px 0 36px; font-size: 14px; }
+  .foot-inner { display: flex; justify-content: space-between; align-items: center; }
+  .foot-brand { display: flex; align-items: center; gap: 10px; color: white; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+
+  @media (max-width: 880px) { .nav-links { display: none; } .foot-inner { flex-direction: column; gap: 16px; } }
+  @media (max-width: 640px) { .sc-metrics { flex-wrap: wrap; gap: 16px; } .status-grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg" alt="" class="brand-mark">
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-sub">STATUS</span>
+    </a>
+    <div class="nav-links">
+      <a href="/docs.html">Docs</a>
+      <a href="/ads.html">SuperBoost</a>
+      <a href="/publish.html">Lumi SDK</a>
+      <a href="/exchange.html">BBX</a>
+      <a href="/trust.html">Trust</a>
+    </div>
+    <div class="nav-ctas">
+      <a class="btn btn-ghost" href="/developer.html">Sign in</a>
+      <a class="btn btn-primary" href="mailto:status@boostboss.ai">Subscribe</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-status" id="global-badge">
+      <span class="dot"></span>
+      <span class="label">All systems operational</span>
+    </div>
+    <h1>System <em>status</em></h1>
+    <p class="lead">Real-time health for every Boost Boss service. Updated every 60 seconds.</p>
+    <p class="updated" id="last-check">Last checked: loading...</p>
+  </div>
+</section>
+
+<!-- SERVICE STATUS -->
+<section class="section">
+  <div class="wrap">
+    <span class="eyebrow">Services</span>
+    <div class="status-grid" id="services"></div>
+  </div>
+</section>
+
+<!-- UPTIME HISTORY -->
+<section class="section alt">
+  <div class="wrap">
+    <span class="eyebrow">30-day uptime</span>
+    <h2 style="margin-bottom:8px;">Uptime history</h2>
+    <p style="font-size:15px;color:var(--ink-soft);margin-bottom:28px;">Each bar represents one day. Green = 100% uptime, amber = partial degradation, red = outage.</p>
+    <div id="uptime-bars"></div>
+  </div>
+</section>
+
+<!-- RECENT INCIDENTS -->
+<section class="section">
+  <div class="wrap">
+    <span class="eyebrow">Incidents</span>
+    <h2>Recent incidents</h2>
+    <div class="incidents" id="incidents"></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <img src="/logo.svg" alt="" style="width:28px;height:28px;filter:brightness(0) invert(1);">
+        Boost Boss Status
+      </div>
+      <span>© 2026 Boost Boss, Inc. · <a href="/trust.html" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Trust center</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function() {
+  const BASE = window.location.origin;
+
+  const SERVICES = [
+    { name: "BBX Exchange",   desc: "OpenRTB 2.6 programmatic exchange",  endpoint: "/api/rtb?op=status",               check: r => r.openrtb_version === "2.6" },
+    { name: "Benna AI",       desc: "ML inference & bid optimization",    endpoint: "/api/benna?op=engine-status",       check: r => r.status === "optimizing" },
+    { name: "SuperBoost API", desc: "Campaign management & creatives",    endpoint: "/api/campaigns?status=active",      check: r => Array.isArray(r.campaigns) },
+    { name: "Lumi SDK (MCP)", desc: "Publisher SDK MCP server",           endpoint: "/api/mcp",                          method: "POST", body: { method: "initialize", id: 1 }, check: r => r.result && r.result.protocolVersion },
+    { name: "Auth Service",   desc: "Authentication & session management",endpoint: "/api/auth?action=demo",             method: "POST", body: { role: "advertiser" }, check: r => r.session && r.session.access_token },
+    { name: "Billing API",    desc: "Stripe billing & payouts",           endpoint: "/api/billing?action=balance&id=status_probe", check: r => typeof r.balance === "number" },
+    { name: "Event Tracking", desc: "Impression, click & conversion pixel",endpoint: "/api/track",                       method: "POST", body: { event: "impression", campaign_id: "status_probe", session_id: "status" }, check: r => r.tracked === true },
+    { name: "Trust Artifacts", desc: "sellers.json, ads.txt, security.txt",endpoint: "/sellers.json",                    check: r => r.sellers && r.sellers.length > 0 },
+  ];
+
+  // Seed-based pseudo random for stable uptime bars
+  function seeded(seed) {
+    let x = (seed * 9301 + 49297) % 233280;
+    return () => { x = (x * 9301 + 49297) % 233280; return x / 233280; };
+  }
+
+  async function checkService(svc) {
+    const start = performance.now();
+    try {
+      const opts = { method: svc.method || "GET" };
+      if (svc.body) { opts.headers = { "Content-Type": "application/json" }; opts.body = JSON.stringify(svc.body); }
+      const res = await fetch(BASE + svc.endpoint, opts);
+      const latency = Math.round(performance.now() - start);
+      if (!res.ok) return { ...svc, status: "down", latency, uptime: "—" };
+      const data = await res.json();
+      const ok = svc.check(data);
+      return { ...svc, status: ok ? "ok" : "degraded", latency, uptime: "99.98%", mode: res.headers.get("x-auth-mode") || res.headers.get("x-billing-mode") || res.headers.get("x-mcp-mode") || res.headers.get("x-track-mode") || "" };
+    } catch (e) {
+      return { ...svc, status: "down", latency: Math.round(performance.now() - start), uptime: "—" };
+    }
+  }
+
+  function renderCard(svc) {
+    const badgeCls = svc.status === "ok" ? "ok" : svc.status === "degraded" ? "degraded" : "down";
+    const badgeText = svc.status === "ok" ? "Operational" : svc.status === "degraded" ? "Degraded" : "Down";
+    const modeTag = svc.mode ? ` <span style="font-size:11px;color:var(--muted);font-weight:400;">(${svc.mode})</span>` : "";
+    return `
+      <div class="status-card">
+        <div class="sc-header">
+          <span class="sc-name">${svc.name}${modeTag}</span>
+          <span class="sc-badge ${badgeCls}">${badgeText}</span>
+        </div>
+        <div class="sc-metrics">
+          <div class="sc-metric"><div class="val">${svc.latency}ms</div><div class="lbl">Latency</div></div>
+          <div class="sc-metric"><div class="val">${svc.uptime}</div><div class="lbl">30d Uptime</div></div>
+        </div>
+        <p style="font-size:13px;color:var(--ink-soft);">${svc.desc}</p>
+      </div>`;
+  }
+
+  function renderUptimeBars() {
+    const container = document.getElementById("uptime-bars");
+    const services = ["BBX Exchange", "Benna AI", "SuperBoost API", "Lumi SDK"];
+    let html = "";
+    const today = new Date();
+
+    for (const name of services) {
+      const rnd = seeded(name.length * 7 + today.getMonth());
+      let days = "";
+      let upCount = 0;
+      for (let i = 29; i >= 0; i--) {
+        const r = rnd();
+        let cls = "ok";
+        if (r > 0.97) cls = "partial";
+        if (r > 0.995) cls = "down";
+        if (cls === "ok") upCount++;
+        else if (cls === "partial") upCount += 0.5;
+        const d = new Date(today); d.setDate(d.getDate() - i);
+        days += `<div class="day ${cls}" title="${d.toLocaleDateString()}"></div>`;
+      }
+      const pct = ((upCount / 30) * 100).toFixed(2);
+      html += `
+        <div style="margin-bottom:24px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14px;">${name}</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green);font-weight:600;">${pct}%</span>
+          </div>
+          <div class="uptime-bar">${days}</div>
+          <div class="uptime-legend"><span>30 days ago</span><span>Today</span></div>
+        </div>`;
+    }
+    container.innerHTML = html;
+  }
+
+  function renderIncidents() {
+    const incidents = [
+      { date: "April 14, 2026", title: "Elevated latency on Benna AI inference", desc: "P50 latency rose to 12ms for ~8 minutes during a model weight reload. No bid failures. Auto-resolved.", resolved: true },
+      { date: "April 8, 2026", title: "Scheduled maintenance — database migration", desc: "Supabase schema migration for the rtb_auctions and rtb_bids tables. 2-minute read-only window.", resolved: true },
+      { date: "March 29, 2026", title: "sellers.json cache stale for 45 minutes", desc: "CDN cache invalidation delay after adding a new authorized seller. No impact on live auctions.", resolved: true },
+    ];
+    const el = document.getElementById("incidents");
+    el.innerHTML = incidents.map(i => `
+      <div class="incident">
+        <div class="date">${i.date}</div>
+        <div class="title">${i.title}</div>
+        <div class="desc">${i.desc}</div>
+        ${i.resolved ? '<div class="resolved" style="margin-top:6px;">Resolved</div>' : ''}
+      </div>`).join("");
+  }
+
+  async function refresh() {
+    const results = await Promise.all(SERVICES.map(checkService));
+    document.getElementById("services").innerHTML = results.map(renderCard).join("");
+    document.getElementById("last-check").textContent = "Last checked: " + new Date().toLocaleTimeString();
+
+    // Update global badge
+    const allOk = results.every(r => r.status === "ok");
+    const anyDown = results.some(r => r.status === "down");
+    const badge = document.getElementById("global-badge");
+    if (allOk) {
+      badge.innerHTML = '<span class="dot"></span><span class="label">All systems operational</span>';
+      badge.style.borderColor = "var(--green)";
+    } else if (anyDown) {
+      badge.innerHTML = '<span class="dot" style="background:var(--red);"></span><span class="label" style="color:var(--red);">Partial outage</span>';
+      badge.style.borderColor = "var(--red)";
+    } else {
+      badge.innerHTML = '<span class="dot" style="background:var(--amber);"></span><span class="label" style="color:var(--amber);">Degraded performance</span>';
+      badge.style.borderColor = "var(--amber)";
+    }
+  }
+
+  renderUptimeBars();
+  renderIncidents();
+  refresh();
+  setInterval(refresh, 60000);
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,18 @@
+# Boost Boss — app-ads.txt
+# Spec: https://iabtechlab.com/wp-content/uploads/2022/03/app-ads.txt-v1.1-2021-final.pdf
+# Last updated: 2026-04-16
+# Contact: sellers@boostboss.ai
+#
+# This file declares the sellers authorized to monetize Boost Boss inventory
+# served inside native AI applications that resolve via app-store metadata
+# rather than DNS. Native MCP apps (Claude Desktop, Cursor, etc.) reference
+# this file via the developer URL listed in their app-store record.
+
+boostboss.ai,          boostboss-primary, DIRECT,   c5e8a91f3e0d2b67
+exchange.boostboss.ai, bbx-exchange,      RESELLER, c5e8a91f3e0d2b67
+boostboss.ai,          house-ads,         DIRECT,   c5e8a91f3e0d2b67
+
+CONTACT=sellers@boostboss.ai
+SUBDOMAIN=exchange.boostboss.ai
+OWNERDOMAIN=boostboss.ai
+MANAGERDOMAIN=boostboss.ai

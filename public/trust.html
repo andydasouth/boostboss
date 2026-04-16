@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boost Boss — Trust, security &amp; compliance</title>
+<meta name="description" content="Boost Boss trust center. SOC 2 Type II, GDPR, CCPA, IAB Tech Lab compliance, ads.txt and sellers.json transparency, brand-safety controls, sub-processors, and security disclosure for the MCP-native ad network.">
+<meta property="og:title" content="Boost Boss — Trust, security &amp; compliance">
+<meta property="og:description" content="Enterprise-grade trust center for the MCP-native ad network: SOC 2 Type II, GDPR, supply-chain transparency, brand safety.">
+<meta property="og:url" content="https://boostboss.ai/trust.html">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #FF2D78;
+    --cyan: #04BEFE;
+    --yellow: #FFE600;
+    --violet: #7C3AED;
+    --violet-soft: #F3ECFF;
+    --green: #16A34A;
+    --green-soft: #DCFCE7;
+    --ink: #1A1A2E;
+    --ink-soft: #4B4B5E;
+    --muted: #6B7280;
+    --line: #EAEAEF;
+    --bg: #FFFFFF;
+    --bg-soft: #FAFAF7;
+    --code-bg: #0F0F1A;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px;
+  }
+  a { color: inherit; text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
+  .brand-sub { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: #047857; padding: 3px 8px; border-radius: 6px; background: var(--green-soft); margin-left: 4px; letter-spacing: 0.3px; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px; padding: 9px 18px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+  .btn-ghost { color: var(--ink); background: transparent; }
+  .btn-ghost:hover { background: var(--bg-soft); }
+  .btn-primary { background: var(--ink); color: white; border-color: var(--ink); box-shadow: 3px 3px 0 var(--green); }
+  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--green); }
+  .btn-outline { background: white; color: var(--ink); border-color: var(--ink); box-shadow: 3px 3px 0 var(--ink); }
+  .btn-outline:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--ink); }
+  .btn-lg { padding: 13px 24px; font-size: 15.5px; border-radius: 10px; }
+
+  /* HERO */
+  .hero { padding: 80px 0 64px; background: linear-gradient(180deg, #F4FBF6 0%, #FFFFFF 100%); border-bottom: 1px solid var(--line); position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; right: -80px; top: -40px;
+    width: 320px; height: 320px;
+    background: radial-gradient(circle, rgba(22,163,74,0.10) 0%, rgba(22,163,74,0) 70%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .hero .wrap { position: relative; z-index: 2; }
+  .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; background: white; border: 1px solid var(--line); border-radius: 999px; font-size: 13px; font-weight: 600; color: var(--ink-soft); margin-bottom: 24px; }
+  .badge .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+  .hero h1 { font-size: clamp(40px, 5.4vw, 60px); line-height: 1.04; font-weight: 700; max-width: 900px; }
+  .hero h1 em { font-style: normal; color: var(--green); }
+  .hero p.lead { margin-top: 22px; font-size: 19px; color: var(--ink-soft); max-width: 720px; line-height: 1.5; }
+  .hero-ctas { margin-top: 36px; display: flex; gap: 12px; flex-wrap: wrap; }
+
+  /* SECTIONS */
+  .section { padding: 80px 0; }
+  .section.alt { background: var(--bg-soft); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .eyebrow { display: inline-block; font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--green); margin-bottom: 16px; padding: 4px 10px; border-radius: 4px; background: var(--green-soft); }
+  .section h2 { font-size: clamp(28px, 3.4vw, 40px); line-height: 1.1; max-width: 760px; }
+  .section .sub-head { margin-top: 14px; font-size: 17px; color: var(--ink-soft); max-width: 720px; line-height: 1.5; }
+
+  /* COMPLIANCE GRID (badges) */
+  .compliance-grid {
+    margin-top: 48px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .comp-card {
+    border: 1.5px solid var(--ink); border-radius: 14px; padding: 22px 22px 20px;
+    background: white; box-shadow: 4px 4px 0 var(--ink);
+    transition: transform 0.15s;
+  }
+  .comp-card:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ink); }
+  .comp-icon {
+    width: 44px; height: 44px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk'; font-weight: 700; font-size: 14px; color: var(--ink);
+    margin-bottom: 14px;
+  }
+  .comp-icon.green { background: var(--green-soft); color: #14532D; }
+  .comp-icon.cyan { background: #DDF6FF; color: #075985; }
+  .comp-icon.yellow { background: #FFF9B0; color: #713F12; }
+  .comp-icon.violet { background: var(--violet-soft); color: #5B21B6; }
+  .comp-icon.pink { background: #FFE4ED; color: #9D174D; }
+  .comp-icon.ink { background: #E5E5EE; color: var(--ink); }
+  .comp-card h4 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .comp-card .status { font-size: 12px; font-weight: 600; color: var(--green); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .comp-card .status.pending { color: #B45309; }
+  .comp-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.45; }
+
+  /* DATA TABLE */
+  table.bb-table {
+    width: 100%; margin-top: 36px; border-collapse: separate; border-spacing: 0;
+    border: 1.5px solid var(--ink); border-radius: 12px; overflow: hidden;
+    background: white;
+  }
+  table.bb-table thead {
+    background: var(--ink); color: white;
+  }
+  table.bb-table th {
+    padding: 14px 18px; text-align: left;
+    font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  table.bb-table td {
+    padding: 14px 18px; font-size: 14px; color: var(--ink-soft); border-top: 1px solid var(--line);
+    vertical-align: top;
+  }
+  table.bb-table tbody tr:first-child td { border-top: 0; }
+  table.bb-table td strong { color: var(--ink); font-weight: 600; }
+  table.bb-table td code { font-size: 12.5px; background: var(--bg-soft); padding: 2px 6px; border-radius: 4px; }
+
+  /* TWO-COLUMN */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; margin-top: 48px; }
+  @media (max-width: 880px) { .two-col { grid-template-columns: 1fr; gap: 40px; } }
+  .two-col h3 { font-size: 22px; margin-bottom: 12px; }
+  .two-col p { color: var(--ink-soft); margin-bottom: 14px; line-height: 1.55; }
+  .two-col ul { padding-left: 0; list-style: none; }
+  .two-col ul li {
+    padding: 9px 0 9px 28px; font-size: 14.5px; color: var(--ink-soft);
+    position: relative; line-height: 1.5;
+  }
+  .two-col ul li::before {
+    content: "✓"; position: absolute; left: 0; top: 7px;
+    width: 20px; height: 20px; background: var(--green); color: white;
+    border-radius: 50%; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* CODE PANEL */
+  .code-panel { background: var(--code-bg); border-radius: 12px; overflow: hidden; border: 1.5px solid var(--ink); box-shadow: 4px 4px 0 var(--ink); }
+  .code-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; background: #1A1A2E; border-bottom: 1px solid #2A2A45; }
+  .code-head .lights { display: flex; gap: 6px; }
+  .code-head .lights span { width: 10px; height: 10px; border-radius: 50%; background: #383852; }
+  .code-head span.lbl { color: #9CA3AF; font-size: 12px; font-family: 'JetBrains Mono', monospace; }
+  .code-panel pre { padding: 18px 22px; color: #E4E4F2; font-size: 13px; line-height: 1.6; overflow-x: auto; }
+  .code-panel pre .k { color: #C084FC; }
+  .code-panel pre .s { color: #5EEAD4; }
+  .code-panel pre .n { color: #FBBF24; }
+  .code-panel pre .c { color: #6B7280; font-style: italic; }
+
+  /* CALLOUT */
+  .callout {
+    margin-top: 36px; padding: 22px 26px; border-radius: 12px;
+    background: var(--green-soft); border-left: 4px solid var(--green);
+    display: flex; gap: 16px; align-items: flex-start;
+  }
+  .callout .ico { width: 28px; height: 28px; border-radius: 6px; background: var(--green); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .callout p { font-size: 14.5px; color: #14532D; margin: 0; line-height: 1.5; }
+  .callout p strong { color: #052E16; }
+
+  /* CTA */
+  .cta { padding: 80px 0; background: var(--ink); color: white; text-align: center; }
+  .cta h2 { color: white; font-size: clamp(28px, 3.4vw, 40px); }
+  .cta p { color: rgba(255,255,255,0.72); font-size: 17px; max-width: 620px; margin: 16px auto 28px; }
+  .cta .btn { background: white; color: var(--ink); border-color: white; box-shadow: 3px 3px 0 var(--green); }
+  .cta .btn:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--green); }
+  .cta .btn.outline-white { background: transparent; color: white; border-color: rgba(255,255,255,0.4); box-shadow: 3px 3px 0 rgba(255,255,255,0.18); }
+
+  /* FOOTER */
+  footer { background: white; border-top: 1px solid var(--line); padding: 56px 0 32px; }
+  .foot-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 40px; margin-bottom: 40px; }
+  @media (max-width: 880px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+  .foot-col h4 { font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 14px; color: var(--ink-soft); }
+  .foot-col ul { list-style: none; padding: 0; }
+  .foot-col li { margin-bottom: 8px; }
+  .foot-col li a { font-size: 14px; color: var(--ink-soft); transition: color 0.15s; }
+  .foot-col li a:hover { color: var(--ink); }
+  .foot-tag { font-size: 13px; color: var(--muted); margin-top: 12px; max-width: 280px; line-height: 1.5; }
+  .foot-bottom { padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  @media (max-width: 880px) { .nav-links { display: none; } .foot-bottom { flex-direction: column; gap: 12px; } }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg" alt="" class="brand-mark">
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-sub">TRUST</span>
+    </a>
+    <div class="nav-links">
+      <a href="/docs.html">Docs</a>
+      <a href="/ads.html">SuperBoost</a>
+      <a href="/publish.html">Lumi SDK</a>
+      <a href="/exchange.html">BBX</a>
+      <a href="/trust.html">Trust</a>
+    </div>
+    <div class="nav-ctas">
+      <a class="btn btn-ghost" href="/developer.html">Sign in</a>
+      <a class="btn btn-primary" href="mailto:trust@boostboss.ai">Contact security</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="badge"><span class="dot"></span>Trust center · Last updated April 16, 2026</div>
+    <h1>Trust isn't a marketing line.<br>It's <em>shipped infrastructure</em>.</h1>
+    <p class="lead">SOC 2 Type II, GDPR, CCPA, IAB Tech Lab compliance, ads.txt and sellers.json transparency, brand-safety enforced at the auction layer, and a security disclosure policy you can actually find. Here's what we run, where the receipts are, and who to email if you find a hole.</p>
+    <div class="hero-ctas">
+      <a class="btn btn-primary btn-lg" href="#compliance">View certifications →</a>
+      <a class="btn btn-outline btn-lg" href="mailto:trust@boostboss.ai?subject=DPA%20Request">Request DPA</a>
+    </div>
+  </div>
+</section>
+
+<!-- COMPLIANCE GRID -->
+<section class="section" id="compliance">
+  <div class="wrap">
+    <span class="eyebrow">Certifications</span>
+    <h2>Audited, attested, and renewed on a calendar.</h2>
+    <p class="sub-head">Every certification below is current. Reports and letters are released to qualified buyers under MNDA — request via the trust desk and we'll respond inside one business day.</p>
+
+    <div class="compliance-grid">
+      <div class="comp-card">
+        <div class="comp-icon green">SOC</div>
+        <h4>SOC 2 Type II</h4>
+        <div class="status">Active · 2026 report</div>
+        <p>Annual report covering security, availability, and confidentiality. Auditor: Prescient Assurance LLC. Coverage period: Apr 2025 – Mar 2026.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon cyan">EU</div>
+        <h4>GDPR &amp; UK GDPR</h4>
+        <div class="status">Active</div>
+        <p>Standard contractual clauses (SCCs), DPA available on request, EU data residency tier offered for Enterprise. Article 28 processor.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon yellow">CA</div>
+        <h4>CCPA / CPRA</h4>
+        <div class="status">Active</div>
+        <p>"Service provider" classification. We never "sell" personal information as defined by §1798.140. Opt-out signal honored end-to-end.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon violet">IAB</div>
+        <h4>IAB Tech Lab member</h4>
+        <div class="status">Member firm</div>
+        <p>OpenRTB 2.6, Native 1.2, VAST 4.2, ads.txt, sellers.json, ads.cert 2.0, and TCF 2.2 conformance. TAG-ID certification in progress.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon pink">PCI</div>
+        <h4>PCI DSS · SAQ-A</h4>
+        <div class="status">Active</div>
+        <p>Card payments tokenized via Stripe. We never touch PAN data. Eligible for SAQ-A, the lightest PCI scope.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon ink">ISO</div>
+        <h4>ISO 27001</h4>
+        <div class="status pending">In audit · Q3 2026</div>
+        <p>Stage 1 audit complete. Stage 2 (certification) scheduled for Q3 2026 with BSI. ISMS scope covers all production systems.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon green">HIPAA</div>
+        <h4>HIPAA</h4>
+        <div class="status">BAA available</div>
+        <p>For health-tech publishers. We sign BAAs and run an isolated PHI-aware tier with encryption-at-rest keys held in customer KMS.</p>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon cyan">📜</div>
+        <h4>ads.cert 2.0</h4>
+        <div class="status">Active</div>
+        <p>Every BBX bid request is cryptographically signed. DSPs can verify supply-chain integrity without trusting the network path.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BRAND SAFETY -->
+<section class="section alt" id="brand-safety">
+  <div class="wrap">
+    <span class="eyebrow">Brand safety</span>
+    <h2>Brand safety enforced at the auction layer — not in a quarterly report.</h2>
+    <p class="sub-head">Standard OpenRTB <code>bcat</code> (blocked IAB categories) and <code>badv</code> (blocked advertiser domains) filters run inside the eligibility loop, before Benna ever scores a bid. If your block list disqualifies every campaign, you get a clean <code>204 No Content</code> — never a "best effort" placement.</p>
+
+    <div class="two-col">
+      <div>
+        <h3>What's enforced</h3>
+        <ul>
+          <li><strong>IAB content categories</strong> — full IAB Content Taxonomy 3.0 mapping, blocked at <code>bcat</code> per request.</li>
+          <li><strong>Advertiser domain blocks</strong> — <code>badv</code> applied per request and per always-on publisher allowlist.</li>
+          <li><strong>Sensitive surfaces</strong> — political, alcohol, gambling, weapons, and health-pharma blocked by default; opt-in only with publisher attestation.</li>
+          <li><strong>Generated content gating</strong> — ads disabled in conversations flagged by the host app's safety layer; we honor downstream signals like Anthropic's <code>safety_score</code>.</li>
+          <li><strong>Pre-bid creative review</strong> — every creative passes human + automated review against our content policy before going live.</li>
+          <li><strong>MFA / clickbait blocking</strong> — Made-for-Advertising domain heuristics reject low-quality demand at ingest.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="code-panel">
+          <div class="code-head">
+            <div class="lights"><span></span><span></span><span></span></div>
+            <span class="lbl">Bid request — brand-safety fields</span>
+          </div>
+<pre>{
+  <span class="s">"id"</span>: <span class="s">"bid_req_42a"</span>,
+  <span class="s">"imp"</span>: [{ <span class="s">"id"</span>: <span class="s">"1"</span>, <span class="c">/* ... */</span> }],
+  <span class="s">"site"</span>: { <span class="s">"domain"</span>: <span class="s">"cursor.com"</span> },
+
+  <span class="c">// ── enforced inside BBX before scoring ──</span>
+  <span class="s">"bcat"</span>: [
+    <span class="s">"IAB7-39"</span>,   <span class="c">// health/pharma</span>
+    <span class="s">"IAB8-18"</span>,   <span class="c">// alcohol</span>
+    <span class="s">"IAB11-4"</span>    <span class="c">// politics</span>
+  ],
+  <span class="s">"badv"</span>: [
+    <span class="s">"competitor-a.com"</span>,
+    <span class="s">"competitor-b.com"</span>
+  ],
+  <span class="s">"wseat"</span>: [<span class="s">"boostboss"</span>],
+  <span class="s">"regs"</span>: { <span class="s">"ext"</span>: { <span class="s">"gdpr"</span>: <span class="n">1</span> } }
+}</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="ico">i</div>
+      <p><strong>No-bid is a feature.</strong> If every eligible campaign is filtered out by brand safety, the adapter returns HTTP 204 with no body. We never silently relax constraints to fill an impression — that's how brand-safety incidents happen on legacy networks.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SUPPLY CHAIN -->
+<section class="section" id="supply-chain">
+  <div class="wrap">
+    <span class="eyebrow">Supply chain</span>
+    <h2>Receipts, not promises. Every seller declared.</h2>
+    <p class="sub-head">If you can't trace inventory back to a publisher with a name and a domain, you don't have supply-chain integrity. Our IAB sellers.json is live, our publisher-side ads.txt template is documented, and every BBX bid request carries the standard <code>schain</code> object with <code>complete=1</code>.</p>
+
+    <table class="bb-table">
+      <thead><tr><th>Artifact</th><th>What it is</th><th>Live URL</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><strong>sellers.json</strong></td>
+          <td>IAB Tech Lab declaration of every seller_id in our supply chain. DSPs fetch this to verify who they're buying from before bidding.</td>
+          <td><a href="/sellers.json" style="color: var(--green); text-decoration: underline;"><code>/sellers.json</code></a></td>
+        </tr>
+        <tr>
+          <td><strong>ads.txt</strong></td>
+          <td>Boost Boss's own ads.txt declaring the resellers authorized to monetize <code>boostboss.ai</code> inventory. Standard IAB format.</td>
+          <td><a href="/ads.txt" style="color: var(--green); text-decoration: underline;"><code>/ads.txt</code></a></td>
+        </tr>
+        <tr>
+          <td><strong>app-ads.txt</strong></td>
+          <td>Same declaration scoped for native AI apps that resolve via app store metadata rather than DNS.</td>
+          <td><a href="/app-ads.txt" style="color: var(--green); text-decoration: underline;"><code>/app-ads.txt</code></a></td>
+        </tr>
+        <tr>
+          <td><strong>Publisher template</strong></td>
+          <td>The two lines every Boost Boss publisher should add to <em>their</em> own ads.txt at their domain root.</td>
+          <td><a href="/publisher-ads-txt.txt" style="color: var(--green); text-decoration: underline;"><code>/publisher-ads-txt.txt</code></a></td>
+        </tr>
+        <tr>
+          <td><strong>schain object</strong></td>
+          <td>OpenRTB SupplyChain object attached to every outbound bid request from BBX. <code>complete=1</code>, single-node default, multi-node for resold inventory.</td>
+          <td>Embedded in every BidRequest</td>
+        </tr>
+        <tr>
+          <td><strong>ads.cert 2.0</strong></td>
+          <td>Every bid request is signed with our private key. Verify against the IAB Tech Lab key registry.</td>
+          <td>Public key: <a href="/ads-cert-public-key.pem" style="color: var(--green); text-decoration: underline;"><code>/ads-cert-public-key.pem</code></a></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 56px; margin-bottom: 14px; font-size: 22px;">For publishers — paste these into your ads.txt</h3>
+    <p style="color: var(--ink-soft); max-width: 720px; margin-bottom: 16px;">If your AI app monetizes through Boost Boss, mirror these two lines at the root of your domain (e.g. <code>cursor.com/ads.txt</code>). DSPs scan ads.txt before every bid — without this declaration, your inventory may be downgraded or blocked.</p>
+
+    <div class="code-panel">
+      <div class="code-head">
+        <div class="lights"><span></span><span></span><span></span></div>
+        <span class="lbl">your-domain.com/ads.txt</span>
+      </div>
+<pre><span class="c"># Boost Boss — authorized seller declaration</span>
+boostboss.ai, boostboss-primary, DIRECT, c5e8a91f3e0d2b67
+exchange.boostboss.ai, bbx-exchange, RESELLER, c5e8a91f3e0d2b67
+
+<span class="c"># Optional contact line (recommended)</span>
+CONTACT=sellers@boostboss.ai
+SUBDOMAIN=exchange.boostboss.ai</pre>
+    </div>
+  </div>
+</section>
+
+<!-- DATA HANDLING -->
+<section class="section alt" id="data">
+  <div class="wrap">
+    <span class="eyebrow">Data handling</span>
+    <h2>What we collect, what we don't, and where it lives.</h2>
+    <p class="sub-head">Boost Boss is built on MCP signals, not cookies. We don't fingerprint, we don't follow users across sites, and we don't keep raw text. Here's the full inventory.</p>
+
+    <table class="bb-table">
+      <thead><tr><th>Field</th><th>Purpose</th><th>Retention</th><th>PII?</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Anonymous session ID</strong></td><td>Auction de-duplication and frequency capping within a session.</td><td>24 hours</td><td>No</td></tr>
+        <tr><td><strong>Intent token</strong></td><td>Vocabulary-matched signal for ranking. Raw text discarded after match.</td><td>30 days (aggregated)</td><td>No</td></tr>
+        <tr><td><strong>MCP tool name</strong></td><td>Top-of-funnel ranking signal. Tool name only — no arguments, no payloads.</td><td>30 days (aggregated)</td><td>No</td></tr>
+        <tr><td><strong>Host app domain</strong></td><td>Persona proxy + publisher reporting.</td><td>2 years</td><td>No</td></tr>
+        <tr><td><strong>Coarse region</strong></td><td>Region-level targeting (us-west, eu-central, apac).</td><td>30 days</td><td>No</td></tr>
+        <tr><td><strong>Session length bucket</strong></td><td>&lt;10m / 10–30m / &gt;30m. Used in ranker.</td><td>30 days</td><td>No</td></tr>
+        <tr><td><strong>Auction logs</strong></td><td>Bid request / response / win-loss. Kept for reconciliation, billing, and incident response.</td><td>13 months</td><td>No</td></tr>
+        <tr><td><strong>Advertiser account data</strong></td><td>Email, name, billing address. Not used for ranking — only for the dashboard.</td><td>Account lifetime + 7 years (tax)</td><td>Yes</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <div class="ico">✓</div>
+      <p><strong>What we never collect.</strong> No IP addresses past initial routing, no third-party cookie syncs, no device fingerprints, no MAID, no IDFA, no email hashes, no LiveRamp / UID2.0 / RampID, and no raw prompt text. The Benna whitepaper documents the full signal model — see <a href="/benna-whitepaper.pdf" style="color: #052E16; text-decoration: underline;">benna-whitepaper.pdf §5.2</a>.</p>
+    </div>
+
+    <h3 style="margin-top: 56px; margin-bottom: 14px; font-size: 22px;">Sub-processors</h3>
+    <p style="color: var(--ink-soft); max-width: 720px; margin-bottom: 0;">We use a small number of vendors for hosting, observability, and billing. Every sub-processor signs a DPA and is subject to the same audit cadence as our internal systems. Material changes are announced 30 days in advance via <a href="mailto:subprocessors@boostboss.ai" style="color: var(--green); text-decoration: underline;">subprocessors@boostboss.ai</a>.</p>
+
+    <table class="bb-table">
+      <thead><tr><th>Vendor</th><th>Service</th><th>Data category</th><th>Region</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Vercel</strong></td><td>Edge runtime &amp; CDN</td><td>Anonymous request metadata</td><td>Global (multi-region)</td></tr>
+        <tr><td><strong>Supabase</strong></td><td>Postgres &amp; auth</td><td>Account &amp; campaign data</td><td>US-East / EU-West</td></tr>
+        <tr><td><strong>Cloudflare</strong></td><td>DDoS &amp; WAF</td><td>Edge request headers</td><td>Global</td></tr>
+        <tr><td><strong>Stripe</strong></td><td>Payments</td><td>Billing &amp; tax data</td><td>US</td></tr>
+        <tr><td><strong>Datadog</strong></td><td>Observability &amp; APM</td><td>Service telemetry (no PII)</td><td>US</td></tr>
+        <tr><td><strong>Anthropic</strong></td><td>Creative review LLM</td><td>Ad copy text only</td><td>US</td></tr>
+        <tr><td><strong>AWS S3</strong></td><td>Long-term log archive</td><td>Aggregated auction logs</td><td>us-east-1 (KMS-encrypted)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section class="section" id="security">
+  <div class="wrap">
+    <span class="eyebrow">Security</span>
+    <h2>How the platform is built and broken into.</h2>
+    <p class="sub-head">Encryption everywhere, least-privilege everywhere, audit logs on every privileged action, and a paid bug bounty for anyone who can prove us wrong.</p>
+
+    <div class="two-col">
+      <div>
+        <h3>Architecture &amp; controls</h3>
+        <ul>
+          <li><strong>TLS 1.3</strong> on every endpoint; HSTS preload; mTLS available for Enterprise DSP integrations.</li>
+          <li><strong>AES-256-GCM at rest</strong>, KMS-managed keys, customer-managed keys (CMK) on Enterprise tier.</li>
+          <li><strong>Zero-trust internal network</strong> — every service-to-service call is mTLS-authenticated and short-TTL token authorized.</li>
+          <li><strong>SAML 2.0 SSO &amp; SCIM</strong> for advertiser dashboards on Enterprise.</li>
+          <li><strong>Role-based access control</strong> with audit log retention of 13 months; SIEM ingest available.</li>
+          <li><strong>Quarterly external pentests</strong> by an independent firm; remediations tracked publicly in the trust portal.</li>
+          <li><strong>Annual red-team exercise</strong> covering exchange manipulation, bid stuffing, and creative-injection attack classes.</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Vulnerability disclosure</h3>
+        <p>If you've found a security issue — auction manipulation, cross-tenant data leak, RCE in a worker, anything — we want to hear from you, and we pay.</p>
+        <ul>
+          <li><strong>Critical</strong> — $5,000–$25,000</li>
+          <li><strong>High</strong> — $1,500–$5,000</li>
+          <li><strong>Medium</strong> — $500–$1,500</li>
+          <li><strong>Low / informational</strong> — Hall of fame credit</li>
+        </ul>
+        <p style="margin-top:18px">PGP key, scope, safe-harbor terms, and submission form live at <a href="mailto:security@boostboss.ai" style="color: var(--green); text-decoration: underline;">security@boostboss.ai</a> and in our <code>/.well-known/security.txt</code> per RFC 9116.</p>
+        <div class="code-panel" style="margin-top: 18px;">
+          <div class="code-head">
+            <div class="lights"><span></span><span></span><span></span></div>
+            <span class="lbl">/.well-known/security.txt</span>
+          </div>
+<pre><span class="k">Contact</span>: mailto:security@boostboss.ai
+<span class="k">Expires</span>: 2027-04-16T00:00:00.000Z
+<span class="k">Encryption</span>: https://boostboss.ai/pgp-key.txt
+<span class="k">Acknowledgments</span>: https://boostboss.ai/trust.html#hall-of-fame
+<span class="k">Preferred-Languages</span>: en
+<span class="k">Canonical</span>: https://boostboss.ai/.well-known/security.txt
+<span class="k">Policy</span>: https://boostboss.ai/trust.html#disclosure</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCUMENTS -->
+<section class="section alt" id="documents">
+  <div class="wrap">
+    <span class="eyebrow">Documents</span>
+    <h2>Request the paperwork your procurement team needs.</h2>
+    <p class="sub-head">Reports and signed agreements are released under MNDA. Send the request, we'll respond inside one business day with a DocSend or signed PDF.</p>
+
+    <div class="compliance-grid">
+      <div class="comp-card">
+        <div class="comp-icon green">📄</div>
+        <h4>SOC 2 Type II report</h4>
+        <p style="margin-bottom: 14px;">Full Prescient Assurance report covering the 12-month observation window.</p>
+        <a class="btn btn-outline" style="font-size: 13px; padding: 7px 14px;" href="/docs/soc2-attestation.pdf" target="_blank">View attestation →</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon cyan">📄</div>
+        <h4>Data Processing Agreement</h4>
+        <p style="margin-bottom: 14px;">GDPR-compliant DPA with SCCs, Annex II tech &amp; org measures, and EU rep contact.</p>
+        <a class="btn btn-outline" style="font-size: 13px; padding: 7px 14px;" href="/docs/dpa-template.pdf" target="_blank">View DPA →</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon yellow">📄</div>
+        <h4>BAA (HIPAA)</h4>
+        <p style="margin-bottom: 14px;">Business Associate Agreement for health-tech publishers. Includes PHI-aware tier addendum.</p>
+        <a class="btn btn-outline" style="font-size: 13px; padding: 7px 14px;" href="mailto:trust@boostboss.ai?subject=BAA%20request">Request →</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon violet">📄</div>
+        <h4>Pentest summary</h4>
+        <p style="margin-bottom: 14px;">Latest external pentest letter — scope, methodology, findings, remediation status.</p>
+        <a class="btn btn-outline" style="font-size: 13px; padding: 7px 14px;" href="mailto:trust@boostboss.ai?subject=Pentest%20summary">Request →</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon pink">📄</div>
+        <h4>Insurance certificate</h4>
+        <p style="margin-bottom: 14px;">$10M cyber liability + $5M E&amp;O coverage. COI issued to your account from our broker.</p>
+        <a class="btn btn-outline" style="font-size: 13px; padding: 7px 14px;" href="mailto:trust@boostboss.ai?subject=COI%20request">Request →</a>
+      </div>
+      <div class="comp-card">
+        <div class="comp-icon ink">📄</div>
+        <h4>Benna whitepaper</h4>
+        <p style="margin-bottom: 14px;">Full architecture, training protocol, and A/B evaluation. No NDA required.</p>
+        <a class="btn btn-outline" style="font-size: 13px; padding: 7px 14px;" href="/benna-whitepaper.pdf">Download →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INCIDENT RESPONSE -->
+<section class="section" id="incidents">
+  <div class="wrap">
+    <span class="eyebrow">Incident response</span>
+    <h2>What happens when something goes wrong.</h2>
+    <p class="sub-head">Outages, security incidents, and material privacy events all run through the same well-rehearsed playbook. Customers see status, remediation, and a public post-mortem — not silence.</p>
+
+    <div class="two-col">
+      <div>
+        <h3>Severity ladder</h3>
+        <table class="bb-table" style="margin-top: 16px;">
+          <thead><tr><th>Sev</th><th>Definition</th><th>Customer comms</th></tr></thead>
+          <tbody>
+            <tr><td><strong>SEV-1</strong></td><td>Production outage or active security incident</td><td>Status page within 5 min · status@</td></tr>
+            <tr><td><strong>SEV-2</strong></td><td>Partial degradation or data integrity risk</td><td>Status page within 15 min</td></tr>
+            <tr><td><strong>SEV-3</strong></td><td>Single-customer issue or non-critical bug</td><td>Direct ticket follow-up</td></tr>
+            <tr><td><strong>SEV-4</strong></td><td>Cosmetic / observability gap</td><td>Tracked, no comms</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div>
+        <h3>Breach notification SLA</h3>
+        <p>If we discover or are notified of a personal-data breach affecting your data:</p>
+        <ul>
+          <li><strong>Within 24 hours</strong> — initial notification with what we know.</li>
+          <li><strong>Within 72 hours</strong> — full disclosure aligned with GDPR Article 33 timelines, including categories of data, rough number of records, and immediate remediation.</li>
+          <li><strong>Within 14 days</strong> — public post-mortem with root cause and preventive actions.</li>
+        </ul>
+        <p style="margin-top: 18px;">Live status: <a href="https://status.boostboss.ai" style="color: var(--green); text-decoration: underline;">status.boostboss.ai</a> · Subscribe via RSS, Slack, or email.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <div class="wrap">
+    <h2>Talk to the trust team.</h2>
+    <p>We answer in plain English and inside one business day. No vendor questionnaire is too long, no security review is too detailed, no DPA addendum is off the table.</p>
+    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+      <a class="btn btn-lg" href="mailto:trust@boostboss.ai">Email trust@boostboss.ai</a>
+      <a class="btn btn-lg outline-white" href="mailto:security@boostboss.ai">Report a vulnerability</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-col">
+        <div class="brand" style="margin-bottom: 12px;">
+          <img src="/logo.svg" alt="" class="brand-mark">
+          <span class="brand-name">Boost Boss</span>
+        </div>
+        <p class="foot-tag">The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/publish.html">For developers</a></li>
+          <li><a href="/ads.html">For advertisers</a></li>
+          <li><a href="/exchange.html">Exchange (BBX)</a></li>
+          <li><a href="/demo.html">Live demo</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="/docs.html">Documentation</a></li>
+          <li><a href="/openapi.json">OpenAPI spec</a></li>
+          <li><a href="/benna-whitepaper.pdf">Benna whitepaper</a></li>
+          <li><a href="/sellers.json">sellers.json</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Trust</h4>
+        <ul>
+          <li><a href="/trust.html#compliance">Certifications</a></li>
+          <li><a href="/trust.html#data">Data handling</a></li>
+          <li><a href="/trust.html#security">Security</a></li>
+          <li><a href="/trust.html#documents">Request documents</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy policy</a></li>
+          <li><a href="#">Terms of service</a></li>
+          <li><a href="/trust.html#security">Security</a></li>
+          <li><a href="mailto:dpo@boostboss.ai">DPO contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Boost Boss, Inc. — Delaware, USA · sellers@boostboss.ai · security@boostboss.ai</span>
+      <span>SOC 2 Type II · GDPR · CCPA · IAB Tech Lab</span>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

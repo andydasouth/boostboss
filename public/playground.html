@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benna AI Playground — Boost Boss</title>
+<meta name="description" content="Interactive Benna AI scoring playground. Test bid optimization signals, see real-time attribution, and explore how Benna scores MCP context for ad auctions.">
+<meta property="og:title" content="Benna AI Playground — Boost Boss">
+<meta property="og:description" content="Try Benna AI live: adjust MCP signals and watch bid scoring, click predictions, and signal attribution update in real time.">
+<meta property="og:url" content="https://boostboss.ai/playground.html">
+<meta property="og:type" content="website">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --pink: #FF2D78;
+    --cyan: #04BEFE;
+    --yellow: #FFE600;
+    --violet: #7C3AED;
+    --violet-soft: #F3ECFF;
+    --green: #16A34A;
+    --green-soft: #DCFCE7;
+    --ink: #1A1A2E;
+    --ink-soft: #4B4B5E;
+    --muted: #6B7280;
+    --line: #EAEAEF;
+    --bg: #FFFFFF;
+    --bg-soft: #FAFAF7;
+    --code-bg: #0F0F1A;
+  }
+
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg); color: var(--ink);
+    line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px;
+  }
+  a { color: inherit; text-decoration: none; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
+  code, pre { font-family: 'JetBrains Mono', monospace; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
+  .brand-sub { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--violet); padding: 3px 8px; border-radius: 6px; background: var(--violet-soft); margin-left: 4px; letter-spacing: 0.3px; }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-ctas { display: flex; gap: 10px; align-items: center; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px; padding: 9px 18px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+  .btn-ghost { color: var(--ink); background: transparent; }
+  .btn-ghost:hover { background: var(--bg-soft); }
+  .btn-primary { background: var(--ink); color: white; border-color: var(--ink); box-shadow: 3px 3px 0 var(--violet); }
+  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--violet); }
+
+  /* HERO */
+  .hero { padding: 64px 0 48px; background: linear-gradient(180deg, #F5F0FF 0%, #FFFFFF 100%); border-bottom: 1px solid var(--line); }
+  .hero h1 { font-size: clamp(36px, 4.4vw, 52px); line-height: 1.08; font-weight: 700; }
+  .hero h1 em { font-style: normal; color: var(--violet); }
+  .hero .lead { margin-top: 16px; font-size: 17px; color: var(--ink-soft); max-width: 660px; }
+
+  /* PLAYGROUND LAYOUT */
+  .pg-layout { display: grid; grid-template-columns: 380px 1fr; gap: 28px; margin-top: 32px; align-items: start; }
+  @media (max-width: 880px) { .pg-layout { grid-template-columns: 1fr; } .nav-links { display: none; } }
+
+  /* PANEL */
+  .panel {
+    border: 1.5px solid var(--ink); border-radius: 14px; padding: 24px;
+    background: white; box-shadow: 4px 4px 0 var(--ink);
+  }
+  .panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
+  .field select, .field input[type="number"], .field input[type="text"] {
+    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-soft);
+    transition: border-color 0.15s;
+  }
+  .field select:focus, .field input:focus { outline: none; border-color: var(--violet); }
+  .field .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  .run-btn {
+    width: 100%; padding: 14px; background: var(--violet); color: white; border: none;
+    border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px;
+    font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em;
+  }
+  .run-btn:hover { background: #6D28D9; transform: translateY(-1px); }
+  .run-btn:active { transform: translateY(0); }
+
+  /* RESULT PANEL */
+  .result-panel { display: flex; flex-direction: column; gap: 20px; }
+
+  /* BIG STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  @media (max-width: 640px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    border: 1.5px solid var(--line); border-radius: 12px; padding: 18px; background: white;
+    text-align: center;
+  }
+  .stat-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
+  .stat-card .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; margin-top: 4px; }
+  .stat-card.highlight { border-color: var(--violet); background: var(--violet-soft); }
+  .stat-card.highlight .val { color: var(--violet); }
+
+  /* SIGNAL BARS */
+  .signal-panel { border: 1.5px solid var(--ink); border-radius: 14px; padding: 24px; background: white; box-shadow: 4px 4px 0 var(--ink); }
+  .signal-panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .signal-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .signal-row:last-child { margin-bottom: 0; }
+  .signal-name { width: 180px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .signal-bar-bg { flex: 1; height: 24px; background: var(--bg-soft); border-radius: 6px; overflow: hidden; position: relative; }
+  .signal-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
+  .signal-lift { width: 60px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+
+  /* JSON OUTPUT */
+  .json-panel { border: 1.5px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--code-bg); box-shadow: 4px 4px 0 var(--ink); }
+  .json-header { padding: 12px 20px; background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .json-header span { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); }
+  .json-header .latency { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--green); }
+  .json-body { padding: 16px 20px; max-height: 400px; overflow-y: auto; }
+  .json-body pre { color: rgba(255,255,255,0.85); font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+
+  /* FOOTER */
+  footer { background: var(--ink); color: rgba(255,255,255,0.6); padding: 48px 0 36px; font-size: 14px; margin-top: 64px; }
+  .foot-inner { display: flex; justify-content: space-between; align-items: center; }
+  .foot-brand { display: flex; align-items: center; gap: 10px; color: white; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="brand">
+      <img src="/logo.svg" alt="" class="brand-mark">
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-sub">BENNA AI</span>
+    </a>
+    <div class="nav-links">
+      <a href="/docs.html">Docs</a>
+      <a href="/ads.html">SuperBoost</a>
+      <a href="/publish.html">Lumi SDK</a>
+      <a href="/exchange.html">BBX</a>
+      <a href="/trust.html">Trust</a>
+    </div>
+    <div class="nav-ctas">
+      <a class="btn btn-ghost" href="/developer.html">Sign in</a>
+      <a class="btn btn-primary" href="/docs.html#benna">Read the docs</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <h1>Benna AI <em>playground</em></h1>
+    <p class="lead">Adjust MCP context signals and watch Benna score a bid in real time. See exactly which signals drive the prediction and how much each contributes.</p>
+  </div>
+</section>
+
+<!-- PLAYGROUND -->
+<section style="padding:48px 0;">
+  <div class="wrap">
+    <div class="pg-layout">
+
+      <!-- INPUT PANEL -->
+      <div class="panel" style="position:sticky;top:80px;">
+        <h3>MCP context signals</h3>
+
+        <div class="field">
+          <label>Intent</label>
+          <select id="sig-intent">
+            <option value="">— none —</option>
+            <option value="debug_py" selected>debug_py</option>
+            <option value="docs_lookup">docs_lookup</option>
+          </select>
+          <div class="hint">What the user is doing (most predictive signal)</div>
+        </div>
+
+        <div class="field">
+          <label>MCP Tool</label>
+          <select id="sig-tool">
+            <option value="">— none —</option>
+            <option value="shell.exec" selected>shell.exec</option>
+            <option value="file.read">file.read</option>
+          </select>
+          <div class="hint">Active MCP tool in the session</div>
+        </div>
+
+        <div class="field">
+          <label>Host application</label>
+          <select id="sig-host">
+            <option value="">— none —</option>
+            <option value="cursor.com" selected>cursor.com</option>
+            <option value="replit.com">replit.com</option>
+            <option value="windsurf.ai">windsurf.ai</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Session length (minutes)</label>
+          <input type="number" id="sig-session" value="45" min="0" max="480" step="5">
+          <div class="hint">Sessions >30 min signal stronger intent</div>
+        </div>
+
+        <div class="field">
+          <label>Region</label>
+          <select id="sig-region">
+            <option value="">— none —</option>
+            <option value="us-west" selected>us-west</option>
+            <option value="us-east">us-east</option>
+            <option value="eu-central">eu-central</option>
+            <option value="apac">apac</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Target CPA ($)</label>
+          <input type="number" id="sig-cpa" value="8.00" min="0.50" max="100" step="0.50">
+          <div class="hint">Advertiser target cost-per-acquisition</div>
+        </div>
+
+        <div class="field">
+          <label>Ad format</label>
+          <select id="sig-format">
+            <option value="native" selected>native</option>
+            <option value="banner">banner</option>
+            <option value="video">video</option>
+          </select>
+        </div>
+
+        <button class="run-btn" onclick="runInference()">Score bid</button>
+      </div>
+
+      <!-- RESULT PANEL -->
+      <div class="result-panel" id="results">
+
+        <!-- Stats -->
+        <div class="stat-row" id="stat-row">
+          <div class="stat-card highlight"><div class="val" id="r-bid">—</div><div class="lbl">Bid (USD)</div></div>
+          <div class="stat-card"><div class="val" id="r-pclick">—</div><div class="lbl">P(click)</div></div>
+          <div class="stat-card"><div class="val" id="r-pconv">—</div><div class="lbl">P(convert)</div></div>
+          <div class="stat-card"><div class="val" id="r-latency">—</div><div class="lbl">Latency</div></div>
+        </div>
+
+        <!-- Signal attribution -->
+        <div class="signal-panel" id="signal-panel">
+          <h3>Signal attribution</h3>
+          <div id="signals-container">
+            <p style="font-size:14px;color:var(--muted);">Click "Score bid" to see signal contributions.</p>
+          </div>
+        </div>
+
+        <!-- Raw JSON -->
+        <div class="json-panel">
+          <div class="json-header">
+            <span>Raw Benna response</span>
+            <span class="latency" id="json-latency"></span>
+          </div>
+          <div class="json-body">
+            <pre id="json-output">// Click "Score bid" to see the raw API response</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-inner">
+      <div class="foot-brand">
+        <img src="/logo.svg" alt="" style="width:28px;height:28px;filter:brightness(0) invert(1);">
+        Benna AI Playground
+      </div>
+      <span>© 2026 Boost Boss, Inc. · <a href="/docs.html#benna" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Benna docs</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+const COLORS = ["#7C3AED", "#FF2D78", "#04BEFE", "#16A34A", "#D97706", "#1A1A2E", "#6366F1"];
+
+async function runInference() {
+  const context = {};
+  const intent = document.getElementById("sig-intent").value;
+  const tool = document.getElementById("sig-tool").value;
+  const host = document.getElementById("sig-host").value;
+  const session = parseFloat(document.getElementById("sig-session").value);
+  const region = document.getElementById("sig-region").value;
+  const cpa = parseFloat(document.getElementById("sig-cpa").value);
+  const format = document.getElementById("sig-format").value;
+
+  if (intent) context.intent = intent;
+  if (tool) context.mcp_tool = tool;
+  if (host) context.host = host;
+  if (session > 0) context.session_len = session;
+  if (region) context.region = region;
+
+  const body = {
+    context,
+    campaign: { target_cpa: cpa, goal: "target_cpa", format },
+  };
+
+  const start = performance.now();
+  try {
+    const res = await fetch("/api/benna", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const elapsed = Math.round(performance.now() - start);
+    const data = await res.json();
+
+    // Stats
+    document.getElementById("r-bid").textContent = "$" + data.bid_usd.toFixed(4);
+    document.getElementById("r-pclick").textContent = (data.p_click * 100).toFixed(2) + "%";
+    document.getElementById("r-pconv").textContent = (data.p_convert * 100).toFixed(2) + "%";
+    document.getElementById("r-latency").textContent = data.latency_ms + "ms";
+
+    // Signal bars
+    const cont = document.getElementById("signals-container");
+    if (data.signal_contributions.length === 0) {
+      cont.innerHTML = '<p style="font-size:14px;color:var(--muted);">No matching signals in current context. Try adding intent or tool signals.</p>';
+    } else {
+      const maxLift = Math.max(...data.signal_contributions.map(s => s.lift));
+      cont.innerHTML = data.signal_contributions.map((s, i) => {
+        const pct = Math.max(8, (s.lift / maxLift) * 100);
+        const color = COLORS[i % COLORS.length];
+        return `
+          <div class="signal-row">
+            <span class="signal-name" title="${s.signal}">${s.signal}</span>
+            <div class="signal-bar-bg">
+              <div class="signal-bar-fill" style="width:${pct}%;background:${color};"></div>
+            </div>
+            <span class="signal-lift" style="color:${color};">+${s.lift}%</span>
+          </div>`;
+      }).join("");
+    }
+
+    // Raw JSON
+    document.getElementById("json-latency").textContent = elapsed + "ms round-trip";
+    document.getElementById("json-output").textContent = JSON.stringify(data, null, 2);
+
+  } catch (err) {
+    document.getElementById("json-output").textContent = "Error: " + err.message;
+  }
+}
+
+// Auto-run on load
+runInference();
+</script>
+
+</body>
+</html>

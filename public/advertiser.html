@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Boost Boss Ads — Dashboard</title>
+    <title>SuperBoost — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
@@ -912,6 +912,381 @@
             transform: translateY(0);
         }
 
+        /* ───────────── BENNA OPTIMIZATION GOAL ───────────── */
+        .benna-section {
+            background: #0A0A14;
+            color: #F5F5F7;
+            border: 1.5px solid #1A1A2E;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 4px 4px 0 #1A1A2E;
+            position: relative;
+            overflow: hidden;
+        }
+        .benna-section::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background: radial-gradient(circle at 20% 0%, rgba(157, 122, 255, 0.18) 0%, transparent 50%);
+        }
+        .benna-section > * { position: relative; z-index: 1; }
+        .benna-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.25rem;
+        }
+        .benna-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #F5F5F7;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .benna-title .benna-mark {
+            width: 28px; height: 28px;
+            background: linear-gradient(135deg, #9D7AFF 0%, #C76AFF 100%);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; font-size: 14px; color: #0A0A14;
+            box-shadow: 0 0 18px rgba(157, 122, 255, 0.5);
+        }
+        .benna-subtitle {
+            font-size: 12px; color: #A1A1B3;
+            font-family: 'JetBrains Mono', monospace;
+            margin-top: 2px;
+        }
+        .benna-badge {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            background: rgba(157, 122, 255, 0.15);
+            color: #9D7AFF;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(157, 122, 255, 0.4);
+        }
+        .goal-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .goal-tile {
+            background: #12121F;
+            border: 1.5px solid #26263D;
+            border-radius: 10px;
+            padding: 14px 14px 16px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-align: left;
+            position: relative;
+        }
+        .goal-tile:hover {
+            border-color: #4B4B6B;
+            transform: translateY(-1px);
+        }
+        .goal-tile.selected {
+            border-color: #9D7AFF;
+            background: linear-gradient(180deg, #1A1530 0%, #12121F 100%);
+            box-shadow: 0 0 0 1px #9D7AFF, 0 0 24px rgba(157, 122, 255, 0.25);
+        }
+        .goal-tile .goal-kbd {
+            position: absolute; top: 10px; right: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; color: #6B6B83;
+            padding: 1px 5px; border-radius: 3px;
+            background: #1A1A2E; border: 1px solid #26263D;
+        }
+        .goal-tile .goal-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9.5px; letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #9D7AFF;
+            margin-bottom: 6px;
+        }
+        .goal-tile .goal-name {
+            font-family: 'Space Grotesk', 'Inter', sans-serif;
+            font-size: 14.5px; font-weight: 600; color: #F5F5F7;
+            letter-spacing: -0.01em; margin-bottom: 3px;
+        }
+        .goal-tile .goal-desc {
+            font-size: 11.5px; color: #A1A1B3; line-height: 1.45;
+        }
+        .goal-tile.recommended::after {
+            content: 'RECOMMENDED';
+            position: absolute; top: -7px; left: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.8px;
+            background: linear-gradient(135deg, #9D7AFF 0%, #C76AFF 100%);
+            color: #0A0A14;
+            padding: 2px 8px; border-radius: 3px;
+        }
+        .goal-target-input {
+            display: none;
+            padding: 14px 16px;
+            background: #12121F;
+            border: 1.5px solid #26263D;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            align-items: center;
+            gap: 12px;
+        }
+        .goal-target-input.active { display: flex; }
+        .goal-target-input label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; color: #A1A1B3;
+            text-transform: uppercase; letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+        .goal-target-input .dollar {
+            color: #9D7AFF; font-weight: 700; font-size: 16px;
+        }
+        .goal-target-input input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #F5F5F7;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 22px; font-weight: 600;
+            padding: 0;
+            outline: none;
+        }
+        .goal-target-input input::placeholder { color: #4B4B6B; }
+        .goal-target-input .unit {
+            color: #6B6B83; font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .benna-plan {
+            background: #12121F;
+            border: 1px dashed #33334A;
+            border-radius: 10px;
+            padding: 14px 16px;
+            font-size: 12.5px;
+            color: #A1A1B3;
+            line-height: 1.6;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        .benna-plan .pulse {
+            flex-shrink: 0;
+            width: 8px; height: 8px; border-radius: 50%;
+            background: #4DF0A1;
+            box-shadow: 0 0 10px #4DF0A1;
+            margin-top: 6px;
+            animation: bennaPulse 2s infinite;
+        }
+        @keyframes bennaPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.35; }
+        }
+        .benna-plan strong { color: #F5F5F7; font-weight: 600; }
+        .benna-plan code {
+            font-family: 'JetBrains Mono', monospace;
+            background: #1A1A2E;
+            color: #9D7AFF;
+            padding: 1px 6px;
+            border-radius: 3px;
+            font-size: 11.5px;
+        }
+        .manual-bid-wrap { display: none; }
+        .manual-bid-wrap.active { display: block; }
+
+        @media (max-width: 720px) {
+            .goal-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* ───────────── BENNA ENGINE LIVE PANEL ───────────── */
+        .benna-engine {
+            background: #0A0A14;
+            color: #F5F5F7;
+            border: 1.5px solid #1A1A2E;
+            border-radius: 14px;
+            padding: 1.75rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 6px 6px 0 #1A1A2E;
+            position: relative;
+            overflow: hidden;
+        }
+        .benna-engine::before {
+            content: '';
+            position: absolute; inset: 0; pointer-events: none;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(157, 122, 255, 0.18) 0%, transparent 45%),
+                radial-gradient(circle at 85% 100%, rgba(80, 227, 254, 0.08) 0%, transparent 45%);
+        }
+        .benna-engine > * { position: relative; z-index: 1; }
+        .benna-engine-head {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 1.25rem;
+            flex-wrap: wrap; gap: 12px;
+        }
+        .benna-engine-brand {
+            display: flex; align-items: center; gap: 12px;
+        }
+        .benna-engine-brand .mark {
+            width: 34px; height: 34px;
+            background: linear-gradient(135deg, #9D7AFF 0%, #C76AFF 100%);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 800; font-size: 17px; color: #0A0A14;
+            box-shadow: 0 0 22px rgba(157, 122, 255, 0.45);
+        }
+        .benna-engine-brand .label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; letter-spacing: 1.5px;
+            text-transform: uppercase; color: #9D7AFF;
+            margin-bottom: 2px;
+        }
+        .benna-engine-brand .title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600; font-size: 17px;
+            letter-spacing: -0.01em; color: #F5F5F7;
+        }
+        .benna-engine-status {
+            display: flex; align-items: center; gap: 8px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; color: #A1A1B3;
+            padding: 6px 12px;
+            background: rgba(77, 240, 161, 0.08);
+            border: 1px solid rgba(77, 240, 161, 0.3);
+            border-radius: 100px;
+        }
+        .benna-engine-status .status-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: #4DF0A1;
+            box-shadow: 0 0 10px #4DF0A1;
+            animation: bennaPulse 1.8s infinite;
+        }
+        .benna-engine-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr 1.4fr;
+            gap: 20px;
+        }
+        .bcol {
+            background: rgba(255, 255, 255, 0.025);
+            border: 1px solid #1A1A2E;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .bcol-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px; letter-spacing: 1px;
+            text-transform: uppercase; color: #6B6B83;
+            margin-bottom: 14px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .bcol-label::before {
+            content: '●'; color: #9D7AFF; font-size: 8px;
+        }
+        /* Column A: Metrics */
+        .b-metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px 16px;
+        }
+        .b-metric .v {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 24px; font-weight: 600;
+            letter-spacing: -0.02em; line-height: 1;
+            background: linear-gradient(135deg, #F5F5F7 0%, #9D7AFF 100%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+        .b-metric .l {
+            font-size: 11px; color: #A1A1B3;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        /* Column B: Signal weights */
+        .b-signal {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px;
+        }
+        .b-signal:last-child { margin-bottom: 0; }
+        .b-signal .name {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; color: #F5F5F7;
+            min-width: 120px; flex-shrink: 0;
+        }
+        .b-signal .bar {
+            flex: 1; height: 6px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 3px; overflow: hidden;
+            position: relative;
+        }
+        .b-signal .bar-fill {
+            position: absolute; top: 0; left: 0; bottom: 0;
+            background: linear-gradient(90deg, #9D7AFF 0%, #C76AFF 100%);
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(157, 122, 255, 0.5);
+        }
+        .b-signal .weight {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px; color: #9D7AFF;
+            width: 42px; text-align: right;
+        }
+        /* Column C: Log */
+        .b-log {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11.5px; line-height: 1.65;
+            max-height: 180px; overflow-y: auto;
+        }
+        .b-log-entry {
+            padding: 6px 0;
+            border-bottom: 1px dashed #1A1A2E;
+            display: flex; align-items: flex-start; gap: 8px;
+        }
+        .b-log-entry:last-child { border-bottom: none; }
+        .b-log-entry .time {
+            color: #6B6B83; flex-shrink: 0; font-size: 10.5px;
+            padding-top: 1px;
+        }
+        .b-log-entry .action {
+            color: #A1A1B3;
+        }
+        .b-log-entry .action strong { color: #F5F5F7; font-weight: 600; }
+        .b-log-entry .action code {
+            color: #9D7AFF; background: rgba(157, 122, 255, 0.08);
+            padding: 1px 5px; border-radius: 3px; font-size: 10.5px;
+        }
+        .b-log-entry .action .pos { color: #4DF0A1; }
+        .b-log-entry .action .neg { color: #FF5E9C; }
+
+        /* Per-campaign Benna status chip */
+        .b-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 3px 8px; border-radius: 100px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10.5px; font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .b-chip.learning {
+            background: rgba(255, 230, 0, 0.14);
+            color: #B59400; border: 1px solid rgba(255, 230, 0, 0.35);
+        }
+        .b-chip.optimizing {
+            background: rgba(157, 122, 255, 0.14);
+            color: #6E4FCC; border: 1px solid rgba(157, 122, 255, 0.35);
+        }
+        .b-chip.mature {
+            background: rgba(77, 240, 161, 0.14);
+            color: #0B8E52; border: 1px solid rgba(77, 240, 161, 0.4);
+        }
+        .b-chip .d { width: 5px; height: 5px; border-radius: 50%; }
+        .b-chip.learning .d { background: #FFE600; }
+        .b-chip.optimizing .d { background: #9D7AFF; animation: bennaPulse 1.6s infinite; }
+        .b-chip.mature .d { background: #4DF0A1; }
+
+        @media (max-width: 900px) {
+            .benna-engine-grid { grid-template-columns: 1fr; }
+        }
+
         /* Loading & Empty States */
         .loading {
             text-align: center;
@@ -941,8 +1316,8 @@
         <div class="auth-form-wrapper">
             <div class="auth-header">
                 <div class="auth-logo-icon"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/><rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/><g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g><text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text><path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
-                <div class="auth-logo-text">Boost Boss <span style="color: #FF2D78;">Ads</span></div>
-                <div class="auth-subtitle">Sign in to launch and manage campaigns</div>
+                <div class="auth-logo-text">SuperBoost</div>
+                <div class="auth-subtitle">Dashboard · Launch and manage campaigns</div>
             </div>
 
             <div class="auth-error" id="authError"></div>
@@ -970,6 +1345,19 @@
 
                 <button type="submit" class="auth-submit-btn" id="authSubmitBtn">Login</button>
             </form>
+
+            <div style="margin-top: 22px; padding-top: 22px; border-top: 1px dashed #D1D5DB; text-align: center;">
+                <button type="button" id="demoBtn" style="
+                    width: 100%; padding: 12px 16px; background: #1A1A2E; color: #FFFFFF;
+                    border: 1.5px solid #1A1A2E; border-radius: 8px;
+                    font-family: 'Inter', sans-serif; font-size: 14.5px; font-weight: 600;
+                    cursor: pointer; box-shadow: 3px 3px 0 #FF2D78; transition: all 0.15s;">
+                    ⚡ Try the demo — instant access, no signup
+                </button>
+                <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
+                    Spins up a synthetic advertiser account loaded with $5K balance and 4 live campaigns.
+                </div>
+            </div>
         </div>
     </div>
 
@@ -979,9 +1367,9 @@
             <div class="header-left">
                 <a href="#" class="logo">
                     <div class="logo-icon"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/><rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/><g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g><text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text><path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
-                    <div class="logo-text">Boost Boss <span style="color: #FF2D78;">Ads</span></div>
+                    <div class="logo-text">SuperBoost</div>
                 </a>
-                <div class="header-title">Campaign Dashboard</div>
+                <div class="header-title">Dashboard</div>
             </div>
             <div class="header-right">
                 <div class="account-info">
@@ -1029,6 +1417,111 @@
                 </div>
             </div>
 
+            <!-- Benna Engine — live panel -->
+            <section class="benna-engine" id="bennaEnginePanel">
+                <div class="benna-engine-head">
+                    <div class="benna-engine-brand">
+                        <div class="mark">B</div>
+                        <div>
+                            <div class="label">Optimization engine · live</div>
+                            <div class="title">Benna is running your campaigns</div>
+                        </div>
+                    </div>
+                    <div class="benna-engine-status">
+                        <span class="status-dot"></span>
+                        <span id="bennaStatusLabel">OPTIMIZING · 2 campaigns</span>
+                    </div>
+                </div>
+
+                <div class="benna-engine-grid">
+                    <!-- Column A: Metrics -->
+                    <div class="bcol">
+                        <div class="bcol-label">Engine metrics</div>
+                        <div class="b-metrics-grid">
+                            <div class="b-metric">
+                                <div class="v" id="bMetricDecisions">1.24M</div>
+                                <div class="l">decisions / 24h</div>
+                            </div>
+                            <div class="b-metric">
+                                <div class="v" id="bMetricLatency">4.2ms</div>
+                                <div class="l">p50 inference</div>
+                            </div>
+                            <div class="b-metric">
+                                <div class="v" id="bMetricLift">−38%</div>
+                                <div class="l">eCPA vs manual</div>
+                            </div>
+                            <div class="b-metric">
+                                <div class="v" id="bMetricLearning">1</div>
+                                <div class="l">in learning phase</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column B: Top signals -->
+                    <div class="bcol">
+                        <div class="bcol-label">Top weighted signals</div>
+                        <div id="bSignals">
+                            <div class="b-signal">
+                                <div class="name">intent=debug_py</div>
+                                <div class="bar"><div class="bar-fill" style="width: 94%;"></div></div>
+                                <div class="weight">0.34</div>
+                            </div>
+                            <div class="b-signal">
+                                <div class="name">tool=shell.exec</div>
+                                <div class="bar"><div class="bar-fill" style="width: 61%;"></div></div>
+                                <div class="weight">0.22</div>
+                            </div>
+                            <div class="b-signal">
+                                <div class="name">host=cursor.com</div>
+                                <div class="bar"><div class="bar-fill" style="width: 50%;"></div></div>
+                                <div class="weight">0.18</div>
+                            </div>
+                            <div class="b-signal">
+                                <div class="name">session_len&gt;30m</div>
+                                <div class="bar"><div class="bar-fill" style="width: 36%;"></div></div>
+                                <div class="weight">0.13</div>
+                            </div>
+                            <div class="b-signal">
+                                <div class="name">region=us-west</div>
+                                <div class="bar"><div class="bar-fill" style="width: 26%;"></div></div>
+                                <div class="weight">0.09</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column C: Recent auto-adjustments -->
+                    <div class="bcol">
+                        <div class="bcol-label">Recent auto-adjustments</div>
+                        <div class="b-log" id="bLog">
+                            <div class="b-log-entry">
+                                <span class="time">14:23</span>
+                                <span class="action">Raised bid on <code>intent=debug_py</code> <span class="pos">+18%</span> — CVR <span class="pos">+24%</span></span>
+                            </div>
+                            <div class="b-log-entry">
+                                <span class="time">14:11</span>
+                                <span class="action">Paused creative <code>cr_2f9a</code> — CTR <span class="neg">−61%</span> vs cohort</span>
+                            </div>
+                            <div class="b-log-entry">
+                                <span class="time">13:58</span>
+                                <span class="action">Shifted spend to <strong>Cursor</strong> inventory <span class="pos">+$142</span></span>
+                            </div>
+                            <div class="b-log-entry">
+                                <span class="time">13:40</span>
+                                <span class="action">Lowered bid on <code>tool=search</code> <span class="neg">−9%</span> — cost/conv above target</span>
+                            </div>
+                            <div class="b-log-entry">
+                                <span class="time">13:22</span>
+                                <span class="action">Expanded cohort <code>python-devs-advanced</code> <span class="pos">+2.1k</span> users</span>
+                            </div>
+                            <div class="b-log-entry">
+                                <span class="time">13:05</span>
+                                <span class="action">Retrained weights · loss <span class="pos">−0.012</span> · AUC 0.91</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Performance Chart -->
             <div class="chart-section">
                 <div class="chart-title">Daily Impressions (Last 14 Days)</div>
@@ -1049,6 +1542,7 @@
                         <tr>
                             <th>Campaign Name</th>
                             <th>Status</th>
+                            <th>Benna</th>
                             <th>Format</th>
                             <th>Impressions</th>
                             <th>Clicks</th>
@@ -1059,7 +1553,7 @@
                         </tr>
                     </thead>
                     <tbody id="campaignTableBody">
-                        <tr><td colspan="9" class="loading">Loading campaigns...</td></tr>
+                        <tr><td colspan="10" class="loading">Loading campaigns...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -1245,12 +1739,78 @@
                         </div>
                     </div>
 
-                    <!-- Bid Amount -->
-                    <div class="form-group">
+                    <!-- Benna Optimization Goal -->
+                    <div class="benna-section">
+                        <div class="benna-header">
+                            <div class="benna-title">
+                                <div class="benna-mark">B</div>
+                                <div>
+                                    <div>Benna optimization</div>
+                                    <div class="benna-subtitle">Set a goal. The engine handles bidding.</div>
+                                </div>
+                            </div>
+                            <span class="benna-badge">Powered by Benna</span>
+                        </div>
+
+                        <div class="goal-grid">
+                            <div class="goal-tile recommended" data-goal="target_cpa">
+                                <span class="goal-kbd">1</span>
+                                <div class="goal-label">01 · tCPA</div>
+                                <div class="goal-name">Target CPA</div>
+                                <div class="goal-desc">Hit a cost per acquisition. Benna tunes bids in real time.</div>
+                            </div>
+                            <div class="goal-tile" data-goal="target_roas">
+                                <span class="goal-kbd">2</span>
+                                <div class="goal-label">02 · tROAS</div>
+                                <div class="goal-name">Target ROAS</div>
+                                <div class="goal-desc">Optimize for return on ad spend. Ideal for revenue campaigns.</div>
+                            </div>
+                            <div class="goal-tile" data-goal="max_conversions">
+                                <span class="goal-kbd">3</span>
+                                <div class="goal-label">03 · MaxConv</div>
+                                <div class="goal-name">Max Conversions</div>
+                                <div class="goal-desc">Spend the full budget on the highest-probability converters.</div>
+                            </div>
+                            <div class="goal-tile" data-goal="manual">
+                                <span class="goal-kbd">4</span>
+                                <div class="goal-label">04 · Manual</div>
+                                <div class="goal-name">Manual bid</div>
+                                <div class="goal-desc">You set a fixed bid. Benna signals still applied to targeting.</div>
+                            </div>
+                        </div>
+
+                        <!-- Target value input (Target CPA) -->
+                        <div class="goal-target-input active" id="goalTargetCpa">
+                            <label>Target CPA</label>
+                            <span class="dollar">$</span>
+                            <input type="number" id="targetCpaValue" placeholder="4.50" step="0.01" min="0">
+                            <span class="unit">per conversion</span>
+                        </div>
+
+                        <!-- Target value input (Target ROAS) -->
+                        <div class="goal-target-input" id="goalTargetRoas">
+                            <label>Target ROAS</label>
+                            <input type="number" id="targetRoasValue" placeholder="3.0" step="0.1" min="0" style="padding-left: 8px;">
+                            <span class="unit">× return on spend</span>
+                        </div>
+
+                        <input type="hidden" id="optimizationGoal" name="optimization_goal" value="target_cpa">
+
+                        <!-- Benna plan -->
+                        <div class="benna-plan" id="bennaPlan">
+                            <span class="pulse"></span>
+                            <span>
+                                Benna will score every eligible impression against your targeting signals and auto-bid up to a ceiling that hits your <strong>target CPA of $4.50</strong>. Expect a <code>learning phase</code> of 48–72 hours while the engine calibrates on your conversion events, then steady optimization. Live adjustments viewable in the campaign dashboard.
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Bid Amount (only shown for Manual goal) -->
+                    <div class="form-group manual-bid-wrap" id="manualBidWrap">
                         <label class="form-label">Bid Amount</label>
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="color: var(--text); font-weight: 600;">$</span>
-                            <input type="number" class="form-input campaign-field" name="bid_amount" placeholder="0.00" min="0" step="0.01" required>
+                            <input type="number" class="form-input campaign-field" name="bid_amount" placeholder="0.00" min="0" step="0.01">
                         </div>
                     </div>
 
@@ -1280,7 +1840,7 @@
 
         <!-- Footer -->
         <footer>
-            Boost Boss Ads © 2026 · <a href="/ads.html" style="color: #FF2D78; text-decoration: none;">← Back to boostboss.ai/ads</a>
+            SuperBoost © 2026 · <a href="/ads.html" style="color: #FF2D78; text-decoration: none;">← Back to boostboss.ai/ads</a>
         </footer>
     </div>
 
@@ -1334,6 +1894,7 @@
         function init() {
             checkSession();
             setupEventListeners();
+            initBennaGoalSelector();
         }
 
         // Check for existing session
@@ -1358,6 +1919,10 @@
                 showDashboard();
                 loadStats();
                 loadCampaigns();
+                loadBennaEngine();
+                if (!window.__bennaInterval) {
+                    window.__bennaInterval = setInterval(loadBennaEngine, 30000);
+                }
             } else {
                 showAuthForm();
             }
@@ -1391,6 +1956,10 @@
 
             // Logout
             logoutBtn.addEventListener('click', handleLogout);
+
+            // Demo quick-start
+            const demoBtn = document.getElementById('demoBtn');
+            if (demoBtn) demoBtn.addEventListener('click', handleDemoQuickStart);
 
             // Modal
             newCampaignBtn.addEventListener('click', openModal);
@@ -1516,9 +2085,58 @@
                 showDashboard();
                 loadStats();
                 loadCampaigns();
+                loadBennaEngine();
+                if (!window.__bennaInterval) {
+                    window.__bennaInterval = setInterval(loadBennaEngine, 30000);
+                }
             } catch (error) {
                 authError.textContent = error.message;
                 authError.classList.add('active');
+            }
+        }
+
+        async function handleDemoQuickStart() {
+            const demoBtn = document.getElementById('demoBtn');
+            const originalText = demoBtn.textContent;
+            demoBtn.textContent = 'Spinning up your demo account…';
+            demoBtn.disabled = true;
+            authError.classList.remove('active');
+            try {
+                const response = await fetch(`${API_BASE}/api/auth?action=demo`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: 'advertiser' })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Demo provisioning failed');
+
+                const userId = data.user?.id;
+                const token = data.session?.access_token;
+                const company = data.profile?.company_name || 'Demo Co.';
+
+                currentUser = { token: token, user_id: userId };
+                currentUserData = {
+                    company_name: company,
+                    email: data.user.email,
+                    user_id: userId,
+                    is_demo: true
+                };
+
+                localStorage.setItem('bb_session_token', JSON.stringify(currentUser));
+                localStorage.setItem('bb_user_data', JSON.stringify(currentUserData));
+
+                showDashboard();
+                loadStats();
+                loadCampaigns();
+                loadBennaEngine();
+                if (!window.__bennaInterval) {
+                    window.__bennaInterval = setInterval(loadBennaEngine, 30000);
+                }
+            } catch (error) {
+                authError.textContent = error.message;
+                authError.classList.add('active');
+                demoBtn.textContent = originalText;
+                demoBtn.disabled = false;
             }
         }
 
@@ -1598,9 +2216,12 @@
                 campaignTableBody.innerHTML = '';
 
                 if (campaigns.length === 0) {
-                    campaignTableBody.innerHTML = '<tr><td colspan="9" class="empty-state">No campaigns yet. Create one to get started!</td></tr>';
+                    campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state">No campaigns yet. Create one to get started!</td></tr>';
                     return;
                 }
+
+                // Update Benna header counters based on campaign cohort
+                updateBennaEngineCounters(campaigns);
 
                 campaigns.forEach(campaign => {
                     const ctr = ((campaign.clicks / (campaign.impressions || 1)) * 100).toFixed(2);
@@ -1610,10 +2231,13 @@
                     const statusBadge = campaign.status === 'live' ? 'live' :
                                        campaign.status === 'paused' ? 'paused' : 'review';
 
+                    const bennaChip = renderBennaChip(campaign);
+
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td><strong>${campaign.name}</strong></td>
                         <td><span class="badge ${statusBadge}">${campaign.status}</span></td>
+                        <td>${bennaChip}</td>
                         <td>${campaign.format || 'N/A'}</td>
                         <td>${formatNumber(campaign.impressions || 0)}</td>
                         <td>${formatNumber(campaign.clicks || 0)}</td>
@@ -1672,8 +2296,113 @@
                 });
             } catch (error) {
                 console.error('Error loading campaigns:', error);
-                campaignTableBody.innerHTML = '<tr><td colspan="9" class="loading">Error loading campaigns</td></tr>';
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="loading">Error loading campaigns</td></tr>';
             }
+        }
+
+        // Per-campaign Benna chip based on paused/live + inferred age
+        function renderBennaChip(campaign) {
+            if (campaign.status === 'paused') {
+                return '<span class="b-chip" style="background:rgba(255,255,255,0.05);color:#6B6B83;border:1px solid rgba(255,255,255,0.08)"><span class="d" style="background:#6B6B83"></span>paused</span>';
+            }
+            // Infer phase from created_at if present, otherwise from impressions
+            let phase = 'optimizing';
+            const imps = campaign.impressions || 0;
+            if (campaign.created_at) {
+                const hrs = (Date.now() - new Date(campaign.created_at).getTime()) / 3600000;
+                if (hrs < 48) phase = 'learning';
+                else if (hrs > 168) phase = 'mature';
+                else phase = 'optimizing';
+            } else {
+                if (imps < 5000) phase = 'learning';
+                else if (imps > 100000) phase = 'mature';
+            }
+            const label = phase === 'learning' ? 'learning'
+                        : phase === 'mature'   ? 'mature'
+                        : 'optimizing';
+            return `<span class="b-chip ${phase}"><span class="d"></span>${label}</span>`;
+        }
+
+        // Update the "OPTIMIZING · N campaigns" pill + learning count metric
+        function updateBennaEngineCounters(campaigns) {
+            const active = campaigns.filter(c => c.status === 'live');
+            let learning = 0, optimizing = 0, mature = 0;
+            active.forEach(c => {
+                const imps = c.impressions || 0;
+                let phase = 'optimizing';
+                if (c.created_at) {
+                    const hrs = (Date.now() - new Date(c.created_at).getTime()) / 3600000;
+                    if (hrs < 48) phase = 'learning';
+                    else if (hrs > 168) phase = 'mature';
+                } else {
+                    if (imps < 5000) phase = 'learning';
+                    else if (imps > 100000) phase = 'mature';
+                }
+                if (phase === 'learning') learning++;
+                else if (phase === 'mature') mature++;
+                else optimizing++;
+            });
+            const statusLabel = document.getElementById('bennaStatusLabel');
+            const learnEl = document.getElementById('bMetricLearning');
+            if (statusLabel) {
+                if (active.length === 0) {
+                    statusLabel.textContent = 'IDLE · awaiting campaigns';
+                } else {
+                    statusLabel.textContent = `OPTIMIZING · ${active.length} campaign${active.length === 1 ? '' : 's'}`;
+                }
+            }
+            if (learnEl) learnEl.textContent = String(learning);
+        }
+
+        // Live pull from /api/benna — updates metrics / signals / log every 30s
+        async function loadBennaEngine() {
+            try {
+                const advertiserId = (currentUserData && currentUserData.user_id) || 'default';
+                const response = await fetch(`${API_BASE}/api/benna?op=engine-status&advertiser_id=${encodeURIComponent(advertiserId)}`);
+                if (!response.ok) return;
+                const data = await response.json();
+
+                // Metrics
+                const m = data.metrics || {};
+                const elD = document.getElementById('bMetricDecisions');
+                const elL = document.getElementById('bMetricLatency');
+                const elE = document.getElementById('bMetricLift');
+                if (elD && m.decisions_24h_fmt) elD.textContent = m.decisions_24h_fmt;
+                if (elL && m.inference_p50_ms) elL.textContent = `${m.inference_p50_ms}ms`;
+                if (elE && m.ecpa_lift_pct != null) elE.textContent = `${m.ecpa_lift_pct > 0 ? '+' : ''}${m.ecpa_lift_pct}%`;
+
+                // Signals
+                const sigBox = document.getElementById('bSignals');
+                if (sigBox && Array.isArray(data.signals)) {
+                    sigBox.innerHTML = data.signals.map(s => `
+                        <div class="b-signal">
+                            <div class="name">${escapeHtml(s.name)}</div>
+                            <div class="bar"><div class="bar-fill" style="width: ${s.bar}%;"></div></div>
+                            <div class="weight">${s.weight.toFixed(2)}</div>
+                        </div>
+                    `).join('');
+                }
+
+                // Log
+                const logBox = document.getElementById('bLog');
+                if (logBox && Array.isArray(data.log)) {
+                    logBox.innerHTML = data.log.map(e => `
+                        <div class="b-log-entry">
+                            <span class="time">${escapeHtml(e.time)}</span>
+                            <span class="action">${e.action}</span>
+                        </div>
+                    `).join('');
+                }
+            } catch (err) {
+                // Silently fail — static fallback stays on screen
+                console.warn('Benna engine poll failed:', err.message);
+            }
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => (
+                { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]
+            ));
         }
 
         // Render chart with real data
@@ -1784,6 +2513,69 @@
             // eCPA improves as targeting tightens (to a floor)
             const ecpa = Math.max(1.80, 3.20 - signalCount * 0.18);
             document.getElementById('reachEcpa').textContent = '$' + ecpa.toFixed(2);
+            // Keep Benna plan's learning-phase estimate in sync with targeting narrowness
+            if (window.__updateBennaPlan) window.__updateBennaPlan();
+        }
+
+        // ───────────── BENNA OPTIMIZATION GOAL ─────────────
+        function initBennaGoalSelector() {
+            const tiles = document.querySelectorAll('.goal-tile');
+            const hiddenInput = document.getElementById('optimizationGoal');
+            const cpaInput = document.getElementById('goalTargetCpa');
+            const roasInput = document.getElementById('goalTargetRoas');
+            const manualWrap = document.getElementById('manualBidWrap');
+            const bennaPlan = document.getElementById('bennaPlan');
+            const cpaVal = document.getElementById('targetCpaValue');
+            const roasVal = document.getElementById('targetRoasValue');
+            const manualBid = document.querySelector('#manualBidWrap input[name="bid_amount"]');
+
+            function render(goal) {
+                tiles.forEach(t => t.classList.toggle('selected', t.dataset.goal === goal));
+                hiddenInput.value = goal;
+                cpaInput.classList.toggle('active', goal === 'target_cpa');
+                roasInput.classList.toggle('active', goal === 'target_roas');
+                manualWrap.classList.toggle('active', goal === 'manual');
+
+                // Toggle required states
+                if (manualBid) manualBid.required = (goal === 'manual');
+                cpaVal.required = (goal === 'target_cpa');
+                roasVal.required = (goal === 'target_roas');
+
+                updateBennaPlan();
+            }
+
+            function updateBennaPlan() {
+                const goal = hiddenInput.value;
+                const cpa = parseFloat(cpaVal.value) || 4.50;
+                const roas = parseFloat(roasVal.value) || 3.0;
+                const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
+                const signalCount = intents.length + hostApps.length + mcpTools.length + aiModels.length;
+                const learningHrs = signalCount >= 4 ? '24–48 hours' : '48–72 hours';
+
+                let html = '';
+                if (goal === 'target_cpa') {
+                    html = `Benna will score every eligible impression against your targeting signals and auto-bid up to a ceiling that hits your <strong>target CPA of $${cpa.toFixed(2)}</strong>. Expect a <code>learning phase</code> of ${learningHrs} while the engine calibrates on your conversion events, then steady optimization.`;
+                } else if (goal === 'target_roas') {
+                    html = `Benna will pace spend toward impressions with the highest predicted return, aiming for a <strong>${roas.toFixed(1)}× ROAS</strong>. The engine relies on your conversion-value signal, so ensure the pixel is firing revenue events. <code>learning phase: ${learningHrs}</code>.`;
+                } else if (goal === 'max_conversions') {
+                    html = `Benna will spend the <strong>full daily budget</strong> on the highest-probability converters, ignoring CPA ceilings. Ideal for campaigns with flexible CPA tolerance and aggressive volume goals. <code>learning phase: ${learningHrs}</code>.`;
+                } else if (goal === 'manual') {
+                    html = `Benna's targeting signals are still applied — you just set the bid. Use this if you want <strong>full manual control</strong> for testing or when running against strict legacy bid caps. No learning phase required.`;
+                }
+                bennaPlan.innerHTML = '<span class="pulse"></span><span>' + html + '</span>';
+            }
+
+            tiles.forEach(tile => {
+                tile.addEventListener('click', () => render(tile.dataset.goal));
+            });
+            cpaVal.addEventListener('input', updateBennaPlan);
+            roasVal.addEventListener('input', updateBennaPlan);
+
+            // Initialize default state (target_cpa is default)
+            render('target_cpa');
+
+            // Expose for external calls (e.g. after targeting changes)
+            window.__updateBennaPlan = updateBennaPlan;
         }
 
         function updateUploadAreaText(fileName) {
@@ -1816,9 +2608,17 @@
                 mcp_tools: mcpTools,
                 ai_models: aiModels,
                 billing_model: formData.get('billing_model'),
-                bid_amount: parseFloat(formData.get('bid_amount')),
+                bid_amount: parseFloat(formData.get('bid_amount')) || null,
                 daily_budget: parseFloat(formData.get('daily_budget')),
                 total_budget: parseFloat(formData.get('total_budget')),
+                // Benna optimization goal
+                optimization_goal: document.getElementById('optimizationGoal').value,
+                target_cpa: document.getElementById('optimizationGoal').value === 'target_cpa'
+                    ? parseFloat(document.getElementById('targetCpaValue').value) || null
+                    : null,
+                target_roas: document.getElementById('optimizationGoal').value === 'target_roas'
+                    ? parseFloat(document.getElementById('targetRoasValue').value) || null
+                    : null,
                 status: 'review'
             };
 

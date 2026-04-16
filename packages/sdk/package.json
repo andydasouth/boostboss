@@ -1,0 +1,46 @@
+{
+  "name": "@boostboss/sdk",
+  "version": "1.0.0",
+  "description": "Boost Boss — MCP ad network SDK. Monetize your AI app with context-aware, native sponsored content ranked in real time by Benna.",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./src/index.js",
+      "import": "./src/index.mjs",
+      "types": "./src/index.d.ts"
+    },
+    "./renderer": "./src/renderer.js",
+    "./mcp": "./src/mcp.js"
+  },
+  "keywords": [
+    "mcp",
+    "ads",
+    "advertising",
+    "monetization",
+    "ai",
+    "claude",
+    "cursor",
+    "boostboss",
+    "benna"
+  ],
+  "author": "Boost Boss, Inc.",
+  "license": "Apache-2.0",
+  "homepage": "https://boostboss.ai",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/boostboss/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/boostboss/sdk/issues",
+    "email": "sdk@boostboss.ai"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "scripts": {
+    "test": "node test/smoke.js"
+  }
+}

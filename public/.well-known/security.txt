@@ -1,0 +1,12 @@
+# Boost Boss security disclosure policy
+# RFC 9116 — https://www.rfc-editor.org/rfc/rfc9116
+
+Contact: mailto:security@boostboss.ai
+Contact: https://boostboss.ai/trust.html#security
+Expires: 2027-04-16T00:00:00.000Z
+Encryption: https://boostboss.ai/pgp-key.txt
+Acknowledgments: https://boostboss.ai/trust.html#hall-of-fame
+Preferred-Languages: en
+Canonical: https://boostboss.ai/.well-known/security.txt
+Policy: https://boostboss.ai/trust.html#security
+Hiring: https://boostboss.ai/careers

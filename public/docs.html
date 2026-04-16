@@ -391,9 +391,11 @@
       <span class="brand-sub">DOCS</span>
     </a>
     <div class="nav-links">
-      <a href="/ads.html">Advertisers</a>
-      <a href="/publish.html">Publishers</a>
-      <a href="/demo.html">Demo</a>
+      <a href="/ads.html">SuperBoost</a>
+      <a href="/publish.html">Lumi SDK</a>
+      <a href="/exchange.html">BBX</a>
+      <a href="/docs.html">Docs</a>
+      <a href="/trust.html">Trust</a>
       <a href="/">boostboss.ai ↗</a>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
@@ -453,6 +455,26 @@
         <li><a href="#errors">Error codes</a></li>
       </ul>
     </div>
+    <div class="side-group">
+      <h5><span class="chip ink"></span>Benna (ranking engine)</h5>
+      <ul class="side-links">
+        <li><a href="#benna-overview">Overview &amp; licensing</a></li>
+        <li><a href="#benna-score"><span class="method-tag post">POST</span>Score a bid</a></li>
+        <li><a href="#benna-engine-status"><span class="method-tag get">GET</span>Engine status</a></li>
+        <li><a href="#benna-signals">Signal reference</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <h5><span class="chip cyan"></span>OpenRTB 2.6 (BBX)</h5>
+      <ul class="side-links">
+        <li><a href="#rtb-overview">Overview for DSPs</a></li>
+        <li><a href="#rtb-bid"><span class="method-tag post">POST</span>Bid request</a></li>
+        <li><a href="#rtb-response">Bid response</a></li>
+        <li><a href="#rtb-win-loss"><span class="method-tag get">GET</span>Win / loss notice</a></li>
+        <li><a href="#rtb-status"><span class="method-tag get">GET</span>Adapter status</a></li>
+        <li><a href="#rtb-mcp-translation">OpenRTB → MCP map</a></li>
+      </ul>
+    </div>
   </aside>
 
   <!-- MAIN CONTENT -->
@@ -472,7 +494,12 @@
 
     <p>The Boost Boss API lets you <strong>fetch ads</strong>, <strong>beacon events</strong>, and <strong>manage campaigns</strong> programmatically. This reference covers every endpoint, every parameter, and every response field. The API is organized around REST — predictable URLs, standard HTTP verbs, standard status codes, JSON request and response bodies.</p>
 
-    <p>If you're monetizing an AI app, start with the <a href="#sdk-typescript" class="inline-link">SDK quickstart</a>. If you're running campaigns, skip to <a href="#api-create-campaign" class="inline-link">Create campaign</a>. If you're integrating via OpenRTB, see our <a href="#" class="inline-link">exchange docs</a>.</p>
+    <p>If you're monetizing an AI app, start with the <a href="#sdk-typescript" class="inline-link">SDK quickstart</a>. If you're running campaigns, skip to <a href="#api-create-campaign" class="inline-link">Create campaign</a>. If you're integrating via OpenRTB 2.6, jump to the <a href="#rtb-overview" class="inline-link">BBX adapter</a>. Licensing Benna into your own mediation stack? Jump to <a href="#benna-overview" class="inline-link">Benna</a>.</p>
+
+    <div class="callout tip">
+      <span class="icon">✦</span>
+      <div><strong>Machine-readable spec.</strong> A full OpenAPI 3.1 description of every endpoint on this page lives at <a href="/openapi.json" class="inline-link"><code>/openapi.json</code></a> — drop it into Postman, Stoplight, or your code generator of choice.</div>
+    </div>
 
     <div class="card-grid">
       <a class="doc-card" href="#quickstart">
@@ -801,6 +828,118 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
 }</pre>
     </div>
 
+    <!-- BENNA -->
+    <h2 id="benna-overview">Benna — the ranking engine</h2>
+    <p><strong>Benna</strong> is the model that ranks every bid served through Boost Boss. It's an MCP-native ranker: instead of scoring on cookies, device IDs, and page URLs, it scores on the signals that actually predict conversion in an AI surface — user intent, the MCP tool about to be called, the host application, and session length. Benna runs at <strong>sub-5ms p50</strong> and returns a full attribution block so every decision is inspectable.</p>
+
+    <p>Benna powers the first-party Boost Boss exchange (BBX) by default. You don't need to call it directly — the SDK does it for you. <strong>But if you operate your own demand stack</strong> and want to plug Benna into an existing mediation waterfall or header bidder, we license the raw inference endpoint at <strong>$0.002 per call</strong>. Every response includes the model version, predicted click &amp; conversion rates, and a signal-by-signal contribution breakdown.</p>
+
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>When to license Benna directly.</strong> If your network already has demand but your ranker was built for web/mobile contexts, Benna is the fastest way to bolt on MCP-aware scoring. Typical lift in A/B tests: <strong>+28% eCPM</strong> and <strong>+34% CVR</strong> vs. a cookie-trained baseline on the same inventory.</div>
+    </div>
+
+    <div class="callout tip">
+      <span class="icon">✦</span>
+      <div><strong>Technical whitepaper.</strong> The full architecture, training protocol, and A/B evaluation are documented in <a href="/benna-whitepaper.pdf" class="inline-link">Benna: MCP-Native Ranking for Agentic Advertising (PDF, 8 pages)</a>. Cite as <code>boostboss.ai/benna-whitepaper.pdf</code>.</div>
+    </div>
+
+    <!-- BENNA SCORE -->
+    <h2 id="benna-score">Score a bid request</h2>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Rank a single bid against your own demand.</span></div>
+    <p>Submit a bid context and a campaign spec; Benna returns an effective bid in USD plus click / convert probabilities and a signal attribution map. Billed at $0.002 per call; latency budget is 20ms end-to-end (model itself is 3–6ms, the rest is network &amp; JSON).</p>
+
+    <h4>Request</h4>
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">context.intent</td><td class="param-type">string</td><td class="param-desc">Normalized intent token. See <a href="#benna-signals" class="inline-link">Signal reference</a>.</td></tr>
+        <tr><td class="param-name">context.mcp_tool</td><td class="param-type">string</td><td class="param-desc">Tool about to be invoked — e.g. <code>shell.exec</code>, <code>file.read</code>, <code>web.search</code>.</td></tr>
+        <tr><td class="param-name">context.host</td><td class="param-type">string</td><td class="param-desc">Host app domain — e.g. <code>cursor.com</code>, <code>claude.ai</code>.</td></tr>
+        <tr><td class="param-name">context.session_len</td><td class="param-type">number</td><td class="param-desc">Minutes elapsed in the current user session.</td></tr>
+        <tr><td class="param-name">context.region</td><td class="param-type">string</td><td class="param-desc">ISO region — <code>us-west</code>, <code>eu-central</code>, etc.</td></tr>
+        <tr><td class="param-name">campaign.target_cpa</td><td class="param-type">number</td><td class="param-desc">Advertiser target CPA in USD.</td></tr>
+        <tr><td class="param-name">campaign.goal</td><td class="param-type">string</td><td class="param-desc"><code>target_cpa</code>, <code>target_roas</code>, <code>max_conversions</code>, or <code>manual</code>.</td></tr>
+        <tr><td class="param-name">campaign.format</td><td class="param-type">string</td><td class="param-desc"><code>image</code>, <code>video</code>, or <code>native</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
+<pre><span class="k">curl</span> <span class="s">"https://boostboss.ai/api/benna"</span> \
+  -H <span class="s">"Authorization: Bearer bb_sk_live_..."</span> \
+  -H <span class="s">"Content-Type: application/json"</span> \
+  -d <span class="s">'{
+    "context": {
+      "intent":      "debug_py",
+      "mcp_tool":    "shell.exec",
+      "host":        "cursor.com",
+      "session_len": 42,
+      "region":      "us-west"
+    },
+    "campaign": {
+      "target_cpa": 8.00,
+      "goal":       "target_cpa",
+      "format":     "native"
+    }
+  }'</span></pre>
+    </div>
+
+    <h4>Response</h4>
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"model_version"</span>: <span class="s">"benna-rc3-2026.04.14"</span>,
+  <span class="s">"bid_usd"</span>:          <span class="n">8.42</span>,
+  <span class="s">"p_click"</span>:          <span class="n">0.031</span>,
+  <span class="s">"p_convert"</span>:        <span class="n">0.0062</span>,
+  <span class="s">"signal_contributions"</span>: {
+    <span class="s">"intent=debug_py"</span>:        <span class="n">0.34</span>,
+    <span class="s">"mcp_tool=shell.exec"</span>:    <span class="n">0.22</span>,
+    <span class="s">"host=cursor.com"</span>:        <span class="n">0.18</span>,
+    <span class="s">"session_len&gt;30m"</span>:       <span class="n">0.13</span>,
+    <span class="s">"region=us-west"</span>:         <span class="n">0.09</span>,
+    <span class="s">"residual"</span>:               <span class="n">0.04</span>
+  },
+  <span class="s">"latency_ms"</span>: <span class="n">4.2</span>
+}</pre>
+    </div>
+
+    <!-- BENNA ENGINE STATUS -->
+    <h2 id="benna-engine-status">Engine status</h2>
+    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/benna?op=engine-status</span><span class="desc">Current model version, training window, and health.</span></div>
+    <p>Use this to confirm which model is live in production, when it was last retrained, and its self-reported calibration metrics. Free to call — not billed. Pair it with your own monitoring to alert on stale models or calibration drift.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"model_version"</span>:      <span class="s">"benna-rc3-2026.04.14"</span>,
+  <span class="s">"trained_through"</span>:    <span class="s">"2026-04-12"</span>,
+  <span class="s">"training_examples"</span>: <span class="n">184_000_000</span>,
+  <span class="s">"p50_latency_ms"</span>:     <span class="n">4.1</span>,
+  <span class="s">"p99_latency_ms"</span>:     <span class="n">11.8</span>,
+  <span class="s">"calibration_ece"</span>:    <span class="n">0.021</span>,
+  <span class="s">"status"</span>:             <span class="s">"healthy"</span>
+}</pre>
+    </div>
+
+    <!-- BENNA SIGNAL REFERENCE -->
+    <h2 id="benna-signals">Signal reference</h2>
+    <p>Benna is trained on five MCP-native signals. These are the <strong>only</strong> inputs that affect ranking — there are no cookies, no device fingerprints, no persistent user IDs. Intent strings are matched against a vocabulary server-side; raw text is discarded after normalization.</p>
+
+    <table class="params">
+      <thead><tr><th>Signal</th><th>Type</th><th>Typical weight</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">intent</td><td class="param-type">token</td><td class="param-desc">≈ 0.34</td><td class="param-desc">Normalized from the active user request. Vocabulary &gt; 4,000 tokens.</td></tr>
+        <tr><td class="param-name">mcp_tool</td><td class="param-type">token</td><td class="param-desc">≈ 0.22</td><td class="param-desc">The tool about to execute. High signal — differentiates "reading about X" vs. "doing X".</td></tr>
+        <tr><td class="param-name">host</td><td class="param-type">token</td><td class="param-desc">≈ 0.18</td><td class="param-desc">Host app domain. Proxies for user persona (developer, analyst, consumer).</td></tr>
+        <tr><td class="param-name">session_len</td><td class="param-type">number</td><td class="param-desc">≈ 0.13</td><td class="param-desc">Longer sessions convert at higher rates; bucketed as &lt;10m / 10–30m / &gt;30m.</td></tr>
+        <tr><td class="param-name">region</td><td class="param-type">token</td><td class="param-desc">≈ 0.09</td><td class="param-desc">Coarse region only. Never IP-level.</td></tr>
+      </tbody>
+    </table>
+
+    <p class="param-desc" style="margin-top:12px">Weights shown are the current production contributions averaged across the live exchange; per-request attribution is returned in every <code>/api/benna</code> response so you can inspect the exact mix for any decision.</p>
+
     <!-- AD FORMATS -->
     <h2 id="ad-formats">Ad formats</h2>
     <p>Boost Boss serves four native-first ad formats. Each is rendered by your app — we return the content, you render the chrome that matches your UI.</p>
@@ -928,6 +1067,212 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
       </tbody>
     </table>
 
+    <!-- OPENRTB 2.6 ADAPTER ========================================= -->
+    <h2 id="rtb-overview">OpenRTB 2.6 — BBX adapter</h2>
+    <p><strong>BBX</strong> (Boost Boss Exchange) exposes an <a href="https://iabtechlab.com/wp-content/uploads/2022/04/OpenRTB-2-6_FINAL.pdf" class="inline-link" target="_blank" rel="noopener">OpenRTB 2.6</a> endpoint so that any compliant DSP — The Trade Desk, DV360, Amazon DSP, Criteo, or your in-house demand stack — can bid into MCP-native inventory without writing a bespoke integration. One URL, first-price auction, win/loss notices, native 1.2 + VAST 4.2 markup. The adapter sits in front of Benna: every bid is scored and every response includes a full attribution block in <code>bid.ext.benna</code>.</p>
+
+    <div class="callout tip">
+      <span class="icon">✦</span>
+      <div><strong>Why bid here.</strong> MCP surfaces are the highest-intent inventory on the internet — a user calling <code>filesystem.read</code> on a traceback is a conversion event waiting to happen. BBX translates those signals into OpenRTB fields DSPs already understand, so your existing bidder works out of the box.</div>
+    </div>
+
+    <h4>Endpoint summary</h4>
+    <table class="params">
+      <thead><tr><th>Operation</th><th>Method</th><th>Path</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">Bid</td><td class="param-type">POST</td><td class="param-desc"><code>/api/rtb</code></td><td class="param-desc">Send an OpenRTB 2.6 BidRequest; get back a BidResponse or <code>204 No Content</code>.</td></tr>
+        <tr><td class="param-name">Win notice</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=win</code></td><td class="param-desc">DSPs hit <code>bid.nurl</code> with <code>${AUCTION_PRICE}</code> substituted. Returns a 1×1 GIF.</td></tr>
+        <tr><td class="param-name">Loss notice</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=loss</code></td><td class="param-desc">DSPs hit <code>bid.lurl</code> with <code>${AUCTION_LOSS}</code>. Returns a 1×1 GIF.</td></tr>
+        <tr><td class="param-name">Status</td><td class="param-type">GET</td><td class="param-desc"><code>/api/rtb?op=status</code></td><td class="param-desc">Adapter metadata — OpenRTB version, supported formats, auction type, Benna build.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>Machine-readable.</strong> Full JSON Schema for every object on this page is in <a href="/openapi.json" class="inline-link"><code>/openapi.json</code></a> under the <code>RTB</code> tag. Drop it into your DSP's QA harness.</div>
+    </div>
+
+    <h2 id="rtb-bid">Bid request</h2>
+    <p>Send a standard OpenRTB 2.6 <code>BidRequest</code> as the body. All supported objects — <code>imp[]</code>, <code>site</code> / <code>app</code>, <code>device</code>, <code>user</code>, <code>source</code>, <code>regs</code>, <code>bcat</code>, <code>badv</code> — are honored. Native 1.2 asset requests pass through unchanged; the adapter parses <code>imp.native.request</code> and returns matching asset IDs in the response <code>adm</code>.</p>
+
+    <p>Minimum viable request: a <code>BidRequest.id</code>, a single <code>imp</code> with one of <code>native</code> / <code>banner</code> / <code>video</code>, and enough context to score. A realistic Trade Desk-style request looks like this:</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">cURL · POST /api/rtb</span><span class="copy">Copy</span></div>
+<pre>curl -X POST https://boostboss.ai/api/rtb \
+  -H <span class="s">'Authorization: Bearer bb_seat_&lt;your-seat-key&gt;'</span> \
+  -H <span class="s">'Content-Type: application/json'</span> \
+  -H <span class="s">'x-openrtb-version: 2.6'</span> \
+  --data <span class="s">'{
+    "id": "bid_req_9a8b7c",
+    "at": 1,
+    "tmax": 200,
+    "cur": ["USD"],
+    "imp": [{
+      "id": "1",
+      "tagid": "cursor.com/editor/python",
+      "bidfloor": 1.50,
+      "bidfloorcur": "USD",
+      "secure": 1,
+      "native": {
+        "ver": "1.2",
+        "request": "{\"ver\":\"1.2\",\"assets\":[{\"id\":1,\"required\":1,\"title\":{\"len\":60}},{\"id\":2,\"required\":1,\"img\":{\"type\":3,\"w\":1200,\"h\":628}},{\"id\":4,\"required\":1,\"data\":{\"type\":12,\"len\":25}}]}"
+      }
+    }],
+    "site": {
+      "id": "site_cursor_1",
+      "domain": "cursor.com",
+      "page": "https://cursor.com/editor",
+      "keywords": "python debugging traceback editor",
+      "publisher": { "id": "pub_cursor", "name": "Cursor Labs" }
+    },
+    "device": {
+      "ua": "Mozilla/5.0 ...",
+      "ip": "192.0.2.1",
+      "geo": { "country": "USA", "region": "us-west" },
+      "devicetype": 2
+    },
+    "user": { "id": "anon_sess_a1b2c3", "ext": { "session_len_min": 42 } },
+    "source": { "tid": "tx_42f8", "fd": 1 },
+    "bcat": ["IAB7-39", "IAB8-18"],
+    "badv": ["bad-competitor.com"]
+  }'</span></pre>
+    </div>
+
+    <p class="param-desc" style="margin-top:12px">If your DSP already computes MCP signals server-side, pass them explicitly via <code>imp.ext.mcp_context</code> — they will override any values the adapter would otherwise infer. Example:</p>
+
+    <div class="code-block">
+<pre>{ <span class="s">"imp"</span>: [{ <span class="s">"id"</span>: <span class="s">"1"</span>, <span class="s">"ext"</span>: { <span class="s">"mcp_context"</span>: {
+  <span class="s">"intent"</span>: <span class="s">"debug_py"</span>,
+  <span class="s">"mcp_tool"</span>: <span class="s">"filesystem.read"</span>,
+  <span class="s">"host"</span>: <span class="s">"cursor.com"</span>,
+  <span class="s">"region"</span>: <span class="s">"us-west"</span>,
+  <span class="s">"session_len"</span>: <span class="n">42</span>
+} } }] }</pre>
+    </div>
+
+    <h4>No-bid codes (NBR)</h4>
+    <table class="params">
+      <thead><tr><th>NBR</th><th>HTTP</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td class="param-type">—</td><td class="param-name">204</td><td class="param-desc">No eligible campaign (price floor, brand safety, targeting).</td></tr>
+        <tr><td class="param-type">2</td><td class="param-name">400</td><td class="param-desc">Invalid request — missing <code>id</code>, <code>imp[]</code>, or format.</td></tr>
+        <tr><td class="param-type">1</td><td class="param-name">500</td><td class="param-desc">Technical error; safe to retry with backoff.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="rtb-response">Bid response</h2>
+    <p>On a win, the adapter returns a standard <code>BidResponse</code> with a single <code>seatbid</code> (seat = <code>boostboss</code>). Each bid carries CPM price (USD), creative markup, tracking URLs with the standard auction macros, and — critically — a <code>bid.ext.benna</code> attribution block that tells you exactly why the bid was scored the way it was.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">BidResponse — 200 OK</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"id"</span>: <span class="s">"bid_req_9a8b7c"</span>,
+  <span class="s">"bidid"</span>: <span class="s">"bbx_b1f42a6c3d9e"</span>,
+  <span class="s">"cur"</span>: <span class="s">"USD"</span>,
+  <span class="s">"seatbid"</span>: [{
+    <span class="s">"seat"</span>: <span class="s">"boostboss"</span>,
+    <span class="s">"bid"</span>: [{
+      <span class="s">"id"</span>: <span class="s">"bbx_b1f42a6c3d9e"</span>,
+      <span class="s">"impid"</span>: <span class="s">"1"</span>,
+      <span class="s">"price"</span>: <span class="n">148.20</span>,
+      <span class="s">"adid"</span>: <span class="s">"cam_datadog_001"</span>,
+      <span class="s">"crid"</span>: <span class="s">"cr_datadog_apm_v3"</span>,
+      <span class="s">"cid"</span>: <span class="s">"cam_datadog_001"</span>,
+      <span class="s">"adomain"</span>: [<span class="s">"datadoghq.com"</span>],
+      <span class="s">"cat"</span>: [<span class="s">"IAB19-6"</span>],
+      <span class="s">"nurl"</span>: <span class="s">"https://boostboss.ai/api/rtb?op=win&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;price=${AUCTION_PRICE}"</span>,
+      <span class="s">"lurl"</span>: <span class="s">"https://boostboss.ai/api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=${AUCTION_LOSS}"</span>,
+      <span class="s">"adm"</span>: <span class="s">"{\"native\":{\"ver\":\"1.2\",\"assets\":[...],\"link\":{\"url\":\"https://...\"},\"eventtrackers\":[...]}}"</span>,
+      <span class="s">"ext"</span>: {
+        <span class="s">"benna"</span>: {
+          <span class="s">"model_version"</span>: <span class="s">"benna-rc3-2026.04.14"</span>,
+          <span class="s">"p_click"</span>: <span class="n">0.0500</span>,
+          <span class="s">"p_convert"</span>: <span class="n">0.0119</span>,
+          <span class="s">"latency_ms"</span>: <span class="n">4</span>,
+          <span class="s">"signal_contributions"</span>: [
+            { <span class="s">"signal"</span>: <span class="s">"intent=debug_py"</span>,    <span class="s">"weight"</span>: <span class="n">0.34</span>, <span class="s">"lift"</span>: <span class="n">33.5</span> },
+            { <span class="s">"signal"</span>: <span class="s">"host=cursor.com"</span>,    <span class="s">"weight"</span>: <span class="n">0.18</span>, <span class="s">"lift"</span>: <span class="n">21.9</span> },
+            { <span class="s">"signal"</span>: <span class="s">"region=us-west"</span>,     <span class="s">"weight"</span>: <span class="n">0.09</span>, <span class="s">"lift"</span>: <span class="n">11.2</span> }
+          ]
+        }
+      }
+    }]
+  }]
+}</pre>
+    </div>
+
+    <h4>Key fields</h4>
+    <table class="params">
+      <thead><tr><th>Field</th><th>Type</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">price</td><td class="param-type">number</td><td class="param-desc">First-price CPM in USD. Always ≥ <code>imp.bidfloor</code>.</td></tr>
+        <tr><td class="param-name">adomain</td><td class="param-type">string[]</td><td class="param-desc">Advertiser domain(s) for brand-safety checks.</td></tr>
+        <tr><td class="param-name">adm</td><td class="param-type">string</td><td class="param-desc">JSON for native (1.2 payload), HTML for banner, VAST 4.2 XML for video.</td></tr>
+        <tr><td class="param-name">nurl</td><td class="param-type">string</td><td class="param-desc">Win notice URL — substitute <code>${AUCTION_PRICE}</code>, fire on win.</td></tr>
+        <tr><td class="param-name">lurl</td><td class="param-type">string</td><td class="param-desc">Loss notice URL — substitute <code>${AUCTION_LOSS}</code>, fire on loss.</td></tr>
+        <tr><td class="param-name">ext.benna</td><td class="param-type">object</td><td class="param-desc">Attribution block — model version, p_click, p_convert, per-signal lift.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="rtb-win-loss">Win / loss notices</h2>
+    <p>Both notices are idempotent <code>GET</code>s that return a 43-byte 1×1 transparent GIF with <code>Content-Type: image/gif</code>. Fire them when your DSP resolves the auction. Substitute the standard OpenRTB macros before fetching:</p>
+
+    <div class="code-block">
+<pre><span class="c"># Win: substitute ${AUCTION_PRICE} with the clearing price in USD</span>
+GET /api/rtb?op=win&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;price=148.20
+
+<span class="c"># Loss: substitute ${AUCTION_LOSS} with the OpenRTB loss reason code</span>
+GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
+    </div>
+
+    <p class="param-desc" style="margin-top:12px">Common loss reasons (OpenRTB §5.24): <code>1</code> internal error, <code>2</code> impression opportunity expired, <code>3</code> invalid bid response, <code>102</code> below deal floor, <code>1001</code> lost to higher bid. BBX logs every notice and reconciles against Benna's internal price book.</p>
+
+    <h2 id="rtb-status">Adapter status</h2>
+    <p>A lightweight metadata endpoint for DSP discovery and health checks. Returns adapter version, supported formats, and Benna build info — useful for sandboxed QA and for your bidder's capability-negotiation phase.</p>
+
+    <div class="code-block with-head">
+      <div class="code-head"><span class="lang">GET /api/rtb?op=status</span><span class="copy">Copy</span></div>
+<pre>{
+  <span class="s">"adapter"</span>: <span class="s">"bbx-rtb-adapter"</span>,
+  <span class="s">"adapter_version"</span>: <span class="s">"1.0.0"</span>,
+  <span class="s">"openrtb_version"</span>: <span class="s">"2.6"</span>,
+  <span class="s">"auction_type"</span>: <span class="n">1</span>,
+  <span class="s">"supported_formats"</span>: [<span class="s">"native"</span>, <span class="s">"banner"</span>, <span class="s">"video"</span>],
+  <span class="s">"native_version"</span>: <span class="s">"1.2"</span>,
+  <span class="s">"vast_version"</span>: <span class="s">"4.2"</span>,
+  <span class="s">"benna_version"</span>: <span class="s">"benna-rc3-2026.04.14"</span>,
+  <span class="s">"currencies"</span>: [<span class="s">"USD"</span>]
+}</pre>
+    </div>
+
+    <h2 id="rtb-mcp-translation">OpenRTB → MCP signal map</h2>
+    <p>BBX bridges OpenRTB's cookie/URL world and the MCP signal world that Benna actually scores on. The table below shows how the adapter infers MCP signals from standard OpenRTB fields. <strong>Any explicit <code>imp.ext.mcp_context</code> always wins</strong> — set it if your DSP has richer signal than the adapter can derive.</p>
+
+    <table class="params">
+      <thead><tr><th>MCP signal</th><th>Inferred from</th><th>Rules</th></tr></thead>
+      <tbody>
+        <tr><td class="param-name">host</td><td class="param-desc"><code>site.domain</code> → <code>app.bundle</code> → <code>app.name</code> → <code>imp.tagid</code></td><td class="param-desc">First non-empty wins. Used as a strong persona proxy.</td></tr>
+        <tr><td class="param-name">intent</td><td class="param-desc"><code>site.keywords</code> + <code>site.page</code> + <code>imp.tagid</code></td><td class="param-desc">Vocabulary match: <code>debug|error|traceback|bug</code> → <code>debug_*</code>; <code>doc|tutorial|guide|learn</code> → <code>docs_lookup</code>; language tokens (<code>python</code>, <code>rust</code>, …) attach a suffix.</td></tr>
+        <tr><td class="param-name">mcp_tool</td><td class="param-desc"><code>imp.ext.mcp_context.mcp_tool</code> only</td><td class="param-desc">Not inferred — DSPs must pass it explicitly. Highest-lift signal when supplied.</td></tr>
+        <tr><td class="param-name">region</td><td class="param-desc"><code>device.geo.region</code> → <code>device.geo.country</code></td><td class="param-desc">Country mapping: USA→<code>us-west</code>, CAN→<code>us-east</code>, DEU/GBR/FRA→<code>eu-central</code>, JPN/KOR/SGP→<code>apac</code>, others→<code>global</code>.</td></tr>
+        <tr><td class="param-name">session_len</td><td class="param-desc"><code>user.ext.session_len_min</code></td><td class="param-desc">Integer minutes. Bucketed at &lt;10 / 10–30 / &gt;30. Sessions &gt; 30 min carry the strongest lift.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout info">
+      <span class="icon">i</span>
+      <div><strong>Brand safety.</strong> Standard OpenRTB <code>bcat</code> (blocked IAB categories) and <code>badv</code> (blocked advertiser domains) are honored at the campaign-eligibility layer. A request that blocks every eligible campaign returns <code>204 No Content</code>, not a 400.</div>
+    </div>
+
+    <h4>Response headers</h4>
+    <p>Every BidResponse carries three BBX-specific headers for observability:</p>
+    <div class="code-block">
+<pre><span class="f">x-openrtb-version</span>:     <span class="s">2.6</span>
+<span class="f">x-bbx-adapter</span>:         <span class="s">bbx-rtb-adapter/1.0.0</span>
+<span class="f">x-bbx-processing-ms</span>:   <span class="n">4</span></pre>
+    </div>
+
     <div class="foot-nav">
       <a href="/publish.html" class="prev">
         <div class="dir">← Overview</div>
@@ -957,6 +1302,8 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
       <li><a href="#webhooks">Webhooks</a></li>
       <li><a href="#rate-limits">Rate limits</a></li>
       <li><a href="#errors">Errors</a></li>
+      <li><a href="#rtb-overview">OpenRTB (BBX)</a></li>
+      <li><a href="#rtb-mcp-translation">MCP signal map</a></li>
     </ul>
   </aside>
 </div>

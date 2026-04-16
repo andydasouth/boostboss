@@ -417,6 +417,128 @@
   .demo-btn.vid:hover { background: #E0F2FE; color: #04BEFE; }
   .demo-btn.native { border-color: #FFE600; color: #FFE600; }
   .demo-btn.native:hover { background: #FFFACD; color: #FFE600; }
+
+  /* ───────────── BENNA INSPECTOR PANEL ───────────── */
+  .demo-btn.benna {
+    background: #0A0A14; border-color: #0A0A14; color: #9D7AFF;
+    font-family: 'JetBrains Mono', monospace; letter-spacing: 0.4px;
+  }
+  .demo-btn.benna:hover { background: #1A1A2E; border-color: #9D7AFF; color: #9D7AFF; }
+  .demo-btn.benna.on { box-shadow: inset 0 0 0 1px #9D7AFF; }
+
+  #benna-inspector {
+    position: fixed; top: 0; right: -460px; bottom: 0;
+    width: 440px; max-width: 88vw;
+    background: #0A0A14; color: #F5F5F7;
+    border-left: 1.5px solid #1A1A2E;
+    box-shadow: -20px 0 60px rgba(0,0,0,0.3);
+    z-index: 10000;
+    transition: right 0.35s cubic-bezier(0.2, 0.9, 0.3, 1);
+    overflow-y: auto;
+    font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+  }
+  #benna-inspector.active { right: 0; }
+  .bi-head {
+    padding: 18px 20px;
+    border-bottom: 1px solid #1A1A2E;
+    display: flex; align-items: center; gap: 12px;
+    position: sticky; top: 0; z-index: 2;
+    background: rgba(10, 10, 20, 0.95); backdrop-filter: blur(8px);
+  }
+  .bi-head .mark {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #9D7AFF 0%, #C76AFF 100%);
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px; color: #0A0A14;
+    box-shadow: 0 0 18px rgba(157, 122, 255, 0.4);
+  }
+  .bi-head .title-wrap { flex: 1; }
+  .bi-head .eyebrow {
+    font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #9D7AFF; margin-bottom: 2px;
+  }
+  .bi-head .title {
+    font-family: 'SF Pro', -apple-system, sans-serif;
+    font-weight: 600; font-size: 14px; color: #F5F5F7;
+    letter-spacing: -0.01em;
+  }
+  .bi-head .close {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: transparent; border: 1px solid #1A1A2E;
+    color: #A1A1B3; cursor: pointer; font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .bi-head .close:hover { border-color: #9D7AFF; color: #9D7AFF; }
+  .bi-section {
+    padding: 18px 20px;
+    border-bottom: 1px solid #1A1A2E;
+  }
+  .bi-label {
+    font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: #6B6B83; margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .bi-label::before { content: '●'; color: #9D7AFF; font-size: 7px; }
+  .bi-ctx {
+    background: rgba(157, 122, 255, 0.05);
+    border: 1px solid rgba(157, 122, 255, 0.15);
+    border-radius: 6px; padding: 10px 12px;
+    font-size: 11.5px; line-height: 1.7;
+  }
+  .bi-ctx .k { color: #A1A1B3; }
+  .bi-ctx .v { color: #9D7AFF; font-weight: 600; }
+  .bi-metric-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px 14px;
+  }
+  .bi-metric .v {
+    font-family: 'SF Pro', sans-serif;
+    font-weight: 600; font-size: 20px;
+    background: linear-gradient(135deg, #F5F5F7 0%, #9D7AFF 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.02em; line-height: 1;
+    margin-bottom: 3px;
+  }
+  .bi-metric .l { font-size: 10.5px; color: #6B6B83; }
+  .bi-sig {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 7px; font-size: 11px;
+  }
+  .bi-sig .nm { color: #F5F5F7; min-width: 130px; flex-shrink: 0; }
+  .bi-sig .bar {
+    flex: 1; height: 5px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 3px; overflow: hidden;
+  }
+  .bi-sig .fill {
+    height: 100%;
+    background: linear-gradient(90deg, #9D7AFF 0%, #C76AFF 100%);
+    box-shadow: 0 0 8px rgba(157, 122, 255, 0.5);
+  }
+  .bi-sig .lift { color: #4DF0A1; font-size: 10.5px; width: 44px; text-align: right; }
+  .bi-winner {
+    background: linear-gradient(135deg, rgba(157, 122, 255, 0.12) 0%, rgba(4, 190, 254, 0.06) 100%);
+    border: 1px solid rgba(157, 122, 255, 0.3);
+    border-radius: 8px; padding: 12px 14px;
+  }
+  .bi-winner .headline {
+    font-family: 'SF Pro', sans-serif; font-weight: 600; font-size: 13.5px;
+    color: #F5F5F7; margin-bottom: 3px;
+  }
+  .bi-winner .bid {
+    font-size: 18px; font-weight: 700; color: #4DF0A1;
+    margin-top: 8px; display: inline-block;
+  }
+  .bi-winner .bid-label {
+    font-size: 10px; color: #6B6B83; margin-left: 8px;
+  }
+  .bi-footer {
+    padding: 14px 20px; font-size: 10.5px; color: #6B6B83;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .bi-footer a { color: #9D7AFF; text-decoration: none; }
+  .bi-footer a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -476,8 +598,64 @@
     <button class="demo-btn vid" onclick="BoostBoss.trigger('corner','video')">Corner Video</button>
     <button class="demo-btn vid" onclick="BoostBoss.trigger('fullscreen','video')">Full Video</button>
     <button class="demo-btn native" onclick="insertNativeAd()">Native In-Chat</button>
+    <button class="demo-btn benna" id="bennaToggle" onclick="toggleBennaInspector()">▲ Benna</button>
   </div>
 </div>
+
+<!-- BENNA INSPECTOR (slide-in from right) -->
+<aside id="benna-inspector" aria-hidden="true">
+  <div class="bi-head">
+    <div class="mark">B</div>
+    <div class="title-wrap">
+      <div class="eyebrow">Benna · live decision</div>
+      <div class="title" id="bi-winner-title">Waiting for an auction…</div>
+    </div>
+    <button class="close" onclick="toggleBennaInspector(false)" aria-label="Close">×</button>
+  </div>
+
+  <div class="bi-section">
+    <div class="bi-label">Bid context · derived from MCP</div>
+    <div class="bi-ctx" id="bi-ctx">
+      <span class="k">intent=</span><span class="v">—</span><br>
+      <span class="k">mcp_tool=</span><span class="v">—</span><br>
+      <span class="k">host=</span><span class="v">—</span><br>
+      <span class="k">session_len=</span><span class="v">—</span><br>
+      <span class="k">region=</span><span class="v">—</span>
+    </div>
+  </div>
+
+  <div class="bi-section">
+    <div class="bi-label">Winner</div>
+    <div class="bi-winner">
+      <div class="headline" id="bi-win-headline">—</div>
+      <div style="font-size: 11px; color: #A1A1B3;" id="bi-win-adv">—</div>
+      <div>
+        <span class="bid" id="bi-win-bid">$0.00</span>
+        <span class="bid-label">effective bid</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="bi-section">
+    <div class="bi-label">Inference</div>
+    <div class="bi-metric-grid">
+      <div class="bi-metric"><div class="v" id="bi-pclick">—</div><div class="l">p(click)</div></div>
+      <div class="bi-metric"><div class="v" id="bi-pconv">—</div><div class="l">p(convert)</div></div>
+      <div class="bi-metric"><div class="v" id="bi-latency">—</div><div class="l">latency</div></div>
+      <div class="bi-metric"><div class="v" id="bi-candidates">—</div><div class="l">candidates</div></div>
+    </div>
+  </div>
+
+  <div class="bi-section">
+    <div class="bi-label">Signal contributions</div>
+    <div id="bi-signals"><div style="color:#6B6B83;font-size:11px;">No signals yet — trigger an ad.</div></div>
+  </div>
+
+  <div class="bi-footer">
+    <span id="bi-model">benna-rc3 · ready</span>
+    <a href="https://benna.ai" target="_blank" rel="noopener">benna.ai →</a>
+  </div>
+</aside>
 
 <!-- BOOST BOSS RENDERER -->
 <div id="bb-backdrop" onclick="BoostBoss.close()"></div>
@@ -757,11 +935,12 @@ window.BoostBoss = (() => {
   }
 
   function trigger(format, type) {
-    if (type === "video") {
-      show(ADS.video[vidIdx++ % ADS.video.length], format);
-    } else {
-      show(ADS.image[imgIdx++ % ADS.image.length], format);
-    }
+    const ad = (type === "video")
+      ? ADS.video[vidIdx++ % ADS.video.length]
+      : ADS.image[imgIdx++ % ADS.image.length];
+    show(ad, format);
+    // Feed the Benna inspector with this auction's decision trail
+    if (window.__renderBennaDecision) window.__renderBennaDecision(ad, format, type);
   }
 
   function getStats() {
@@ -769,6 +948,155 @@ window.BoostBoss = (() => {
   }
 
   return { show, close, togglePlay, toggleMute, trigger, showPaywall, getStats, trackEvent };
+})();
+
+/* ───────────── Benna Inspector ───────────── */
+(function () {
+  const panel = document.getElementById('benna-inspector');
+  const toggleBtn = document.getElementById('bennaToggle');
+  let panelOpen = false;
+  let autoOpenedOnce = false;
+
+  window.toggleBennaInspector = function (force) {
+    panelOpen = (typeof force === 'boolean') ? force : !panelOpen;
+    panel.classList.toggle('active', panelOpen);
+    panel.setAttribute('aria-hidden', !panelOpen);
+    toggleBtn.classList.toggle('on', panelOpen);
+  };
+
+  // ── Map each demo ad to a plausible Benna context ──
+  function contextFor(ad) {
+    const name = (ad.advertiser || '').toLowerCase();
+    const kws = (ad.targeting && ad.targeting.keywords) || [];
+    // Infer intent from keywords
+    let intent = 'general_browse';
+    if (kws.some(k => /code|program|IDE|developer/i.test(k))) intent = 'debug_py';
+    else if (kws.some(k => /deploy|hosting|server|scale/i.test(k))) intent = 'ship_deploy';
+    else if (kws.some(k => /design|landing|build|create/i.test(k))) intent = 'design_work';
+    else if (kws.some(k => /notes|organize|project|team/i.test(k))) intent = 'docs_lookup';
+
+    let mcp_tool = 'shell.exec';
+    if (intent === 'design_work') mcp_tool = 'file.edit';
+    else if (intent === 'docs_lookup') mcp_tool = 'file.read';
+
+    const host = name.includes('cursor') ? 'cursor.com'
+              : name.includes('notion') ? 'notion.so'
+              : 'claude.ai';
+
+    return {
+      intent,
+      mcp_tool,
+      host,
+      session_len: 30 + Math.floor(Math.random() * 40),
+      region: 'us-west',
+    };
+  }
+
+  // ── Try real API first; fall back to deterministic local stub ──
+  async function fetchPrediction(context, targetCpa) {
+    try {
+      const r = await fetch('/api/benna', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          op: 'predict',
+          context,
+          campaign: { target_cpa: targetCpa, goal: 'target_cpa' },
+        }),
+      });
+      if (r.ok) return await r.json();
+    } catch (_) { /* fall through to stub */ }
+    return localPredict(context, targetCpa);
+  }
+
+  function localPredict(ctx, targetCpa) {
+    // Mirror benna.js priors so offline renders stay realistic
+    const priors = {
+      'intent=debug_py':      0.34,
+      'intent=ship_deploy':   0.28,
+      'intent=design_work':   0.21,
+      'intent=docs_lookup':   0.11,
+      'tool=shell.exec':      0.22,
+      'tool=file.edit':       0.17,
+      'tool=file.read':       0.12,
+      'host=cursor.com':      0.18,
+      'host=notion.so':       0.14,
+      'session_len>30m':      0.13,
+      'region=us-west':       0.09,
+    };
+    const contribs = [];
+    let pclick = 0.01;
+    for (const [k, w] of Object.entries(priors)) {
+      const [key, val] = k.split('=');
+      let match = false;
+      if (key === 'session_len') match = ctx.session_len > 30;
+      else match = String(ctx[key]).toLowerCase() === String(val).toLowerCase();
+      if (match) {
+        const lift = w * (0.7 + Math.random() * 0.5) * 100;
+        pclick += w * 0.06;
+        contribs.push({ signal: k, weight: +w.toFixed(3), lift: +lift.toFixed(1) });
+      }
+    }
+    pclick = Math.min(pclick, 0.12);
+    const pconv = pclick * (0.18 + Math.random() * 0.15);
+    const bid = +(targetCpa * pconv * (0.95 + Math.random() * 0.1)).toFixed(4);
+    return {
+      bid_usd: bid,
+      p_click: +pclick.toFixed(4),
+      p_convert: +pconv.toFixed(4),
+      signal_contributions: contribs.sort((a, b) => b.lift - a.lift),
+      latency_ms: +(3.4 + Math.random() * 1.8).toFixed(1),
+      model_version: 'benna-rc3-2026.04.14 (local)',
+    };
+  }
+
+  // ── Render the inspector ──
+  window.__renderBennaDecision = async function (ad, format, type) {
+    const ctx = contextFor(ad);
+    const targetCpa = 4.5;
+    const p = await fetchPrediction(ctx, targetCpa);
+    // Keyword boost applied in the server-side auction; here we simulate
+    const kwHits = (ad.targeting && ad.targeting.keywords || []).length > 0 ? 1 : 0;
+    const effectiveBid = +(p.bid_usd * (1 + kwHits * 0.15)).toFixed(4);
+    const candidates = 2 + Math.floor(Math.random() * 3);
+
+    // Auto-open on first auction (but only once per session)
+    if (!autoOpenedOnce) {
+      autoOpenedOnce = true;
+      window.toggleBennaInspector(true);
+    }
+
+    document.getElementById('bi-winner-title').textContent = ad.advertiser;
+
+    document.getElementById('bi-ctx').innerHTML =
+      `<span class="k">intent=</span><span class="v">${ctx.intent}</span><br>` +
+      `<span class="k">mcp_tool=</span><span class="v">${ctx.mcp_tool}</span><br>` +
+      `<span class="k">host=</span><span class="v">${ctx.host}</span><br>` +
+      `<span class="k">session_len=</span><span class="v">${ctx.session_len}m</span><br>` +
+      `<span class="k">region=</span><span class="v">${ctx.region}</span>`;
+
+    document.getElementById('bi-win-headline').textContent = ad.headline;
+    document.getElementById('bi-win-adv').textContent = `${ad.advertiser} · format=${format} · type=${type}`;
+    document.getElementById('bi-win-bid').textContent = '$' + effectiveBid.toFixed(4);
+
+    document.getElementById('bi-pclick').textContent = (p.p_click * 100).toFixed(2) + '%';
+    document.getElementById('bi-pconv').textContent = (p.p_convert * 100).toFixed(2) + '%';
+    document.getElementById('bi-latency').textContent = p.latency_ms + 'ms';
+    document.getElementById('bi-candidates').textContent = candidates;
+
+    const maxLift = Math.max(...p.signal_contributions.map(s => s.lift), 1);
+    const sigHtml = p.signal_contributions.length === 0
+      ? '<div style="color:#6B6B83;font-size:11px;">No matching priors — cold start.</div>'
+      : p.signal_contributions.slice(0, 5).map(s => `
+          <div class="bi-sig">
+            <div class="nm">${s.signal}</div>
+            <div class="bar"><div class="fill" style="width:${Math.max(12, (s.lift / maxLift) * 100).toFixed(0)}%;"></div></div>
+            <div class="lift">+${s.lift.toFixed(1)}%</div>
+          </div>`).join('');
+    document.getElementById('bi-signals').innerHTML = sigHtml;
+
+    document.getElementById('bi-model').textContent = p.model_version;
+  };
 })();
 
 function insertNativeAd() {

@@ -1,0 +1,32 @@
+# Boost Boss — publisher ads.txt template
+#
+# Paste the lines BELOW the dashed banner into the ads.txt file at the root
+# of the domain that hosts your AI app (for example: https://your-app.com/ads.txt).
+# These two lines authorize Boost Boss to monetize impressions on your domain.
+#
+# Without this declaration, DSPs may refuse to bid on your inventory or may
+# discount the bid as "unauthorized" supply. ads.txt is checked on every
+# bid request by the major demand-side platforms.
+#
+# Spec: https://iabtechlab.com/wp-content/uploads/2022/04/Ads.txt-1.1.pdf
+# Questions: sellers@boostboss.ai
+
+# ─────────────────── COPY BELOW THIS LINE ───────────────────
+
+boostboss.ai,          boostboss-primary, DIRECT,   c5e8a91f3e0d2b67
+exchange.boostboss.ai, bbx-exchange,      RESELLER, c5e8a91f3e0d2b67
+
+# ────────────────── END OF COPY-PASTE BLOCK ──────────────────
+#
+# OPTIONAL but recommended — declare a CONTACT line so DSPs can reach you
+# for supply-chain audits:
+#
+# CONTACT=publisher-name <ads-contact@your-app.com>
+#
+# That's it. Once your ads.txt is live and reachable at https://your-app.com/ads.txt,
+# you can confirm the file is parseable with:
+#
+#   curl -s https://your-app.com/ads.txt | head
+#
+# Or run the IAB Tech Lab validator:
+# https://iabtechlab.com/ads-txt-validator/

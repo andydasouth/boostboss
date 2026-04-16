@@ -1,0 +1,83 @@
+{
+  "contact_email": "sellers@boostboss.ai",
+  "contact_address": "Boost Boss, Inc., 8 The Green, Suite R, Dover, DE 19901, USA",
+  "version": "1.0",
+  "identifiers": [
+    { "name": "TAG-ID", "value": "pending-tag-certification-2026" },
+    { "name": "DUNS", "value": "00-000-0000" }
+  ],
+  "sellers": [
+    {
+      "seller_id": "boostboss-primary",
+      "name": "Boost Boss, Inc.",
+      "domain": "boostboss.ai",
+      "seller_type": "BOTH",
+      "is_confidential": 0,
+      "comment": "Boost Boss operates the BBX exchange and BB MCP ad network as both a first-party seller of owned inventory (House Ads, demo placements) and an intermediary for publisher MCP inventory."
+    },
+    {
+      "seller_id": "bbx-exchange",
+      "name": "Boost Boss Exchange (BBX)",
+      "domain": "exchange.boostboss.ai",
+      "seller_type": "INTERMEDIARY",
+      "is_confidential": 0,
+      "comment": "Programmatic OpenRTB 2.6 exchange for MCP-native inventory. First-price auction with PMP support."
+    },
+    {
+      "seller_id": "pub_cursor",
+      "name": "Cursor Labs",
+      "domain": "cursor.com",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "MCP-native code editor. Native ads served inside the editor command palette and assistant surface."
+    },
+    {
+      "seller_id": "pub_perplexity",
+      "name": "Perplexity AI",
+      "domain": "perplexity.ai",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "Conversational answer engine. Sponsored result placements + tool_result format."
+    },
+    {
+      "seller_id": "pub_replit",
+      "name": "Replit",
+      "domain": "replit.com",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "Cloud IDE with MCP integration. Native ads in the agent and run-output surfaces."
+    },
+    {
+      "seller_id": "pub_zed",
+      "name": "Zed Industries",
+      "domain": "zed.dev",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "Collaborative code editor. Native ads in the assistant panel."
+    },
+    {
+      "seller_id": "pub_codeium",
+      "name": "Codeium",
+      "domain": "codeium.com",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "AI coding assistant. Native ads in the chat sidebar."
+    },
+    {
+      "seller_id": "pub_continue",
+      "name": "Continue Dev",
+      "domain": "continue.dev",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "Open-source IDE assistant. agent_suggestion format."
+    },
+    {
+      "seller_id": "house-ads",
+      "name": "Boost Boss House Ads",
+      "domain": "boostboss.ai",
+      "seller_type": "PUBLISHER",
+      "is_confidential": 0,
+      "comment": "First-party house inventory used for marketplace warm-up and unsold-impression backfill."
+    }
+  ]
+}

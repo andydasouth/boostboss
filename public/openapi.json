@@ -1,0 +1,458 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Boost Boss API",
+    "version": "1.0.0",
+    "summary": "The MCP ad network API — monetize AI apps with context-aware, Benna-ranked sponsored content.",
+    "description": "Two surfaces: the **MCP endpoint** (JSON-RPC 2.0, used by publishers running MCP servers) and the **REST API** (campaigns, reporting, Benna inference licensing). Every auction is ranked in real time by Benna on MCP signals.",
+    "contact": {
+      "name": "Boost Boss Platform",
+      "email": "sdk@boostboss.ai",
+      "url": "https://boostboss.ai/docs.html"
+    },
+    "license": { "name": "Apache-2.0" },
+    "termsOfService": "https://boostboss.ai/terms"
+  },
+  "servers": [
+    { "url": "https://boostboss.ai", "description": "Production" },
+    { "url": "https://staging.boostboss.ai", "description": "Staging" }
+  ],
+  "tags": [
+    { "name": "MCP", "description": "Model Context Protocol endpoint (publisher SDK talks here)" },
+    { "name": "RTB", "description": "OpenRTB 2.6 programmatic exchange endpoint (external DSPs bid here)" },
+    { "name": "Tracking", "description": "Impression, click, and conversion beacons" },
+    { "name": "Campaigns", "description": "Advertiser campaign management" },
+    { "name": "Benna", "description": "Benna API licensing — plug our ranking engine into any mediation stack ($0.002 / inference)" },
+    { "name": "Reporting", "description": "Stats, analytics, and engine status" }
+  ],
+  "security": [{ "BBApiKey": [] }],
+  "paths": {
+    "/api/mcp": {
+      "post": {
+        "tags": ["MCP"],
+        "summary": "JSON-RPC 2.0 MCP endpoint",
+        "description": "Supports `initialize`, `tools/list`, and `tools/call`. Tools exposed: `get_sponsored_content`, `track_event`.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/JsonRpcRequest" },
+              "examples": {
+                "tools_list": {
+                  "summary": "List available tools",
+                  "value": { "jsonrpc": "2.0", "id": 1, "method": "tools/list" }
+                },
+                "get_sponsored_content": {
+                  "summary": "Request a ranked sponsored ad",
+                  "value": {
+                    "jsonrpc": "2.0",
+                    "id": 2,
+                    "method": "tools/call",
+                    "params": {
+                      "name": "get_sponsored_content",
+                      "arguments": {
+                        "context_summary": "user is debugging a python traceback",
+                        "host": "cursor.com",
+                        "user_region": "us-west",
+                        "user_language": "en",
+                        "session_len_min": 42,
+                        "developer_api_key": "bb_live_…"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "JSON-RPC response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/JsonRpcResponse" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/rtb": {
+      "post": {
+        "tags": ["RTB"],
+        "summary": "OpenRTB 2.6 bid request",
+        "description": "Programmatic entry point for external DSPs (Trade Desk, DV360, custom mediation stacks). Accepts a standards-compliant OpenRTB 2.6 `BidRequest` and returns either a `BidResponse` (200) or an empty response (204) if no bid clears. Bids are ranked in real time by Benna; every returned bid carries the Benna attribution block in `bid.ext.benna`. Auction type is first-price; prices and floors are CPM USD. Native responses follow OpenRTB Native 1.2.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BidRequest" },
+              "example": {
+                "id": "bid_req_a1b2c3",
+                "at": 1,
+                "tmax": 200,
+                "cur": ["USD"],
+                "imp": [{
+                  "id": "1",
+                  "tagid": "cursor.com/editor/python",
+                  "bidfloor": 1.50,
+                  "bidfloorcur": "USD",
+                  "secure": 1,
+                  "native": {
+                    "ver": "1.2",
+                    "request": "{\"ver\":\"1.2\",\"assets\":[{\"id\":1,\"required\":1,\"title\":{\"len\":60}},{\"id\":2,\"required\":1,\"img\":{\"type\":3,\"w\":1200,\"h\":628}},{\"id\":3,\"data\":{\"type\":2,\"len\":200}},{\"id\":4,\"data\":{\"type\":12,\"len\":25}}]}"
+                  },
+                  "ext": { "mcp_context": { "intent": "debug_py", "mcp_tool": "shell.exec" } }
+                }],
+                "site": { "domain": "cursor.com", "keywords": "python debugging traceback", "publisher": { "id": "pub_cursor", "name": "Cursor Labs" } },
+                "device": { "geo": { "country": "USA", "region": "us-west" } },
+                "user": { "id": "anon_sess_a1b2c3", "ext": { "session_len_min": 42 } },
+                "bcat": ["IAB7-39"],
+                "badv": ["bad-competitor.com"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "BidResponse — one or more bids were won",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BidResponse" }
+              }
+            }
+          },
+          "204": { "description": "No bid cleared (empty body per OpenRTB convention)" },
+          "400": {
+            "description": "Malformed BidRequest",
+            "content": { "application/json": { "schema": { "type": "object", "properties": { "nbr": { "type": "integer" }, "error": { "type": "string" } } } } }
+          }
+        }
+      },
+      "get": {
+        "tags": ["RTB"],
+        "summary": "Win / loss notifications and adapter status",
+        "description": "A single GET endpoint with three ops. Use `op=win` for a DSP's `nurl` callback, `op=loss` for `lurl`, and `op=status` for adapter metadata. Win/loss responses are a 1×1 GIF (pixel beacon); status returns JSON.",
+        "parameters": [
+          { "name": "op",     "in": "query", "required": true, "schema": { "type": "string", "enum": ["win", "loss", "status"] } },
+          { "name": "imp",    "in": "query", "required": false, "schema": { "type": "string" }, "description": "Impression ID (for win/loss)" },
+          { "name": "price",  "in": "query", "required": false, "schema": { "type": "number" }, "description": "Clearing price (for win); DSPs substitute ${AUCTION_PRICE}" },
+          { "name": "reason", "in": "query", "required": false, "schema": { "type": "integer" }, "description": "OpenRTB loss reason code (for loss); DSPs substitute ${AUCTION_LOSS}" },
+          { "name": "bid",    "in": "query", "required": false, "schema": { "type": "string" }, "description": "Bid ID echoed from the BidResponse" }
+        ],
+        "responses": {
+          "200": {
+            "description": "1×1 GIF pixel (win/loss) or adapter status JSON",
+            "content": {
+              "image/gif": { "schema": { "type": "string", "format": "binary" } },
+              "application/json": { "schema": { "$ref": "#/components/schemas/RtbStatus" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/track": {
+      "get": {
+        "tags": ["Tracking"],
+        "summary": "Fire an impression, click, close, or video_complete beacon",
+        "parameters": [
+          { "name": "event", "in": "query", "required": true, "schema": { "type": "string", "enum": ["impression", "click", "close", "video_complete", "skip"] } },
+          { "name": "campaign_id", "in": "query", "required": true, "schema": { "type": "string" } },
+          { "name": "session", "in": "query", "required": false, "schema": { "type": "string" } },
+          { "name": "dev", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "1×1 transparent pixel; billing is recorded server-side" } }
+      }
+    },
+    "/api/benna": {
+      "post": {
+        "tags": ["Benna"],
+        "summary": "Benna inference — rank a bid request against your own demand",
+        "description": "Licensed endpoint for networks plugging Benna into a third-party mediation stack. Billed at $0.002/call. Every response returns the same attribution block as the first-party exchange.",
+        "parameters": [
+          { "name": "op", "in": "query", "required": false, "schema": { "type": "string", "enum": ["score", "engine-status"] }, "description": "Default is `score`." }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/BennaScoreRequest" },
+              "example": {
+                "context": { "intent": "debug_py", "mcp_tool": "shell.exec", "host": "cursor.com", "session_len": 42, "region": "us-west" },
+                "campaign": { "target_cpa": 8.0, "target_roas": null, "goal": "target_cpa", "format": "native" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Benna prediction",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BennaPrediction" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/campaigns": {
+      "get": {
+        "tags": ["Campaigns"],
+        "summary": "List campaigns",
+        "responses": { "200": { "description": "Array of campaigns", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Campaign" } } } } } }
+      },
+      "post": {
+        "tags": ["Campaigns"],
+        "summary": "Create a campaign",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Campaign" } } } },
+        "responses": { "201": { "description": "Created", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Campaign" } } } } }
+      }
+    },
+    "/api/campaigns/{id}": {
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }],
+      "patch": {
+        "tags": ["Campaigns"],
+        "summary": "Update a campaign",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Campaign" } } } },
+        "responses": { "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Campaign" } } } } }
+      }
+    },
+    "/api/stats": {
+      "get": {
+        "tags": ["Reporting"],
+        "summary": "Aggregated stats for the authenticated account",
+        "parameters": [
+          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date" } },
+          { "name": "until", "in": "query", "schema": { "type": "string", "format": "date" } }
+        ],
+        "responses": { "200": { "description": "Aggregated metrics", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Stats" } } } } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "BBApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Pass `Authorization: Bearer bb_live_…`"
+      }
+    },
+    "schemas": {
+      "JsonRpcRequest": {
+        "type": "object",
+        "required": ["jsonrpc", "method"],
+        "properties": {
+          "jsonrpc": { "type": "string", "enum": ["2.0"] },
+          "id": { "oneOf": [{ "type": "string" }, { "type": "integer" }] },
+          "method": { "type": "string", "enum": ["initialize", "tools/list", "tools/call"] },
+          "params": { "type": "object" }
+        }
+      },
+      "JsonRpcResponse": {
+        "type": "object",
+        "required": ["jsonrpc"],
+        "properties": {
+          "jsonrpc": { "type": "string", "enum": ["2.0"] },
+          "id": { "oneOf": [{ "type": "string" }, { "type": "integer" }] },
+          "result": { "type": "object" },
+          "error": { "type": "object", "properties": { "code": { "type": "integer" }, "message": { "type": "string" } } }
+        }
+      },
+      "SponsoredAd": {
+        "type": "object",
+        "properties": {
+          "campaign_id": { "type": "string" },
+          "type": { "type": "string", "enum": ["image", "video", "native"] },
+          "headline": { "type": "string" },
+          "subtext": { "type": "string" },
+          "media_url": { "type": "string", "format": "uri" },
+          "poster_url": { "type": "string", "format": "uri", "nullable": true },
+          "cta_label": { "type": "string" },
+          "cta_url": { "type": "string", "format": "uri" },
+          "skippable_after_sec": { "type": "integer", "minimum": 0, "default": 3 },
+          "tracking": {
+            "type": "object",
+            "properties": {
+              "impression": { "type": "string", "format": "uri" },
+              "click": { "type": "string", "format": "uri" },
+              "close": { "type": "string", "format": "uri" },
+              "video_complete": { "type": "string", "format": "uri" }
+            }
+          }
+        }
+      },
+      "BennaScoreRequest": {
+        "type": "object",
+        "required": ["context", "campaign"],
+        "properties": {
+          "context": {
+            "type": "object",
+            "description": "MCP bid context signals",
+            "properties": {
+              "intent": { "type": "string", "description": "e.g. debug_py, docs_lookup" },
+              "mcp_tool": { "type": "string", "description": "e.g. shell.exec, file.read" },
+              "host": { "type": "string", "description": "Host application domain" },
+              "session_len": { "type": "number", "description": "Minutes in session" },
+              "region": { "type": "string" }
+            }
+          },
+          "campaign": {
+            "type": "object",
+            "properties": {
+              "target_cpa": { "type": "number" },
+              "target_roas": { "type": "number", "nullable": true },
+              "goal": { "type": "string", "enum": ["target_cpa", "target_roas", "max_conversions", "manual"] },
+              "format": { "type": "string", "enum": ["image", "video", "native"] }
+            }
+          }
+        }
+      },
+      "BennaPrediction": {
+        "type": "object",
+        "properties": {
+          "model_version": { "type": "string", "example": "benna-rc3-2026.04.14" },
+          "bid_usd": { "type": "number", "example": 8.42 },
+          "p_click": { "type": "number", "minimum": 0, "maximum": 1 },
+          "p_convert": { "type": "number", "minimum": 0, "maximum": 1 },
+          "signal_contributions": { "type": "object", "additionalProperties": { "type": "number" } },
+          "latency_ms": { "type": "number" }
+        }
+      },
+      "Campaign": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "status": { "type": "string", "enum": ["draft", "active", "paused", "archived"] },
+          "format": { "type": "string", "enum": ["image", "video", "native"] },
+          "headline": { "type": "string" },
+          "subtext": { "type": "string" },
+          "media_url": { "type": "string", "format": "uri" },
+          "cta_label": { "type": "string" },
+          "cta_url": { "type": "string", "format": "uri" },
+          "daily_budget": { "type": "number" },
+          "total_budget": { "type": "number" },
+          "target_cpa": { "type": "number" },
+          "target_roas": { "type": "number", "nullable": true },
+          "optimization_goal": { "type": "string", "enum": ["target_cpa", "target_roas", "max_conversions", "manual"] },
+          "target_regions": { "type": "array", "items": { "type": "string" } },
+          "target_languages": { "type": "array", "items": { "type": "string" } },
+          "target_keywords": { "type": "array", "items": { "type": "string" } },
+          "spent_today": { "type": "number", "readOnly": true },
+          "spent_total": { "type": "number", "readOnly": true }
+        }
+      },
+      "BidRequest": {
+        "type": "object",
+        "description": "OpenRTB 2.6 BidRequest. Only BBX-relevant fields are documented; full field set per IAB spec is accepted.",
+        "required": ["id", "imp"],
+        "properties": {
+          "id":   { "type": "string", "description": "Unique BidRequest ID (echoed in BidResponse.id)" },
+          "imp":  { "type": "array", "items": { "$ref": "#/components/schemas/Imp" } },
+          "site": { "type": "object", "description": "Site object — domain, page, keywords, publisher" },
+          "app":  { "type": "object", "description": "App object — mutually exclusive with site" },
+          "device": { "type": "object", "description": "Device object with geo" },
+          "user": { "type": "object", "description": "User object; pass `user.ext.session_len_min` for MCP session length" },
+          "at":   { "type": "integer", "enum": [1, 2], "default": 1, "description": "Auction type — BBX is first-price (1)" },
+          "tmax": { "type": "integer", "default": 200, "description": "Bid timeout in ms (recommended 200)" },
+          "cur":  { "type": "array", "items": { "type": "string" }, "default": ["USD"] },
+          "bcat": { "type": "array", "items": { "type": "string" }, "description": "Blocked IAB categories" },
+          "badv": { "type": "array", "items": { "type": "string" }, "description": "Blocked advertiser domains" },
+          "source": { "type": "object" },
+          "regs": { "type": "object" },
+          "ext":  { "type": "object", "description": "Optional BBX extensions (`ext.mcp_context` to pass MCP signals at the request level)" }
+        }
+      },
+      "Imp": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id":          { "type": "string" },
+          "tagid":       { "type": "string", "description": "Publisher-side slot identifier. If no ext.mcp_context is provided, the adapter uses this as the `host` MCP signal." },
+          "bidfloor":    { "type": "number", "description": "CPM floor in USD" },
+          "bidfloorcur": { "type": "string", "default": "USD" },
+          "secure":      { "type": "integer", "enum": [0, 1] },
+          "native":      { "type": "object", "description": "Native 1.2 request object with `request` (nested JSON string)" },
+          "banner":      { "type": "object", "description": "Banner object with w/h or format[]" },
+          "video":       { "type": "object", "description": "Video object with w/h/mimes" },
+          "ext":         { "type": "object", "description": "Impression-level extensions (`ext.mcp_context` to override MCP signals per-imp)" }
+        }
+      },
+      "BidResponse": {
+        "type": "object",
+        "description": "OpenRTB 2.6 BidResponse. `seatbid[0].bid[].ext.benna` carries the full ranking attribution for the winning bid.",
+        "required": ["id"],
+        "properties": {
+          "id":      { "type": "string", "description": "Echo of BidRequest.id" },
+          "seatbid": { "type": "array", "items": { "$ref": "#/components/schemas/SeatBid" } },
+          "bidid":   { "type": "string", "description": "BBX-internal bid ID" },
+          "cur":     { "type": "string", "default": "USD" },
+          "nbr":     { "type": "integer", "description": "No-bid reason code (when returned with 200; usually 204 is used for no-bid)" },
+          "ext":     { "type": "object", "properties": {
+            "adapter":       { "type": "string" },
+            "processing_ms": { "type": "number" },
+            "tmax":          { "type": "integer" },
+            "benna_version": { "type": "string" }
+          } }
+        }
+      },
+      "SeatBid": {
+        "type": "object",
+        "required": ["bid"],
+        "properties": {
+          "seat": { "type": "string", "default": "boostboss" },
+          "bid":  { "type": "array", "items": { "$ref": "#/components/schemas/RtbBid" } }
+        }
+      },
+      "RtbBid": {
+        "type": "object",
+        "required": ["id", "impid", "price"],
+        "properties": {
+          "id":      { "type": "string" },
+          "impid":   { "type": "string", "description": "Echo of Imp.id" },
+          "price":   { "type": "number", "description": "CPM in USD" },
+          "adid":    { "type": "string" },
+          "crid":    { "type": "string", "description": "Creative ID (BBX campaign ID)" },
+          "cid":     { "type": "string", "description": "Advertiser ID" },
+          "adomain": { "type": "array", "items": { "type": "string" } },
+          "cat":     { "type": "array", "items": { "type": "string" }, "description": "IAB content categories" },
+          "nurl":    { "type": "string", "description": "Win URL with ${AUCTION_PRICE} macro" },
+          "lurl":    { "type": "string", "description": "Loss URL with ${AUCTION_LOSS} macro" },
+          "adm":     { "type": "string", "description": "Native 1.2 JSON (for native), HTML (for banner), or VAST XML (for video)" },
+          "w":       { "type": "integer" },
+          "h":       { "type": "integer" },
+          "exp":     { "type": "integer", "description": "Seconds until the creative expires" },
+          "ext":     { "type": "object", "properties": {
+            "benna": { "$ref": "#/components/schemas/BennaPrediction" }
+          } }
+        }
+      },
+      "RtbStatus": {
+        "type": "object",
+        "properties": {
+          "status":            { "type": "string", "example": "ok" },
+          "adapter":           { "type": "string", "example": "bbx-rtb-adapter/1.0.0" },
+          "openrtb_version":   { "type": "string", "example": "2.6" },
+          "native_version":    { "type": "string", "example": "1.2" },
+          "currencies":        { "type": "array", "items": { "type": "string" } },
+          "auction_type":      { "type": "integer", "example": 1 },
+          "tmax_recommended":  { "type": "integer", "example": 200 },
+          "supported_formats": { "type": "array", "items": { "type": "string", "enum": ["native", "banner", "video"] } },
+          "benna_version":     { "type": "string" }
+        }
+      },
+      "Stats": {
+        "type": "object",
+        "properties": {
+          "impressions": { "type": "integer" },
+          "clicks": { "type": "integer" },
+          "spend_usd": { "type": "number" },
+          "ctr": { "type": "number" },
+          "ecpm": { "type": "number" }
+        }
+      }
+    }
+  }
+}
