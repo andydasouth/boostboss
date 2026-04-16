@@ -3,136 +3,182 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Benna AI Playground — Boost Boss</title>
-<meta name="description" content="Interactive Benna AI scoring playground. Test bid optimization signals, see real-time attribution, and explore how Benna scores MCP context for ad auctions.">
-<meta property="og:title" content="Benna AI Playground — Boost Boss">
-<meta property="og:description" content="Try Benna AI live: adjust MCP signals and watch bid scoring, click predictions, and signal attribution update in real time.">
-<meta property="og:url" content="https://boostboss.ai/playground.html">
-<meta property="og:type" content="website">
+<title>API Playground — Boost Boss</title>
+<meta name="description" content="Interactive API playground for Boost Boss. Test ad fetching, Benna scoring, and OpenRTB bid requests with live responses and ad preview.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --pink: #FF2D78;
-    --cyan: #04BEFE;
-    --yellow: #FFE600;
-    --violet: #7C3AED;
-    --violet-soft: #F3ECFF;
-    --green: #16A34A;
-    --green-soft: #DCFCE7;
-    --ink: #1A1A2E;
-    --ink-soft: #4B4B5E;
-    --muted: #6B7280;
-    --line: #EAEAEF;
-    --bg: #FFFFFF;
-    --bg-soft: #FAFAF7;
-    --code-bg: #0F0F1A;
+    --pink: #FF2D78; --pink-dark: #E01E65;
+    --cyan: #04BEFE; --yellow: #FFE600;
+    --violet: #7C3AED; --violet-soft: #F3ECFF;
+    --green: #16A34A; --green-soft: #DCFCE7;
+    --ink: #1A1A2E; --ink-soft: #4B4B5E;
+    --muted: #6B7280; --line: #EAEAEF;
+    --bg: #FFFFFF; --bg-soft: #FAFAF7; --code-bg: #0F0F1A;
   }
-
   html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    background: var(--bg); color: var(--ink);
-    line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px;
-  }
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 15px; }
   a { color: inherit; text-decoration: none; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
-  h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
-  code, pre { font-family: 'JetBrains Mono', monospace; }
+  h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+  code,pre { font-family: 'JetBrains Mono', monospace; }
 
   /* NAV */
-  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.85); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
-  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.88); backdrop-filter: blur(14px); border-bottom: 1px solid var(--line); }
+  .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1400px; margin: 0 auto; padding: 0 28px; }
   .brand { display: flex; align-items: center; gap: 10px; }
-  .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
-  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; letter-spacing: -0.5px; color: var(--ink); }
-  .brand-sub { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: var(--violet); padding: 3px 8px; border-radius: 6px; background: var(--violet-soft); margin-left: 4px; letter-spacing: 0.3px; }
-  .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
+  .brand-mark { width: 32px; height: 32px; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: -0.4px; }
+  .brand-sub { font-size: 12px; font-weight: 600; color: var(--violet); padding: 3px 8px; border-radius: 6px; background: var(--violet-soft); margin-left: 4px; letter-spacing: 0.3px; font-family: 'Space Grotesk', sans-serif; }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
   .nav-links a:hover { color: var(--ink); }
-  .nav-ctas { display: flex; gap: 10px; align-items: center; }
-
-  .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px; padding: 9px 18px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13.5px; padding: 7px 14px; border-radius: 7px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; text-decoration: none; white-space: nowrap; }
   .btn-ghost { color: var(--ink); background: transparent; }
   .btn-ghost:hover { background: var(--bg-soft); }
-  .btn-primary { background: var(--ink); color: white; border-color: var(--ink); box-shadow: 3px 3px 0 var(--violet); }
-  .btn-primary:hover { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 var(--violet); }
+  .btn-primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+  .btn-primary:hover { background: var(--pink); border-color: var(--pink); }
 
   /* HERO */
-  .hero { padding: 64px 0 48px; background: linear-gradient(180deg, #F5F0FF 0%, #FFFFFF 100%); border-bottom: 1px solid var(--line); }
-  .hero h1 { font-size: clamp(36px, 4.4vw, 52px); line-height: 1.08; font-weight: 700; }
+  .hero { padding: 48px 0 32px; background: linear-gradient(180deg, #F5F0FF 0%, #fff 100%); border-bottom: 1px solid var(--line); }
+  .hero .wrap { max-width: 1400px; margin: 0 auto; padding: 0 28px; }
+  .hero h1 { font-size: clamp(30px, 3.5vw, 44px); font-weight: 700; }
   .hero h1 em { font-style: normal; color: var(--violet); }
-  .hero .lead { margin-top: 16px; font-size: 17px; color: var(--ink-soft); max-width: 660px; }
+  .hero .lead { margin-top: 10px; font-size: 16px; color: var(--ink-soft); max-width: 700px; }
 
-  /* PLAYGROUND LAYOUT */
-  .pg-layout { display: grid; grid-template-columns: 380px 1fr; gap: 28px; margin-top: 32px; align-items: start; }
-  @media (max-width: 880px) { .pg-layout { grid-template-columns: 1fr; } .nav-links { display: none; } }
+  /* ENDPOINT TABS */
+  .ep-tabs { display: flex; gap: 2px; padding: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px; width: fit-content; margin-top: 20px; }
+  .ep-tab { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; border: none; background: transparent; font-family: 'Inter', sans-serif; transition: all 0.15s; }
+  .ep-tab:hover { color: var(--ink); }
+  .ep-tab.active { background: var(--violet); color: #fff; }
+
+  /* LAYOUT */
+  .wrap { max-width: 1400px; margin: 0 auto; padding: 0 28px; }
+  .pg-layout { display: grid; grid-template-columns: 400px 1fr; gap: 24px; margin-top: 28px; align-items: start; padding-bottom: 64px; }
 
   /* PANEL */
-  .panel {
-    border: 1.5px solid var(--ink); border-radius: 14px; padding: 24px;
-    background: white; box-shadow: 4px 4px 0 var(--ink);
+  .panel { border: 1.5px solid var(--ink); border-radius: 14px; padding: 24px; background: #fff; box-shadow: 4px 4px 0 var(--ink); }
+  .panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 5px; }
+  .field select, .field input[type="number"], .field input[type="text"], .field textarea {
+    width: 100%; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 12.5px; background: var(--bg-soft); transition: border-color 0.15s; color: var(--ink);
   }
-  .panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 20px; }
-  .field { margin-bottom: 18px; }
-  .field label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
-  .field select, .field input[type="number"], .field input[type="text"] {
-    width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 8px;
-    font-family: 'JetBrains Mono', monospace; font-size: 13px; background: var(--bg-soft);
-    transition: border-color 0.15s;
-  }
-  .field select:focus, .field input:focus { outline: none; border-color: var(--violet); }
-  .field .hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .field textarea { min-height: 80px; resize: vertical; line-height: 1.5; }
+  .field select:focus, .field input:focus, .field textarea:focus { outline: none; border-color: var(--violet); }
+  .field .hint { font-size: 10.5px; color: var(--muted); margin-top: 3px; }
 
-  .run-btn {
-    width: 100%; padding: 14px; background: var(--violet); color: white; border: none;
-    border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px;
-    font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em;
-  }
+  .run-btn { width: 100%; padding: 13px; background: var(--violet); color: #fff; border: none; border-radius: 10px; font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.15s; letter-spacing: 0.02em; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .run-btn:hover { background: #6D28D9; transform: translateY(-1px); }
-  .run-btn:active { transform: translateY(0); }
+  .run-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .run-btn .spinner { display: none; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
+  .run-btn.loading .spinner { display: block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* PRESETS */
+  .presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .preset-chip { padding: 5px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; border: 1px solid var(--line); background: #fff; cursor: pointer; color: var(--ink-soft); transition: all 0.15s; }
+  .preset-chip:hover { border-color: var(--violet); color: var(--violet); }
+  .preset-chip.active { background: var(--violet-soft); border-color: var(--violet); color: var(--violet); }
 
   /* RESULT PANEL */
   .result-panel { display: flex; flex-direction: column; gap: 20px; }
 
-  /* BIG STAT CARDS */
-  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (max-width: 640px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
-  .stat-card {
-    border: 1.5px solid var(--line); border-radius: 12px; padding: 18px; background: white;
-    text-align: center;
-  }
-  .stat-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 28px; font-weight: 700; }
-  .stat-card .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; margin-top: 4px; }
-  .stat-card.highlight { border-color: var(--violet); background: var(--violet-soft); }
-  .stat-card.highlight .val { color: var(--violet); }
+  /* STAT CARDS */
+  .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .stat-card { border: 1.5px solid var(--line); border-radius: 12px; padding: 16px; background: #fff; text-align: center; }
+  .stat-card .val { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 700; }
+  .stat-card .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 600; margin-top: 4px; }
+  .stat-card.hl { border-color: var(--violet); background: var(--violet-soft); }
+  .stat-card.hl .val { color: var(--violet); }
+
+  /* AD PREVIEW */
+  .ad-preview { border: 1.5px solid var(--ink); border-radius: 14px; overflow: hidden; background: #fff; box-shadow: 4px 4px 0 var(--ink); }
+  .ad-preview-header { padding: 10px 16px; background: var(--bg-soft); border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: flex; align-items: center; justify-content: space-between; }
+  .ad-preview-header .format-badge { font-size: 10px; padding: 2px 8px; border-radius: 4px; background: var(--violet-soft); color: var(--violet); }
+  .ad-card { padding: 20px; }
+  .ad-card .ad-sponsor { font-size: 11px; color: var(--muted); font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+  .ad-card .ad-sponsor .verified { display: inline-flex; width: 14px; height: 14px; border-radius: 50%; background: var(--cyan); color: #fff; font-size: 9px; align-items: center; justify-content: center; }
+  .ad-card .ad-headline { font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; margin-bottom: 6px; color: var(--ink); }
+  .ad-card .ad-body { font-size: 14px; color: var(--ink-soft); margin-bottom: 14px; line-height: 1.5; }
+  .ad-card .ad-cta { display: inline-flex; padding: 8px 18px; background: var(--pink); color: #fff; border-radius: 8px; font-size: 13px; font-weight: 700; transition: all 0.15s; cursor: pointer; }
+  .ad-card .ad-cta:hover { background: var(--pink-dark); }
+  .ad-card .ad-meta { margin-top: 12px; font-size: 11px; color: var(--muted); display: flex; gap: 12px; }
 
   /* SIGNAL BARS */
-  .signal-panel { border: 1.5px solid var(--ink); border-radius: 14px; padding: 24px; background: white; box-shadow: 4px 4px 0 var(--ink); }
-  .signal-panel h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
-  .signal-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-  .signal-row:last-child { margin-bottom: 0; }
-  .signal-name { width: 180px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--ink-soft); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .signal-bar-bg { flex: 1; height: 24px; background: var(--bg-soft); border-radius: 6px; overflow: hidden; position: relative; }
-  .signal-bar-fill { height: 100%; border-radius: 6px; transition: width 0.4s ease; }
-  .signal-lift { width: 60px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; flex-shrink: 0; }
+  .signal-panel { border: 1.5px solid var(--ink); border-radius: 14px; padding: 20px; background: #fff; box-shadow: 4px 4px 0 var(--ink); }
+  .signal-panel h3 { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+  .signal-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .signal-name { width: 170px; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-soft); flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .signal-bar-bg { flex: 1; height: 22px; background: var(--bg-soft); border-radius: 6px; overflow: hidden; }
+  .signal-bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; }
+  .signal-lift { width: 55px; text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; flex-shrink: 0; }
 
-  /* JSON OUTPUT */
-  .json-panel { border: 1.5px solid var(--ink); border-radius: 14px; overflow: hidden; background: var(--code-bg); box-shadow: 4px 4px 0 var(--ink); }
-  .json-header { padding: 12px 20px; background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
-  .json-header span { font-family: 'Space Grotesk', sans-serif; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); }
-  .json-header .latency { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--green); }
-  .json-body { padding: 16px 20px; max-height: 400px; overflow-y: auto; }
-  .json-body pre { color: rgba(255,255,255,0.85); font-size: 12.5px; line-height: 1.55; white-space: pre-wrap; word-break: break-word; }
+  /* REQUEST/RESPONSE INSPECTOR */
+  .inspector { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1.5px solid var(--ink); border-radius: 14px; overflow: hidden; box-shadow: 4px 4px 0 var(--ink); }
+  .inspector-pane { background: var(--code-bg); }
+  .inspector-pane:first-child { border-right: 1px solid rgba(255,255,255,0.08); }
+  .inspector-head { padding: 10px 16px; background: rgba(255,255,255,0.06); border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; }
+  .inspector-head span { font-family: 'Space Grotesk', sans-serif; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.6); }
+  .inspector-head .tag { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+  .inspector-head .tag.req { background: rgba(124,58,237,0.3); color: #C4B5FD; }
+  .inspector-head .tag.res { background: rgba(22,163,74,0.3); color: #86EFAC; }
+  .inspector-head .tag.err { background: rgba(255,45,120,0.3); color: #FFB3CE; }
+  .inspector-head .copy-btn { font-size: 11px; color: var(--cyan); cursor: pointer; font-weight: 500; padding: 2px 8px; border-radius: 4px; background: none; border: none; font-family: 'JetBrains Mono', monospace; }
+  .inspector-head .copy-btn:hover { background: rgba(4,190,254,0.15); }
+  .inspector-body { padding: 14px 16px; max-height: 380px; overflow: auto; }
+  .inspector-body pre { color: rgba(255,255,255,0.82); font-size: 11.5px; line-height: 1.6; white-space: pre-wrap; word-break: break-word; }
+
+  /* HISTORY */
+  .history-panel { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: #fff; }
+  .history-panel h4 { font-size: 13px; font-weight: 700; color: var(--muted); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .history-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.1s; margin-bottom: 4px; font-size: 12px; }
+  .history-item:hover { background: var(--bg-soft); }
+  .history-item .hi-endpoint { font-weight: 600; color: var(--ink); }
+  .history-item .hi-time { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+  .history-item .hi-bid { font-family: 'JetBrains Mono', monospace; color: var(--violet); font-weight: 600; }
+  .history-empty { font-size: 13px; color: var(--muted); text-align: center; padding: 12px; }
+
+  /* TOAST */
+  #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; transform: translateX(120%); transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: #027A48; }
+  .toast.info { background: var(--ink); }
+  .toast.error { background: #DC2626; }
+
+  /* DARK MODE */
+  body.dark { --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF; --line: #374151; --bg: #111827; --bg-soft: #1F2937; --code-bg: #0D1117; }
+  body.dark nav { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
+  body.dark .hero { background: linear-gradient(180deg, #1a1530 0%, #111827 100%); border-bottom-color: #374151; }
+  body.dark .panel, body.dark .stat-card, body.dark .signal-panel, body.dark .ad-preview, body.dark .history-panel { background: #1F2937; border-color: #4B5563; }
+  body.dark .panel { box-shadow: 4px 4px 0 #374151; }
+  body.dark .signal-panel, body.dark .ad-preview { box-shadow: 4px 4px 0 #374151; }
+  body.dark .inspector { border-color: #4B5563; box-shadow: 4px 4px 0 #374151; }
+  body.dark .stat-card.hl { background: rgba(124,58,237,0.15); border-color: #7C3AED; }
+  body.dark .field select, body.dark .field input, body.dark .field textarea { background: #374151; border-color: #4B5563; color: #F3F4F6; }
+  body.dark .preset-chip { background: #374151; border-color: #4B5563; color: #D1D5DB; }
+  body.dark .ad-preview-header { background: #374151; border-bottom-color: #4B5563; }
+  .dark-toggle { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1; transition: all 0.15s; color: var(--ink); }
+  .dark-toggle:hover { background: var(--bg-soft); }
+
+  /* RESPONSIVE */
+  @media (max-width: 900px) {
+    .pg-layout { grid-template-columns: 1fr; }
+    .inspector { grid-template-columns: 1fr; }
+    .inspector-pane:first-child { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .stat-row { grid-template-columns: repeat(2, 1fr); }
+    .nav-links { display: none; }
+  }
 
   /* FOOTER */
-  footer { background: var(--ink); color: rgba(255,255,255,0.6); padding: 48px 0 36px; font-size: 14px; margin-top: 64px; }
+  footer { background: var(--ink); color: rgba(255,255,255,0.6); padding: 40px 0 28px; font-size: 13px; margin-top: 48px; }
   .foot-inner { display: flex; justify-content: space-between; align-items: center; }
-  .foot-brand { display: flex; align-items: center; gap: 10px; color: white; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
+  .foot-brand { display: flex; align-items: center; gap: 8px; color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 16px; font-weight: 700; }
 </style>
 </head>
 <body>
@@ -141,9 +187,15 @@
 <nav>
   <div class="nav-inner">
     <a href="/" class="brand">
-      <img src="/logo.svg" alt="" class="brand-mark">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="36" width="60" height="38" rx="5" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3.5"/>
+        <rect x="10" y="50" width="60" height="4" fill="#1A1A2E"/>
+        <g transform="rotate(-6 40 26)"><rect x="6" y="18" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3.5"/></g>
+        <text x="40" y="69" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text>
+        <path d="M72 8 L74.5 3 L77 8 L82 10.5 L77 13 L74.5 18 L72 13 L67 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
       <span class="brand-name">Boost Boss</span>
-      <span class="brand-sub">BENNA AI</span>
+      <span class="brand-sub">PLAYGROUND</span>
     </a>
     <div class="nav-links">
       <a href="/docs.html">Docs</a>
@@ -152,122 +204,253 @@
       <a href="/exchange.html">BBX</a>
       <a href="/trust.html">Trust</a>
     </div>
-    <div class="nav-ctas">
+    <div style="display:flex;gap:10px;align-items:center;">
+      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌓</button>
       <a class="btn btn-ghost" href="/developer.html">Sign in</a>
-      <a class="btn btn-primary" href="/docs.html#benna">Read the docs</a>
+      <a class="btn btn-primary" href="/docs.html">Docs</a>
     </div>
   </div>
 </nav>
 
+<!-- TOAST -->
+<div id="toastContainer"></div>
+
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <h1>Benna AI <em>playground</em></h1>
-    <p class="lead">Adjust MCP context signals and watch Benna score a bid in real time. See exactly which signals drive the prediction and how much each contributes.</p>
+    <h1>API <em>Playground</em></h1>
+    <p class="lead">Test every Boost Boss API endpoint interactively. Adjust parameters, run live requests, preview rendered ads, and inspect full request/response payloads.</p>
+
+    <div class="ep-tabs" id="epTabs">
+      <button class="ep-tab active" data-ep="fetch">Fetch Ad</button>
+      <button class="ep-tab" data-ep="benna">Benna Score</button>
+      <button class="ep-tab" data-ep="rtb">OpenRTB Bid</button>
+    </div>
   </div>
 </section>
 
 <!-- PLAYGROUND -->
-<section style="padding:48px 0;">
+<section style="padding:32px 0;">
   <div class="wrap">
     <div class="pg-layout">
 
       <!-- INPUT PANEL -->
-      <div class="panel" style="position:sticky;top:80px;">
-        <h3>MCP context signals</h3>
+      <div style="display:flex;flex-direction:column;gap:20px;">
+        <div class="panel" id="inputPanel" style="position:sticky;top:80px;">
+          <h3>
+            <span id="panelTitle">Fetch Ad Parameters</span>
+            <span style="font-size:11px;font-weight:600;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="endpointPath">POST /v1/ads/fetch</span>
+          </h3>
 
-        <div class="field">
-          <label>Intent</label>
-          <select id="sig-intent">
-            <option value="">— none —</option>
-            <option value="debug_py" selected>debug_py</option>
-            <option value="docs_lookup">docs_lookup</option>
-          </select>
-          <div class="hint">What the user is doing (most predictive signal)</div>
+          <!-- Presets -->
+          <div class="presets" id="presets">
+            <button class="preset-chip active" data-preset="developer" onclick="applyPreset('developer')">Developer (Cursor)</button>
+            <button class="preset-chip" data-preset="analyst" onclick="applyPreset('analyst')">Data analyst</button>
+            <button class="preset-chip" data-preset="writer" onclick="applyPreset('writer')">Content writer</button>
+            <button class="preset-chip" data-preset="mobile" onclick="applyPreset('mobile')">Mobile dev</button>
+          </div>
+
+          <!-- FETCH FIELDS -->
+          <div id="fetchFields">
+            <div class="field">
+              <label>Format</label>
+              <select id="f-format">
+                <option value="native" selected>native</option>
+                <option value="tool_result">tool_result</option>
+                <option value="agent_suggestion">agent_suggestion</option>
+                <option value="display">display</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Context (user intent)</label>
+              <textarea id="f-context" placeholder="What the user is doing...">help me refactor this python script to use async/await</textarea>
+              <div class="hint">Free-form user intent. Up to 2,000 chars.</div>
+            </div>
+            <div class="field">
+              <label>Audience</label>
+              <select id="f-audience">
+                <option value="ai-native" selected>ai-native</option>
+                <option value="prosumer">prosumer</option>
+                <option value="broad">broad</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>MCP Tools (comma-separated)</label>
+              <input type="text" id="f-tools" value="filesystem, github" placeholder="filesystem, shell, github">
+            </div>
+            <div class="field">
+              <label>Model</label>
+              <select id="f-model">
+                <option value="claude-sonnet-4" selected>claude-sonnet-4</option>
+                <option value="claude-opus-4">claude-opus-4</option>
+                <option value="gpt-5">gpt-5</option>
+                <option value="gemini-3">gemini-3</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- BENNA FIELDS -->
+          <div id="bennaFields" style="display:none">
+            <div class="field">
+              <label>Intent</label>
+              <select id="b-intent">
+                <option value="debug_py" selected>debug_py</option>
+                <option value="docs_lookup">docs_lookup</option>
+                <option value="code_review">code_review</option>
+                <option value="data_analysis">data_analysis</option>
+                <option value="writing">writing</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>MCP Tool</label>
+              <select id="b-tool">
+                <option value="shell.exec" selected>shell.exec</option>
+                <option value="file.read">file.read</option>
+                <option value="web.search">web.search</option>
+                <option value="github.pr">github.pr</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Host</label>
+              <select id="b-host">
+                <option value="cursor.com" selected>cursor.com</option>
+                <option value="replit.com">replit.com</option>
+                <option value="windsurf.ai">windsurf.ai</option>
+                <option value="claude.ai">claude.ai</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Session length (min)</label>
+              <input type="number" id="b-session" value="45" min="0" max="480" step="5">
+            </div>
+            <div class="field">
+              <label>Region</label>
+              <select id="b-region">
+                <option value="us-west" selected>us-west</option>
+                <option value="us-east">us-east</option>
+                <option value="eu-central">eu-central</option>
+                <option value="apac">apac</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Target CPA ($)</label>
+              <input type="number" id="b-cpa" value="8.00" min="0.50" max="100" step="0.50">
+            </div>
+            <div class="field">
+              <label>Ad format</label>
+              <select id="b-format">
+                <option value="native" selected>native</option>
+                <option value="banner">banner</option>
+                <option value="video">video</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- RTB FIELDS -->
+          <div id="rtbFields" style="display:none">
+            <div class="field">
+              <label>Bid Request JSON</label>
+              <textarea id="r-body" style="min-height:200px;font-size:11px;">{
+  "id": "bid_req_playground",
+  "at": 1,
+  "tmax": 200,
+  "cur": ["USD"],
+  "imp": [{
+    "id": "1",
+    "tagid": "cursor.com/editor/python",
+    "bidfloor": 1.50,
+    "bidfloorcur": "USD",
+    "native": {
+      "ver": "1.2",
+      "request": "{\"ver\":\"1.2\",\"assets\":[{\"id\":1,\"required\":1,\"title\":{\"len\":60}}]}"
+    }
+  }],
+  "site": {
+    "domain": "cursor.com",
+    "keywords": "python debugging"
+  },
+  "device": {
+    "geo": { "country": "USA", "region": "us-west" }
+  },
+  "user": { "id": "anon_playground", "ext": { "session_len_min": 45 } }
+}</textarea>
+              <div class="hint">Standard OpenRTB 2.6 BidRequest</div>
+            </div>
+          </div>
+
+          <button class="run-btn" id="runBtn" onclick="runRequest()">
+            <span class="spinner"></span>
+            <span>Send request</span>
+          </button>
         </div>
 
-        <div class="field">
-          <label>MCP Tool</label>
-          <select id="sig-tool">
-            <option value="">— none —</option>
-            <option value="shell.exec" selected>shell.exec</option>
-            <option value="file.read">file.read</option>
-          </select>
-          <div class="hint">Active MCP tool in the session</div>
+        <!-- HISTORY -->
+        <div class="history-panel" id="historyPanel">
+          <h4>Recent requests</h4>
+          <div id="historyList"><div class="history-empty">No requests yet</div></div>
         </div>
-
-        <div class="field">
-          <label>Host application</label>
-          <select id="sig-host">
-            <option value="">— none —</option>
-            <option value="cursor.com" selected>cursor.com</option>
-            <option value="replit.com">replit.com</option>
-            <option value="windsurf.ai">windsurf.ai</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Session length (minutes)</label>
-          <input type="number" id="sig-session" value="45" min="0" max="480" step="5">
-          <div class="hint">Sessions >30 min signal stronger intent</div>
-        </div>
-
-        <div class="field">
-          <label>Region</label>
-          <select id="sig-region">
-            <option value="">— none —</option>
-            <option value="us-west" selected>us-west</option>
-            <option value="us-east">us-east</option>
-            <option value="eu-central">eu-central</option>
-            <option value="apac">apac</option>
-          </select>
-        </div>
-
-        <div class="field">
-          <label>Target CPA ($)</label>
-          <input type="number" id="sig-cpa" value="8.00" min="0.50" max="100" step="0.50">
-          <div class="hint">Advertiser target cost-per-acquisition</div>
-        </div>
-
-        <div class="field">
-          <label>Ad format</label>
-          <select id="sig-format">
-            <option value="native" selected>native</option>
-            <option value="banner">banner</option>
-            <option value="video">video</option>
-          </select>
-        </div>
-
-        <button class="run-btn" onclick="runInference()">Score bid</button>
       </div>
 
       <!-- RESULT PANEL -->
       <div class="result-panel" id="results">
-
         <!-- Stats -->
-        <div class="stat-row" id="stat-row">
-          <div class="stat-card highlight"><div class="val" id="r-bid">—</div><div class="lbl">Bid (USD)</div></div>
+        <div class="stat-row" id="statRow">
+          <div class="stat-card hl"><div class="val" id="r-bid">—</div><div class="lbl">Bid (USD)</div></div>
           <div class="stat-card"><div class="val" id="r-pclick">—</div><div class="lbl">P(click)</div></div>
           <div class="stat-card"><div class="val" id="r-pconv">—</div><div class="lbl">P(convert)</div></div>
           <div class="stat-card"><div class="val" id="r-latency">—</div><div class="lbl">Latency</div></div>
         </div>
 
-        <!-- Signal attribution -->
-        <div class="signal-panel" id="signal-panel">
-          <h3>Signal attribution</h3>
-          <div id="signals-container">
-            <p style="font-size:14px;color:var(--muted);">Click "Score bid" to see signal contributions.</p>
+        <!-- AD PREVIEW -->
+        <div class="ad-preview" id="adPreview">
+          <div class="ad-preview-header">
+            <span>Ad preview</span>
+            <span class="format-badge" id="previewFormat">native</span>
+          </div>
+          <div class="ad-card" id="adCard">
+            <div class="ad-sponsor">
+              <span class="verified">✓</span> Sponsored
+            </div>
+            <div class="ad-headline" id="adHeadline">Send a request to preview the ad</div>
+            <div class="ad-body" id="adBody">The winning creative will appear here with full rendering.</div>
+            <div class="ad-cta" id="adCta">Try it free</div>
+            <div class="ad-meta">
+              <span id="adScore">Match: —</span>
+              <span id="adCpm">CPM: —</span>
+              <span id="adAdvertiser">Advertiser: —</span>
+            </div>
           </div>
         </div>
 
-        <!-- Raw JSON -->
-        <div class="json-panel">
-          <div class="json-header">
-            <span>Raw Benna response</span>
-            <span class="latency" id="json-latency"></span>
+        <!-- Signal attribution (Benna) -->
+        <div class="signal-panel" id="signalPanel">
+          <h3>Benna signal attribution</h3>
+          <div id="signalsContainer">
+            <p style="font-size:13px;color:var(--muted);">Send a request to see signal contributions.</p>
           </div>
-          <div class="json-body">
-            <pre id="json-output">// Click "Score bid" to see the raw API response</pre>
+        </div>
+
+        <!-- Request / Response Inspector -->
+        <div class="inspector" id="inspector">
+          <div class="inspector-pane">
+            <div class="inspector-head">
+              <span>Request</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="tag req" id="reqMethod">POST</span>
+                <button class="copy-btn" onclick="copyPane('req')">Copy</button>
+              </div>
+            </div>
+            <div class="inspector-body"><pre id="reqOutput">// Send a request to see the payload</pre></div>
+          </div>
+          <div class="inspector-pane">
+            <div class="inspector-head">
+              <span>Response</span>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <span class="tag res" id="resStatus">—</span>
+                <button class="copy-btn" onclick="copyPane('res')">Copy</button>
+              </div>
+            </div>
+            <div class="inspector-body"><pre id="resOutput">// Response will appear here</pre></div>
           </div>
         </div>
       </div>
@@ -279,86 +462,281 @@
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <div class="foot-brand">
-        <img src="/logo.svg" alt="" style="width:28px;height:28px;filter:brightness(0) invert(1);">
-        Benna AI Playground
-      </div>
-      <span>© 2026 Boost Boss, Inc. · <a href="/docs.html#benna" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Benna docs</a></span>
+      <div class="foot-brand">Boost Boss Playground</div>
+      <span>© 2026 Boost Boss, Inc. · <a href="/docs.html" style="color:rgba(255,255,255,0.8);text-decoration:underline;">Back to docs</a></span>
     </div>
   </div>
 </footer>
 
 <script>
-const COLORS = ["#7C3AED", "#FF2D78", "#04BEFE", "#16A34A", "#D97706", "#1A1A2E", "#6366F1"];
+const COLORS = ["#7C3AED","#FF2D78","#04BEFE","#16A34A","#D97706","#6366F1","#1A1A2E"];
+let currentEndpoint = 'fetch';
+let history = [];
 
-async function runInference() {
-  const context = {};
-  const intent = document.getElementById("sig-intent").value;
-  const tool = document.getElementById("sig-tool").value;
-  const host = document.getElementById("sig-host").value;
-  const session = parseFloat(document.getElementById("sig-session").value);
-  const region = document.getElementById("sig-region").value;
-  const cpa = parseFloat(document.getElementById("sig-cpa").value);
-  const format = document.getElementById("sig-format").value;
+// ── Toast ──
+function showToast(msg, type='success', dur=2500) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
+}
 
-  if (intent) context.intent = intent;
-  if (tool) context.mcp_tool = tool;
-  if (host) context.host = host;
-  if (session > 0) context.session_len = session;
-  if (region) context.region = region;
+// ── Dark mode ──
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('bb_pg_dark', document.body.classList.contains('dark') ? '1' : '0');
+}
+if (localStorage.getItem('bb_pg_dark') === '1') document.body.classList.add('dark');
 
-  const body = {
-    context,
-    campaign: { target_cpa: cpa, goal: "target_cpa", format },
-  };
+// ── Endpoint tabs ──
+document.querySelectorAll('.ep-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    currentEndpoint = tab.dataset.ep;
+    document.querySelectorAll('.ep-tab').forEach(t => t.classList.toggle('active', t === tab));
+    document.getElementById('fetchFields').style.display = currentEndpoint === 'fetch' ? 'block' : 'none';
+    document.getElementById('bennaFields').style.display = currentEndpoint === 'benna' ? 'block' : 'none';
+    document.getElementById('rtbFields').style.display = currentEndpoint === 'rtb' ? 'block' : 'none';
+    document.getElementById('presets').style.display = currentEndpoint === 'rtb' ? 'none' : 'flex';
 
-  const start = performance.now();
-  try {
-    const res = await fetch("/api/benna", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const elapsed = Math.round(performance.now() - start);
-    const data = await res.json();
+    const titles = { fetch: 'Fetch Ad Parameters', benna: 'Benna Score Parameters', rtb: 'OpenRTB Bid Request' };
+    const paths = { fetch: 'POST /v1/ads/fetch', benna: 'POST /api/benna', rtb: 'POST /api/rtb' };
+    document.getElementById('panelTitle').textContent = titles[currentEndpoint];
+    document.getElementById('endpointPath').textContent = paths[currentEndpoint];
 
-    // Stats
-    document.getElementById("r-bid").textContent = "$" + data.bid_usd.toFixed(4);
-    document.getElementById("r-pclick").textContent = (data.p_click * 100).toFixed(2) + "%";
-    document.getElementById("r-pconv").textContent = (data.p_convert * 100).toFixed(2) + "%";
-    document.getElementById("r-latency").textContent = data.latency_ms + "ms";
+    // Show/hide panels
+    document.getElementById('adPreview').style.display = currentEndpoint === 'fetch' ? 'block' : 'none';
+    document.getElementById('signalPanel').style.display = currentEndpoint !== 'fetch' ? 'block' : 'none';
+  });
+});
 
-    // Signal bars
-    const cont = document.getElementById("signals-container");
-    if (data.signal_contributions.length === 0) {
-      cont.innerHTML = '<p style="font-size:14px;color:var(--muted);">No matching signals in current context. Try adding intent or tool signals.</p>';
-    } else {
-      const maxLift = Math.max(...data.signal_contributions.map(s => s.lift));
-      cont.innerHTML = data.signal_contributions.map((s, i) => {
-        const pct = Math.max(8, (s.lift / maxLift) * 100);
-        const color = COLORS[i % COLORS.length];
-        return `
-          <div class="signal-row">
-            <span class="signal-name" title="${s.signal}">${s.signal}</span>
-            <div class="signal-bar-bg">
-              <div class="signal-bar-fill" style="width:${pct}%;background:${color};"></div>
-            </div>
-            <span class="signal-lift" style="color:${color};">+${s.lift}%</span>
-          </div>`;
-      }).join("");
+// ── Presets ──
+const PRESETS = {
+  developer: { context: 'help me refactor this python script to use async/await', tools: 'filesystem, github', audience: 'ai-native', model: 'claude-sonnet-4', format: 'native',
+    benna: { intent: 'debug_py', tool: 'shell.exec', host: 'cursor.com', session: 45, region: 'us-west', cpa: 8 } },
+  analyst: { context: 'analyze this CSV and create a pivot table summary', tools: 'filesystem, web.search', audience: 'prosumer', model: 'claude-opus-4', format: 'native',
+    benna: { intent: 'data_analysis', tool: 'file.read', host: 'claude.ai', session: 30, region: 'us-east', cpa: 12 } },
+  writer: { context: 'help me write a blog post about sustainable investing trends', tools: 'web.search', audience: 'broad', model: 'gpt-5', format: 'agent_suggestion',
+    benna: { intent: 'writing', tool: 'web.search', host: 'claude.ai', session: 20, region: 'eu-central', cpa: 5 } },
+  mobile: { context: 'implement SwiftUI navigation with deep linking support', tools: 'filesystem, github', audience: 'ai-native', model: 'claude-sonnet-4', format: 'tool_result',
+    benna: { intent: 'code_review', tool: 'github.pr', host: 'cursor.com', session: 60, region: 'us-west', cpa: 10 } },
+};
+
+function applyPreset(name) {
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.toggle('active', c.dataset.preset === name));
+  const p = PRESETS[name];
+  if (currentEndpoint === 'fetch' || currentEndpoint === 'benna') {
+    document.getElementById('f-context').value = p.context;
+    document.getElementById('f-tools').value = p.tools;
+    document.getElementById('f-audience').value = p.audience;
+    document.getElementById('f-model').value = p.model;
+    document.getElementById('f-format').value = p.format;
+    if (p.benna) {
+      document.getElementById('b-intent').value = p.benna.intent;
+      document.getElementById('b-tool').value = p.benna.tool;
+      document.getElementById('b-host').value = p.benna.host;
+      document.getElementById('b-session').value = p.benna.session;
+      document.getElementById('b-region').value = p.benna.region;
+      document.getElementById('b-cpa').value = p.benna.cpa;
     }
-
-    // Raw JSON
-    document.getElementById("json-latency").textContent = elapsed + "ms round-trip";
-    document.getElementById("json-output").textContent = JSON.stringify(data, null, 2);
-
-  } catch (err) {
-    document.getElementById("json-output").textContent = "Error: " + err.message;
   }
 }
 
+// ── Run request ──
+async function runRequest() {
+  const btn = document.getElementById('runBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  let url, body, method = 'POST';
+  if (currentEndpoint === 'fetch') {
+    url = '/api/ads';
+    const tools = document.getElementById('f-tools').value.split(',').map(s => s.trim()).filter(Boolean);
+    body = {
+      format: document.getElementById('f-format').value,
+      context: document.getElementById('f-context').value,
+      audience: document.getElementById('f-audience').value,
+      mcp_tools: tools,
+      model: document.getElementById('f-model').value,
+    };
+  } else if (currentEndpoint === 'benna') {
+    url = '/api/benna';
+    const ctx = {};
+    ctx.intent = document.getElementById('b-intent').value;
+    ctx.mcp_tool = document.getElementById('b-tool').value;
+    ctx.host = document.getElementById('b-host').value;
+    ctx.session_len = parseFloat(document.getElementById('b-session').value);
+    ctx.region = document.getElementById('b-region').value;
+    body = { context: ctx, campaign: { target_cpa: parseFloat(document.getElementById('b-cpa').value), goal: 'target_cpa', format: document.getElementById('b-format').value } };
+  } else {
+    url = '/api/rtb';
+    try { body = JSON.parse(document.getElementById('r-body').value); } catch(e) { showToast('Invalid JSON: ' + e.message, 'error'); btn.classList.remove('loading'); btn.disabled = false; return; }
+  }
+
+  // Show request
+  document.getElementById('reqMethod').textContent = method;
+  document.getElementById('reqOutput').textContent = JSON.stringify(body, null, 2);
+
+  const start = performance.now();
+  try {
+    const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    const elapsed = Math.round(performance.now() - start);
+    const data = await res.json();
+
+    // Status tag
+    const statusEl = document.getElementById('resStatus');
+    statusEl.textContent = res.status + ' ' + (res.status < 300 ? 'OK' : 'Error');
+    statusEl.className = 'tag ' + (res.status < 300 ? 'res' : 'err');
+    document.getElementById('resOutput').textContent = JSON.stringify(data, null, 2);
+
+    if (currentEndpoint === 'fetch') {
+      renderFetchResult(data, elapsed);
+    } else if (currentEndpoint === 'benna') {
+      renderBennaResult(data, elapsed);
+    } else {
+      renderRtbResult(data, elapsed);
+    }
+
+    // History
+    addHistory(currentEndpoint, data, elapsed);
+    showToast('Request completed in ' + elapsed + 'ms');
+
+  } catch (err) {
+    document.getElementById('resOutput').textContent = 'Error: ' + err.message;
+    document.getElementById('resStatus').textContent = 'Error';
+    document.getElementById('resStatus').className = 'tag err';
+    showToast('Request failed: ' + err.message, 'error');
+  }
+  btn.classList.remove('loading');
+  btn.disabled = false;
+}
+
+function renderFetchResult(data, elapsed) {
+  // Stats
+  document.getElementById('r-bid').textContent = '$' + (data.bid_cpm || data.bid_usd || 0).toFixed(2);
+  document.getElementById('r-pclick').textContent = data.match_score ? (data.match_score * 100).toFixed(0) + '%' : (data.p_click ? (data.p_click * 100).toFixed(1) + '%' : '—');
+  document.getElementById('r-pconv').textContent = data.p_convert ? (data.p_convert * 100).toFixed(2) + '%' : '—';
+  document.getElementById('r-latency').textContent = (data.latency_ms || elapsed) + 'ms';
+
+  // Ad preview
+  document.getElementById('previewFormat').textContent = data.format || 'native';
+  document.getElementById('adHeadline').textContent = data.headline || 'No headline';
+  document.getElementById('adBody').textContent = data.body || data.subtext || '';
+  document.getElementById('adCta').textContent = data.cta_text || data.cta || 'Learn more';
+  document.getElementById('adScore').textContent = 'Match: ' + ((data.match_score || 0) * 100).toFixed(0) + '%';
+  document.getElementById('adCpm').textContent = 'CPM: $' + (data.bid_cpm || 0).toFixed(2);
+  document.getElementById('adAdvertiser').textContent = 'Advertiser: ' + (data.advertiser?.name || data.adomain || 'Demo');
+
+  // Show ad preview, hide signals
+  document.getElementById('adPreview').style.display = 'block';
+  document.getElementById('signalPanel').style.display = data.signal_contributions ? 'block' : 'none';
+  if (data.signal_contributions) renderSignals(data.signal_contributions);
+}
+
+function renderBennaResult(data, elapsed) {
+  document.getElementById('r-bid').textContent = '$' + (data.bid_usd || 0).toFixed(4);
+  document.getElementById('r-pclick').textContent = ((data.p_click || 0) * 100).toFixed(2) + '%';
+  document.getElementById('r-pconv').textContent = ((data.p_convert || 0) * 100).toFixed(2) + '%';
+  document.getElementById('r-latency').textContent = (data.latency_ms || elapsed) + 'ms';
+  document.getElementById('signalPanel').style.display = 'block';
+  if (data.signal_contributions) renderSignals(data.signal_contributions);
+}
+
+function renderRtbResult(data, elapsed) {
+  const bid = data.seatbid?.[0]?.bid?.[0];
+  if (bid) {
+    document.getElementById('r-bid').textContent = '$' + (bid.price || 0).toFixed(2);
+    const benna = bid.ext?.benna;
+    document.getElementById('r-pclick').textContent = benna ? (benna.p_click * 100).toFixed(2) + '%' : '—';
+    document.getElementById('r-pconv').textContent = benna ? (benna.p_convert * 100).toFixed(2) + '%' : '—';
+    document.getElementById('r-latency').textContent = (benna?.latency_ms || elapsed) + 'ms';
+    if (benna?.signal_contributions) {
+      document.getElementById('signalPanel').style.display = 'block';
+      renderSignals(benna.signal_contributions);
+    }
+  } else {
+    document.getElementById('r-bid').textContent = 'No bid';
+    document.getElementById('r-pclick').textContent = '—';
+    document.getElementById('r-pconv').textContent = '—';
+    document.getElementById('r-latency').textContent = elapsed + 'ms';
+  }
+}
+
+function renderSignals(contributions) {
+  const cont = document.getElementById('signalsContainer');
+  if (!contributions || contributions.length === 0) {
+    cont.innerHTML = '<p style="font-size:13px;color:var(--muted);">No signal contributions in response.</p>';
+    return;
+  }
+  // Handle both object and array formats
+  let signals = contributions;
+  if (!Array.isArray(contributions)) {
+    signals = Object.entries(contributions).map(([signal, weight]) => ({ signal, weight, lift: weight * 100 }));
+  }
+  const maxLift = Math.max(...signals.map(s => s.lift || s.weight * 100));
+  cont.innerHTML = signals.map((s, i) => {
+    const lift = s.lift || (s.weight * 100);
+    const pct = Math.max(8, (lift / maxLift) * 100);
+    const color = COLORS[i % COLORS.length];
+    return `<div class="signal-row">
+      <span class="signal-name" title="${s.signal}">${s.signal}</span>
+      <div class="signal-bar-bg"><div class="signal-bar-fill" style="width:${pct}%;background:${color};"></div></div>
+      <span class="signal-lift" style="color:${color};">+${lift.toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+}
+
+// ── Copy panes ──
+function copyPane(which) {
+  const el = document.getElementById(which === 'req' ? 'reqOutput' : 'resOutput');
+  navigator.clipboard.writeText(el.textContent).then(() => showToast('Copied to clipboard'));
+}
+
+// ── History ──
+function addHistory(endpoint, data, elapsed) {
+  const names = { fetch: 'Fetch Ad', benna: 'Benna Score', rtb: 'RTB Bid' };
+  let bid = '—';
+  if (endpoint === 'fetch') bid = '$' + (data.bid_cpm || 0).toFixed(2);
+  else if (endpoint === 'benna') bid = '$' + (data.bid_usd || 0).toFixed(4);
+  else bid = '$' + (data.seatbid?.[0]?.bid?.[0]?.price || 0).toFixed(2);
+
+  history.unshift({ endpoint: names[endpoint], bid, time: elapsed + 'ms', ts: new Date() });
+  if (history.length > 10) history.pop();
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById('historyList');
+  if (!history.length) { el.innerHTML = '<div class="history-empty">No requests yet</div>'; return; }
+  el.innerHTML = history.map(h => `
+    <div class="history-item">
+      <span class="hi-endpoint">${h.endpoint}</span>
+      <span class="hi-bid">${h.bid}</span>
+      <span class="hi-time">${h.time}</span>
+    </div>
+  `).join('');
+}
+
+// ── URL params (from docs "Try it" links) ──
+const params = new URLSearchParams(window.location.search);
+if (params.get('endpoint')) {
+  const ep = params.get('endpoint');
+  const tabMap = { fetch: 'fetch', benna: 'benna', rtb: 'rtb', campaigns: 'fetch' };
+  const target = tabMap[ep] || 'fetch';
+  document.querySelectorAll('.ep-tab').forEach(t => {
+    if (t.dataset.ep === target) t.click();
+  });
+}
+
+// ── Dark mode from docs ──
+if (localStorage.getItem('bb_docs_dark') === '1' && localStorage.getItem('bb_pg_dark') === null) {
+  document.body.classList.add('dark');
+}
+
 // Auto-run on load
-runInference();
+runRequest();
 </script>
 
 </body>
