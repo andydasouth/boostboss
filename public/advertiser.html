@@ -1427,6 +1427,14 @@
                     <div class="logo-text">SuperBoost</div>
                 </a>
                 <div class="header-title">Dashboard</div>
+                <button onclick="openCmdPalette()" style="
+                    background: #F3F4F6; border: 1px solid #E5E7EB; border-radius: 8px;
+                    padding: 6px 14px; font-size: 12px; color: #9CA3AF; cursor: pointer;
+                    font-family: inherit; display: flex; align-items: center; gap: 8px;
+                ">
+                    <span>Search actions</span>
+                    <kbd style="background: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; border: 1px solid #E5E7EB; color: #6B7280;">⌘K</kbd>
+                </button>
             </div>
             <div class="header-right">
                 <div class="account-info">
@@ -1470,6 +1478,43 @@
         </header>
 
         <main>
+            <!-- Date Range Picker + Stats Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <h2 style="font-size: 18px; font-weight: 700; color: #111; margin: 0;">Overview</h2>
+                <div style="display: flex; gap: 6px; align-items: center;" id="dateRangePicker">
+                    <button class="date-range-btn active" data-range="7d" style="
+                        padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                        font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        background: #111; color: #fff; transition: all 0.15s;
+                    ">7D</button>
+                    <button class="date-range-btn" data-range="14d" style="
+                        padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                        font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        background: #fff; color: #374151; transition: all 0.15s;
+                    ">14D</button>
+                    <button class="date-range-btn" data-range="30d" style="
+                        padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                        font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        background: #fff; color: #374151; transition: all 0.15s;
+                    ">30D</button>
+                    <button class="date-range-btn" data-range="90d" style="
+                        padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                        font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        background: #fff; color: #374151; transition: all 0.15s;
+                    ">90D</button>
+                    <span style="color: #D1D5DB; margin: 0 4px;">|</span>
+                    <input type="date" id="dateRangeFrom" style="
+                        padding: 5px 10px; border: 1px solid #E5E7EB; border-radius: 8px;
+                        font-size: 12px; font-family: inherit; color: #374151;
+                    ">
+                    <span style="font-size: 12px; color: #9CA3AF;">to</span>
+                    <input type="date" id="dateRangeTo" style="
+                        padding: 5px 10px; border: 1px solid #E5E7EB; border-radius: 8px;
+                        font-size: 12px; font-family: inherit; color: #374151;
+                    ">
+                </div>
+            </div>
+
             <!-- Stats Row -->
             <div class="stats-row">
                 <div class="stat-card">
@@ -1701,6 +1746,11 @@
                             background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
                             font-family: inherit; color: #374151;
                         ">Export CSV</button>
+                        <button onclick="openCompareModal()" style="
+                            padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
+                            background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+                            font-family: inherit; color: #374151;
+                        ">Compare</button>
                         <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
                     </div>
                 </div>
@@ -1943,6 +1993,54 @@
                         border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
                         cursor: pointer; font-family: inherit;
                     ">Create Rule</button>
+                </div>
+            </div>
+
+            <!-- Compare Modal -->
+            <div id="compareModal" style="
+                display: none; position: fixed; inset: 0; z-index: 950;
+                background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+            ">
+                <div style="
+                    background: #fff; border-radius: 16px; width: 720px; max-width: 95vw;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;
+                ">
+                    <div style="padding: 24px 28px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
+                        <h2 style="font-size: 20px; font-weight: 700;">Compare Campaigns</h2>
+                        <button onclick="document.getElementById('compareModal').style.display='none'" style="
+                            background: #F3F4F6; border: none; width: 32px; height: 32px;
+                            border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
+                        ">×</button>
+                    </div>
+                    <div style="padding: 20px 28px;">
+                        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+                            <select id="compareA" style="
+                                flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
+                                border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+                            "><option value="">Select Campaign A</option></select>
+                            <span style="font-size: 14px; font-weight: 700; color: #9CA3AF; align-self: center;">vs</span>
+                            <select id="compareB" style="
+                                flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
+                                border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+                            "><option value="">Select Campaign B</option></select>
+                        </div>
+                        <div id="compareResult" style="display: none;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                                <thead>
+                                    <tr style="border-bottom: 2px solid #F3F4F6;">
+                                        <th style="text-align: left; padding: 10px 8px; color: #6B7280; font-size: 12px;">Metric</th>
+                                        <th style="text-align: right; padding: 10px 8px; color: #FF2D78; font-size: 12px;" id="compareAName">Campaign A</th>
+                                        <th style="text-align: right; padding: 10px 8px; color: #2563EB; font-size: 12px;" id="compareBName">Campaign B</th>
+                                        <th style="text-align: right; padding: 10px 8px; color: #6B7280; font-size: 12px;">Diff</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="compareTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div id="compareEmpty" style="text-align: center; padding: 40px; color: #9CA3AF;">
+                            Select two campaigns to compare their performance
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -3156,20 +3254,20 @@
         }
 
         // Render chart with real data
-        function renderChart(dailyData) {
+        function renderChart(dailyData, numDays) {
             chartContainer.innerHTML = '';
+            const days = numDays || 14;
 
             if (!dailyData || dailyData.length === 0) {
-                // Create 14 placeholder bars
-                dailyData = Array(14).fill(0).map((_, i) => ({
-                    date: new Date(Date.now() - (14 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                dailyData = Array(days).fill(0).map((_, i) => ({
+                    date: new Date(Date.now() - (days - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
                     impressions: Math.floor(Math.random() * 100000) + 50000
                 }));
             }
 
             const maxImpressions = Math.max(...dailyData.map(d => d.impressions || 0), 1);
 
-            dailyData.slice(-14).forEach(day => {
+            dailyData.slice(-days).forEach(day => {
                 const height = ((day.impressions || 0) / maxImpressions) * 100;
                 const bar = document.createElement('div');
                 bar.className = 'chart-bar';
@@ -3873,6 +3971,56 @@
             }
         });
 
+        // ───────────── DATE RANGE PICKER ─────────────
+        let _selectedRange = '7d';
+
+        document.querySelectorAll('.date-range-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.date-range-btn').forEach(b => {
+                    b.style.background = '#fff'; b.style.color = '#374151';
+                });
+                btn.style.background = '#111'; btn.style.color = '#fff';
+                _selectedRange = btn.dataset.range;
+
+                // Set custom date inputs to match
+                const days = parseInt(_selectedRange);
+                const to = new Date();
+                const from = new Date(); from.setDate(to.getDate() - days);
+                document.getElementById('dateRangeFrom').value = from.toISOString().split('T')[0];
+                document.getElementById('dateRangeTo').value = to.toISOString().split('T')[0];
+
+                // Refresh chart with new range
+                const chartDays = days || 14;
+                renderChart(null, chartDays);
+                showToast(`Showing ${_selectedRange} data`, 'info', 1500);
+            });
+        });
+
+        // Custom date inputs
+        ['dateRangeFrom', 'dateRangeTo'].forEach(id => {
+            document.getElementById(id).addEventListener('change', () => {
+                // Clear active preset button
+                document.querySelectorAll('.date-range-btn').forEach(b => {
+                    b.style.background = '#fff'; b.style.color = '#374151';
+                });
+                _selectedRange = 'custom';
+                const from = document.getElementById('dateRangeFrom').value;
+                const to = document.getElementById('dateRangeTo').value;
+                if (from && to) {
+                    const days = Math.ceil((new Date(to) - new Date(from)) / 86400000);
+                    renderChart(null, Math.max(7, days));
+                }
+            });
+        });
+
+        // Initialize date inputs
+        (function initDateRange() {
+            const to = new Date();
+            const from = new Date(); from.setDate(to.getDate() - 7);
+            document.getElementById('dateRangeFrom').value = from.toISOString().split('T')[0];
+            document.getElementById('dateRangeTo').value = to.toISOString().split('T')[0];
+        })();
+
         // ───────────── PATCH loadStats to also load balance ─────────────
         const _origLoadStats = loadStats;
         loadStats = async function() {
@@ -4045,6 +4193,79 @@
             loadBillingHistory();
             updatePixelSnippet();
         };
+
+        // ───────────── CAMPAIGN COMPARE ─────────────
+        function openCompareModal() {
+            if (_cachedCampaigns.length < 2) {
+                showToast('Need at least 2 campaigns to compare', 'info');
+                return;
+            }
+            const selA = document.getElementById('compareA');
+            const selB = document.getElementById('compareB');
+            const opts = '<option value="">Select campaign</option>' +
+                _cachedCampaigns.map(c => `<option value="${c.id}">${escapeHtml(c.name)}</option>`).join('');
+            selA.innerHTML = opts;
+            selB.innerHTML = opts;
+            document.getElementById('compareResult').style.display = 'none';
+            document.getElementById('compareEmpty').style.display = 'block';
+            document.getElementById('compareModal').style.display = 'flex';
+        }
+
+        ['compareA', 'compareB'].forEach(id => {
+            document.getElementById(id).addEventListener('change', runComparison);
+        });
+
+        function runComparison() {
+            const aId = document.getElementById('compareA').value;
+            const bId = document.getElementById('compareB').value;
+            if (!aId || !bId || aId === bId) {
+                document.getElementById('compareResult').style.display = 'none';
+                document.getElementById('compareEmpty').style.display = 'block';
+                return;
+            }
+            const a = _cachedCampaigns.find(c => c.id === aId);
+            const b = _cachedCampaigns.find(c => c.id === bId);
+            if (!a || !b) return;
+
+            document.getElementById('compareAName').textContent = a.name;
+            document.getElementById('compareBName').textContent = b.name;
+
+            const metrics = [
+                { label: 'Status', a: a.status, b: b.status, fmt: v => v },
+                { label: 'Impressions', a: a.impressions || 0, b: b.impressions || 0, fmt: v => formatNumber(v) },
+                { label: 'Clicks', a: a.clicks || 0, b: b.clicks || 0, fmt: v => formatNumber(v) },
+                { label: 'CTR', a: (a.clicks || 0) / (a.impressions || 1) * 100, b: (b.clicks || 0) / (b.impressions || 1) * 100, fmt: v => v.toFixed(2) + '%' },
+                { label: 'Spend', a: a.spent_total || a.spent_today || 0, b: b.spent_total || b.spent_today || 0, fmt: v => '$' + v.toFixed(2) },
+                { label: 'Daily Budget', a: a.daily_budget || 0, b: b.daily_budget || 0, fmt: v => '$' + v.toFixed(2) },
+                { label: 'Total Budget', a: a.total_budget || 0, b: b.total_budget || 0, fmt: v => '$' + v.toFixed(2) },
+                { label: 'Format', a: a.format || 'native', b: b.format || 'native', fmt: v => v },
+                { label: 'Billing', a: a.billing_model || 'cpm', b: b.billing_model || 'cpm', fmt: v => v.toUpperCase() },
+            ];
+
+            const tbody = document.getElementById('compareTableBody');
+            tbody.innerHTML = metrics.map(m => {
+                let diff = '';
+                if (typeof m.a === 'number' && typeof m.b === 'number' && m.b !== 0) {
+                    const pct = ((m.a - m.b) / Math.abs(m.b) * 100);
+                    const color = pct > 0 ? '#059669' : pct < 0 ? '#DC2626' : '#6B7280';
+                    diff = `<span style="color: ${color}; font-weight: 600;">${pct > 0 ? '+' : ''}${pct.toFixed(1)}%</span>`;
+                }
+                // Highlight winner
+                const aWin = typeof m.a === 'number' && m.a > m.b;
+                const bWin = typeof m.b === 'number' && m.b > m.a;
+                return `
+                    <tr style="border-bottom: 1px solid #F9FAFB;">
+                        <td style="padding: 10px 8px; color: #6B7280;">${m.label}</td>
+                        <td style="padding: 10px 8px; text-align: right; font-weight: ${aWin ? '700' : '400'}; color: ${aWin ? '#FF2D78' : '#111'};">${m.fmt(m.a)}</td>
+                        <td style="padding: 10px 8px; text-align: right; font-weight: ${bWin ? '700' : '400'}; color: ${bWin ? '#2563EB' : '#111'};">${m.fmt(m.b)}</td>
+                        <td style="padding: 10px 8px; text-align: right;">${diff}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('compareResult').style.display = 'block';
+            document.getElementById('compareEmpty').style.display = 'none';
+        }
 
         // ───────────── A/B VARIANTS ─────────────
         let variantCount = 0;
@@ -4330,6 +4551,118 @@
             settingsModal.style.display = 'none';
             showToast('Settings saved', 'success');
         });
+
+        // ───────────── COMMAND PALETTE (Cmd+K) ─────────────
+        const cmdPalette = document.createElement('div');
+        cmdPalette.id = 'cmdPalette';
+        cmdPalette.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:flex-start;justify-content:center;padding-top:15vh;';
+        cmdPalette.innerHTML = `
+            <div style="
+                background: #fff; border-radius: 14px; width: 520px; max-width: 90vw;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.25); overflow: hidden;
+            ">
+                <div style="padding: 4px;">
+                    <input type="text" id="cmdInput" placeholder="Search actions… (Esc to close)" style="
+                        width: 100%; padding: 14px 18px; border: none; outline: none;
+                        font-size: 15px; font-family: inherit; background: transparent;
+                    ">
+                </div>
+                <div id="cmdResults" style="
+                    max-height: 320px; overflow-y: auto; border-top: 1px solid #F3F4F6;
+                "></div>
+                <div style="padding: 8px 18px; border-top: 1px solid #F3F4F6; display: flex; gap: 12px;">
+                    <span style="font-size: 11px; color: #9CA3AF;"><kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:10px;">↑↓</kbd> Navigate</span>
+                    <span style="font-size: 11px; color: #9CA3AF;"><kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:10px;">Enter</kbd> Select</span>
+                    <span style="font-size: 11px; color: #9CA3AF;"><kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:10px;">Esc</kbd> Close</span>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(cmdPalette);
+
+        const cmdActions = [
+            { label: 'New Campaign', icon: '🚀', action: () => openModal(), keywords: 'create campaign new' },
+            { label: 'Export Campaigns CSV', icon: '📄', action: () => exportCampaignsCSV(), keywords: 'export download csv' },
+            { label: 'Compare Campaigns', icon: '⚖️', action: () => openCompareModal(), keywords: 'compare side by side' },
+            { label: 'Add Deposit', icon: '💰', action: () => document.getElementById('depositBtn').click(), keywords: 'deposit money fund balance' },
+            { label: 'Account Settings', icon: '⚙️', action: () => document.getElementById('settingsBtn').click(), keywords: 'settings account profile' },
+            { label: 'Add Automated Rule', icon: '🤖', action: () => document.getElementById('addRuleBtn').click(), keywords: 'rule automation' },
+            { label: 'Refresh Data', icon: '🔄', action: () => { loadStats(); loadCampaigns(); showToast('Data refreshed', 'info', 1500); }, keywords: 'refresh reload update' },
+            { label: 'Toggle Notifications', icon: '🔔', action: () => notifBtn.click(), keywords: 'notifications alerts bell' },
+            { label: 'Logout', icon: '🚪', action: () => document.getElementById('logoutBtn').click(), keywords: 'logout sign out' },
+        ];
+
+        let cmdOpen = false, cmdSelectedIdx = 0;
+
+        function openCmdPalette() {
+            cmdOpen = true;
+            cmdPalette.style.display = 'flex';
+            const input = document.getElementById('cmdInput');
+            input.value = '';
+            input.focus();
+            cmdSelectedIdx = 0;
+            renderCmdResults('');
+        }
+
+        function closeCmdPalette() {
+            cmdOpen = false;
+            cmdPalette.style.display = 'none';
+        }
+
+        function renderCmdResults(query) {
+            const q = query.toLowerCase();
+            const filtered = cmdActions.filter(a =>
+                !q || a.label.toLowerCase().includes(q) || a.keywords.includes(q)
+            );
+            const results = document.getElementById('cmdResults');
+            results.innerHTML = filtered.map((a, i) => `
+                <div class="cmd-item" data-idx="${i}" style="
+                    padding: 10px 18px; cursor: pointer; display: flex; align-items: center; gap: 12px;
+                    background: ${i === cmdSelectedIdx ? '#F3F4F6' : '#fff'};
+                    transition: background 0.1s;
+                " onmouseover="this.style.background='#F3F4F6'" onmouseout="this.style.background='${i === cmdSelectedIdx ? '#F3F4F6' : '#fff'}'">
+                    <span style="font-size: 18px;">${a.icon}</span>
+                    <span style="font-size: 14px; font-weight: 500;">${a.label}</span>
+                </div>
+            `).join('');
+            results.querySelectorAll('.cmd-item').forEach(el => {
+                el.addEventListener('click', () => {
+                    const idx = parseInt(el.dataset.idx);
+                    filtered[idx]?.action();
+                    closeCmdPalette();
+                });
+            });
+        }
+
+        document.getElementById('cmdInput').addEventListener('input', (e) => {
+            cmdSelectedIdx = 0;
+            renderCmdResults(e.target.value);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            // Cmd+K or Ctrl+K to open
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                cmdOpen ? closeCmdPalette() : openCmdPalette();
+                return;
+            }
+            if (!cmdOpen) return;
+            if (e.key === 'Escape') { closeCmdPalette(); return; }
+            const items = document.querySelectorAll('.cmd-item');
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                cmdSelectedIdx = Math.min(cmdSelectedIdx + 1, items.length - 1);
+                items.forEach((el, i) => el.style.background = i === cmdSelectedIdx ? '#F3F4F6' : '#fff');
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                cmdSelectedIdx = Math.max(cmdSelectedIdx - 1, 0);
+                items.forEach((el, i) => el.style.background = i === cmdSelectedIdx ? '#F3F4F6' : '#fff');
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                items[cmdSelectedIdx]?.click();
+            }
+        });
+
+        cmdPalette.addEventListener('click', (e) => { if (e.target === cmdPalette) closeCmdPalette(); });
 
         // Start app
         init();
