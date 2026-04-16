@@ -2207,6 +2207,9 @@
                     body: JSON.stringify({ developer_id: userProfile.user_id, email: userProfile.email })
                 });
                 const data = await r.json();
+                if (!r.ok) {
+                    throw new Error(data.error || `Server returned ${r.status}`);
+                }
                 if (data.onboarding_url) {
                     window.location.href = data.onboarding_url;
                 } else if (data.mode === 'demo') {
@@ -2228,7 +2231,7 @@
 
             const context = document.getElementById('testContext').value;
             const format = document.getElementById('testFormat').value;
-            const apiKey = currentUserData ? currentUserData.api_key : '';
+            const apiKey = userProfile ? userProfile.api_key : '';
 
             const start = performance.now();
             try {

@@ -239,7 +239,7 @@
         <div class="panel" id="inputPanel" style="position:sticky;top:80px;">
           <h3>
             <span id="panelTitle">Fetch Ad Parameters</span>
-            <span style="font-size:11px;font-weight:600;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="endpointPath">POST /v1/ads/fetch</span>
+            <span style="font-size:11px;font-weight:600;color:var(--muted);font-family:'JetBrains Mono',monospace;" id="endpointPath">POST /api/mcp</span>
           </h3>
 
           <!-- Presets -->
@@ -502,7 +502,7 @@ document.querySelectorAll('.ep-tab').forEach(tab => {
     document.getElementById('presets').style.display = currentEndpoint === 'rtb' ? 'none' : 'flex';
 
     const titles = { fetch: 'Fetch Ad Parameters', benna: 'Benna Score Parameters', rtb: 'OpenRTB Bid Request' };
-    const paths = { fetch: 'POST /v1/ads/fetch', benna: 'POST /api/benna', rtb: 'POST /api/rtb' };
+    const paths = { fetch: 'POST /api/mcp', benna: 'POST /api/benna', rtb: 'POST /api/rtb' };
     document.getElementById('panelTitle').textContent = titles[currentEndpoint];
     document.getElementById('endpointPath').textContent = paths[currentEndpoint];
 
@@ -761,8 +761,8 @@ if (params.get('endpoint')) {
   });
 }
 
-// Auto-run on load
-runRequest();
+// Show placeholder — user clicks Run to fire first request
+document.getElementById('runBtn').textContent = '▶ Run request';
 </script>
 
 </body>

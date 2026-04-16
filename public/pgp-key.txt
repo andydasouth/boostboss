@@ -1,0 +1,11 @@
+Boost Boss Security PGP Key
+============================
+
+A PGP public key for encrypted security communications will be
+published here once the Boost Boss security team generates one.
+
+In the meantime, please report vulnerabilities via:
+  - Email: security@boostboss.ai
+  - Web: https://boostboss.ai/trust#security
+
+We aim to respond to all reports within 48 hours.

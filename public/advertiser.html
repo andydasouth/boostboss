@@ -3632,6 +3632,9 @@
                     })
                 });
                 const j = await r.json();
+                if (!r.ok) {
+                    throw new Error(j.error || `Server returned ${r.status}`);
+                }
                 if (j.checkout_url) {
                     // Stripe mode — redirect to checkout
                     window.location.href = j.checkout_url;
@@ -3640,6 +3643,8 @@
                     showToast(`Demo deposit of $${amount} credited!`, 'success');
                     depositModal.style.display = 'none';
                     loadBalance();
+                } else {
+                    throw new Error('Unexpected response from billing API');
                 }
             } catch (e) {
                 showToast('Deposit failed: ' + e.message, 'error');
@@ -4131,15 +4136,15 @@
                 _billingHistory = [];
             }
 
-            // If no real data, show demo transactions
+            // If no real data, show sample transactions (demo mode only)
             if (_billingHistory.length === 0) {
                 const now = Date.now();
                 _billingHistory = [
-                    { date: new Date(now - 86400000 * 0).toISOString(), description: 'Campaign spend — Q2 Launch', type: 'spend', amount: -42.18, balance: 457.82, status: 'settled' },
-                    { date: new Date(now - 86400000 * 1).toISOString(), description: 'Campaign spend — Brand Awareness', type: 'spend', amount: -28.50, balance: 500.00, status: 'settled' },
-                    { date: new Date(now - 86400000 * 3).toISOString(), description: 'Deposit via Stripe', type: 'deposit', amount: 500.00, balance: 528.50, status: 'completed' },
-                    { date: new Date(now - 86400000 * 7).toISOString(), description: 'Campaign spend — Retargeting', type: 'spend', amount: -15.32, balance: 28.50, status: 'settled' },
-                    { date: new Date(now - 86400000 * 10).toISOString(), description: 'Initial deposit', type: 'deposit', amount: 100.00, balance: 43.82, status: 'completed' },
+                    { date: new Date(now - 86400000 * 0).toISOString(), description: '[Sample] Campaign spend — Q2 Launch', type: 'spend', amount: -42.18, balance: 457.82, status: 'settled' },
+                    { date: new Date(now - 86400000 * 1).toISOString(), description: '[Sample] Campaign spend — Brand Awareness', type: 'spend', amount: -28.50, balance: 500.00, status: 'settled' },
+                    { date: new Date(now - 86400000 * 3).toISOString(), description: '[Sample] Deposit via Stripe', type: 'deposit', amount: 500.00, balance: 528.50, status: 'completed' },
+                    { date: new Date(now - 86400000 * 7).toISOString(), description: '[Sample] Campaign spend — Retargeting', type: 'spend', amount: -15.32, balance: 28.50, status: 'settled' },
+                    { date: new Date(now - 86400000 * 10).toISOString(), description: '[Sample] Initial deposit', type: 'deposit', amount: 100.00, balance: 43.82, status: 'completed' },
                 ];
             }
 
