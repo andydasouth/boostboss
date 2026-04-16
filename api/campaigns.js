@@ -305,10 +305,10 @@ async function handleUpdate(req, res) {
 
   const allowed = [
     "name", "headline", "subtext", "media_url", "poster_url",
-    "cta_label", "cta_url", "adomain", "iab_cat",
+    "cta_label", "cta_url", "adomain", "iab_cat", "format",
     "target_keywords", "target_regions", "target_languages",
     "target_cpa", "billing_model", "bid_amount",
-    "daily_budget", "total_budget", "status",
+    "daily_budget", "total_budget", "status", "skippable_after_sec",
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];

@@ -1415,6 +1415,78 @@
                         <span id="spendTrend">Loading...</span>
                     </div>
                 </div>
+                <div class="stat-card" style="border: 1.5px solid var(--accent-primary); position: relative;">
+                    <div class="stat-label">Account Balance</div>
+                    <div class="stat-value" style="color: var(--accent-primary);" id="accountBalance">$0.00</div>
+                    <button id="depositBtn" style="
+                        margin-top: 8px; padding: 6px 14px; background: var(--accent-primary); color: #fff;
+                        border: none; border-radius: 6px; font-size: 13px; font-weight: 600;
+                        cursor: pointer; font-family: inherit; transition: all 0.15s;
+                    ">+ Add Funds</button>
+                </div>
+            </div>
+
+            <!-- Deposit Modal -->
+            <div id="depositModal" style="
+                display: none; position: fixed; inset: 0; z-index: 1000;
+                background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+                align-items: center; justify-content: center;
+            ">
+                <div style="
+                    background: #fff; border-radius: 16px; padding: 32px;
+                    width: 100%; max-width: 420px; box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+                ">
+                    <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 4px;">Add Funds</h3>
+                    <p style="color: #6B7280; font-size: 14px; margin-bottom: 20px;">Deposit to your Boost Boss ad account</p>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px;">
+                        <button class="deposit-preset" data-amount="100" style="
+                            padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
+                            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        ">$100</button>
+                        <button class="deposit-preset" data-amount="500" style="
+                            padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
+                            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        ">$500</button>
+                        <button class="deposit-preset" data-amount="1000" style="
+                            padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
+                            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        ">$1,000</button>
+                        <button class="deposit-preset" data-amount="2500" style="
+                            padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
+                            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        ">$2,500</button>
+                        <button class="deposit-preset" data-amount="5000" style="
+                            padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
+                            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        ">$5,000</button>
+                        <button class="deposit-preset" data-amount="10000" style="
+                            padding: 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; background: #fff;
+                            font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit;
+                        ">$10,000</button>
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 4px;">Custom amount</label>
+                        <input type="number" id="depositAmount" min="10" step="1" placeholder="Enter amount ($10 minimum)" style="
+                            width: 100%; padding: 10px 14px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+                            font-size: 15px; font-family: inherit;
+                        ">
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="depositConfirmBtn" style="
+                            flex: 1; padding: 12px; background: var(--accent-primary); color: #fff;
+                            border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
+                            cursor: pointer; font-family: inherit;
+                        ">Deposit via Stripe</button>
+                        <button id="depositCancelBtn" style="
+                            padding: 12px 20px; background: #F3F4F6; color: #374151;
+                            border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+                            cursor: pointer; font-family: inherit;
+                        ">Cancel</button>
+                    </div>
+                    <p style="font-size: 11px; color: #9CA3AF; margin-top: 12px; text-align: center;">
+                        Payments processed securely by Stripe. Funds are available instantly.
+                    </p>
+                </div>
             </div>
 
             <!-- Benna Engine — live panel -->
@@ -1899,8 +1971,27 @@
 
         // Check for existing session
         function checkSession() {
-            const token = localStorage.getItem('bb_session_token');
-            const userData = localStorage.getItem('bb_user_data');
+            let token = localStorage.getItem('bb_session_token');
+            let userData = localStorage.getItem('bb_user_data');
+
+            // Bridge from /signup page tokens (bb_token + bb_user + bb_profile)
+            if (!token && localStorage.getItem('bb_token')) {
+                const signupToken = localStorage.getItem('bb_token');
+                const signupUser = JSON.parse(localStorage.getItem('bb_user') || '{}');
+                const signupProfile = JSON.parse(localStorage.getItem('bb_profile') || '{}');
+                if (signupToken && signupUser.id) {
+                    currentUser = { token: signupToken, user_id: signupUser.id };
+                    currentUserData = {
+                        company_name: signupProfile.company_name || signupUser.email?.split('@')[0] || 'Advertiser',
+                        email: signupUser.email,
+                        user_id: signupUser.id,
+                    };
+                    localStorage.setItem('bb_session_token', JSON.stringify(currentUser));
+                    localStorage.setItem('bb_user_data', JSON.stringify(currentUserData));
+                    token = localStorage.getItem('bb_session_token');
+                    userData = localStorage.getItem('bb_user_data');
+                }
+            }
 
             if (token && userData) {
                 currentUser = JSON.parse(token);
@@ -2287,7 +2378,7 @@
                                     alert('Error updating campaign');
                                 }
                             } else if (action === 'edit') {
-                                alert('Edit coming soon');
+                                openEditModal(campaignId);
                             }
                         });
                     });
@@ -2664,6 +2755,208 @@
             dashboardContainer.classList.add('active');
             companyDisplayName.textContent = currentUserData.company_name || 'Advertiser';
         }
+
+        // ───────────── BILLING ─────────────
+        async function loadBalance() {
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=balance&id=${currentUserData.user_id}`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+                if (r.ok) {
+                    const j = await r.json();
+                    document.getElementById('accountBalance').textContent = '$' + formatNumber(j.balance || 0, true);
+                } else if (r.status === 404) {
+                    document.getElementById('accountBalance').textContent = '$0.00';
+                }
+            } catch (e) {
+                console.warn('Balance load failed:', e.message);
+            }
+        }
+
+        // Deposit modal
+        const depositModal = document.getElementById('depositModal');
+        const depositAmountInput = document.getElementById('depositAmount');
+        document.getElementById('depositBtn').addEventListener('click', () => {
+            depositModal.style.display = 'flex';
+            depositAmountInput.value = '';
+        });
+        document.getElementById('depositCancelBtn').addEventListener('click', () => {
+            depositModal.style.display = 'none';
+        });
+        depositModal.addEventListener('click', (e) => {
+            if (e.target === depositModal) depositModal.style.display = 'none';
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.deposit-preset').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.deposit-preset').forEach(b => b.style.borderColor = '#E5E7EB');
+                btn.style.borderColor = '#FF2D78';
+                depositAmountInput.value = btn.dataset.amount;
+            });
+        });
+
+        // Confirm deposit
+        document.getElementById('depositConfirmBtn').addEventListener('click', async () => {
+            const amount = parseFloat(depositAmountInput.value);
+            if (!amount || amount < 10) {
+                alert('Minimum deposit is $10');
+                return;
+            }
+            const btn = document.getElementById('depositConfirmBtn');
+            btn.textContent = 'Processing…';
+            btn.disabled = true;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=create_checkout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
+                    body: JSON.stringify({
+                        advertiser_id: currentUserData.user_id,
+                        amount: amount,
+                        email: currentUserData.email
+                    })
+                });
+                const j = await r.json();
+                if (j.checkout_url) {
+                    // Stripe mode — redirect to checkout
+                    window.location.href = j.checkout_url;
+                } else if (j.mode === 'demo') {
+                    // Demo mode — balance credited instantly
+                    alert(`Demo deposit of $${amount} credited!`);
+                    depositModal.style.display = 'none';
+                    loadBalance();
+                }
+            } catch (e) {
+                alert('Deposit failed: ' + e.message);
+            } finally {
+                btn.textContent = 'Deposit via Stripe';
+                btn.disabled = false;
+            }
+        });
+
+        // Check for deposit success/cancel URL params
+        (function checkDepositReturn() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('deposit') === 'success') {
+                setTimeout(() => {
+                    alert('Deposit successful! Your balance has been updated.');
+                    loadBalance();
+                }, 500);
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+            if (params.get('deposit') === 'cancelled') {
+                window.history.replaceState({}, '', window.location.pathname);
+            }
+        })();
+
+        // ───────────── CAMPAIGN EDIT ─────────────
+        let editingCampaignId = null;
+
+        async function openEditModal(campaignId) {
+            try {
+                const r = await fetch(`${API_BASE}/api/campaigns?action=get&id=${campaignId}`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+                const j = await r.json();
+                const c = j.campaign || j;
+
+                editingCampaignId = campaignId;
+
+                // Populate the form fields
+                const form = campaignForm;
+                form.querySelector('[name="name"]').value = c.name || '';
+                form.querySelector('[name="format"]').value = c.format || 'native';
+                form.querySelector('[name="headline"]').value = c.headline || '';
+                if (form.querySelector('[name="subtext"]')) form.querySelector('[name="subtext"]').value = c.subtext || '';
+                if (form.querySelector('[name="cta_text"]')) form.querySelector('[name="cta_text"]').value = c.cta_label || '';
+                form.querySelector('[name="cta_url"]').value = c.cta_url || '';
+                form.querySelector('[name="daily_budget"]').value = c.daily_budget || '';
+                form.querySelector('[name="total_budget"]').value = c.total_budget || '';
+                if (form.querySelector('[name="bid_amount"]')) form.querySelector('[name="bid_amount"]').value = c.bid_amount || '';
+                if (form.querySelector('[name="billing_model"]')) {
+                    const radio = form.querySelector(`[name="billing_model"][value="${c.billing_model || 'cpm'}"]`);
+                    if (radio) radio.checked = true;
+                }
+
+                // Populate intent chips
+                intentChips.innerHTML = '';
+                (c.target_keywords || []).forEach(kw => addIntentChip(kw));
+
+                // Change modal title
+                const modalTitle = campaignModal.querySelector('.modal-header h2, h3');
+                if (modalTitle) modalTitle.textContent = 'Edit Campaign';
+
+                openModal();
+            } catch (e) {
+                alert('Failed to load campaign: ' + e.message);
+            }
+        }
+
+        // Override create handler to support edit mode
+        const _origSubmit = handleCreateCampaign;
+        campaignForm.removeEventListener('submit', handleCreateCampaign);
+        campaignForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            if (editingCampaignId) {
+                // UPDATE mode
+                const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
+                const formData = new FormData(campaignForm);
+                const updateData = {
+                    id: editingCampaignId,
+                    name: formData.get('name'),
+                    format: formData.get('format'),
+                    headline: formData.get('headline'),
+                    cta_url: formData.get('cta_url'),
+                    target_keywords: intents,
+                    billing_model: formData.get('billing_model'),
+                    bid_amount: parseFloat(formData.get('bid_amount')) || null,
+                    daily_budget: parseFloat(formData.get('daily_budget')),
+                    total_budget: parseFloat(formData.get('total_budget')),
+                };
+
+                try {
+                    const r = await fetch(`${API_BASE}/api/campaigns?action=update`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${currentUser.token}`
+                        },
+                        body: JSON.stringify(updateData)
+                    });
+                    if (!r.ok) {
+                        const err = await r.json();
+                        throw new Error(err.error || 'Update failed');
+                    }
+                    alert('Campaign updated!');
+                    editingCampaignId = null;
+                    closeModal();
+                    loadCampaigns();
+                    loadStats();
+                } catch (err) {
+                    alert('Error: ' + err.message);
+                }
+            } else {
+                // CREATE mode — call original handler
+                _origSubmit.call(this, e);
+            }
+        });
+
+        // Patch closeModal to reset edit state
+        const _origClose = closeModal;
+        closeModal = function() {
+            editingCampaignId = null;
+            const modalTitle = campaignModal.querySelector('.modal-header h2, h3');
+            if (modalTitle) modalTitle.textContent = 'Create New Campaign';
+            _origClose();
+        };
+
+        // ───────────── PATCH loadStats to also load balance ─────────────
+        const _origLoadStats = loadStats;
+        loadStats = async function() {
+            await _origLoadStats();
+            loadBalance();
+        };
 
         // Start app
         init();
