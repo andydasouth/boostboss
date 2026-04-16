@@ -486,6 +486,7 @@ module.exports = async function handler(req, res) {
 
     // No bid for any impression → 204 per OpenRTB convention
     if (seatbidBids.length === 0) {
+      console.log("[BBX RTB] NO_BID", { auction_id: bidReq.id, imp_count: bidReq.imp.length, reason: "no eligible campaigns or all bids below floor" });
       return res.status(204).end();
     }
 

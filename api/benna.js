@@ -67,9 +67,10 @@ function scoreBid(context = {}, campaign = {}) {
   const p_convert = p_click * (0.18 + rnd() * 0.15);
 
   // bid = target_cpa × p_convert + small exploration noise (Thompson-ish)
-  const target = parseFloat(campaign.target_cpa) || 4.5;
+  let target = parseFloat(campaign.target_cpa);
+  if (!Number.isFinite(target) || target <= 0) target = 4.5;
   const explore = 1 + (rnd() - 0.5) * 0.08;
-  const bid = +(target * p_convert * explore).toFixed(4);
+  const bid = +Math.max(0, target * p_convert * explore).toFixed(4);
 
   return {
     bid_usd: bid,
