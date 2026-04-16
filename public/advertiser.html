@@ -512,6 +512,11 @@
             color: var(--accent-orange);
         }
 
+        .badge.rejected {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
         .action-buttons {
             display: flex;
             gap: 0.5rem;
@@ -3096,15 +3101,28 @@
                     const spent = campaign.spent_today || campaign.spent_total || 0;
                     const budget = campaign.daily_budget || campaign.total_budget || 0;
 
-                    const statusBadge = campaign.status === 'live' ? 'live' :
-                                       campaign.status === 'paused' ? 'paused' : 'review';
+                    const statusMap = {
+                        active: 'live', live: 'live',
+                        paused: 'paused',
+                        in_review: 'review', review: 'review',
+                        rejected: 'rejected',
+                    };
+                    const statusBadge = statusMap[campaign.status] || 'review';
+                    const statusLabel = campaign.status === 'in_review' ? 'In Review'
+                        : campaign.status === 'active' ? 'Active'
+                        : campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1);
+                    const rejectReason = campaign.review_notes || campaign.rejection_reason || '';
+                    const rejectionNote = campaign.status === 'rejected' && rejectReason
+                        ? `<div style="font-size:11px;color:#ef4444;margin-top:2px;" title="${rejectReason}">Reason: ${rejectReason.slice(0, 60)}${rejectReason.length > 60 ? '...' : ''}</div>`
+                        : campaign.status === 'in_review'
+                        ? '<div style="font-size:11px;color:#f59e0b;margin-top:2px;">Pending admin review</div>' : '';
 
                     const bennaChip = renderBennaChip(campaign);
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
                         <td><strong><a href="#" class="campaign-name-link" data-id="${campaign.id}" style="color: inherit; text-decoration: none; border-bottom: 1px dashed #D1D5DB;">${campaign.name}</a></strong></td>
-                        <td><span class="badge ${statusBadge}">${campaign.status}</span></td>
+                        <td><span class="badge ${statusBadge}">${statusLabel}</span>${rejectionNote}</td>
                         <td>${bennaChip}</td>
                         <td>${campaign.format || 'N/A'}</td>
                         <td>${formatNumber(campaign.impressions || 0)}</td>
@@ -3635,13 +3653,38 @@
         (function checkDepositReturn() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('deposit') === 'success') {
-                setTimeout(() => {
-                    showToast('Deposit successful! Your balance has been updated.', 'success');
-                    loadBalance();
-                }, 500);
+                const depositAmount = parseFloat(params.get('amount')) || 0;
+                showToast('Payment received! Updating your balance...', 'success');
                 window.history.replaceState({}, '', window.location.pathname);
+
+                // Poll for balance update — webhook may take a few seconds to process
+                let pollCount = 0;
+                const maxPolls = 10;
+                let initialBalance = null;
+                async function pollBalance() {
+                    try {
+                        await loadBalance();
+                        const balEl = document.getElementById('currentBalance');
+                        const currentBal = parseFloat((balEl?.textContent || '0').replace(/[$,]/g, ''));
+                        if (initialBalance === null) initialBalance = currentBal;
+
+                        // If balance increased or we've polled enough, stop
+                        if ((depositAmount > 0 && currentBal > initialBalance) || pollCount >= maxPolls) {
+                            if (currentBal > initialBalance) {
+                                showToast(`$${depositAmount || (currentBal - initialBalance).toFixed(2)} deposited successfully!`, 'success');
+                            } else {
+                                showToast('Deposit is processing — your balance will update shortly.', 'info');
+                            }
+                            return;
+                        }
+                    } catch (_) {}
+                    pollCount++;
+                    setTimeout(pollBalance, 2000);
+                }
+                setTimeout(pollBalance, 1000);
             }
             if (params.get('deposit') === 'cancelled') {
+                showToast('Deposit cancelled.', 'info');
                 window.history.replaceState({}, '', window.location.pathname);
             }
         })();

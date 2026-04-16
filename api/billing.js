@@ -43,6 +43,17 @@ const MIN_PAYOUT_USD     = Number(process.env.BBX_MIN_PAYOUT) || 100.0;
 const PUBLIC_BASE_URL    = process.env.BOOSTBOSS_BASE_URL     || "https://boostboss.ai";
 const STRIPE_WEBHOOK_KEY = process.env.STRIPE_WEBHOOK_SECRET   || null;
 
+// ── Startup safety: warn loudly if production infra is partially configured ──
+if (HAS_SUPABASE && !HAS_STRIPE) {
+  console.error("⚠️  [Billing] CRITICAL: Supabase is configured but STRIPE_SECRET_KEY is missing. Billing will run in DEMO mode — real deposits will NOT be processed. Set STRIPE_SECRET_KEY to enable production billing.");
+}
+if (HAS_STRIPE && !STRIPE_WEBHOOK_KEY) {
+  console.error("⚠️  [Billing] WARNING: Stripe is configured but STRIPE_WEBHOOK_SECRET is missing. Webhooks will be rejected in production. Deposits may not credit advertiser balances.");
+}
+if (HAS_STRIPE && !HAS_SUPABASE) {
+  console.error("⚠️  [Billing] WARNING: Stripe is configured but Supabase is missing. Payments will process but balances cannot be persisted.");
+}
+
 // ── lazy loaders so demo mode has zero deps ────────────────────────────
 let _stripe = null;
 function stripe() {

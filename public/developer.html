@@ -1279,7 +1279,7 @@
                             <pre id="step1-code">{
   "mcp_server": {
     "type": "sse",
-    "url": "https://api.boostboss.ai/mcp",
+    "url": "https://boostboss.ai/api/mcp",
     "api_key": "bb_dev_sk_loading"
   }
 }</pre>
@@ -1293,13 +1293,8 @@
                         <p style="color: #888; margin-bottom: 1rem;">Include the Boost Boss SDK in your application.</p>
                         <div class="code-block">
                             <button class="code-copy-btn" onclick="copyCode(this, 'step2-code')">Copy</button>
-                            <pre id="step2-code">&lt;script src="https://cdn.boostboss.ai/sdk/v1/boost-boss.js"&gt;&lt;/script&gt;
-&lt;script&gt;
-  BoostBoss.init({
-    apiKey: 'bb_dev_sk_loading',
-    appId: 'app_loading'
-  });
-&lt;/script&gt;</pre>
+                            <pre id="step2-code">&lt;script src="https://boostboss.ai/sdk.js"
+  data-api-key="bb_dev_sk_loading"&gt;&lt;/script&gt;</pre>
                         </div>
                     </div>
                 </div>
@@ -1903,18 +1898,13 @@
             step1Code.textContent = `{
   "mcp_server": {
     "type": "sse",
-    "url": "https://api.boostboss.ai/mcp",
+    "url": "https://boostboss.ai/api/mcp",
     "api_key": "${userProfile.api_key}"
   }
 }`;
 
-            step2Code.textContent = `<script src="https://cdn.boostboss.ai/sdk/v1/boost-boss.js"><\/script>
-<script>
-  BoostBoss.init({
-    apiKey: '${userProfile.api_key}',
-    appId: '${userProfile.app_id}'
-  });
-<\/script>`;
+            step2Code.textContent = `<script src="https://boostboss.ai/sdk.js"
+  data-api-key="${userProfile.api_key}"><\/script>`;
 
             // Update the display copies
             document.getElementById('app-id').textContent = userProfile.app_id;
