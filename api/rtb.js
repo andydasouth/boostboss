@@ -470,7 +470,11 @@ module.exports = async function handler(req, res) {
       const bid = buildBid(imp, best.campaign, best.score, bidReq);
       seatbidBids.push(bid);
       // Persist asynchronously — don't make the auction wait on disk
-      persistOps.push(ledger.recordBid(bidReq.id, bid, best.campaign.id, auth.seat.seat_id));
+      const pubDomain = (bidReq.site && bidReq.site.domain) || (bidReq.app && bidReq.app.bundle) || null;
+      persistOps.push(ledger.recordBid(bidReq.id, bid, best.campaign.id, auth.seat.seat_id, {
+        developer_id: (bidReq.ext && bidReq.ext.developer_id) || null,
+        developer_domain: pubDomain,
+      }));
     }
 
     // Fire-and-forget; await before responding so a failing ledger surfaces

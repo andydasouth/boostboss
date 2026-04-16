@@ -196,11 +196,31 @@ async function handleEarnings(req, res) {
       payout_threshold: MIN_PAYOUT_USD, next_payout_date: nextPayoutDate(),
     });
   }
-  // Demo path: derive from ledger so dashboard numbers match what really happened
+  // Demo path: derive earnings from ledger + track events so numbers are real
   const dev = ensureDemoDeveloper(key, { app_name: "My AI App" });
+  // Sum developer_payout from in-memory track events
+  let pendingPayout = 0;
+  try {
+    const trackEvents = require("./track.js")._DEMO_EVENTS || [];
+    for (const ev of trackEvents) {
+      if (ev.developer_id === key && ev.developer_payout > 0) {
+        pendingPayout += ev.developer_payout;
+      }
+    }
+  } catch (_) {}
+  // Also check ledger wins attributed to this developer
+  try {
+    const dump = ledger._dump();
+    for (const bid of dump.bids) {
+      if (bid.status === "won" && bid.developer_id === key) {
+        pendingPayout += (Number(bid.won_price_cpm) || 0) / 1000 * (1 - TAKE_RATE);
+      }
+    }
+  } catch (_) {}
+  const totalEarnings = dev.total_earnings + pendingPayout;
   return res.json({
-    app_name: dev.app_name, total_earnings: dev.total_earnings,
-    pending_payout: "0.00", revenue_share_pct: (1 - TAKE_RATE) * 100,
+    app_name: dev.app_name, total_earnings: totalEarnings.toFixed(2),
+    pending_payout: pendingPayout.toFixed(2), revenue_share_pct: (1 - TAKE_RATE) * 100,
     payout_threshold: MIN_PAYOUT_USD, next_payout_date: nextPayoutDate(),
   });
 }
@@ -419,11 +439,16 @@ async function handlePayout(req, res) {
     const sb = supa();
     for (const t of transfers) {
       if (!t.eligible) continue;
-      // Map publisher → stripe_account_id (look up by site_domain/app_bundle)
+      // Map publisher → stripe_account_id (look up by app_domain or app_bundle)
       let acct = null;
       if (sb) {
-        const { data } = await sb.from("developers")
-          .select("stripe_account_id").eq("publisher_key", t.publisher).single();
+        // Try app_domain first, then app_bundle — these match what rtb.js stores in auction records
+        let { data } = await sb.from("developers")
+          .select("stripe_account_id").eq("app_domain", t.publisher).single();
+        if (!data) {
+          ({ data } = await sb.from("developers")
+            .select("stripe_account_id").eq("app_bundle", t.publisher).single());
+        }
         acct = data && data.stripe_account_id;
       }
       if (!acct) { t.transfer_skipped = "no Stripe Connect account on file"; continue; }

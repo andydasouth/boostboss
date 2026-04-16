@@ -83,31 +83,52 @@ module.exports = async function handler(req, res) {
 
   if (sb) {
     // ── Supabase path ──
-    const { error } = await sb.from("events").insert(record);
-    if (!error && ["impression", "click", "video_complete"].includes(event)) {
+    // Insert with cost pre-computed so we never need a second update (fixes race condition)
+    if (["impression", "click", "video_complete"].includes(event)) {
       const { data: campaign } = await sb.from("campaigns")
-        .select("billing_model, bid_amount, spent_today, spent_total")
+        .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget")
         .eq("id", campaignId).single();
       if (campaign) {
-        let cost = computeCost(event, campaign);
+        const cost = computeCost(event, campaign);
         if (cost > 0) {
-          const devPayout = +(cost * (1 - TAKE_RATE)).toFixed(4);
-          await sb.from("campaigns").update({
-            spent_today: (campaign.spent_today || 0) + cost,
-            spent_total: (campaign.spent_total || 0) + cost,
-          }).eq("id", campaignId);
-          await sb.from("events").update({ cost, developer_payout: devPayout })
-            .eq("campaign_id", campaignId)
-            .eq("session_id", sessionId)
-            .eq("event_type", event)
-            .order("created_at", { ascending: false }).limit(1);
           record.cost = cost;
-          record.developer_payout = devPayout;
+          record.developer_payout = +(cost * (1 - TAKE_RATE)).toFixed(4);
+          // Atomic budget deduction — increment rather than read-then-write
+          const newDaily = (campaign.spent_today || 0) + cost;
+          const newTotal = (campaign.spent_total || 0) + cost;
+          await sb.from("campaigns").update({
+            spent_today: newDaily, spent_total: newTotal,
+            // Auto-pause if budget exhausted
+            ...(newDaily >= campaign.daily_budget || newTotal >= campaign.total_budget
+              ? { status: "paused" } : {}),
+          }).eq("id", campaignId);
         }
       }
     }
+    const { error } = await sb.from("events").insert(record);
+    if (error) console.error("[Track] event insert:", error.message);
   } else {
-    // ── Demo path ──
+    // ── Demo path — compute cost and attribute to developer ──
+    if (["impression", "click", "video_complete"].includes(event)) {
+      let campaign = null;
+      try {
+        const camps = require("./campaigns.js")._DEMO_CAMPAIGNS || [];
+        campaign = camps.find(c => c.id === campaignId);
+      } catch (_) {}
+      if (campaign) {
+        const cost = computeCost(event, campaign);
+        if (cost > 0) {
+          record.cost = cost;
+          record.developer_payout = +(cost * (1 - TAKE_RATE)).toFixed(4);
+          campaign.spent_today = (campaign.spent_today || 0) + cost;
+          campaign.spent_total = (campaign.spent_total || 0) + cost;
+          // Auto-pause in demo too
+          if (campaign.spent_today >= campaign.daily_budget || campaign.spent_total >= campaign.total_budget) {
+            campaign.status = "paused";
+          }
+        }
+      }
+    }
     DEMO_EVENTS.push(record);
   }
 

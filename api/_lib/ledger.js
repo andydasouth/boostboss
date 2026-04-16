@@ -76,7 +76,7 @@ async function recordAuction(bidReq, seatId = null) {
 }
 
 /** Record a Bid we returned. Returns the stored bid record. */
-async function recordBid(auctionId, bid, campaignId, seatId = "boostboss") {
+async function recordBid(auctionId, bid, campaignId, seatId = "boostboss", extras = {}) {
   const row = {
     id: bid.id,
     auction_id: auctionId,
@@ -86,6 +86,8 @@ async function recordBid(auctionId, bid, campaignId, seatId = "boostboss") {
     price_cpm: bid.price,
     adomain: bid.adomain || [],
     cat: bid.cat || [],
+    developer_id: extras.developer_id || null,
+    developer_domain: extras.developer_domain || null,
     status: "pending", // pending → won | lost | expired
     ts: new Date().toISOString(),
   };
