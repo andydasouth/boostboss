@@ -1102,9 +1102,9 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-label">Your Share</div>
-                    <div class="stat-value default" id="revenueShare">65%</div>
+                    <div class="stat-value default" id="revenueShare">85%</div>
                     <div class="stat-bar">
-                        <div class="stat-bar-fill" id="shareBar" style="width: 65%"></div>
+                        <div class="stat-bar-fill" id="shareBar" style="width: 85%"></div>
                     </div>
                 </div>
                 <div class="stat-card">
@@ -1342,7 +1342,14 @@
 
             <!-- Earnings History Table -->
             <div class="section">
-                <div class="section-title">Earnings History</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="section-title" style="margin-bottom: 0;">Earnings History</div>
+                    <button onclick="exportEarningsCSV()" style="
+                        padding: 6px 14px; border: 1px solid #E5E7EB; border-radius: 8px;
+                        background: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+                        font-family: inherit; color: #374151;
+                    ">Export CSV</button>
+                </div>
                 <div class="table-container">
                     <table>
                         <thead>
@@ -1379,7 +1386,59 @@
                         <div class="key-value">$100.00</div>
                     </div>
                 </div>
-                <button class="payout-btn" onclick="requestPayout()">Request Payout</button>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="payout-btn" onclick="requestPayout()">Request Payout</button>
+                    <button onclick="connectStripe()" style="
+                        padding: 12px 24px; background: #635BFF; color: #fff;
+                        border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
+                        cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 8px;
+                    ">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M13.976 9.15c-2.172-.806-3.356-1.426-3.356-2.409 0-.831.683-1.305 1.901-1.305 2.227 0 4.515.858 6.09 1.631l.89-5.494C18.252.975 15.697 0 12.165 0 9.667 0 7.589.654 6.104 1.872 4.56 3.147 3.757 4.992 3.757 7.218c0 4.039 2.467 5.76 6.476 7.219 2.585.92 3.445 1.574 3.445 2.583 0 .98-.84 1.545-2.354 1.545-1.875 0-4.965-.921-6.99-2.109l-.9 5.555C5.175 22.99 8.385 24 11.714 24c2.641 0 4.843-.624 6.328-1.813 1.664-1.305 2.525-3.236 2.525-5.732 0-4.128-2.524-5.851-6.591-7.305z"/></svg>
+                        Connect Stripe
+                    </button>
+                </div>
+            </div>
+
+            <!-- SDK Quick Start -->
+            <div class="section">
+                <div class="section-title">Quick Start</div>
+                <div style="
+                    background: #0A0A14; border-radius: 12px; padding: 20px; color: #B0B0C7;
+                    font-family: 'SFMono-Regular', Consolas, monospace; font-size: 13px;
+                    line-height: 1.7; position: relative; overflow-x: auto;
+                ">
+                    <button onclick="copyQuickStart()" style="
+                        position: absolute; top: 10px; right: 10px;
+                        background: rgba(255,255,255,0.1); border: none;
+                        padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
+                        font-size: 11px; cursor: pointer; font-family: inherit;
+                    " id="copyQsBtn">Copy</button>
+                    <pre id="quickStartCode" style="margin: 0; white-space: pre-wrap;"><span style="color:#9D7AFF;">const</span> bb = <span style="color:#9D7AFF;">require</span>(<span style="color:#FFE600;">"@boostbossai/lumi-sdk"</span>);
+
+<span style="color:#9D7AFF;">const</span> ad = <span style="color:#04BEFE;">await</span> bb.<span style="color:#FF2D78;">getSponsoredContent</span>({
+  context: <span style="color:#FFE600;">"user is debugging a python traceback"</span>,
+  host: <span style="color:#FFE600;">"your-app.com"</span>
+});
+
+<span style="color:#9D7AFF;">if</span> (ad.sponsored) render(ad.sponsored);</pre>
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
+                    <a href="/docs.html" style="
+                        padding: 8px 16px; background: var(--pink); color: #fff;
+                        border-radius: 8px; font-size: 13px; font-weight: 600;
+                        text-decoration: none; display: inline-block;
+                    ">Full Documentation</a>
+                    <a href="/playground.html" style="
+                        padding: 8px 16px; border: 1px solid #E5E7EB;
+                        border-radius: 8px; font-size: 13px; font-weight: 600;
+                        text-decoration: none; color: #374151; display: inline-block;
+                    ">Try in Playground</a>
+                    <a href="https://www.npmjs.com/package/@boostbossai/lumi-sdk" target="_blank" style="
+                        padding: 8px 16px; border: 1px solid #E5E7EB;
+                        border-radius: 8px; font-size: 13px; font-weight: 600;
+                        text-decoration: none; color: #374151; display: inline-block;
+                    ">npm Package</a>
+                </div>
             </div>
         </div>
 
@@ -1718,7 +1777,7 @@
                     stats = {
                         total_earnings: 0,
                         total_impressions: 0,
-                        revenue_share: 0,
+                        revenue_share: 85,
                         rpm: 0,
                         daily: []
                     };
@@ -1956,12 +2015,141 @@
                 apiKeyRevealed = false;
                 updateIntegrationGuide();
 
-                alert('API key regenerated successfully! Your new key is: ' + newKey);
+                showToast('API key regenerated! Update your integration code.', 'success');
             }
         }
 
-        function requestPayout() {
-            alert('Payout request submitted! You will receive your earnings by May 1, 2026.');
+        // ───────────── TOAST NOTIFICATIONS ─────────────
+        function showToast(message, type = 'success', duration = 3500) {
+            let container = document.getElementById('toastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px;';
+                document.body.appendChild(container);
+            }
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                padding: 14px 20px; border-radius: 10px; font-size: 14px;
+                font-weight: 500; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+                transform: translateX(120%); transition: transform 0.3s ease;
+                max-width: 360px; font-family: inherit;
+                background: ${type === 'success' ? '#059669' : type === 'error' ? '#DC2626' : '#2563EB'};
+            `;
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.style.transform = 'translateX(0)');
+            setTimeout(() => {
+                toast.style.transform = 'translateX(120%)';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ───────────── AUTH BRIDGE FROM /signup ─────────────
+        (function bridgeSignupAuth() {
+            const session = localStorage.getItem('bb_dev_session');
+            if (session) return; // Already authenticated
+
+            const signupToken = localStorage.getItem('bb_token');
+            const signupUser = localStorage.getItem('bb_user');
+            const signupProfile = localStorage.getItem('bb_profile');
+            if (signupToken && signupUser) {
+                try {
+                    const user = JSON.parse(signupUser);
+                    const profile = JSON.parse(signupProfile || '{}');
+                    if (user.id && user.role === 'developer') {
+                        const sessionData = { token: signupToken, user_id: user.id };
+                        const profileData = {
+                            user_id: user.id,
+                            email: user.email,
+                            app_name: profile.app_name || user.email?.split('@')[0] || 'My App',
+                            api_key: profile.api_key || 'bb_dev_sk_' + user.id.replace(/-/g, '').substring(0, 18),
+                            app_id: profile.app_id || 'app_' + user.id.substring(0, 8),
+                            revenue_share_pct: profile.revenue_share_pct || 85,
+                            formats: { corner: true, fullscreen: true, video: true, native: true }
+                        };
+                        localStorage.setItem('bb_dev_session', JSON.stringify(sessionData));
+                        localStorage.setItem('bb_dev_data', JSON.stringify(profileData));
+                    }
+                } catch (e) { console.warn('Auth bridge failed:', e); }
+            }
+        })();
+
+        // ───────────── EARNINGS CSV EXPORT ─────────────
+        function exportEarningsCSV() {
+            const rows = document.querySelectorAll('#earningsTableBody tr');
+            if (!rows.length || rows[0].querySelector('td[colspan]')) {
+                showToast('No earnings data to export', 'info');
+                return;
+            }
+            let csv = 'Date,Impressions,Earnings,Clicks,RPM,Status\n';
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                csv += Array.from(cells).map(c => `"${c.textContent.trim()}"`).join(',') + '\n';
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `lumi-earnings-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Earnings CSV downloaded', 'success');
+        }
+
+        // ───────────── STRIPE CONNECT PAYOUT ─────────────
+        async function requestPayout() {
+            const session = JSON.parse(localStorage.getItem('bb_dev_session') || '{}');
+            const btn = document.querySelector('.payout-btn');
+            btn.textContent = 'Processing…';
+            btn.disabled = true;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=payout`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                    body: JSON.stringify({ developer_id: userProfile.user_id })
+                });
+                const data = await r.json();
+                if (data.payout_id || data.mode === 'demo') {
+                    showToast('Payout request submitted! Funds will arrive in 2-3 business days.', 'success');
+                } else {
+                    showToast(data.error || 'Payout failed', 'error');
+                }
+            } catch (e) {
+                showToast('Payout request failed: ' + e.message, 'error');
+            } finally {
+                btn.textContent = 'Request Payout';
+                btn.disabled = false;
+            }
+        }
+
+        async function connectStripe() {
+            const session = JSON.parse(localStorage.getItem('bb_dev_session') || '{}');
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=create_connect`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session.token}` },
+                    body: JSON.stringify({ developer_id: userProfile.user_id, email: userProfile.email })
+                });
+                const data = await r.json();
+                if (data.onboarding_url) {
+                    window.location.href = data.onboarding_url;
+                } else if (data.mode === 'demo') {
+                    showToast('Stripe Connect linked (demo mode)', 'success');
+                } else {
+                    showToast(data.error || 'Failed to start Stripe Connect', 'error');
+                }
+            } catch (e) {
+                showToast('Stripe Connect failed: ' + e.message, 'error');
+            }
+        }
+
+        function copyQuickStart() {
+            const code = document.getElementById('quickStartCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = document.getElementById('copyQsBtn');
+                btn.textContent = 'Copied!';
+                showToast('Code copied!', 'success', 1500);
+                setTimeout(() => btn.textContent = 'Copy', 2000);
+            });
         }
 
         function handleLogout() {
