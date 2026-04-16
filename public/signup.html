@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up — Boost Boss</title>
+<meta name="description" content="Create your Boost Boss account. Advertise in AI apps or monetize your AI product.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --pink: #FF2D78; --pink-dark: #E01E65; --cyan: #04BEFE;
+  --ink: #1A1A2E; --ink-soft: #4B4B5E; --muted: #6B7280;
+  --line: #EAEAEF; --bg: #FFFFFF; --bg-soft: #FAFAF7;
+  --green: #10B981; --red: #EF4444;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg-soft); color: var(--ink);
+  line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+h1, h2, h3 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
+
+/* ── Nav ── */
+nav {
+  background: rgba(255,255,255,0.85); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 100;
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; max-width: 1200px; margin: 0 auto; padding: 0 24px;
+}
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.brand-name {
+  font-family: 'Space Grotesk', sans-serif; font-size: 20px;
+  font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
+}
+
+/* ── Layout ── */
+.page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
+.card {
+  background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  border: 1px solid var(--line); width: 100%; max-width: 520px; padding: 48px 40px;
+}
+.card h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; text-align: center; }
+.card .sub { color: var(--muted); font-size: 15px; text-align: center; margin-bottom: 32px; }
+
+/* ── Role picker ── */
+.role-picker { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+.role-btn {
+  padding: 18px 16px; border: 2px solid var(--line); border-radius: 12px;
+  background: #fff; cursor: pointer; text-align: center; transition: all 0.15s;
+}
+.role-btn:hover { border-color: #ccc; }
+.role-btn.active { border-color: var(--pink); background: #FFF5F8; }
+.role-btn .icon { font-size: 28px; margin-bottom: 8px; }
+.role-btn .label { font-weight: 600; font-size: 15px; color: var(--ink); }
+.role-btn .desc { font-size: 12.5px; color: var(--muted); margin-top: 4px; }
+
+/* ── Form ── */
+.form-group { margin-bottom: 18px; }
+.form-group label {
+  display: block; font-size: 13.5px; font-weight: 600; color: var(--ink);
+  margin-bottom: 6px;
+}
+.form-group input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--line);
+  border-radius: 8px; font-size: 15px; font-family: inherit;
+  transition: border-color 0.15s; background: #fff; color: var(--ink);
+}
+.form-group input:focus { outline: none; border-color: var(--pink); }
+.form-group input::placeholder { color: #B0B0C7; }
+.form-group .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+.btn-submit {
+  width: 100%; padding: 13px; border: none; border-radius: 10px;
+  background: var(--pink); color: #fff; font-size: 15.5px;
+  font-weight: 700; font-family: inherit; cursor: pointer;
+  transition: background 0.15s; margin-top: 8px;
+}
+.btn-submit:hover { background: var(--pink-dark); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.error-msg {
+  background: #FEF2F2; border: 1px solid #FECACA; color: var(--red);
+  padding: 10px 14px; border-radius: 8px; font-size: 13.5px;
+  margin-bottom: 16px; display: none;
+}
+.success-msg {
+  background: #F0FDF4; border: 1px solid #BBF7D0; color: #15803D;
+  padding: 10px 14px; border-radius: 8px; font-size: 13.5px;
+  margin-bottom: 16px; display: none;
+}
+
+.divider {
+  display: flex; align-items: center; gap: 14px; margin: 24px 0;
+  color: var(--muted); font-size: 13px;
+}
+.divider::before, .divider::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
+
+.alt-link { text-align: center; font-size: 14px; color: var(--muted); margin-top: 20px; }
+.alt-link a { color: var(--pink); font-weight: 600; text-decoration: none; }
+.alt-link a:hover { text-decoration: underline; }
+
+/* ── Footer ── */
+footer {
+  text-align: center; padding: 24px; font-size: 13px; color: var(--muted);
+  border-top: 1px solid var(--line);
+}
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .card { padding: 32px 24px; }
+  .role-picker { grid-template-columns: 1fr; }
+}
+
+/* ── Login toggle ── */
+.tab-row { display: flex; gap: 0; margin-bottom: 28px; border-bottom: 2px solid var(--line); }
+.tab-btn {
+  flex: 1; padding: 12px; text-align: center; font-weight: 600; font-size: 14.5px;
+  color: var(--muted); background: none; border: none; cursor: pointer;
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s;
+  font-family: inherit;
+}
+.tab-btn.active { color: var(--pink); border-bottom-color: var(--pink); }
+
+.hidden { display: none !important; }
+
+/* ── API key display ── */
+.api-key-box {
+  background: #0A0A14; color: #04BEFE; padding: 14px 16px;
+  border-radius: 8px; font-family: 'SF Mono', Consolas, monospace;
+  font-size: 13px; word-break: break-all; margin: 12px 0;
+  position: relative;
+}
+.api-key-box .copy-btn {
+  position: absolute; top: 8px; right: 8px; background: #2A2A3E;
+  border: none; color: #fff; padding: 4px 10px; border-radius: 6px;
+  font-size: 11px; cursor: pointer; font-family: inherit;
+}
+.api-key-box .copy-btn:hover { background: #3A3A4E; }
+</style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" width="36" height="36" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FF2D78"/><path d="M30 68V32h18c10 0 16 5 16 13 0 5-3 9-8 11l10 12H56l-9-11h-7v11H30zm10-19h7c4 0 7-2 7-5s-3-5-7-5h-7v10z" fill="#fff"/></svg>
+      <span class="brand-name">Boost Boss</span>
+    </a>
+    <div style="display:flex;gap:10px;align-items:center;">
+      <a href="/docs.html" style="font-size:14px;font-weight:500;color:var(--ink-soft);">Docs</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Page -->
+<div class="page">
+  <div class="card">
+    <!-- Tabs -->
+    <div class="tab-row">
+      <button class="tab-btn active" data-tab="signup">Create account</button>
+      <button class="tab-btn" data-tab="login">Sign in</button>
+    </div>
+
+    <!-- Signup form -->
+    <div id="signup-panel">
+      <h1>Get started with Boost Boss</h1>
+      <p class="sub">Choose your role to begin</p>
+
+      <div id="error" class="error-msg"></div>
+      <div id="success" class="success-msg"></div>
+
+      <!-- Role picker -->
+      <div class="role-picker">
+        <button class="role-btn active" data-role="advertiser">
+          <div class="icon">📣</div>
+          <div class="label">Advertiser</div>
+          <div class="desc">Run campaigns via SuperBoost</div>
+        </button>
+        <button class="role-btn" data-role="developer">
+          <div class="icon">🧩</div>
+          <div class="label">Publisher</div>
+          <div class="desc">Monetize with Lumi SDK</div>
+        </button>
+      </div>
+
+      <form id="signup-form" autocomplete="off">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@company.com" required>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="At least 6 characters" required minlength="6">
+        </div>
+        <div class="form-group" id="company-group">
+          <label for="company_name">Company name</label>
+          <input type="text" id="company_name" name="company_name" placeholder="Acme Inc.">
+        </div>
+        <div class="form-group hidden" id="app-group">
+          <label for="app_name">App or product name</label>
+          <input type="text" id="app_name" name="app_name" placeholder="My AI Assistant">
+        </div>
+        <button type="submit" class="btn-submit" id="submit-btn">Create account</button>
+      </form>
+
+      <div class="divider">or</div>
+      <button class="btn-submit" style="background:#0A0A14;" id="demo-btn">Try the demo (no account needed)</button>
+      <div class="alt-link">Already have an account? <a href="#" id="switch-login">Sign in</a></div>
+    </div>
+
+    <!-- Login form -->
+    <div id="login-panel" class="hidden">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to your Boost Boss account</p>
+
+      <div id="login-error" class="error-msg"></div>
+
+      <form id="login-form" autocomplete="off">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" name="email" placeholder="you@company.com" required>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" name="password" placeholder="Your password" required>
+        </div>
+        <button type="submit" class="btn-submit" id="login-submit-btn">Sign in</button>
+      </form>
+
+      <div class="divider">or</div>
+      <button class="btn-submit" style="background:#0A0A14;" id="login-demo-btn">Try the demo instead</button>
+      <div class="alt-link">Don't have an account? <a href="#" id="switch-signup">Create one</a></div>
+    </div>
+
+    <!-- Success panel (shown after signup) -->
+    <div id="welcome-panel" class="hidden">
+      <h1 style="margin-bottom:16px;">You're in! 🎉</h1>
+      <p class="sub" id="welcome-msg">Your account is ready.</p>
+
+      <div style="margin-bottom:20px;">
+        <p style="font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:8px;">Your API key</p>
+        <div class="api-key-box">
+          <span id="api-key-val"></span>
+          <button class="copy-btn" onclick="copyKey()">Copy</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px;">Save this — you won't see it again in production.</p>
+      </div>
+
+      <a class="btn-submit" id="go-dashboard" href="/ads.html" style="display:block;text-align:center;text-decoration:none;">Go to dashboard →</a>
+    </div>
+  </div>
+</div>
+
+<footer>© 2026 Boost Boss, Inc.</footer>
+
+<script>
+const API = "/api/auth";
+let selectedRole = "advertiser";
+
+// ── Tab switching ──
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    const tab = btn.dataset.tab;
+    document.getElementById("signup-panel").classList.toggle("hidden", tab !== "signup");
+    document.getElementById("login-panel").classList.toggle("hidden", tab !== "login");
+    document.getElementById("welcome-panel").classList.add("hidden");
+  });
+});
+document.getElementById("switch-login").addEventListener("click", e => {
+  e.preventDefault();
+  document.querySelector('[data-tab="login"]').click();
+});
+document.getElementById("switch-signup").addEventListener("click", e => {
+  e.preventDefault();
+  document.querySelector('[data-tab="signup"]').click();
+});
+
+// ── Role picker ──
+document.querySelectorAll(".role-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".role-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    selectedRole = btn.dataset.role;
+    document.getElementById("company-group").classList.toggle("hidden", selectedRole !== "advertiser");
+    document.getElementById("app-group").classList.toggle("hidden", selectedRole !== "developer");
+  });
+});
+
+// ── Signup ──
+document.getElementById("signup-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = document.getElementById("submit-btn");
+  btn.disabled = true; btn.textContent = "Creating account…";
+  hideMessages();
+
+  try {
+    const payload = {
+      email: document.getElementById("email").value.trim(),
+      password: document.getElementById("password").value,
+      role: selectedRole,
+    };
+    if (selectedRole === "advertiser") payload.company_name = document.getElementById("company_name").value.trim() || undefined;
+    if (selectedRole === "developer") payload.app_name = document.getElementById("app_name").value.trim() || undefined;
+
+    const r = await fetch(API + "?action=signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || "Signup failed");
+
+    saveSession(j);
+    showWelcome(j);
+  } catch (err) {
+    showError("error", err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Create account";
+  }
+});
+
+// ── Login ──
+document.getElementById("login-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const btn = document.getElementById("login-submit-btn");
+  btn.disabled = true; btn.textContent = "Signing in…";
+  hideMessages();
+
+  try {
+    const r = await fetch(API + "?action=login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: document.getElementById("login-email").value.trim(),
+        password: document.getElementById("login-password").value,
+      }),
+    });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || "Login failed");
+
+    saveSession(j);
+    // Redirect straight to dashboard
+    const dest = j.user?.role === "developer" ? "/publish.html" : "/ads.html";
+    window.location.href = dest;
+  } catch (err) {
+    showError("login-error", err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = "Sign in";
+  }
+});
+
+// ── Demo buttons ──
+async function launchDemo(role) {
+  try {
+    const r = await fetch(API + "?action=demo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ role: role || selectedRole }),
+    });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || "Demo failed");
+    saveSession(j);
+    const dest = j.user?.role === "developer" ? "/publish.html" : "/ads.html";
+    window.location.href = dest;
+  } catch (err) {
+    showError("error", err.message);
+  }
+}
+document.getElementById("demo-btn").addEventListener("click", () => launchDemo(selectedRole));
+document.getElementById("login-demo-btn").addEventListener("click", () => launchDemo("advertiser"));
+
+// ── Helpers ──
+function saveSession(j) {
+  if (j.session?.access_token) localStorage.setItem("bb_token", j.session.access_token);
+  if (j.user) localStorage.setItem("bb_user", JSON.stringify(j.user));
+  if (j.profile) localStorage.setItem("bb_profile", JSON.stringify(j.profile));
+}
+
+function showWelcome(j) {
+  document.getElementById("signup-panel").classList.add("hidden");
+  document.getElementById("login-panel").classList.add("hidden");
+  document.getElementById("welcome-panel").classList.remove("hidden");
+
+  const role = j.user?.role || "advertiser";
+  const key = j.profile?.api_key || "(available in dashboard)";
+  document.getElementById("api-key-val").textContent = key;
+  document.getElementById("welcome-msg").textContent =
+    role === "developer"
+      ? "Your publisher account is live. Install the Lumi SDK to start earning."
+      : "Your advertiser account is live. Launch your first campaign in SuperBoost.";
+  document.getElementById("go-dashboard").href = role === "developer" ? "/publish.html" : "/ads.html";
+  document.getElementById("go-dashboard").textContent =
+    role === "developer" ? "Go to Lumi SDK dashboard →" : "Go to SuperBoost dashboard →";
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = "block";
+}
+function hideMessages() {
+  document.querySelectorAll(".error-msg, .success-msg").forEach(el => el.style.display = "none");
+}
+
+function copyKey() {
+  const text = document.getElementById("api-key-val").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector(".copy-btn");
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = "Copy", 1500);
+  });
+}
+
+// ── Auto-redirect if already logged in ──
+(function checkExistingSession() {
+  const token = localStorage.getItem("bb_token");
+  const user = localStorage.getItem("bb_user");
+  if (token && user) {
+    try {
+      const u = JSON.parse(user);
+      // Verify token is still valid
+      fetch(API + "?action=me", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      }).then(r => {
+        if (r.ok) {
+          const dest = u.role === "developer" ? "/publish.html" : "/ads.html";
+          window.location.href = dest;
+        } else {
+          // Token expired — clear and show form
+          localStorage.removeItem("bb_token");
+          localStorage.removeItem("bb_user");
+          localStorage.removeItem("bb_profile");
+        }
+      });
+    } catch (e) {}
+  }
+})();
+
+// ── URL param: ?role=developer pre-selects publisher tab ──
+const params = new URLSearchParams(window.location.search);
+if (params.get("role") === "developer") {
+  document.querySelector('[data-role="developer"]').click();
+}
+if (params.get("tab") === "login") {
+  document.querySelector('[data-tab="login"]').click();
+}
+</script>
+</body>
+</html>

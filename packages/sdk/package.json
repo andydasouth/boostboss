@@ -29,18 +29,25 @@
   "homepage": "https://boostboss.ai",
   "repository": {
     "type": "git",
-    "url": "https://github.com/boostboss/sdk"
+    "url": "https://github.com/andydasouth/boostboss",
+    "directory": "packages/sdk"
   },
   "bugs": {
-    "url": "https://github.com/boostboss/sdk/issues",
+    "url": "https://github.com/andydasouth/boostboss/issues",
     "email": "sdk@boostboss.ai"
   },
+  "files": [
+    "src/",
+    "README.md",
+    "LICENSE"
+  ],
   "engines": {
     "node": ">=18"
   },
   "dependencies": {},
   "devDependencies": {},
   "scripts": {
-    "test": "node test/smoke.js"
+    "test": "node test/smoke.js",
+    "prepublishOnly": "node test/smoke.js"
   }
 }

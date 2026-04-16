@@ -36,7 +36,7 @@ function assert(cond, msg) { if (!cond) throw new Error(msg); }
     assert(t.includes("Boost Boss"), "missing brand name");
   });
 
-  for (const page of ["/ads.html", "/publish.html", "/exchange.html", "/docs.html", "/trust.html", "/status.html", "/playground.html"]) {
+  for (const page of ["/ads.html", "/publish.html", "/exchange.html", "/docs.html", "/trust.html", "/status.html", "/playground.html", "/signup.html", "/admin.html"]) {
     await check(`${page} loads`, async () => {
       const r = await fetch(BASE + page);
       assert(r.ok, `status ${r.status}`);

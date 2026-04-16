@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Boost Boss</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --pink: #FF2D78; --pink-dark: #E01E65; --cyan: #04BEFE; --yellow: #FFE600;
+  --ink: #0A0A14; --ink-soft: #4B4B5E; --muted: #6B7280;
+  --line: #1F1F2E; --bg: #0D0D1A; --bg-card: #13132A; --bg-soft: #1A1A30;
+  --green: #10B981; --red: #EF4444; --orange: #F59E0B;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif; background: var(--bg);
+  color: #E5E5F0; line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 14px;
+}
+h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: #F5F5F7; }
+a { color: var(--cyan); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Layout ── */
+.shell { display: flex; min-height: 100vh; }
+.sidebar {
+  width: 240px; flex-shrink: 0; background: var(--bg-card);
+  border-right: 1px solid var(--line); padding: 24px 16px;
+  display: flex; flex-direction: column; gap: 4px;
+  position: sticky; top: 0; height: 100vh;
+}
+.main { flex: 1; padding: 32px; max-width: 1100px; }
+
+.sidebar .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+.sidebar .brand-name { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 18px; color: #F5F5F7; }
+.sidebar .admin-badge {
+  display: inline-block; background: var(--pink); color: #fff; font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: 4px; letter-spacing: 1px; margin-left: 4px; vertical-align: middle;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px;
+  font-size: 13.5px; font-weight: 500; color: #B0B0C7; cursor: pointer; transition: all 0.12s;
+  border: none; background: none; width: 100%; text-align: left; font-family: inherit;
+}
+.nav-item:hover { background: var(--bg-soft); color: #F5F5F7; }
+.nav-item.active { background: var(--pink); color: #fff; }
+.nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+.nav-item .badge-count {
+  margin-left: auto; background: var(--red); color: #fff; font-size: 10px;
+  font-weight: 700; padding: 1px 6px; border-radius: 100px; min-width: 18px; text-align: center;
+}
+
+.sidebar-footer { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--line); }
+.sidebar-footer .meta { font-size: 11px; color: var(--muted); }
+
+/* ── Stats row ── */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+.stat-card {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+}
+.stat-card .label { font-size: 12px; color: var(--muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card .value { font-family: 'Space Grotesk', sans-serif; font-size: 32px; font-weight: 700; color: #F5F5F7; margin-top: 4px; }
+.stat-card .sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.stat-card .value.pink { color: var(--pink); }
+.stat-card .value.cyan { color: var(--cyan); }
+.stat-card .value.green { color: var(--green); }
+
+/* ── Section ── */
+.section { margin-bottom: 36px; }
+.section-header {
+  display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;
+}
+.section-header h2 { font-size: 20px; }
+.section-header .count { color: var(--muted); font-size: 13px; font-weight: 500; }
+
+/* ── Table ── */
+.table-wrap {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; font-size: 11px; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px; padding: 12px 16px;
+  background: var(--bg-soft); border-bottom: 1px solid var(--line);
+}
+tbody td { padding: 14px 16px; border-bottom: 1px solid var(--line); font-size: 13.5px; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+.badge-status {
+  display: inline-block; padding: 3px 10px; border-radius: 100px;
+  font-size: 11px; font-weight: 600; letter-spacing: 0.3px;
+}
+.badge-status.active { background: rgba(16,185,129,0.15); color: var(--green); }
+.badge-status.in_review { background: rgba(245,158,11,0.15); color: var(--orange); }
+.badge-status.rejected { background: rgba(239,68,68,0.15); color: var(--red); }
+.badge-status.paused { background: rgba(107,114,128,0.15); color: var(--muted); }
+
+.btn-sm {
+  padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+  border: none; cursor: pointer; font-family: inherit; transition: all 0.12s;
+}
+.btn-approve { background: var(--green); color: #fff; }
+.btn-approve:hover { background: #059669; }
+.btn-reject { background: var(--red); color: #fff; }
+.btn-reject:hover { background: #DC2626; }
+.btn-action { background: var(--bg-soft); color: #B0B0C7; border: 1px solid var(--line); }
+.btn-action:hover { background: #2A2A3E; color: #fff; }
+
+.mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--cyan); }
+
+/* ── Panel visibility ── */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ── Login gate ── */
+.login-gate {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh; background: var(--bg);
+}
+.login-box {
+  background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px;
+  padding: 48px 40px; width: 100%; max-width: 400px; text-align: center;
+}
+.login-box h1 { font-size: 24px; margin-bottom: 8px; }
+.login-box .sub { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+.login-box input {
+  width: 100%; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 8px;
+  font-size: 14px; font-family: inherit; background: var(--bg); color: #E5E5F0;
+  margin-bottom: 12px;
+}
+.login-box input:focus { outline: none; border-color: var(--pink); }
+.login-box button {
+  width: 100%; padding: 12px; background: var(--pink); color: #fff; border: none;
+  border-radius: 8px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit;
+}
+.login-box button:hover { background: var(--pink-dark); }
+.login-box .error { color: var(--red); font-size: 13px; margin-top: 8px; display: none; }
+
+/* ── Toast ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px; background: var(--bg-card);
+  border: 1px solid var(--line); border-radius: 10px; padding: 12px 20px;
+  font-size: 13px; color: #F5F5F7; box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  transform: translateY(80px); opacity: 0; transition: all 0.25s ease;
+  z-index: 9999;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { border-color: var(--green); }
+.toast.error { border-color: var(--red); }
+
+/* ── Empty state ── */
+.empty-state {
+  text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px;
+}
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+
+/* ── Review detail ── */
+.review-detail {
+  background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px;
+  padding: 16px; margin-top: 8px; font-size: 13px;
+}
+.review-detail .field { margin-bottom: 8px; }
+.review-detail .field .k { color: var(--muted); font-weight: 500; min-width: 100px; display: inline-block; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main { padding: 16px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login Gate -->
+<div class="login-gate" id="login-gate">
+  <div class="login-box">
+    <h1>Admin Panel</h1>
+    <p class="sub">Boost Boss internal dashboard</p>
+    <form id="admin-login-form">
+      <input type="email" id="admin-email" placeholder="Admin email" required>
+      <input type="password" id="admin-password" placeholder="Password" required>
+      <button type="submit">Sign in</button>
+    </form>
+    <p class="error" id="admin-error"></p>
+    <p style="font-size:12px;color:var(--muted);margin-top:16px;">
+      In demo mode, use any email and password to enter.
+    </p>
+  </div>
+</div>
+
+<!-- Dashboard Shell -->
+<div class="shell" id="dashboard" style="display:none;">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#FF2D78"/><path d="M30 68V32h18c10 0 16 5 16 13 0 5-3 9-8 11l10 12H56l-9-11h-7v11H30zm10-19h7c4 0 7-2 7-5s-3-5-7-5h-7v10z" fill="#fff"/></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="admin-badge">ADMIN</span>
+    </div>
+
+    <button class="nav-item active" data-panel="overview"><span class="icon">📊</span> Overview</button>
+    <button class="nav-item" data-panel="review"><span class="icon">🔍</span> Review Queue <span class="badge-count" id="review-count">0</span></button>
+    <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns</button>
+    <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats</button>
+    <button class="nav-item" data-panel="users"><span class="icon">👥</span> Users</button>
+
+    <div class="sidebar-footer">
+      <p class="meta">Mode: <span id="auth-mode-badge" class="mono">—</span></p>
+      <p class="meta">Billing: <span id="billing-mode-badge" class="mono">—</span></p>
+      <p class="meta" style="margin-top:8px;">Logged in as <span id="admin-name" class="mono">—</span></p>
+      <button class="nav-item" style="margin-top:8px;" onclick="logout()"><span class="icon">🚪</span> Log out</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <!-- ── OVERVIEW ── -->
+    <div class="panel active" id="panel-overview">
+      <h1 style="margin-bottom:24px;">Dashboard</h1>
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="label">Active Campaigns</div>
+          <div class="value pink" id="stat-active">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Pending Review</div>
+          <div class="value" style="color:var(--orange)" id="stat-pending">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">DSP Seats</div>
+          <div class="value cyan" id="stat-seats">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">RTB Status</div>
+          <div class="value green" id="stat-rtb">—</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header">
+          <h2>Quick Actions</h2>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-sm btn-action" onclick="switchPanel('review')">Review pending campaigns</button>
+          <button class="btn-sm btn-action" onclick="switchPanel('seats')">Manage DSP seats</button>
+          <a class="btn-sm btn-action" href="/playground" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;">Open Benna playground</a>
+          <a class="btn-sm btn-action" href="/status" target="_blank" style="text-decoration:none;display:inline-flex;align-items:center;">System status</a>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-header"><h2>Recent Activity</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Time</th><th>Event</th><th>Details</th></tr></thead>
+            <tbody id="activity-body">
+              <tr><td colspan="3" class="empty-state">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── REVIEW QUEUE ── -->
+    <div class="panel" id="panel-review">
+      <div class="section-header">
+        <h1>Creative Review Queue</h1>
+        <button class="btn-sm btn-action" onclick="loadReviewQueue()">Refresh</button>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        Campaigns submitted by advertisers need approval before entering the BBX auction.
+      </p>
+      <div id="review-list">
+        <div class="empty-state"><div class="icon">✨</div>Loading review queue...</div>
+      </div>
+    </div>
+
+    <!-- ── ALL CAMPAIGNS ── -->
+    <div class="panel" id="panel-campaigns">
+      <div class="section-header">
+        <h1>All Campaigns</h1>
+        <button class="btn-sm btn-action" onclick="loadAllCampaigns()">Refresh</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Name</th><th>Advertiser</th><th>Status</th><th>Format</th><th>Budget</th><th>Spent</th><th>Created</th></tr></thead>
+          <tbody id="campaigns-body">
+            <tr><td colspan="7" class="empty-state">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── DSP SEATS ── -->
+    <div class="panel" id="panel-seats">
+      <div class="section-header">
+        <h1>DSP Seats</h1>
+        <button class="btn-sm btn-action" onclick="loadSeats()">Refresh</button>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        External demand-side platforms bidding into BBX.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Seat ID</th><th>Name</th><th>Status</th><th>QPS Cap</th><th>Daily Cap</th><th>API Key</th></tr></thead>
+          <tbody id="seats-body">
+            <tr><td colspan="6" class="empty-state">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── USERS ── -->
+    <div class="panel" id="panel-users">
+      <div class="section-header">
+        <h1>Users</h1>
+      </div>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
+        Advertisers and publishers registered on the platform.
+      </p>
+      <div class="stats-row" style="margin-bottom:20px;">
+        <div class="stat-card">
+          <div class="label">Advertisers</div>
+          <div class="value pink" id="stat-advertisers">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Publishers</div>
+          <div class="value cyan" id="stat-publishers">—</div>
+        </div>
+      </div>
+      <div class="empty-state">
+        <div class="icon">👥</div>
+        <p>User management coming soon.</p>
+        <p style="margin-top:8px;">Use Supabase dashboard for direct user management.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "";
+let token = null;
+let user = null;
+
+// ── Admin login ──
+document.getElementById("admin-login-form").addEventListener("submit", async e => {
+  e.preventDefault();
+  const email = document.getElementById("admin-email").value.trim();
+  const password = document.getElementById("admin-password").value;
+  try {
+    const r = await fetch(API + "/api/auth?action=login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const j = await r.json();
+    if (!r.ok || j.error) throw new Error(j.error || "Login failed");
+    token = j.session?.access_token;
+    user = j.user;
+    localStorage.setItem("bb_admin_token", token);
+    localStorage.setItem("bb_admin_user", JSON.stringify(user));
+    showDashboard();
+  } catch (err) {
+    const el = document.getElementById("admin-error");
+    el.textContent = err.message;
+    el.style.display = "block";
+  }
+});
+
+function showDashboard() {
+  document.getElementById("login-gate").style.display = "none";
+  document.getElementById("dashboard").style.display = "flex";
+  document.getElementById("admin-name").textContent = user?.email || "admin";
+  loadOverview();
+  loadReviewQueue();
+  detectModes();
+}
+
+function logout() {
+  localStorage.removeItem("bb_admin_token");
+  localStorage.removeItem("bb_admin_user");
+  token = null; user = null;
+  document.getElementById("login-gate").style.display = "flex";
+  document.getElementById("dashboard").style.display = "none";
+}
+
+// ── Auto-login ──
+(function() {
+  const t = localStorage.getItem("bb_admin_token");
+  const u = localStorage.getItem("bb_admin_user");
+  if (t && u) {
+    token = t;
+    try { user = JSON.parse(u); } catch(e) {}
+    showDashboard();
+  }
+})();
+
+// ── Navigation ──
+document.querySelectorAll(".nav-item[data-panel]").forEach(btn => {
+  btn.addEventListener("click", () => switchPanel(btn.dataset.panel));
+});
+
+function switchPanel(name) {
+  document.querySelectorAll(".nav-item[data-panel]").forEach(b => b.classList.remove("active"));
+  document.querySelector(`.nav-item[data-panel="${name}"]`)?.classList.add("active");
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("panel-" + name)?.classList.add("active");
+
+  if (name === "campaigns") loadAllCampaigns();
+  if (name === "seats") loadSeats();
+  if (name === "review") loadReviewQueue();
+}
+
+// ── Detect modes ──
+async function detectModes() {
+  try {
+    const r = await fetch(API + "/api/auth?action=demo", { method: "POST", headers: { "Content-Type": "application/json" }, body: '{"role":"advertiser"}' });
+    document.getElementById("auth-mode-badge").textContent = r.headers.get("x-auth-mode") || "unknown";
+  } catch(e) {}
+  try {
+    const r = await fetch(API + "/api/billing?action=balance&id=x");
+    document.getElementById("billing-mode-badge").textContent = r.headers.get("x-billing-mode") || "unknown";
+  } catch(e) {}
+}
+
+// ── Overview ──
+async function loadOverview() {
+  // Load review queue for count
+  try {
+    const r = await fetch(API + "/api/campaigns?action=review_queue");
+    const j = await r.json();
+    const pending = Array.isArray(j) ? j : (j.campaigns || []);
+    document.getElementById("stat-pending").textContent = pending.length;
+    document.getElementById("review-count").textContent = pending.length;
+  } catch(e) { document.getElementById("stat-pending").textContent = "?"; }
+
+  // Load RTB status
+  try {
+    const r = await fetch(API + "/api/rtb?op=status");
+    const j = await r.json();
+    document.getElementById("stat-rtb").textContent = "Online";
+    document.getElementById("stat-seats").textContent = j.registered_seats || "—";
+  } catch(e) { document.getElementById("stat-rtb").textContent = "Offline"; }
+
+  // Count active campaigns from a broad query
+  try {
+    const r = await fetch(API + "/api/campaigns");
+    const j = await r.json();
+    const campaigns = Array.isArray(j) ? j : (j.campaigns || []);
+    const active = campaigns.filter(c => c.status === "active").length;
+    document.getElementById("stat-active").textContent = active;
+
+    // Build activity feed
+    const sorted = campaigns.slice().sort((a,b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)).slice(0, 8);
+    const tbody = document.getElementById("activity-body");
+    if (sorted.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" class="empty-state">No recent activity</td></tr>';
+    } else {
+      tbody.innerHTML = sorted.map(c => `
+        <tr>
+          <td style="font-size:12px;color:var(--muted);">${timeAgo(c.updated_at || c.created_at)}</td>
+          <td><span class="badge-status ${c.status}">${c.status}</span></td>
+          <td><strong>${esc(c.name)}</strong> — ${esc(c.headline || "")}</td>
+        </tr>
+      `).join("");
+    }
+  } catch(e) {
+    document.getElementById("stat-active").textContent = "?";
+  }
+}
+
+// ── Review Queue ──
+async function loadReviewQueue() {
+  const container = document.getElementById("review-list");
+  try {
+    const r = await fetch(API + "/api/campaigns?action=review_queue");
+    const j = await r.json();
+    const pending = Array.isArray(j) ? j : (j.campaigns || []);
+    document.getElementById("review-count").textContent = pending.length;
+
+    if (pending.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>All campaigns reviewed. Nothing pending.</p></div>';
+      return;
+    }
+
+    container.innerHTML = pending.map(c => `
+      <div class="table-wrap" style="margin-bottom:12px;padding:20px;" id="review-${c.id}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;">
+          <div>
+            <h3 style="font-size:16px;margin-bottom:4px;">${esc(c.name)}</h3>
+            <p style="font-size:13px;color:var(--muted);">by ${esc(c.advertiser_id)} · ${esc(c.format)} format</p>
+          </div>
+          <span class="badge-status in_review">in_review</span>
+        </div>
+        <div class="review-detail">
+          <div class="field"><span class="k">Headline:</span> ${esc(c.headline)}</div>
+          <div class="field"><span class="k">Subtext:</span> ${esc(c.subtext || "—")}</div>
+          <div class="field"><span class="k">CTA:</span> <a href="${esc(c.cta_url)}" target="_blank">${esc(c.cta_label)}</a></div>
+          <div class="field"><span class="k">Media:</span> <a href="${esc(c.media_url)}" target="_blank" class="mono">${esc(c.media_url || "none")}</a></div>
+          <div class="field"><span class="k">Ad domain:</span> ${esc((c.adomain || []).join(", ") || "—")}</div>
+          <div class="field"><span class="k">IAB Cat:</span> ${esc((c.iab_cat || []).join(", ") || "—")}</div>
+          <div class="field"><span class="k">Budget:</span> $${num(c.daily_budget)}/day · $${num(c.total_budget)} total · CPA target $${num(c.target_cpa)}</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+          <button class="btn-sm btn-approve" onclick="reviewAction('${c.id}', 'approve')">✓ Approve</button>
+          <button class="btn-sm btn-reject" onclick="reviewAction('${c.id}', 'reject', prompt('Rejection reason:'))">✗ Reject</button>
+        </div>
+      </div>
+    `).join("");
+  } catch(e) {
+    container.innerHTML = '<div class="empty-state"><div class="icon">⚠️</div>Failed to load review queue.</div>';
+  }
+}
+
+async function reviewAction(campaignId, decision, reason) {
+  if (decision === "reject" && !reason) return;
+  try {
+    const r = await fetch(API + "/api/campaigns?action=review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ campaign_id: campaignId, decision, reason: reason || undefined, reviewer: user?.email || "admin" }),
+    });
+    const j = await r.json();
+    if (j.error) throw new Error(j.error);
+    toast(`Campaign ${decision === "approve" ? "approved" : "rejected"}`, "success");
+    // Remove from DOM
+    const el = document.getElementById("review-" + campaignId);
+    if (el) el.remove();
+    // Update count
+    const countEl = document.getElementById("review-count");
+    countEl.textContent = Math.max(0, parseInt(countEl.textContent) - 1);
+  } catch(e) {
+    toast("Error: " + e.message, "error");
+  }
+}
+
+// ── All Campaigns ──
+async function loadAllCampaigns() {
+  const tbody = document.getElementById("campaigns-body");
+  try {
+    const r = await fetch(API + "/api/campaigns");
+    const j = await r.json();
+    const campaigns = Array.isArray(j) ? j : (j.campaigns || []);
+    if (campaigns.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No campaigns yet.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = campaigns.map(c => `
+      <tr>
+        <td><strong>${esc(c.name)}</strong><br><span style="font-size:11px;color:var(--muted)">${esc(c.headline || "")}</span></td>
+        <td class="mono" style="font-size:11px;">${esc(c.advertiser_id)}</td>
+        <td><span class="badge-status ${c.status}">${c.status}</span></td>
+        <td>${esc(c.format || "native")}</td>
+        <td>$${num(c.daily_budget)}/d</td>
+        <td>$${num(c.spent_total)}</td>
+        <td style="font-size:12px;color:var(--muted)">${shortDate(c.created_at)}</td>
+      </tr>
+    `).join("");
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="empty-state">Failed to load campaigns.</td></tr>';
+  }
+}
+
+// ── DSP Seats ──
+async function loadSeats() {
+  const tbody = document.getElementById("seats-body");
+  try {
+    const r = await fetch(API + "/api/rtb?op=status");
+    const j = await r.json();
+    const seats = j.seats || [];
+    if (seats.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No DSP seats registered.</td></tr>';
+      return;
+    }
+    tbody.innerHTML = seats.map(s => `
+      <tr>
+        <td class="mono">${esc(s.seat_id)}</td>
+        <td>${esc(s.name)}</td>
+        <td><span class="badge-status ${s.status}">${s.status}</span></td>
+        <td>${s.qps_cap || "—"}</td>
+        <td>${s.daily_cap_usd ? "$" + num(s.daily_cap_usd) : "—"}</td>
+        <td><span class="mono" style="font-size:11px;">${esc((s.api_key || "").slice(0, 16))}…</span></td>
+      </tr>
+    `).join("");
+  } catch(e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Failed to load seats.</td></tr>';
+  }
+}
+
+// ── Helpers ──
+function esc(s) { const d = document.createElement("div"); d.textContent = s || ""; return d.innerHTML; }
+function num(n) { return (n || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 }); }
+function shortDate(d) { if (!d) return "—"; return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric" }); }
+function timeAgo(d) {
+  if (!d) return "—";
+  const diff = Date.now() - new Date(d).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return mins + "m ago";
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return hrs + "h ago";
+  return Math.floor(hrs / 24) + "d ago";
+}
+
+function toast(msg, type) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.className = "toast " + (type || "") + " show";
+  setTimeout(() => el.classList.remove("show"), 3000);
+}
+</script>
+</body>
+</html>

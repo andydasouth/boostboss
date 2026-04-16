@@ -8,6 +8,9 @@
     { "source": "/advertiser", "destination": "/advertiser.html" },
     { "source": "/developer", "destination": "/developer.html" },
     { "source": "/demo", "destination": "/demo.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/login", "destination": "/signup.html" },
     { "source": "/status", "destination": "/status.html" },
     { "source": "/playground", "destination": "/playground.html" }
   ],

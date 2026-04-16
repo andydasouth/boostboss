@@ -327,6 +327,7 @@ module.exports = async function handler(req, res) {
 
     // ── status / health ──
     if (req.method === "GET" && (op === "status" || !op)) {
+      const allSeats = await seats.listSeats();
       return res.status(200).json({
         status: "ok",
         adapter: ADAPTER_VERSION,
@@ -337,6 +338,8 @@ module.exports = async function handler(req, res) {
         tmax_recommended: 200,
         supported_formats: ["native", "banner", "video"],
         benna_version: benna.MODEL_VERSION,
+        registered_seats: allSeats.length,
+        seats: allSeats,
         endpoints: {
           bid:    { method: "POST", url: `${BASE_URL}/api/rtb` },
           win:    { method: "GET",  url: `${BASE_URL}/api/rtb?op=win&imp={imp}&price={price}&bid={bid}` },
