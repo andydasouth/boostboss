@@ -1375,15 +1375,15 @@
                 <div class="payout-grid">
                     <div class="payout-card">
                         <div class="key-label">Next Payout Date</div>
-                        <div class="key-value">May 1, 2026</div>
+                        <div class="key-value" id="nextPayoutDate">—</div>
                     </div>
                     <div class="payout-card">
-                        <div class="key-label">Payout Method</div>
-                        <div class="key-value">Stripe</div>
+                        <div class="key-label">Pending Payout</div>
+                        <div class="key-value" id="pendingPayout">$0.00</div>
                     </div>
                     <div class="payout-card">
                         <div class="key-label">Minimum Threshold</div>
-                        <div class="key-value">$100.00</div>
+                        <div class="key-value" id="payoutThreshold">$100.00</div>
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -1462,6 +1462,16 @@
             checkAuthStatus();
             document.documentElement.style.scrollBehavior = 'smooth';
             initMediationWaterfall();
+
+            // Handle Stripe Connect return
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('stripe') === 'connected') {
+                setTimeout(() => showToast('Stripe Connect linked successfully! Payouts are now enabled.', 'success', 5000), 500);
+                window.history.replaceState({}, '', window.location.pathname);
+            } else if (params.get('stripe') === 'refresh') {
+                setTimeout(() => showToast('Stripe onboarding incomplete. Please try again.', 'error', 5000), 500);
+                window.history.replaceState({}, '', window.location.pathname);
+            }
         });
 
         // ───────────── Mediation waterfall wiring ─────────────
@@ -1752,14 +1762,21 @@
 
                 const data = await response.json();
 
-                // Map API response to internal format
-                // Expected: { developer: {...}, daily: [...], totals: { impressions, clicks, earnings, rpm } }
+                // Map API response to internal format expected by chart + table
+                // API returns: { developer: {...}, daily: [{date, impressions, clicks, spend, developer_earnings}], totals: {...} }
+                const daily = (data.daily || []).map(d => ({
+                    date: d.date,
+                    impressions: d.impressions || 0,
+                    clicks: d.clicks || 0,
+                    spend: d.spend || 0,
+                    earnings: d.developer_earnings || d.earnings || 0,
+                }));
                 return {
-                    total_earnings: data.totals?.earnings || 0,
+                    total_earnings: parseFloat(data.totals?.earnings) || 0,
                     total_impressions: data.totals?.impressions || 0,
-                    revenue_share: data.developer?.revenue_share_pct || 0,
-                    rpm: data.totals?.rpm || 0,
-                    daily: data.daily || []
+                    revenue_share: data.developer?.revenue_share_pct || 85,
+                    rpm: parseFloat(data.totals?.rpm) || 0,
+                    daily,
                 };
             } catch (error) {
                 console.error('Stats load error:', error);
@@ -1785,6 +1802,7 @@
 
                 updateDashboard(stats);
                 showDashboardView();
+                loadEarningsData(); // Load payout details in background
             } catch (error) {
                 console.error('Dashboard load error:', error);
                 // Show dashboard with zero stats on error
@@ -2093,6 +2111,26 @@
             a.download = `lumi-earnings-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
             showToast('Earnings CSV downloaded', 'success');
+        }
+
+        // ───────────── LOAD EARNINGS DATA ─────────────
+        async function loadEarningsData() {
+            if (!userProfile || !userProfile.api_key) return;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=earnings&key=${encodeURIComponent(userProfile.api_key)}`);
+                if (!r.ok) return;
+                const data = await r.json();
+                // Update payout section
+                const pending = parseFloat(data.pending_payout) || 0;
+                document.getElementById('pendingPayout').textContent = '$' + pending.toFixed(2);
+                document.getElementById('payoutThreshold').textContent = '$' + (data.payout_threshold || 100).toFixed(2);
+                if (data.next_payout_date) {
+                    const d = new Date(data.next_payout_date);
+                    document.getElementById('nextPayoutDate').textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+            } catch (e) {
+                console.error('Earnings load error:', e);
+            }
         }
 
         // ───────────── STRIPE CONNECT PAYOUT ─────────────

@@ -476,9 +476,11 @@ async function detectModes() {
 async function loadOverview() {
   // Load review queue for count
   try {
-    const r = await fetch(API + "/api/campaigns?action=review_queue");
+    const r = await fetch(API + "/api/campaigns?action=review_queue", {
+      headers: { "Authorization": "Bearer " + token },
+    });
     const j = await r.json();
-    const pending = Array.isArray(j) ? j : (j.campaigns || []);
+    const pending = Array.isArray(j.queue) ? j.queue : (Array.isArray(j) ? j : []);
     document.getElementById("stat-pending").textContent = pending.length;
     document.getElementById("review-count").textContent = pending.length;
   } catch(e) { document.getElementById("stat-pending").textContent = "?"; }
@@ -522,9 +524,11 @@ async function loadOverview() {
 async function loadReviewQueue() {
   const container = document.getElementById("review-list");
   try {
-    const r = await fetch(API + "/api/campaigns?action=review_queue");
+    const r = await fetch(API + "/api/campaigns?action=review_queue", {
+      headers: { "Authorization": "Bearer " + token },
+    });
     const j = await r.json();
-    const pending = Array.isArray(j) ? j : (j.campaigns || []);
+    const pending = Array.isArray(j.queue) ? j.queue : (Array.isArray(j) ? j : []);
     document.getElementById("review-count").textContent = pending.length;
 
     if (pending.length === 0) {
@@ -566,8 +570,8 @@ async function reviewAction(campaignId, decision, reason) {
   try {
     const r = await fetch(API + "/api/campaigns?action=review", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ campaign_id: campaignId, decision, reason: reason || undefined, reviewer: user?.email || "admin" }),
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ id: campaignId, decision, notes: reason || undefined }),
     });
     const j = await r.json();
     if (j.error) throw new Error(j.error);

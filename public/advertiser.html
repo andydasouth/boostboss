@@ -3111,26 +3111,24 @@
                             const campaignName = campaign.name;
 
                             if (action === 'pause' || action === 'resume') {
-                                const newStatus = action === 'pause' ? 'paused' : 'live';
                                 try {
                                     const response = await fetch(
-                                        `${API_BASE}/api/campaigns`,
+                                        `${API_BASE}/api/campaigns?action=${action}`,
                                         {
-                                            method: 'PATCH',
+                                            method: 'POST',
                                             headers: {
                                                 'Content-Type': 'application/json',
                                                 'Authorization': `Bearer ${currentUser.token}`
                                             },
-                                            body: JSON.stringify({
-                                                id: campaignId,
-                                                status: newStatus
-                                            })
+                                            body: JSON.stringify({ id: campaignId })
                                         }
                                     );
                                     if (response.ok) {
+                                        showToast(`Campaign ${action === 'pause' ? 'paused' : 'resumed'}`, 'success');
                                         await loadCampaigns();
                                     } else {
-                                        showToast('Failed to update campaign status', 'error');
+                                        const j = await response.json().catch(() => ({}));
+                                        showToast(j.error || 'Failed to update campaign status', 'error');
                                     }
                                 } catch (error) {
                                     console.error('Error updating campaign:', error);
@@ -3944,26 +3942,28 @@
         document.getElementById('detailToggleBtn').addEventListener('click', async () => {
             if (!detailCampaignId) return;
             const btn = document.getElementById('detailToggleBtn');
-            const newStatus = btn.textContent.trim() === 'Pause' ? 'paused' : 'live';
+            const isPause = btn.textContent.trim() === 'Pause';
+            const action = isPause ? 'pause' : 'resume';
             btn.disabled = true;
             btn.textContent = 'Updating…';
             try {
-                const r = await fetch(`${API_BASE}/api/campaigns?action=update`, {
-                    method: 'PATCH',
+                const r = await fetch(`${API_BASE}/api/campaigns?action=${action}`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${currentUser.token}`
                     },
-                    body: JSON.stringify({ id: detailCampaignId, status: newStatus })
+                    body: JSON.stringify({ id: detailCampaignId })
                 });
                 if (r.ok) {
-                    // Refresh
+                    showToast(`Campaign ${isPause ? 'paused' : 'resumed'}`, 'success');
                     openCampaignDetail(detailCampaignId);
                     loadCampaigns();
                 } else {
-                    showToast('Failed to update campaign status', 'error');
+                    const j = await r.json().catch(() => ({}));
+                    showToast(j.error || 'Failed to update campaign status', 'error');
                     btn.disabled = false;
-                    btn.textContent = newStatus === 'paused' ? 'Resume' : 'Pause';
+                    btn.textContent = isPause ? 'Pause' : 'Resume';
                 }
             } catch (e) {
                 showToast(e.message, 'error');
