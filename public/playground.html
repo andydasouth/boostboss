@@ -552,14 +552,23 @@ async function runRequest() {
 
   let url, body, method = 'POST';
   if (currentEndpoint === 'fetch') {
-    url = '/api/ads';
+    url = '/api/mcp';
     const tools = document.getElementById('f-tools').value.split(',').map(s => s.trim()).filter(Boolean);
     body = {
-      format: document.getElementById('f-format').value,
-      context: document.getElementById('f-context').value,
-      audience: document.getElementById('f-audience').value,
-      mcp_tools: tools,
-      model: document.getElementById('f-model').value,
+      jsonrpc: '2.0',
+      id: Date.now(),
+      method: 'tools/call',
+      params: {
+        name: 'get_sponsored_content',
+        arguments: {
+          context_summary: document.getElementById('f-context').value,
+          format_preference: document.getElementById('f-format').value,
+          user_region: 'US',
+          user_language: 'en',
+          session_id: 'playground_' + Date.now(),
+          host: tools[0] || 'playground.boostboss.ai',
+        },
+      },
     };
   } else if (currentEndpoint === 'benna') {
     url = '/api/benna';
@@ -614,25 +623,47 @@ async function runRequest() {
 }
 
 function renderFetchResult(data, elapsed) {
-  // Stats
-  document.getElementById('r-bid').textContent = '$' + (data.bid_cpm || data.bid_usd || 0).toFixed(2);
-  document.getElementById('r-pclick').textContent = data.match_score ? (data.match_score * 100).toFixed(0) + '%' : (data.p_click ? (data.p_click * 100).toFixed(1) + '%' : '—');
-  document.getElementById('r-pconv').textContent = data.p_convert ? (data.p_convert * 100).toFixed(2) + '%' : '—';
-  document.getElementById('r-latency').textContent = (data.latency_ms || elapsed) + 'ms';
+  // Parse MCP JSON-RPC response → extract sponsored + benna
+  let ad = null, benna = null;
+  try {
+    const text = data?.result?.content?.[0]?.text;
+    if (text) {
+      const parsed = JSON.parse(text);
+      ad = parsed.sponsored;
+      benna = parsed.benna;
+    }
+  } catch (_) {}
+
+  if (!ad) {
+    document.getElementById('r-bid').textContent = '—';
+    document.getElementById('r-pclick').textContent = '—';
+    document.getElementById('r-pconv').textContent = '—';
+    document.getElementById('r-latency').textContent = elapsed + 'ms';
+    document.getElementById('adPreview').style.display = 'none';
+    document.getElementById('signalPanel').style.display = 'none';
+    return;
+  }
+
+  // Stats from Benna attribution
+  document.getElementById('r-bid').textContent = '$' + (benna ? benna.effective_bid_usd || benna.bid_usd : 0).toFixed(4);
+  document.getElementById('r-pclick').textContent = benna ? (benna.p_click * 100).toFixed(1) + '%' : '—';
+  document.getElementById('r-pconv').textContent = benna ? (benna.p_convert * 100).toFixed(2) + '%' : '—';
+  document.getElementById('r-latency').textContent = (benna ? benna.latency_ms : elapsed) + 'ms';
 
   // Ad preview
-  document.getElementById('previewFormat').textContent = data.format || 'native';
-  document.getElementById('adHeadline').textContent = data.headline || 'No headline';
-  document.getElementById('adBody').textContent = data.body || data.subtext || '';
-  document.getElementById('adCta').textContent = data.cta_text || data.cta || 'Learn more';
-  document.getElementById('adScore').textContent = 'Match: ' + ((data.match_score || 0) * 100).toFixed(0) + '%';
-  document.getElementById('adCpm').textContent = 'CPM: $' + (data.bid_cpm || 0).toFixed(2);
-  document.getElementById('adAdvertiser').textContent = 'Advertiser: ' + (data.advertiser?.name || data.adomain || 'Demo');
+  document.getElementById('previewFormat').textContent = ad.type || 'native';
+  document.getElementById('adHeadline').textContent = ad.headline || 'No headline';
+  document.getElementById('adBody').textContent = ad.subtext || '';
+  document.getElementById('adCta').textContent = ad.cta_label || 'Learn more';
+  document.getElementById('adScore').textContent = benna ? 'Candidates: ' + benna.candidates_considered : '';
+  document.getElementById('adCpm').textContent = benna ? 'Bid: $' + (benna.effective_bid_usd || benna.bid_usd || 0).toFixed(4) : '';
+  document.getElementById('adAdvertiser').textContent = 'Campaign: ' + (ad.campaign_id || 'Demo');
 
-  // Show ad preview, hide signals
+  // Show ad preview and signals
   document.getElementById('adPreview').style.display = 'block';
-  document.getElementById('signalPanel').style.display = data.signal_contributions ? 'block' : 'none';
-  if (data.signal_contributions) renderSignals(data.signal_contributions);
+  const sigs = benna ? benna.signal_contributions : null;
+  document.getElementById('signalPanel').style.display = sigs ? 'block' : 'none';
+  if (sigs) renderSignals(sigs);
 }
 
 function renderBennaResult(data, elapsed) {

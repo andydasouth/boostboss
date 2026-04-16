@@ -1399,6 +1399,55 @@
                 </div>
             </div>
 
+            <!-- SDK Integration Tester -->
+            <div class="section" id="integrationTester">
+                <div class="section-title">Test Your Integration</div>
+                <div style="background:#FAFAFA; border:1px solid #E5E7EB; border-radius:12px; padding:20px;">
+                    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;">
+                        <div style="flex:1;min-width:200px;">
+                            <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Context</label>
+                            <input type="text" id="testContext" value="user is debugging a python traceback" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
+                        </div>
+                        <div style="min-width:120px;">
+                            <label style="font-size:12px;font-weight:600;color:#6B7280;display:block;margin-bottom:4px;">Format</label>
+                            <select id="testFormat" style="width:100%;padding:8px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;">
+                                <option value="any">Any</option>
+                                <option value="image">Image</option>
+                                <option value="video">Video</option>
+                                <option value="native">Native</option>
+                            </select>
+                        </div>
+                        <div style="align-self:flex-end;">
+                            <button onclick="runIntegrationTest()" id="testRunBtn" style="padding:8px 20px;background:#04BEFE;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Run Test</button>
+                        </div>
+                    </div>
+                    <div id="testResults" style="display:none;">
+                        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;" id="testMetrics">
+                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                <div style="font-size:18px;font-weight:700;color:#1A1A2E;" id="tm-status">—</div>
+                                <div style="font-size:11px;color:#6B7280;">Status</div>
+                            </div>
+                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                <div style="font-size:18px;font-weight:700;color:#04BEFE;" id="tm-latency">—</div>
+                                <div style="font-size:11px;color:#6B7280;">Latency</div>
+                            </div>
+                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                <div style="font-size:18px;font-weight:700;color:#9D7AFF;" id="tm-bid">—</div>
+                                <div style="font-size:11px;color:#6B7280;">Bid</div>
+                            </div>
+                            <div style="text-align:center;padding:10px;background:#fff;border-radius:8px;border:1px solid #E5E7EB;">
+                                <div style="font-size:18px;font-weight:700;color:#FF2D78;" id="tm-payout">—</div>
+                                <div style="font-size:11px;color:#6B7280;">Your Payout</div>
+                            </div>
+                        </div>
+                        <details style="background:#0A0A14;border-radius:8px;overflow:hidden;">
+                            <summary style="padding:10px 14px;color:#9D7AFF;font-size:12px;font-weight:600;cursor:pointer;font-family:'SFMono-Regular',Consolas,monospace;">Raw MCP Response</summary>
+                            <pre id="testRawResponse" style="padding:12px 14px;margin:0;color:#B0B0C7;font-size:11px;line-height:1.6;overflow-x:auto;font-family:'SFMono-Regular',Consolas,monospace;max-height:300px;overflow-y:auto;"></pre>
+                        </details>
+                    </div>
+                </div>
+            </div>
+
             <!-- SDK Quick Start -->
             <div class="section">
                 <div class="section-title">Quick Start</div>
@@ -2178,6 +2227,81 @@
             } catch (e) {
                 showToast('Stripe Connect failed: ' + e.message, 'error');
             }
+        }
+
+        async function runIntegrationTest() {
+            const btn = document.getElementById('testRunBtn');
+            btn.textContent = 'Testing...';
+            btn.disabled = true;
+            const results = document.getElementById('testResults');
+            results.style.display = 'block';
+
+            const context = document.getElementById('testContext').value;
+            const format = document.getElementById('testFormat').value;
+            const apiKey = currentUserData ? currentUserData.api_key : '';
+
+            const start = performance.now();
+            try {
+                const resp = await fetch(`${API_BASE}/api/mcp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        jsonrpc: '2.0',
+                        id: Date.now(),
+                        method: 'tools/call',
+                        params: {
+                            name: 'get_sponsored_content',
+                            arguments: {
+                                context_summary: context,
+                                format_preference: format,
+                                user_region: 'US',
+                                user_language: 'en',
+                                session_id: 'test_' + Date.now(),
+                                developer_api_key: apiKey,
+                                host: 'integration-test.local',
+                            },
+                        },
+                    }),
+                });
+                const elapsed = Math.round(performance.now() - start);
+                const data = await resp.json();
+                document.getElementById('testRawResponse').textContent = JSON.stringify(data, null, 2);
+
+                const text = data?.result?.content?.[0]?.text;
+                if (text) {
+                    const parsed = JSON.parse(text);
+                    if (parsed.sponsored) {
+                        const benna = parsed.benna || {};
+                        const bid = benna.effective_bid_usd || benna.bid_usd || 0;
+                        const payout = +(bid * 0.85).toFixed(4);
+                        document.getElementById('tm-status').textContent = '✓ Ad served';
+                        document.getElementById('tm-status').style.color = '#10B981';
+                        document.getElementById('tm-latency').textContent = (benna.latency_ms || elapsed) + 'ms';
+                        document.getElementById('tm-bid').textContent = '$' + bid.toFixed(4);
+                        document.getElementById('tm-payout').textContent = '$' + payout;
+                        showToast('Integration test passed — ad served in ' + elapsed + 'ms', 'success');
+                    } else {
+                        document.getElementById('tm-status').textContent = 'No ad';
+                        document.getElementById('tm-status').style.color = '#F59E0B';
+                        document.getElementById('tm-latency').textContent = elapsed + 'ms';
+                        document.getElementById('tm-bid').textContent = '—';
+                        document.getElementById('tm-payout').textContent = '—';
+                        showToast('No ad returned: ' + (parsed.reason || 'no match'), 'warning');
+                    }
+                } else {
+                    throw new Error('Invalid response shape');
+                }
+            } catch (err) {
+                document.getElementById('tm-status').textContent = '✕ Error';
+                document.getElementById('tm-status').style.color = '#EF4444';
+                document.getElementById('tm-latency').textContent = '—';
+                document.getElementById('tm-bid').textContent = '—';
+                document.getElementById('tm-payout').textContent = '—';
+                document.getElementById('testRawResponse').textContent = err.message;
+                showToast('Integration test failed: ' + err.message, 'error');
+            }
+            btn.textContent = 'Run Test';
+            btn.disabled = false;
         }
 
         function copyQuickStart() {

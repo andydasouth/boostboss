@@ -2377,6 +2377,31 @@
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
                     </div>
 
+                    <!-- Advertiser Domain -->
+                    <div class="form-group">
+                        <label class="form-label">Advertiser Domain</label>
+                        <input type="text" class="form-input campaign-field" name="adomain" placeholder="e.g., example.com" style="font-size:13px;">
+                        <div style="font-size:11px;color:#6B7280;margin-top:4px;">Used for brand safety checks. Enter your company domain.</div>
+                    </div>
+
+                    <!-- IAB Category -->
+                    <div class="form-group">
+                        <label class="form-label">Content Category</label>
+                        <select class="form-input campaign-field" name="iab_cat" style="font-size:13px;">
+                            <option value="">Select category (optional)</option>
+                            <option value="IAB3">Business</option>
+                            <option value="IAB5">Education</option>
+                            <option value="IAB19">Technology & Computing</option>
+                            <option value="IAB4">Careers</option>
+                            <option value="IAB22">Shopping</option>
+                            <option value="IAB13">Personal Finance</option>
+                            <option value="IAB7">Health & Fitness</option>
+                            <option value="IAB1">Arts & Entertainment</option>
+                            <option value="IAB17">Sports</option>
+                            <option value="IAB20">Travel</option>
+                        </select>
+                    </div>
+
                     <!-- AI Targeting Section -->
                     <div class="ai-targeting-section">
                         <div class="ai-targeting-header">
@@ -3439,12 +3464,21 @@
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const formData = new FormData(campaignForm);
 
-            // Build media_url from uploaded file or placeholder
+            // Build media_url — placeholder for demo; production would upload to CDN
             const uploadedFile = fileInput.files && fileInput.files[0];
             let mediaUrl = 'https://placehold.co/540x304/1a1a2e/ffffff?text=' + encodeURIComponent(formData.get('name') || 'Ad');
             if (uploadedFile) {
-                // In production this would upload to CDN; for demo use a data URL placeholder
-                mediaUrl = URL.createObjectURL(uploadedFile);
+                // Convert to base64 data URL so it persists (blob URLs expire)
+                try {
+                    mediaUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(uploadedFile);
+                    });
+                } catch (_) {
+                    // Fall back to placeholder
+                }
             }
 
             const campaignData = {
@@ -3472,6 +3506,8 @@
                     : null,
                 start_date: formData.get('start_date') || null,
                 end_date: formData.get('end_date') || null,
+                adomain: formData.get('adomain') ? [formData.get('adomain')] : [],
+                iab_cat: formData.get('iab_cat') ? [formData.get('iab_cat')] : [],
             };
 
             try {
