@@ -1,7 +1,7 @@
 {
-  "name": "@boostboss/sdk",
+  "name": "@boostbossai/lumi-sdk",
   "version": "1.0.0",
-  "description": "Boost Boss — MCP ad network SDK. Monetize your AI app with context-aware, native sponsored content ranked in real time by Benna.",
+  "description": "Lumi SDK — Monetize your AI app with context-aware, native sponsored content ranked in real time by Benna. Part of the Boost Boss ad network.",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "exports": {
@@ -22,7 +22,8 @@
     "claude",
     "cursor",
     "boostboss",
-    "benna"
+    "benna",
+    "lumi"
   ],
   "author": "Boost Boss, Inc.",
   "license": "Apache-2.0",

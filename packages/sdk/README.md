@@ -1,15 +1,15 @@
-# @boostboss/sdk
+# @boostbossai/lumi-sdk
 
 The Lumi SDK — monetize your AI app with **context-aware, native sponsored content** ranked in real time by [Benna](https://benna.ai).
 
 ```bash
-npm install @boostboss/sdk
+npm install @boostbossai/lumi-sdk
 ```
 
 ## Three lines to ship
 
 ```js
-const bb = require("@boostboss/sdk");
+const bb = require("@boostbossai/lumi-sdk");
 const ad = await bb.getSponsoredContent({ context: "user is debugging a python traceback", host: "cursor.com" });
 if (ad.sponsored) render(ad.sponsored);
 ```
@@ -29,7 +29,7 @@ Publishers take **85% of cleared revenue**. Boost Boss keeps 15% as the exchange
 Use this when you want full control over when and where an ad appears.
 
 ```js
-const { BoostBoss } = require("@boostboss/sdk");
+const { BoostBoss } = require("@boostbossai/lumi-sdk");
 
 const bb = new BoostBoss({
   apiKey: process.env.BB_API_KEY,
@@ -58,8 +58,8 @@ if (sponsored) {
 Ship a polished unit with one call — no CSS, no markup.
 
 ```js
-import { getSponsoredContent } from "@boostboss/sdk";
-import { renderAd } from "@boostboss/sdk/renderer";
+import { getSponsoredContent } from "@boostbossai/lumi-sdk";
+import { renderAd } from "@boostbossai/lumi-sdk/renderer";
 
 const ad = await getSponsoredContent({ context: "fastapi + sqlalchemy tutorial" });
 renderAd(ad, { format: "corner" });     // bottom-right popover
@@ -74,7 +74,7 @@ The renderer injects scoped styles once, wires up the impression/click/close bea
 Wrap your existing MCP server and the `get_sponsored_content` tool shows up automatically in `tools/list`. The host app can now call it the same way it calls your tools.
 
 ```js
-const { withBoostBoss } = require("@boostboss/sdk/mcp");
+const { withBoostBoss } = require("@boostbossai/lumi-sdk/mcp");
 
 const server = withBoostBoss(myMcpServer, {
   apiKey: process.env.BB_API_KEY,
