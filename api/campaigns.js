@@ -47,6 +47,24 @@ function supa() {
 // ── Demo in-process campaign store ─────────────────────────────────────
 const DEMO_CAMPAIGNS = new Map();
 let _seeded = false;
+let _lastResetDay = new Date().toISOString().slice(0, 10);
+
+// Reset spent_today on all demo campaigns when the date changes (mimics pg_cron).
+function checkDailyReset() {
+  const today = new Date().toISOString().slice(0, 10);
+  if (today !== _lastResetDay) {
+    _lastResetDay = today;
+    for (const c of DEMO_CAMPAIGNS.values()) {
+      c.spent_today = 0;
+      // Un-pause campaigns that were auto-paused due to daily budget exhaustion
+      // (but not manually paused or rejected campaigns)
+      if (c.status === "paused" && (c._auto_paused || false)) {
+        c.status = "active";
+        c._auto_paused = false;
+      }
+    }
+  }
+}
 
 function seedDemoCampaigns() {
   if (_seeded) return;
@@ -192,6 +210,7 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
 
   seedDemoCampaigns();
+  if (!HAS_SUPABASE) checkDailyReset();
 
   const action = (req.query && req.query.action) || (req.body && req.body.action);
 
@@ -302,10 +321,15 @@ async function handleCreate(req, res) {
     target_regions: b.target_regions || ["global"],
     target_languages: b.target_languages || ["en"],
     target_cpa: b.target_cpa || null,
+    target_roas: b.target_roas || null,
+    optimization_goal: b.optimization_goal || "target_cpa",
     billing_model: b.billing_model || "cpm",
     bid_amount: b.bid_amount || 5.00,
     daily_budget: b.daily_budget || 50.00,
     total_budget: b.total_budget || 1000.00,
+    start_date: b.start_date || null,
+    end_date: b.end_date || null,
+    skippable_after_sec: b.skippable_after_sec || 3,
     spent_today: 0, spent_total: 0,
     created_at: now, updated_at: now,
   };

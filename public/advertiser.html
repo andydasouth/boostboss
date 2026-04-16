@@ -3439,25 +3439,30 @@
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const formData = new FormData(campaignForm);
 
+            // Build media_url from uploaded file or placeholder
+            const uploadedFile = fileInput.files && fileInput.files[0];
+            let mediaUrl = 'https://placehold.co/540x304/1a1a2e/ffffff?text=' + encodeURIComponent(formData.get('name') || 'Ad');
+            if (uploadedFile) {
+                // In production this would upload to CDN; for demo use a data URL placeholder
+                mediaUrl = URL.createObjectURL(uploadedFile);
+            }
+
             const campaignData = {
                 advertiser_id: currentUserData.user_id,
                 name: formData.get('name'),
                 format: formData.get('format'),
                 headline: formData.get('headline'),
-                media_url: 'https://via.placeholder.com/300x250',
+                subtext: formData.get('subtext') || '',
+                media_url: mediaUrl,
+                cta_label: formData.get('cta_text') || 'Learn More',
                 cta_url: formData.get('cta_url'),
-                // Intent signals double as target keywords for backward compat with current backend schema
                 target_keywords: intents,
-                // AI-native targeting (new fields — backend may ignore until schema updated)
-                intent_signals: intents,
-                host_apps: hostApps,
-                mcp_tools: mcpTools,
-                ai_models: aiModels,
+                target_regions: ['global'],
+                target_languages: ['en'],
                 billing_model: formData.get('billing_model'),
                 bid_amount: parseFloat(formData.get('bid_amount')) || null,
                 daily_budget: parseFloat(formData.get('daily_budget')),
                 total_budget: parseFloat(formData.get('total_budget')),
-                // Benna optimization goal
                 optimization_goal: document.getElementById('optimizationGoal').value,
                 target_cpa: document.getElementById('optimizationGoal').value === 'target_cpa'
                     ? parseFloat(document.getElementById('targetCpaValue').value) || null
@@ -3467,7 +3472,6 @@
                     : null,
                 start_date: formData.get('start_date') || null,
                 end_date: formData.get('end_date') || null,
-                status: 'review'
             };
 
             try {

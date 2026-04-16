@@ -290,16 +290,36 @@ async function handleGetSponsoredContent(body, args, res) {
 }
 
 // ── track_event ─────────────────────────────────────────────────────────
+// Delegates to the track API handler so cost computation, budget deduction,
+// and auto-pause all happen consistently whether the event comes from the
+// SDK pixel or the MCP tool call.
 async function handleTrackEvent(body, args, res) {
-  const sb = supa();
-  if (sb) {
-    const { error } = await sb.from("events").insert({
-      event_type: args.event,
+  const trackHandler = require("./track.js");
+  const mockRes = {
+    _status: 200, _body: null, _headers: {},
+    setHeader(k, v) { this._headers[k] = v; },
+    status(n) { this._status = n; return this; },
+    json(o) { this._body = o; return this; },
+    send(d) { this._body = d; return this; },
+    end() { return this; },
+  };
+  const mockReq = {
+    method: "POST",
+    headers: {},
+    query: {},
+    body: {
+      event: args.event,
       campaign_id: args.campaign_id,
       session_id: args.session_id || null,
-    });
-    return jsonRpc(res, body.id, { tracked: !error });
+      developer_id: args.developer_api_key || null,
+    },
+  };
+  try {
+    await trackHandler(mockReq, mockRes);
+  } catch (e) {
+    console.error("[MCP track_event]", e.message);
   }
+  // Also store in MCP's local events for the test suite
   DEMO_EVENTS.push({
     event_type: args.event,
     campaign_id: args.campaign_id,

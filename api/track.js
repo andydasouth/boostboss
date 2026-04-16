@@ -122,9 +122,10 @@ module.exports = async function handler(req, res) {
           record.developer_payout = +(cost * (1 - TAKE_RATE)).toFixed(4);
           campaign.spent_today = (campaign.spent_today || 0) + cost;
           campaign.spent_total = (campaign.spent_total || 0) + cost;
-          // Auto-pause in demo too
+          // Auto-pause in demo too (mark as _auto_paused so daily reset can un-pause)
           if (campaign.spent_today >= campaign.daily_budget || campaign.spent_total >= campaign.total_budget) {
             campaign.status = "paused";
+            campaign._auto_paused = true;
           }
         }
       }
