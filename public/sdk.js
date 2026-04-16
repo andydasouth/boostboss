@@ -125,6 +125,12 @@
     img.src = url;
   }
 
+  // ── HTML escape (prevents XSS in getNativeAdHTML) ──
+  function esc(str) {
+    if (!str) return "";
+    return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+  }
+
   // ── Show ad ──
   function showAd(ad, format) {
     injectDOM();
@@ -180,7 +186,7 @@
       video.style.display = "none";
       overlay.style.display = "none";
       muteBtn.style.display = "none";
-      startSkip(skip, ad.skippable_after_sec || 3);
+      startSkip(skip, ad.skippable_after_sec || 3, ad);
     } else if (ad.type === "video") {
       img.style.display = "none";
       video.style.display = "block";
@@ -197,6 +203,23 @@
         video.play().then(() => { overlay.style.display = "none"; startProgress(video, progress); }).catch(() => { overlay.style.display = "flex"; });
         video.oncanplay = null;
       };
+      video.onerror = () => {
+        console.warn("[BoostBoss] Video failed to load:", ad.media_url);
+        // Fall back to image if poster available, otherwise close gracefully
+        if (ad.poster_url) {
+          video.style.display = "none";
+          overlay.style.display = "none";
+          muteBtn.style.display = "none";
+          img.src = ad.poster_url;
+          img.style.display = "block";
+        } else {
+          BoostBoss.close();
+          return;
+        }
+        skip.textContent = "✕";
+        skip.className = "bb-sr ready";
+        skip.onclick = () => { track(ad.tracking?.skip); BoostBoss.close(); };
+      };
       video.onended = () => {
         progress.style.width = "100%";
         clearTimers();
@@ -205,7 +228,7 @@
         skip.onclick = () => BoostBoss.close();
         track(ad.tracking?.video_complete);
       };
-      startSkip(skip, ad.skippable_after_sec || 5);
+      startSkip(skip, ad.skippable_after_sec || 5, ad);
     }
 
     popup.style.display = "block";
@@ -217,7 +240,7 @@
     if (config.onImpression) config.onImpression(ad);
   }
 
-  function startSkip(el, sec) {
+  function startSkip(el, sec, ad) {
     el.className = "bb-sr";
     el.textContent = sec;
     el.onclick = null;
@@ -228,7 +251,7 @@
         clearInterval(state.skipTimer);
         el.textContent = "✕";
         el.className = "bb-sr ready";
-        el.onclick = () => BoostBoss.close();
+        el.onclick = () => { track(ad?.tracking?.skip); BoostBoss.close(); };
       } else {
         el.textContent = rem;
       }
@@ -299,8 +322,6 @@
           }),
         });
 
-        clearTimeout(timeoutId);
-
         if (!resp.ok) {
           console.warn("[BoostBoss] Server returned", resp.status);
           return null;
@@ -328,6 +349,8 @@
       } catch (err) {
         console.error("[BoostBoss] Error fetching ad:", err);
         return null;
+      } finally {
+        clearTimeout(timeoutId);
       }
     },
 
@@ -368,12 +391,21 @@
     },
 
     getNativeAdHTML(ad) {
+      const clickUrl = esc(ad.tracking?.click || "");
       return `<div class="bb-na">
-        <div class="bb-nal"><span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>Sponsored · Boost Boss</div>
-        <div class="bb-nat">${ad.headline}</div>
-        <div class="bb-nad">${ad.subtext}</div>
-        <a class="bb-nac" href="${ad.cta_url}" target="_blank" onclick="BoostBoss._trackNative('${ad.tracking?.click}')">${ad.cta_label}</a>
+        <div class="bb-nal"><span style="width:12px;height:12px;border-radius:3px;background:#FF2D78;display:inline-flex;align-items:center;justify-content:center;font-size:7px;color:#fff;font-weight:900;letter-spacing:-0.5px;">BB</span>Sponsored &middot; Boost Boss</div>
+        <div class="bb-nat">${esc(ad.headline)}</div>
+        <div class="bb-nad">${esc(ad.subtext)}</div>
+        <a class="bb-nac" href="${esc(ad.cta_url)}" target="_blank" data-bb-click="${clickUrl}">${esc(ad.cta_label)}</a>
       </div>`;
+    },
+
+    /** Bind native ad click tracking after inserting getNativeAdHTML into DOM */
+    bindNativeClicks(container) {
+      const el = container || document;
+      el.querySelectorAll("a[data-bb-click]").forEach(a => {
+        a.addEventListener("click", () => track(a.dataset.bbClick));
+      });
     },
 
     _trackNative(url) { track(url); },
