@@ -88,7 +88,7 @@ function matchesSignal(ctx, key, expected) {
   if (key === "session_len") {
     // expected = ">30m"
     const mins = parseFloat(String(v));
-    return mins > 30;
+    return Number.isFinite(mins) && mins > 30;
   }
   return String(v).toLowerCase() === String(expected).toLowerCase();
 }

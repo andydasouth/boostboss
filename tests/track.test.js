@@ -172,6 +172,61 @@ async function test(name, fn) {
     assert.strictEqual(r._body.mode, "demo");
   });
 
+  // ── Rate Limiting ───────────────────────────────────────────────────
+  track._reset(); // also clears rateLimitMap
+  await test("rate limiter allows up to RATE_LIMIT_MAX requests per IP", async () => {
+    const max = track._RATE_LIMIT_MAX;
+    assert(max > 0, "RATE_LIMIT_MAX should be positive");
+    // Simulate max requests from the same IP
+    for (let i = 0; i < max; i++) {
+      const r = await run({
+        method: "POST",
+        body: { event: "impression", campaign_id: "cam_rl" },
+        headers: { "x-forwarded-for": "10.0.0.99" },
+      });
+      assert.strictEqual(r._status, 200, `request ${i + 1} should succeed (got ${r._status})`);
+    }
+  });
+
+  await test("rate limiter returns 429 after exceeding RATE_LIMIT_MAX", async () => {
+    // The previous test already sent RATE_LIMIT_MAX requests from 10.0.0.99
+    const r = await run({
+      method: "POST",
+      body: { event: "impression", campaign_id: "cam_rl" },
+      headers: { "x-forwarded-for": "10.0.0.99" },
+    });
+    assert.strictEqual(r._status, 429);
+    assert(r._body.error.includes("Rate limit"));
+  });
+
+  await test("rate limiter tracks IPs independently", async () => {
+    // Different IP should still be allowed
+    const r = await run({
+      method: "POST",
+      body: { event: "impression", campaign_id: "cam_rl" },
+      headers: { "x-forwarded-for": "10.0.0.100" },
+    });
+    assert.strictEqual(r._status, 200);
+  });
+
+  await test("rate limiter resets after window expires", async () => {
+    // Manually reset the entry for 10.0.0.99 to simulate window expiry
+    const entry = track._rateLimitMap.get("10.0.0.99");
+    assert(entry, "should have an entry for 10.0.0.99");
+    entry.start = Date.now() - 61000; // push it 61s into the past
+    const r = await run({
+      method: "POST",
+      body: { event: "impression", campaign_id: "cam_rl" },
+      headers: { "x-forwarded-for": "10.0.0.99" },
+    });
+    assert.strictEqual(r._status, 200, "should allow after window reset");
+  });
+
+  await test("_reset clears rateLimitMap", () => {
+    track._reset();
+    assert.strictEqual(track._rateLimitMap.size, 0);
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

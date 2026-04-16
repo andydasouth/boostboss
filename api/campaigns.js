@@ -203,7 +203,15 @@ function requireAdmin(req) {
 //                                HANDLER
 // ────────────────────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // Restrict CORS in production to BoostBoss origins; allow * in demo for local dev
+  const PUBLIC_BASE = process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai";
+  if (HAS_SUPABASE) {
+    const origin = req.headers && req.headers.origin;
+    const allowed = ["https://boostboss.ai", "https://www.boostboss.ai", PUBLIC_BASE];
+    res.setHeader("Access-Control-Allow-Origin", allowed.includes(origin) ? origin : PUBLIC_BASE);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("x-campaigns-mode", HAS_SUPABASE ? "supabase" : "demo");

@@ -64,8 +64,15 @@ create table if not exists public.campaigns (
   spent_today      numeric(10,2) default 0.00,
   spent_total      numeric(12,2) default 0.00,
   skippable_after_sec int default 3,
-  created_at       timestamptz default now(),
-  updated_at       timestamptz default now()
+  optimization_goal text default 'target_cpa',  -- AI optimization target
+  target_roas       numeric(8,2),               -- target ROAS for ML bidding
+  start_date        date,                       -- campaign scheduling
+  end_date          date,                       -- campaign scheduling
+  review_notes      text,                       -- admin review feedback
+  reviewed_at       timestamptz,                -- when admin reviewed
+  reviewed_by       uuid references public.advertisers(id) on delete set null,  -- admin reviewer
+  created_at        timestamptz default now(),
+  updated_at        timestamptz default now()
 );
 
 create table if not exists public.events (
@@ -194,6 +201,31 @@ create index if not exists rtb_bids_auction_idx       on public.rtb_bids(auction
 create index if not exists rtb_bids_campaign_idx      on public.rtb_bids(campaign_id);
 create index if not exists rtb_bids_seat_ts_idx       on public.rtb_bids(seat_id, ts desc);
 create index if not exists rtb_bids_status_idx        on public.rtb_bids(status) where status = 'pending';
+
+-- ── 4b. MIGRATION: add columns if missing (safe to re-run) ───────────
+do $$ begin
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='review_notes') then
+    alter table public.campaigns add column review_notes text;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='reviewed_at') then
+    alter table public.campaigns add column reviewed_at timestamptz;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='reviewed_by') then
+    alter table public.campaigns add column reviewed_by uuid references public.advertisers(id) on delete set null;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='start_date') then
+    alter table public.campaigns add column start_date date;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='end_date') then
+    alter table public.campaigns add column end_date date;
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='optimization_goal') then
+    alter table public.campaigns add column optimization_goal text default 'target_cpa';
+  end if;
+  if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='target_roas') then
+    alter table public.campaigns add column target_roas numeric(8,2);
+  end if;
+end $$;
 
 -- ── 5. ROW-LEVEL SECURITY ─────────────────────────────────────────────
 

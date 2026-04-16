@@ -367,6 +367,87 @@ async function test(name, fn) {
     assert(p.issues.some(i => i.includes("cannot exceed")));
   });
 
+  // ── Numeric bounds validation on create ─────────────────────────────
+  campaigns._reset(); campaigns._seed();
+  await test("create rejects bid_amount below $0.01", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "Low Bid", cta_url: "https://x.com", bid_amount: 0.001, daily_budget: 100, total_budget: 5000 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("bid_amount"));
+  });
+
+  await test("create rejects bid_amount above $1,000", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "High Bid", cta_url: "https://x.com", bid_amount: 1001, daily_budget: 100, total_budget: 5000 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("bid_amount"));
+  });
+
+  await test("create accepts bid_amount at boundary ($0.01)", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "Min Bid", cta_url: "https://x.com", bid_amount: 0.01, daily_budget: 100, total_budget: 5000 },
+    });
+    assert.strictEqual(r._status, 201);
+  });
+
+  await test("create accepts bid_amount at boundary ($1,000)", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "Max Bid", cta_url: "https://x.com", bid_amount: 1000, daily_budget: 100, total_budget: 5000 },
+    });
+    assert.strictEqual(r._status, 201);
+  });
+
+  await test("create rejects daily_budget below $1", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "Low Daily", cta_url: "https://x.com", daily_budget: 0.5, total_budget: 5000 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("daily_budget"));
+  });
+
+  await test("create rejects daily_budget above $1,000,000", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "High Daily", cta_url: "https://x.com", daily_budget: 1000001, total_budget: 5000000 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("daily_budget"));
+  });
+
+  await test("create rejects total_budget below $1", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "Low Total", cta_url: "https://x.com", daily_budget: 1, total_budget: 0.5 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("total_budget"));
+  });
+
+  await test("create rejects total_budget above $10,000,000", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "High Total", cta_url: "https://x.com", daily_budget: 100, total_budget: 10000001 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("total_budget"));
+  });
+
+  await test("create rejects NaN bid_amount", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: { advertiser_id: "adv_test", headline: "NaN Bid", cta_url: "https://x.com", bid_amount: "abc", daily_budget: 100, total_budget: 5000 },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("bid_amount"));
+  });
+
   // ── Summary ────────────────────────────────────────────────────────
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }

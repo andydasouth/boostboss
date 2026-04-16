@@ -1,7 +1,7 @@
 /**
  * Boost Boss — Lumi SDK MCP Server
  *
- * The JSON-RPC 2.0 endpoint that the @boostboss/sdk talks to. Implements
+ * The JSON-RPC 2.0 endpoint that the @boostbossai/lumi-sdk talks to. Implements
  * the Model Context Protocol tools:
  *
  *   initialize                     → handshake (protocolVersion, capabilities)

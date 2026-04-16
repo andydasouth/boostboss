@@ -247,7 +247,7 @@ async function handleEarnings(req, res) {
     if (!dev) return res.status(404).json({ error: "Developer not found" });
     const { data: pending } = await sb.from("events")
       .select("developer_payout").eq("developer_id", dev.id).gt("developer_payout", 0);
-    const pendingTotal = (pending || []).reduce((s, e) => s + parseFloat(e.developer_payout || 0), 0);
+    const pendingTotal = (pending || []).reduce((s, e) => { const v = parseFloat(e.developer_payout || 0); return s + (Number.isFinite(v) ? v : 0); }, 0);
     return res.json({
       app_name: dev.app_name, total_earnings: dev.total_earnings,
       pending_payout: pendingTotal.toFixed(2),
@@ -584,7 +584,7 @@ async function handleWebhook(req, res) {
     const session = event.data.object;
     const advertiserId = session.metadata && session.metadata.advertiser_id;
     const amount       = parseFloat((session.metadata && session.metadata.amount) || 0);
-    if (advertiserId && amount > 0) {
+    if (advertiserId && Number.isFinite(amount) && amount > 0) {
       const sb = supa();
       if (sb) {
         // Atomic increment using RPC to avoid read-then-write race
@@ -600,7 +600,7 @@ async function handleWebhook(req, res) {
               console.error("[Billing] webhook balance fallback lookup failed:", advErr.message);
             } else if (adv) {
               await sb.from("advertisers")
-                .update({ balance: parseFloat(adv.balance) + amount })
+                .update({ balance: (parseFloat(adv.balance) || 0) + amount })
                 .eq("id", advertiserId);
             }
           } catch (fallbackErr) {
@@ -670,7 +670,7 @@ async function handleWebhook(req, res) {
             const { data: adv } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
             if (adv) {
               await sb.from("advertisers")
-                .update({ balance: Math.max(0, parseFloat(adv.balance) - refundAmount) })
+                .update({ balance: Math.max(0, (parseFloat(adv.balance) || 0) - refundAmount) })
                 .eq("id", advertiserId);
             }
           } catch (_) {}

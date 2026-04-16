@@ -18,7 +18,7 @@ async function test(name, fn) {
 }
 
 (async () => {
-  console.log("@boostboss/sdk smoke test");
+  console.log("@boostbossai/lumi-sdk smoke test");
 
   await test("exports named + default API", () => {
     assert.strictEqual(typeof bb.BoostBoss, "function");

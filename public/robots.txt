@@ -1,0 +1,9 @@
+# Boost Boss — https://boostboss.ai
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin
+Disallow: /playground
+
+# Sitemaps
+Sitemap: https://boostboss.ai/sitemap.xml

@@ -1,9 +1,9 @@
 // Example: serve a sponsored recommendation inside a Cursor extension
 // when the user has been debugging Python for > 2 minutes.
 //
-//   npm install @boostboss/sdk
+//   npm install @boostbossai/lumi-sdk
 //
-const { BoostBoss } = require("@boostboss/sdk");
+const { BoostBoss } = require("@boostbossai/lumi-sdk");
 
 const bb = new BoostBoss({
   apiKey: process.env.BB_API_KEY,

@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boost Boss Docs — API reference &amp; SDK guide</title>
 <meta name="description" content="Complete API reference, SDK guides, ad format specs, and webhook reference for the Boost Boss ad network.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Boost Boss Docs — API reference & SDK guide">
+<meta name="twitter:description" content="Complete API reference, SDK guides, ad format specs, and webhook reference.">
+<link rel="canonical" href="https://boostboss.ai/docs">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -744,7 +748,7 @@
     <h4>1. Install</h4>
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">bash</span><span class="copy">Copy</span></div>
-      <pre><span class="n">npm install @boostboss/sdk</span>
+      <pre><span class="n">npm install @boostbossai/lumi-sdk</span>
 <span class="c"># or</span>
 <span class="n">pip install boostboss</span>
 <span class="c"># or</span>
@@ -754,7 +758,7 @@
     <h4>2. Initialize the client</h4>
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
-<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
 
 <span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({
   apiKey: process.env.<span class="n">BB_API_KEY</span>,
@@ -830,11 +834,11 @@
       <p style="margin-top:14px">The recommended client for browsers, Node, and Deno. Zero dependencies, 8kb gzipped.</p>
       <div class="code-block with-head">
         <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-        <pre>npm install @boostboss/sdk</pre>
+        <pre>npm install @boostbossai/lumi-sdk</pre>
       </div>
       <div class="code-block with-head">
         <div class="code-head"><span class="lang">TypeScript</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre><span class="k">import</span> { BoostBoss, <span class="n">NativeAd</span> } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+<pre><span class="k">import</span> { BoostBoss, <span class="n">NativeAd</span> } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
 
 <span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({ apiKey: <span class="s">'bb_sk_live_***'</span> });
 
@@ -1258,7 +1262,7 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
 
     <div class="callout info">
       <span class="icon">i</span>
-      <div><strong>No PII, ever.</strong> User identifiers are SHA-256 hashed before they leave the client. Intent strings are matched against a vocabulary server-side; raw text is dropped after matching. See our <a href="#" class="inline-link">Privacy white paper</a> for the full protocol.</div>
+      <div><strong>No PII, ever.</strong> User identifiers are SHA-256 hashed before they leave the client. Intent strings are matched against a vocabulary server-side; raw text is dropped after matching. See our <a href="/trust" class="inline-link">Privacy white paper</a> for the full protocol.</div>
     </div>
 
     <!-- MCP INTEGRATION -->
@@ -1267,7 +1271,7 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
 
     <div class="code-block with-head">
       <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
-<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
+<pre><span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
 <span class="k">import</span> { McpClient } <span class="k">from</span> <span class="s">'@modelcontextprotocol/sdk'</span>;
 
 <span class="k">const</span> mcp = <span class="f">new</span> <span class="f">McpClient</span>({ /* ... */ });

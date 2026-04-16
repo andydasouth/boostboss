@@ -227,4 +227,6 @@ function computeCost(event, campaign) {
 // ── Exports for testing ─────────────────────────────────────────────────
 module.exports.HAS_SUPABASE = HAS_SUPABASE;
 module.exports._DEMO_EVENTS = DEMO_EVENTS;
-module.exports._reset = function () { DEMO_EVENTS.length = 0; };
+module.exports._rateLimitMap = rateLimitMap;
+module.exports._RATE_LIMIT_MAX = RATE_LIMIT_MAX;
+module.exports._reset = function () { DEMO_EVENTS.length = 0; rateLimitMap.clear(); };

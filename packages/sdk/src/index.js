@@ -1,18 +1,18 @@
 /**
- * @boostboss/sdk — MCP Ad Network SDK
+ * @boostbossai/lumi-sdk — MCP Ad Network SDK
  *
  * Three ways to use:
  *
  *   1. Direct API call (any runtime):
- *        const bb = require("@boostboss/sdk");
+ *        const bb = require("@boostbossai/lumi-sdk");
  *        const ad = await bb.getSponsoredContent({ context: "user is debugging python" });
  *
  *   2. MCP server middleware (wraps your existing MCP server):
- *        const { withBoostBoss } = require("@boostboss/sdk/mcp");
+ *        const { withBoostBoss } = require("@boostbossai/lumi-sdk/mcp");
  *        const server = withBoostBoss(yourMcpServer, { apiKey: process.env.BB_KEY });
  *
  *   3. Browser-side renderer (React/plain HTML):
- *        import { renderAd } from "@boostboss/sdk/renderer";
+ *        import { renderAd } from "@boostbossai/lumi-sdk/renderer";
  *        renderAd(ad, { mount: "#bb-ad-slot", format: "corner" });
  *
  * Every response is Benna-ranked against live MCP signals.

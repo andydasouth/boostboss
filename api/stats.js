@@ -89,7 +89,15 @@ function generateDailyStats(id, days = 30) {
 
 // ── Handler ───────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // Restrict CORS in production to BoostBoss origins; allow * in demo for local dev
+  const PUBLIC_BASE = process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai";
+  if (HAS_SUPABASE) {
+    const origin = req.headers && req.headers.origin;
+    const allowed = ["https://boostboss.ai", "https://www.boostboss.ai", PUBLIC_BASE];
+    res.setHeader("Access-Control-Allow-Origin", allowed.includes(origin) ? origin : PUBLIC_BASE);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", "*");
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("x-stats-mode", HAS_SUPABASE ? "supabase" : "demo");
@@ -234,7 +242,8 @@ function rollUpTotals(dailyStats) {
   for (const s of dailyStats) {
     totalImpressions += s.impressions || 0;
     totalClicks += s.clicks || 0;
-    totalSpend += parseFloat(s.spend || 0);
+    const sp = parseFloat(s.spend || 0);
+    totalSpend += Number.isFinite(sp) ? sp : 0;
   }
   return {
     impressions: totalImpressions,
@@ -249,7 +258,8 @@ function rollUpDevTotals(dailyStats) {
   for (const s of dailyStats) {
     totalImpressions += s.impressions || 0;
     totalClicks += s.clicks || 0;
-    totalEarnings += parseFloat(s.developer_earnings || 0);
+    const de = parseFloat(s.developer_earnings || 0);
+    totalEarnings += Number.isFinite(de) ? de : 0;
   }
   return {
     impressions: totalImpressions,
@@ -363,8 +373,10 @@ async function handleAggregateClientSide(sb, targetDate, res) {
     if (ev.event_type === "video_complete") b.video_completes++;
     if (ev.event_type === "skip") b.skips++;
     if (ev.event_type === "close") b.closes++;
-    b.spend += parseFloat(ev.cost) || 0;
-    b.developer_earnings += parseFloat(ev.developer_payout) || 0;
+    const evCost = parseFloat(ev.cost);
+    b.spend += Number.isFinite(evCost) ? evCost : 0;
+    const evPayout = parseFloat(ev.developer_payout);
+    b.developer_earnings += Number.isFinite(evPayout) ? evPayout : 0;
     buckets.set(key, b);
   }
 

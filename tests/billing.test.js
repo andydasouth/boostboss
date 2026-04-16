@@ -240,6 +240,131 @@ async function test(name, fn) {
     assert.strictEqual(billing._DEMO.events[0].untrusted, true);
   });
 
+  // ── deposit cap ────────────────────────────────────────────────────
+  await test("create_checkout rejects deposits over $100,000", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create_checkout" },
+      body: { advertiser_id: "adv_rich", amount: 150000, email: "rich@x.com" },
+    });
+    assert.strictEqual(r._status, 400);
+    assert(r._body.error.includes("100,000"));
+  });
+
+  await test("create_checkout accepts exactly $100,000", async () => {
+    billing._reset();
+    const r = await run({
+      method: "POST", query: { action: "create_checkout" },
+      body: { advertiser_id: "adv_rich", amount: 100000, email: "rich@x.com" },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.deposited, 100000);
+  });
+
+  await test("create_checkout rejects non-finite amount (NaN)", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create_checkout" },
+      body: { advertiser_id: "adv_x", amount: "notanumber", email: "x@x.com" },
+    });
+    assert.strictEqual(r._status, 400);
+  });
+
+  await test("create_checkout rejects Infinity", async () => {
+    const r = await run({
+      method: "POST", query: { action: "create_checkout" },
+      body: { advertiser_id: "adv_x", amount: Infinity, email: "x@x.com" },
+    });
+    assert.strictEqual(r._status, 400);
+  });
+
+  // ── webhook idempotency ──────────────────────────────────────────
+  billing._reset();
+  await test("webhook deduplicates events by id", async () => {
+    const event = {
+      id: "evt_dedup_test_001",
+      type: "checkout.session.completed",
+      data: { object: { metadata: { advertiser_id: "adv_dedup", amount: "50" } } },
+    };
+    const r1 = await run({ method: "POST", query: { action: "webhook" }, body: event });
+    assert.strictEqual(r1._status, 200);
+    assert.strictEqual(r1._body.received, true);
+    assert(!r1._body.duplicate, "first call should not be marked duplicate");
+
+    // Send the exact same event again
+    const r2 = await run({ method: "POST", query: { action: "webhook" }, body: event });
+    assert.strictEqual(r2._status, 200);
+    assert.strictEqual(r2._body.duplicate, true, "second call should be duplicate");
+  });
+
+  await test("duplicate webhook does not double-credit balance", async () => {
+    // adv_dedup was credited $50 by first webhook, default balance is $5000
+    const bal = await run({ method: "GET", query: { action: "balance", id: "adv_dedup" } });
+    assert.strictEqual(bal._body.balance, 5050, `expected 5050, got ${bal._body.balance}`);
+  });
+
+  await test("_reset clears processedWebhookIds", () => {
+    billing._reset();
+    assert.strictEqual(billing._DEMO.processedWebhookIds.size, 0);
+  });
+
+  // ── charge.refunded ──────────────────────────────────────────────
+  billing._reset();
+  await test("charge.refunded deducts from advertiser balance in demo mode", async () => {
+    // First, ensure the advertiser has some balance
+    const balBefore = (await run({ method: "GET", query: { action: "balance", id: "adv_refund" } }))._body.balance;
+    assert.strictEqual(balBefore, 5000); // default
+
+    const r = await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "charge.refunded",
+        data: { object: { amount_refunded: 7500, metadata: { advertiser_id: "adv_refund" } } },
+      },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.event_type, "charge.refunded");
+
+    const balAfter = (await run({ method: "GET", query: { action: "balance", id: "adv_refund" } }))._body.balance;
+    assert.strictEqual(balAfter, 4925, `expected 5000-75=4925, got ${balAfter}`); // 7500 cents = $75
+  });
+
+  await test("charge.refunded does not go below zero", async () => {
+    billing._reset();
+    // Set up advertiser with $5000 then refund $600000 ($6000 — more than balance)
+    await run({ method: "GET", query: { action: "balance", id: "adv_broke" } }); // creates with $5000
+    const r = await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "charge.refunded",
+        data: { object: { amount_refunded: 600000, metadata: { advertiser_id: "adv_broke" } } },
+      },
+    });
+    assert.strictEqual(r._status, 200);
+    const bal = (await run({ method: "GET", query: { action: "balance", id: "adv_broke" } }))._body.balance;
+    assert.strictEqual(bal, 0, `expected floor of 0, got ${bal}`);
+  });
+
+  // ── charge.failed ────────────────────────────────────────────────
+  await test("charge.failed records in audit log but does not change balance", async () => {
+    billing._reset();
+    await run({ method: "GET", query: { action: "balance", id: "adv_fail" } }); // creates $5000
+    const r = await run({
+      method: "POST", query: { action: "webhook" },
+      body: {
+        type: "charge.failed",
+        data: { object: { id: "ch_failed_001", failure_message: "card_declined", amount: 10000, metadata: { advertiser_id: "adv_fail" } } },
+      },
+    });
+    assert.strictEqual(r._status, 200);
+    assert.strictEqual(r._body.event_type, "charge.failed");
+
+    // Balance should remain unchanged (no credit for failed charges)
+    const bal = (await run({ method: "GET", query: { action: "balance", id: "adv_fail" } }))._body.balance;
+    assert.strictEqual(bal, 5000, `expected 5000 (unchanged), got ${bal}`);
+
+    // Event should be in the audit log
+    assert(billing._DEMO.events.some(e => e.type === "charge.failed"), "charge.failed should be in audit log");
+  });
+
   console.log();
   if (failed) { console.log(`\x1b[31m${failed} failed\x1b[0m, ${passed} passed.`); process.exit(1); }
   else console.log(`\x1b[32m${passed} checks passed.\x1b[0m`);

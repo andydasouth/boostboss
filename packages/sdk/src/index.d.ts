@@ -1,4 +1,4 @@
-// Type definitions for @boostboss/sdk
+// Type definitions for @boostbossai/lumi-sdk
 
 export interface BennaAttribution {
   model_version: string;

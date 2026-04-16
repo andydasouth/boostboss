@@ -1,9 +1,9 @@
 // Example: wrap your own MCP server so Boost Boss tool appears alongside yours.
 //
-//   npm install @boostboss/sdk
+//   npm install @boostbossai/lumi-sdk
 //
 const http = require("http");
-const { withBoostBoss } = require("@boostboss/sdk/mcp");
+const { withBoostBoss } = require("@boostbossai/lumi-sdk/mcp");
 
 // Your existing MCP server — just needs a .handle(request) method
 const myServer = {

@@ -6,7 +6,7 @@
  * having to plumb it themselves.
  *
  * Usage:
- *   const { withBoostBoss } = require("@boostboss/sdk/mcp");
+ *   const { withBoostBoss } = require("@boostbossai/lumi-sdk/mcp");
  *   const server = withBoostBoss(yourMcpServer, {
  *     apiKey: process.env.BB_API_KEY,
  *     publisherId: "your-publisher-id",
