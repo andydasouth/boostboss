@@ -375,6 +375,77 @@
     font-size: 13px; color: var(--muted);
   }
 
+  /* LIVE AUCTION ANIMATION */
+  .bid-row { transition: all 0.4s ease; opacity: 0; transform: translateY(10px); }
+  .bid-row.visible { opacity: 1; transform: translateY(0); }
+  .bid-row.winner .bid { animation: bidPulse 0.6s ease; }
+  @keyframes bidPulse { 0% { transform: scale(1); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+  .auction-viz .replay-btn {
+    position: absolute; top: -12px; right: 24px;
+    background: var(--ink); color: #fff; border: 1.5px solid var(--ink);
+    font-family: 'Space Grotesk', sans-serif; font-size: 11px; font-weight: 700;
+    padding: 4px 12px; border-radius: 4px; cursor: pointer; letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .auction-viz .replay-btn:hover { background: var(--violet); }
+
+  /* BID LANDSCAPE */
+  .bid-landscape {
+    margin-top: 28px; padding-top: 20px; border-top: 1px dashed var(--line);
+  }
+  .bid-landscape h4 { font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .bid-landscape canvas { width: 100%; height: 120px; border-radius: 8px; }
+
+  /* LIVE QPS */
+  .live-qps {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'JetBrains Mono', monospace; font-size: 13px;
+    color: var(--violet); font-weight: 600;
+  }
+  .live-qps .dot { width: 8px; height: 8px; border-radius: 50%; background: #10B981; animation: pulse 1.5s infinite; }
+
+  /* TOAST */
+  #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; transform: translateX(120%); transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: #027A48; }
+  .toast.info { background: var(--ink); }
+
+  /* COPY CURL BUTTON */
+  .copy-curl {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    background: var(--cyan); color: var(--ink); border: none; cursor: pointer;
+    transition: all 0.15s; font-family: 'JetBrains Mono', monospace;
+  }
+  .copy-curl:hover { opacity: 0.85; }
+
+  /* DARK MODE */
+  body.dark { --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF; --line: #374151; --bg: #111827; --bg-soft: #1F2937; --code-bg: #0D1117; --violet-soft: rgba(124,58,237,0.15); }
+  body.dark nav { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
+  body.dark .hero { background: linear-gradient(180deg, #111827 0%, #1a1530 100%); }
+  body.dark .why-card, body.dark .dynamics-card { background: #1F2937; border-color: #4B5563; box-shadow: 6px 6px 0 #374151; }
+  body.dark .auction-viz { background: #1F2937; border-color: #4B5563; box-shadow: 10px 10px 0 #374151; }
+  body.dark .bid-row { background: #1F2937; border-color: #4B5563; }
+  body.dark .bid-row.winner { background: rgba(124,58,237,0.15); border-color: var(--violet); }
+  body.dark .flow-node { background: #374151; border-color: #4B5563; }
+  body.dark .inventory-table { background: #1F2937; border-color: #4B5563; box-shadow: 6px 6px 0 #374151; }
+  body.dark .inv-row { border-bottom-color: #374151; }
+  body.dark .inv-row:hover { background: #374151; }
+  body.dark .badge { background: #1F2937; border-color: #4B5563; box-shadow: 3px 3px 0 #374151; }
+  body.dark .stats { background: #1F2937; border-color: #374151; }
+  body.dark .apply-box { background: #0D1117; box-shadow: 12px 12px 0 var(--violet); }
+  body.dark .code-block { background: #0D1117; border-color: #4B5563; box-shadow: 8px 8px 0 #374151; }
+  body.dark footer { background: #0D1117; border-color: #374151; }
+  body.dark .btn-primary { box-shadow: 3px 3px 0 #4B5563; }
+  body.dark .btn-outline { box-shadow: 3px 3px 0 #4B5563; border-color: #6B7280; }
+  .dark-toggle { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1; transition: all 0.15s; color: var(--ink); }
+  .dark-toggle:hover { background: var(--bg-soft); }
+
+  /* ANIMATED STATS */
+  .stat h3 { transition: color 0.3s; }
+  .stat h3.counting { color: var(--cyan); }
+
   @media (max-width: 900px) {
     .nav-links { display: none; }
     .hero { padding: 64px 0 40px; }
@@ -417,11 +488,13 @@
       <a href="/">Boost Boss ↗</a>
     </div>
     <div class="nav-ctas">
+      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌓</button>
       <a class="btn btn-ghost" href="#apply">Contact</a>
       <a class="btn btn-primary" href="#apply">Apply for access</a>
     </div>
   </div>
 </nav>
+<div id="toastContainer"></div>
 
 <!-- HERO -->
 <section class="hero">
@@ -442,6 +515,7 @@
 
     <!-- AUCTION VISUALIZER -->
     <div class="auction-viz">
+      <button class="replay-btn" onclick="replayAuction()">↻ REPLAY</button>
       <div class="auction-flow">
         <div class="flow-node">
           <h4>Publisher</h4>
@@ -480,6 +554,15 @@
           <div class="bid">$3.61</div>
           <div class="tag">Bid received · 44ms</div>
         </div>
+      </div>
+
+      <!-- BID LANDSCAPE -->
+      <div class="bid-landscape">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h4>Bid landscape (last 1,000 auctions)</h4>
+          <div class="live-qps"><span class="dot"></span><span id="liveQps">8,412</span> QPS</div>
+        </div>
+        <canvas id="bidLandscape" height="120"></canvas>
       </div>
     </div>
   </div>
@@ -610,7 +693,7 @@
         </div>
         <div style="display: flex; gap: 10px;">
           <a href="/docs.html#rtb-overview" class="btn btn-primary" style="background: var(--violet); border-color: var(--violet);">Read RTB docs →</a>
-          <a href="/openapi.json" class="btn btn-ghost" style="color: #fff; border-color: rgba(255,255,255,0.3);">OpenAPI spec</a>
+          <a href="/playground.html?endpoint=rtb" class="btn btn-ghost" style="color: #fff; border-color: rgba(255,255,255,0.3);">Open in Playground</a>
         </div>
       </div>
       <pre style="margin-top: 20px; padding: 18px 20px; background: #06081C; border-radius: 8px; color: #E4E4F2; font-family: 'JetBrains Mono', Consolas, monospace; font-size: 12.5px; line-height: 1.55; overflow-x: auto;">curl -X POST https://boostboss.ai/api/rtb \
@@ -819,6 +902,206 @@
     </div>
   </div>
 </footer>
+
+<script>
+// ── Toast ──
+function showToast(msg, type='success', dur=2500) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
+}
+
+// ── Dark mode ──
+function toggleDark() {
+  document.body.classList.toggle('dark');
+  localStorage.setItem('bb_bbx_dark', document.body.classList.contains('dark') ? '1' : '0');
+  drawBidLandscape(); // Redraw chart for dark mode
+}
+if (localStorage.getItem('bb_bbx_dark') === '1' || localStorage.getItem('bb_docs_dark') === '1') document.body.classList.add('dark');
+
+// ── Animated auction replay ──
+function replayAuction() {
+  const rows = document.querySelectorAll('.bid-row');
+  rows.forEach(r => r.classList.remove('visible'));
+
+  const dsps = [
+    { name: 'The Trade Desk', bid: '$' + (3.2 + Math.random() * 1.8).toFixed(2), ms: Math.round(30 + Math.random() * 20) },
+    { name: 'DV360', bid: '$' + (3.0 + Math.random() * 2.0).toFixed(2), ms: Math.round(35 + Math.random() * 15) },
+    { name: 'Amazon Ads', bid: '$' + (3.5 + Math.random() * 2.5).toFixed(2), ms: Math.round(32 + Math.random() * 18) },
+    { name: 'MediaMath', bid: '$' + (2.8 + Math.random() * 1.6).toFixed(2), ms: Math.round(38 + Math.random() * 12) },
+  ];
+
+  // Find winner
+  const bids = dsps.map(d => parseFloat(d.bid.substring(1)));
+  const winnerIdx = bids.indexOf(Math.max(...bids));
+
+  rows.forEach((row, i) => {
+    const d = dsps[i];
+    row.querySelector('.dsp').textContent = 'DSP · ' + d.name;
+    row.querySelector('.bid').textContent = d.bid;
+
+    row.classList.remove('winner');
+    if (i === winnerIdx) {
+      row.classList.add('winner');
+      row.querySelector('.tag').textContent = 'Winning bid · ' + d.ms + 'ms';
+      // Update flow node
+      document.querySelector('.flow-node:last-child p').textContent = d.ms + 'ms · ' + d.bid + ' CPM';
+    } else {
+      row.querySelector('.tag').textContent = 'Bid received · ' + d.ms + 'ms';
+    }
+
+    setTimeout(() => row.classList.add('visible'), 200 + i * 300);
+  });
+}
+
+// Initial animation on page load
+setTimeout(replayAuction, 400);
+
+// ── Animated stat counters ──
+function animateCounters() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const el = entry.target;
+        const text = el.textContent;
+        const num = parseFloat(text.replace(/[^0-9.]/g, ''));
+        const suffix = text.replace(/[0-9.]/g, '');
+        const duration = 1200;
+        const start = performance.now();
+        el.classList.add('counting');
+
+        function tick(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = num * eased;
+          if (text.includes('B+')) el.textContent = Math.round(current) + 'B+';
+          else if (text.includes('ms')) el.textContent = Math.round(current) + 'ms';
+          else if (text.includes('+')) el.textContent = Math.round(current) + '+';
+          else if (text.includes('%')) el.textContent = current.toFixed(2) + '%';
+          else el.textContent = text;
+
+          if (progress < 1) requestAnimationFrame(tick);
+          else { el.textContent = text; el.classList.remove('counting'); }
+        }
+        requestAnimationFrame(tick);
+        observer.unobserve(el);
+      }
+    });
+  }, { threshold: 0.3 });
+
+  document.querySelectorAll('.stat h3').forEach(el => observer.observe(el));
+}
+animateCounters();
+
+// ── Live QPS counter ──
+setInterval(() => {
+  const base = 8400;
+  const jitter = Math.round((Math.random() - 0.5) * 600);
+  document.getElementById('liveQps').textContent = (base + jitter).toLocaleString();
+}, 2000);
+
+// ── Bid landscape chart ──
+function drawBidLandscape() {
+  const canvas = document.getElementById('bidLandscape');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * dpr;
+  canvas.height = 120 * dpr;
+  ctx.scale(dpr, dpr);
+  const w = rect.width, h = 120;
+
+  // Generate bid distribution (bell curve-ish)
+  const bins = 40;
+  const data = [];
+  for (let i = 0; i < bins; i++) {
+    const x = (i / bins) * 10; // $0 - $10 CPM range
+    const center = 3.8;
+    const spread = 1.5;
+    const y = Math.exp(-0.5 * Math.pow((x - center) / spread, 2)) * (0.7 + Math.random() * 0.3);
+    data.push(y);
+  }
+  const maxY = Math.max(...data);
+
+  const isDark = document.body.classList.contains('dark');
+
+  // Draw bars
+  const barW = (w - 20) / bins;
+  data.forEach((val, i) => {
+    const barH = (val / maxY) * (h - 30);
+    const x = 10 + i * barW;
+    const y = h - 15 - barH;
+
+    // Winner zone highlight
+    if (i >= 14 && i <= 18) {
+      ctx.fillStyle = isDark ? 'rgba(124,58,237,0.3)' : 'rgba(124,58,237,0.15)';
+    } else {
+      ctx.fillStyle = isDark ? 'rgba(124,58,237,0.6)' : 'rgba(124,58,237,0.4)';
+    }
+    ctx.beginPath();
+    ctx.roundRect(x, y, barW - 2, barH, 2);
+    ctx.fill();
+  });
+
+  // Labels
+  ctx.fillStyle = isDark ? '#9CA3AF' : '#6B7280';
+  ctx.font = '10px JetBrains Mono, monospace';
+  ctx.textAlign = 'center';
+  for (let i = 0; i <= 10; i += 2) {
+    const x = 10 + (i / 10) * (w - 20);
+    ctx.fillText('$' + i, x, h - 2);
+  }
+
+  // Winner line
+  const winX = 10 + (4.12 / 10) * (w - 20);
+  ctx.strokeStyle = '#FF2D78';
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([4, 3]);
+  ctx.beginPath();
+  ctx.moveTo(winX, 5);
+  ctx.lineTo(winX, h - 15);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.fillStyle = '#FF2D78';
+  ctx.font = 'bold 10px JetBrains Mono, monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText('Winner $4.12', winX + 4, 14);
+}
+
+drawBidLandscape();
+window.addEventListener('resize', drawBidLandscape);
+
+// ── Copy cURL from sandbox ──
+const curlPre = document.querySelector('.apply-box + section pre, [style*="06081C"] + pre') ||
+  document.querySelector('pre[style]');
+// Add click-to-copy on sandbox cURL
+document.querySelectorAll('pre').forEach(pre => {
+  if (pre.textContent.includes('curl -X POST') && pre.textContent.includes('/api/rtb')) {
+    pre.style.cursor = 'pointer';
+    pre.title = 'Click to copy';
+    pre.addEventListener('click', () => {
+      navigator.clipboard.writeText(pre.textContent).then(() => showToast('cURL copied to clipboard'));
+    });
+  }
+});
+
+// ── Smooth anchor scrolling ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+});
+</script>
 
 </body>
 </html>
