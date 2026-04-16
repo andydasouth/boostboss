@@ -16,8 +16,8 @@ delete process.env.SUPABASE_ANON_KEY;
 delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const assert = require("assert");
-const billing = require("./billing.js");
-const ledger  = require("./_lib/ledger.js");
+const billing = require("../api/billing.js");
+const ledger  = require("../api/_lib/ledger.js");
 
 function mockReqRes({ method = "POST", body = null, query = {}, headers = {} } = {}) {
   const res = {

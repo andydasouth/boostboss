@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vercel dev",
     "deploy": "vercel --prod",
-    "test": "node api/auth.test.js && node api/rtb.test.js && node api/billing.test.js && node api/campaigns.test.js && node api/track.test.js && node api/mcp.test.js"
+    "test": "node tests/auth.test.js && node tests/rtb.test.js && node tests/billing.test.js && node tests/campaigns.test.js && node tests/track.test.js && node tests/mcp.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.0",

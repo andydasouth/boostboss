@@ -13,7 +13,7 @@ delete process.env.SUPABASE_ANON_KEY;
 delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const assert = require("assert");
-const mcp = require("./mcp.js");
+const mcp = require("../api/mcp.js");
 
 function mockReqRes({ method = "POST", body = null, query = {}, headers = {} } = {}) {
   const res = {

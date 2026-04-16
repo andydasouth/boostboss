@@ -12,7 +12,7 @@ delete process.env.SUPABASE_ANON_KEY;
 process.env.JWT_SECRET = "test-secret-do-not-use";
 
 const assert = require("assert");
-const handler = require("./auth.js");
+const handler = require("../api/auth.js");
 
 function mockReqRes({ method = "POST", body = {}, query = {}, headers = {} } = {}) {
   const res = {

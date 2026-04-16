@@ -12,7 +12,7 @@ delete process.env.SUPABASE_ANON_KEY;
 delete process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const assert = require("assert");
-const track = require("./track.js");
+const track = require("../api/track.js");
 
 function mockReqRes({ method = "POST", body = null, query = {}, headers = {} } = {}) {
   const res = {

@@ -8,7 +8,7 @@
  */
 
 const assert = require("assert");
-const handler = require("./rtb.js");
+const handler = require("../api/rtb.js");
 
 // ─── mock req/res that mimic Vercel's serverless interface ───
 function mockReqRes({ method = "POST", body = null, query = {}, headers = {} } = {}) {
@@ -306,8 +306,8 @@ function freshBidRequest(overrides = {}) {
   });
 
   // ───────── seat authentication ─────────
-  const seats = require("./_lib/seats.js");
-  const ledger = require("./_lib/ledger.js");
+  const seats = require("../api/_lib/seats.js");
+  const ledger = require("../api/_lib/ledger.js");
   const demoSeatKey = seats._DEMO_SEATS.get("seat_demo").api_key;
 
   await test("anonymous bids are accepted in demo mode and tagged seat_anon", async () => {
@@ -332,9 +332,9 @@ function freshBidRequest(overrides = {}) {
   await test("invalid Bearer token rejects with 401 + WWW-Authenticate", async () => {
     process.env.BBX_SEAT_AUTH_REQUIRED = "true";
     // Re-require seats so it picks up the new env var
-    delete require.cache[require.resolve("./_lib/seats.js")];
-    delete require.cache[require.resolve("./rtb.js")];
-    const handlerStrict = require("./rtb.js");
+    delete require.cache[require.resolve("../api/_lib/seats.js")];
+    delete require.cache[require.resolve("../api/rtb.js")];
+    const handlerStrict = require("../api/rtb.js");
     const { req, res } = mockReqRes({
       method: "POST",
       body: freshBidRequest(),
@@ -344,21 +344,21 @@ function freshBidRequest(overrides = {}) {
     assert.strictEqual(res._status, 401);
     assert.ok(res._headers["www-authenticate"]);
     delete process.env.BBX_SEAT_AUTH_REQUIRED;
-    delete require.cache[require.resolve("./_lib/seats.js")];
-    delete require.cache[require.resolve("./rtb.js")];
+    delete require.cache[require.resolve("../api/_lib/seats.js")];
+    delete require.cache[require.resolve("../api/rtb.js")];
   });
 
   await test("missing Bearer token in strict mode returns 401", async () => {
     process.env.BBX_SEAT_AUTH_REQUIRED = "true";
-    delete require.cache[require.resolve("./_lib/seats.js")];
-    delete require.cache[require.resolve("./rtb.js")];
-    const handlerStrict = require("./rtb.js");
+    delete require.cache[require.resolve("../api/_lib/seats.js")];
+    delete require.cache[require.resolve("../api/rtb.js")];
+    const handlerStrict = require("../api/rtb.js");
     const { req, res } = mockReqRes({ method: "POST", body: freshBidRequest() });
     await handlerStrict(req, res);
     assert.strictEqual(res._status, 401);
     delete process.env.BBX_SEAT_AUTH_REQUIRED;
-    delete require.cache[require.resolve("./_lib/seats.js")];
-    delete require.cache[require.resolve("./rtb.js")];
+    delete require.cache[require.resolve("../api/_lib/seats.js")];
+    delete require.cache[require.resolve("../api/rtb.js")];
   });
 
   // ───────── auction ledger persistence ─────────
@@ -489,15 +489,15 @@ function freshBidRequest(overrides = {}) {
 
   await test("op=report without auth in strict mode returns 401", async () => {
     process.env.BBX_SEAT_AUTH_REQUIRED = "true";
-    delete require.cache[require.resolve("./_lib/seats.js")];
-    delete require.cache[require.resolve("./rtb.js")];
-    const handlerStrict = require("./rtb.js");
+    delete require.cache[require.resolve("../api/_lib/seats.js")];
+    delete require.cache[require.resolve("../api/rtb.js")];
+    const handlerStrict = require("../api/rtb.js");
     const { req, res } = mockReqRes({ method: "GET", query: { op: "report" } });
     await handlerStrict(req, res);
     assert.strictEqual(res._status, 401);
     delete process.env.BBX_SEAT_AUTH_REQUIRED;
-    delete require.cache[require.resolve("./_lib/seats.js")];
-    delete require.cache[require.resolve("./rtb.js")];
+    delete require.cache[require.resolve("../api/_lib/seats.js")];
+    delete require.cache[require.resolve("../api/rtb.js")];
   });
 
   // ───────── summary ─────────
