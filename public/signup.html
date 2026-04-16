@@ -144,6 +144,47 @@ footer {
   font-size: 11px; cursor: pointer; font-family: inherit;
 }
 .api-key-box .copy-btn:hover { background: #3A3A4E; }
+
+/* ── Toast ── */
+#toastContainer { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.toast { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; transform: translateX(120%); transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px; }
+.toast.show { transform: translateX(0); }
+.toast.success { background: #027A48; }
+.toast.error { background: #DC2626; }
+.toast.info { background: #1A1A2E; }
+
+/* ── Dark mode toggle ── */
+.dark-toggle { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1; transition: all 0.15s; color: var(--ink); }
+.dark-toggle:hover { background: var(--bg-soft); }
+
+/* ── Dark mode ── */
+body.dark {
+  --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF;
+  --line: #374151; --bg: #111827; --bg-soft: #1F2937;
+}
+body.dark nav { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
+body.dark .card { background: #1F2937; border-color: #374151; box-shadow: 0 4px 24px rgba(0,0,0,0.3); }
+body.dark .role-btn { background: #1F2937; border-color: #374151; }
+body.dark .role-btn:hover { border-color: #6B7280; }
+body.dark .role-btn.active { border-color: var(--pink); background: rgba(255,45,120,0.1); }
+body.dark .form-group input { background: #111827; color: #F3F4F6; border-color: #374151; }
+body.dark .form-group input:focus { border-color: var(--pink); }
+body.dark .form-group input::placeholder { color: #6B7280; }
+body.dark .btn-submit { background: var(--pink); }
+body.dark .error-msg { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.3); color: #FCA5A5; }
+body.dark .success-msg { background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color: #6EE7B7; }
+body.dark .divider { color: #6B7280; }
+body.dark .divider::before, body.dark .divider::after { border-top-color: #374151; }
+body.dark footer { background: #0D1117; border-top-color: #374151; color: #6B7280; }
+body.dark .api-key-box { background: #0A0A14; }
+body.dark .tab-row { border-bottom-color: #374151; }
+body.dark .tab-btn { color: #6B7280; }
+body.dark .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink); }
+
+/* ── Password strength ── */
+.pw-strength { height: 4px; border-radius: 2px; background: var(--line); margin-top: 6px; overflow: hidden; }
+.pw-strength .bar { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; width: 0; }
+.pw-label { font-size: 11px; margin-top: 3px; font-weight: 500; }
 </style>
 </head>
 <body>
@@ -157,6 +198,7 @@ footer {
     </a>
     <div style="display:flex;gap:10px;align-items:center;">
       <a href="/docs.html" style="font-size:14px;font-weight:500;color:var(--ink-soft);">Docs</a>
+      <button class="dark-toggle" onclick="document.body.classList.toggle('dark');localStorage.setItem('bb_signup_dark',document.body.classList.contains('dark')?'1':'0')" title="Toggle dark mode">🌓</button>
     </div>
   </div>
 </nav>
@@ -200,6 +242,8 @@ footer {
         <div class="form-group">
           <label for="password">Password</label>
           <input type="password" id="password" name="password" placeholder="At least 6 characters" required minlength="6">
+          <div class="pw-strength"><div class="bar" id="pw-bar"></div></div>
+          <div class="pw-label" id="pw-label"></div>
         </div>
         <div class="form-group" id="company-group">
           <label for="company_name">Company name</label>
@@ -260,9 +304,24 @@ footer {
   </div>
 </div>
 
+<div id="toastContainer"></div>
 <footer>© 2026 Boost Boss, Inc.</footer>
 
 <script>
+// Dark mode
+if (['bb_signup_dark','bb_docs_dark','bb_pg_dark','bb_bbx_dark','bb_status_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
+
+// Toast
+function showToast(msg, type='info', dur=2500) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
+}
+
 const API = "/api/auth";
 let selectedRole = "advertiser";
 
@@ -323,8 +382,10 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
 
     saveSession(j);
     showWelcome(j);
+    showToast('Account created!', 'success');
   } catch (err) {
     showError("error", err.message);
+    showToast(err.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = "Create account";
   }
@@ -350,11 +411,13 @@ document.getElementById("login-form").addEventListener("submit", async e => {
     if (!r.ok || j.error) throw new Error(j.error || "Login failed");
 
     saveSession(j);
+    showToast('Signed in! Redirecting...', 'success');
     // Redirect straight to dashboard
     const dest = j.user?.role === "developer" ? "/publish.html" : "/ads.html";
-    window.location.href = dest;
+    setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("login-error", err.message);
+    showToast(err.message, 'error');
   } finally {
     btn.disabled = false; btn.textContent = "Sign in";
   }
@@ -371,10 +434,12 @@ async function launchDemo(role) {
     const j = await r.json();
     if (!r.ok || j.error) throw new Error(j.error || "Demo failed");
     saveSession(j);
+    showToast('Demo session started!', 'success');
     const dest = j.user?.role === "developer" ? "/publish.html" : "/ads.html";
-    window.location.href = dest;
+    setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("error", err.message);
+    showToast(err.message, 'error');
   }
 }
 document.getElementById("demo-btn").addEventListener("click", () => launchDemo(selectedRole));
@@ -456,6 +521,26 @@ if (params.get("role") === "developer") {
 if (params.get("tab") === "login") {
   document.querySelector('[data-tab="login"]').click();
 }
+
+// ── Password strength ──
+document.getElementById("password").addEventListener("input", function() {
+  const v = this.value;
+  const bar = document.getElementById("pw-bar");
+  const lbl = document.getElementById("pw-label");
+  let score = 0;
+  if (v.length >= 6) score++;
+  if (v.length >= 10) score++;
+  if (/[A-Z]/.test(v) && /[a-z]/.test(v)) score++;
+  if (/\d/.test(v)) score++;
+  if (/[^A-Za-z0-9]/.test(v)) score++;
+  const pct = Math.min(score / 5 * 100, 100);
+  const colors = ['#DC2626','#F59E0B','#F59E0B','#10B981','#10B981'];
+  const labels = ['Weak','Fair','Fair','Strong','Very strong'];
+  bar.style.width = pct + '%';
+  bar.style.background = v.length > 0 ? colors[Math.min(score,4)] : 'transparent';
+  lbl.textContent = v.length > 0 ? labels[Math.min(score,4)] : '';
+  lbl.style.color = v.length > 0 ? colors[Math.min(score,4)] : 'transparent';
+});
 </script>
 </body>
 </html>

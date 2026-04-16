@@ -123,6 +123,31 @@
   .foot-inner { display: flex; justify-content: space-between; align-items: center; }
   .foot-brand { display: flex; align-items: center; gap: 10px; color: white; font-family: 'Space Grotesk', sans-serif; font-size: 18px; font-weight: 700; }
 
+  /* TOAST */
+  #toastContainer { position: fixed; top: 80px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+  .toast { padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500; color: #fff; transform: translateX(120%); transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px; }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: #027A48; }
+  .toast.info { background: var(--ink); }
+
+  /* AUTO-REFRESH BAR */
+  .refresh-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 3px; background: var(--line); z-index: 50; }
+  .refresh-bar .fill { height: 100%; background: var(--green); transition: width 1s linear; width: 0; }
+
+  /* DARK MODE */
+  body.dark { --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF; --line: #374151; --bg: #111827; --bg-soft: #1F2937; --green-soft: rgba(22,163,74,0.15); --amber-soft: rgba(217,119,6,0.15); --red-soft: rgba(220,38,38,0.15); }
+  body.dark nav { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
+  body.dark .hero { background: linear-gradient(180deg, #0d1a12 0%, #111827 100%); border-bottom-color: #374151; }
+  body.dark .hero-status { background: #1F2937; border-color: var(--green); }
+  body.dark .status-card { background: #1F2937; border-color: #4B5563; box-shadow: 4px 4px 0 #374151; }
+  body.dark .section.alt { background: #1F2937; border-color: #374151; }
+  body.dark footer { background: #0D1117; }
+  body.dark .sc-badge.ok { background: rgba(22,163,74,0.2); color: #4ADE80; }
+  body.dark .sc-badge.degraded { background: rgba(217,119,6,0.2); color: #FCD34D; }
+  body.dark .sc-badge.down { background: rgba(220,38,38,0.2); color: #FCA5A5; }
+  .dark-toggle { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1; transition: all 0.15s; color: var(--ink); }
+  .dark-toggle:hover { background: var(--bg-soft); }
+
   @media (max-width: 880px) { .nav-links { display: none; } .foot-inner { flex-direction: column; gap: 16px; } }
   @media (max-width: 640px) { .sc-metrics { flex-wrap: wrap; gap: 16px; } .status-grid { grid-template-columns: 1fr; } }
 </style>
@@ -145,11 +170,14 @@
       <a href="/trust.html">Trust</a>
     </div>
     <div class="nav-ctas">
+      <button class="dark-toggle" onclick="document.body.classList.toggle('dark');localStorage.setItem('bb_status_dark',document.body.classList.contains('dark')?'1':'0')" title="Toggle dark mode">🌓</button>
       <a class="btn btn-ghost" href="/developer.html">Sign in</a>
       <a class="btn btn-primary" href="mailto:status@boostboss.ai">Subscribe</a>
     </div>
   </div>
 </nav>
+<div id="toastContainer"></div>
+<div class="refresh-bar"><div class="fill" id="refreshFill"></div></div>
 
 <!-- HERO -->
 <section class="hero">
@@ -205,6 +233,32 @@
 </footer>
 
 <script>
+// Dark mode
+if (['bb_status_dark','bb_docs_dark','bb_pg_dark','bb_bbx_dark','bb_signup_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
+
+// Toast
+function showToast(msg, type='info', dur=2500) {
+  const c = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + type;
+  t.textContent = msg;
+  c.appendChild(t);
+  requestAnimationFrame(() => t.classList.add('show'));
+  setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, dur);
+}
+
+// Refresh bar
+let refreshInterval;
+function startRefreshBar() {
+  const fill = document.getElementById('refreshFill');
+  fill.style.transition = 'none';
+  fill.style.width = '0%';
+  requestAnimationFrame(() => {
+    fill.style.transition = 'width 60s linear';
+    fill.style.width = '100%';
+  });
+}
+
 (function() {
   const BASE = window.location.origin;
 
@@ -332,8 +386,10 @@
 
   renderUptimeBars();
   renderIncidents();
-  refresh();
-  setInterval(refresh, 60000);
+  refresh().then(() => { showToast('All services checked', 'success'); startRefreshBar(); });
+  setInterval(() => {
+    refresh().then(() => { showToast('Status refreshed', 'success'); startRefreshBar(); });
+  }, 60000);
 })();
 </script>
 

@@ -160,6 +160,28 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 }
 .empty-state .icon { font-size: 40px; margin-bottom: 12px; }
 
+/* ── Keyboard shortcut hint ── */
+.kbd { display: inline-block; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--muted); margin-left: auto; }
+
+/* ── Search modal ── */
+.search-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 9998; display: none; align-items: flex-start; justify-content: center; padding-top: 20vh; }
+.search-overlay.open { display: flex; }
+.search-modal { background: var(--bg-card); border: 1px solid var(--line); border-radius: 14px; width: 100%; max-width: 480px; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,0.5); }
+.search-input-wrap { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.search-input-wrap input { flex: 1; background: none; border: none; color: #F5F5F7; font-size: 15px; font-family: inherit; outline: none; }
+.search-input-wrap input::placeholder { color: var(--muted); }
+.search-results { max-height: 300px; overflow-y: auto; }
+.search-results a { display: block; padding: 10px 18px; font-size: 13.5px; color: #D1D5DB; text-decoration: none; border-bottom: 1px solid var(--line); transition: background 0.1s; }
+.search-results a:hover, .search-results a.active { background: var(--bg-soft); color: #F5F5F7; }
+.search-results .empty { padding: 24px 18px; text-align: center; color: var(--muted); font-size: 13px; }
+
+/* ── Mobile hamburger ── */
+.mobile-toggle { display: none; background: none; border: none; color: #F5F5F7; font-size: 24px; cursor: pointer; padding: 8px; }
+@media (max-width: 768px) {
+  .mobile-toggle { display: block; position: fixed; top: 12px; left: 12px; z-index: 200; background: var(--bg-card); border: 1px solid var(--line); border-radius: 8px; }
+  .sidebar.open { display: flex !important; position: fixed; top: 0; left: 0; z-index: 150; width: 260px; height: 100vh; box-shadow: 4px 0 24px rgba(0,0,0,0.5); }
+}
+
 /* ── Review detail ── */
 .review-detail {
   background: var(--bg-soft); border: 1px solid var(--line); border-radius: 10px;
@@ -195,6 +217,21 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
   </div>
 </div>
 
+<!-- Search Modal -->
+<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-modal">
+    <div class="search-input-wrap">
+      <span style="color:var(--muted);">🔍</span>
+      <input id="searchInput" placeholder="Search panels, actions..." autocomplete="off">
+      <span class="kbd">ESC</span>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- Mobile Toggle -->
+<button class="mobile-toggle" id="mobileToggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
 <!-- Dashboard Shell -->
 <div class="shell" id="dashboard" style="display:none;">
   <!-- Sidebar -->
@@ -205,11 +242,13 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
       <span class="admin-badge">ADMIN</span>
     </div>
 
-    <button class="nav-item active" data-panel="overview"><span class="icon">📊</span> Overview</button>
+    <button class="nav-item" onclick="openSearch()" style="margin-bottom:12px;border:1px dashed var(--line);"><span class="icon">🔍</span> Search <span class="kbd">⌘K</span></button>
+
+    <button class="nav-item active" data-panel="overview"><span class="icon">📊</span> Overview <span class="kbd">1</span></button>
     <button class="nav-item" data-panel="review"><span class="icon">🔍</span> Review Queue <span class="badge-count" id="review-count">0</span></button>
-    <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns</button>
-    <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats</button>
-    <button class="nav-item" data-panel="users"><span class="icon">👥</span> Users</button>
+    <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns <span class="kbd">3</span></button>
+    <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats <span class="kbd">4</span></button>
+    <button class="nav-item" data-panel="users"><span class="icon">👥</span> Users <span class="kbd">5</span></button>
 
     <div class="sidebar-footer">
       <p class="meta">Mode: <span id="auth-mode-badge" class="mono">—</span></p>
@@ -618,6 +657,92 @@ function toast(msg, type) {
   el.className = "toast " + (type || "") + " show";
   setTimeout(() => el.classList.remove("show"), 3000);
 }
+
+// ── Keyboard shortcuts ──
+const panels = ['overview','review','campaigns','seats','users'];
+document.addEventListener('keydown', e => {
+  // Don't fire in inputs
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    if (e.key === 'Escape') { closeSearch(); e.target.blur(); }
+    return;
+  }
+  // Cmd/Ctrl+K for search
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); return; }
+  if (e.key === 'Escape') { closeSearch(); return; }
+  // Number keys for panels
+  const n = parseInt(e.key);
+  if (n >= 1 && n <= 5 && !document.getElementById('searchOverlay').classList.contains('open')) {
+    switchPanel(panels[n - 1]);
+  }
+  // R to refresh current panel
+  if (e.key === 'r' && !e.metaKey && !e.ctrlKey) {
+    const active = document.querySelector('.panel.active');
+    if (active?.id === 'panel-overview') loadOverview();
+    else if (active?.id === 'panel-review') loadReviewQueue();
+    else if (active?.id === 'panel-campaigns') loadAllCampaigns();
+    else if (active?.id === 'panel-seats') loadSeats();
+    toast('Refreshed', 'success');
+  }
+});
+
+// ── Search ──
+const searchItems = [
+  { label: 'Overview Dashboard', panel: 'overview' },
+  { label: 'Review Queue — Pending campaigns', panel: 'review' },
+  { label: 'All Campaigns', panel: 'campaigns' },
+  { label: 'DSP Seats', panel: 'seats' },
+  { label: 'Users', panel: 'users' },
+  { label: 'Benna Playground', href: '/playground.html' },
+  { label: 'System Status', href: '/status.html' },
+  { label: 'API Docs', href: '/docs.html' },
+  { label: 'BBX Exchange', href: '/exchange.html' },
+  { label: 'Log out', action: 'logout' },
+];
+
+function openSearch() {
+  const overlay = document.getElementById('searchOverlay');
+  overlay.classList.add('open');
+  const input = document.getElementById('searchInput');
+  input.value = '';
+  input.focus();
+  renderSearchResults('');
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+}
+function renderSearchResults(q) {
+  const container = document.getElementById('searchResults');
+  const filtered = q ? searchItems.filter(i => i.label.toLowerCase().includes(q.toLowerCase())) : searchItems;
+  if (filtered.length === 0) {
+    container.innerHTML = '<div class="empty">No results</div>';
+    return;
+  }
+  container.innerHTML = filtered.map((item, i) => {
+    if (item.href) return `<a href="${item.href}" class="${i===0?'active':''}">${item.label}</a>`;
+    if (item.action) return `<a href="#" onclick="event.preventDefault();${item.action}();closeSearch();" class="${i===0?'active':''}">${item.label}</a>`;
+    return `<a href="#" onclick="event.preventDefault();switchPanel('${item.panel}');closeSearch();" class="${i===0?'active':''}">${item.label}</a>`;
+  }).join('');
+}
+document.getElementById('searchInput').addEventListener('input', function() {
+  renderSearchResults(this.value);
+});
+document.getElementById('searchInput').addEventListener('keydown', function(e) {
+  const results = document.querySelectorAll('#searchResults a');
+  const active = document.querySelector('#searchResults a.active');
+  const idx = Array.from(results).indexOf(active);
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    results.forEach(r => r.classList.remove('active'));
+    results[Math.min(idx + 1, results.length - 1)]?.classList.add('active');
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    results.forEach(r => r.classList.remove('active'));
+    results[Math.max(idx - 1, 0)]?.classList.add('active');
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    active?.click();
+  }
+});
 </script>
 </body>
 </html>

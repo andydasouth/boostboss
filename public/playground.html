@@ -489,7 +489,7 @@ function toggleDark() {
   document.body.classList.toggle('dark');
   localStorage.setItem('bb_pg_dark', document.body.classList.contains('dark') ? '1' : '0');
 }
-if (localStorage.getItem('bb_pg_dark') === '1') document.body.classList.add('dark');
+if (['bb_pg_dark','bb_docs_dark','bb_bbx_dark','bb_status_dark','bb_signup_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
 
 // ── Endpoint tabs ──
 document.querySelectorAll('.ep-tab').forEach(tab => {
@@ -728,11 +728,6 @@ if (params.get('endpoint')) {
   document.querySelectorAll('.ep-tab').forEach(t => {
     if (t.dataset.ep === target) t.click();
   });
-}
-
-// ── Dark mode from docs ──
-if (localStorage.getItem('bb_docs_dark') === '1' && localStorage.getItem('bb_pg_dark') === null) {
-  document.body.classList.add('dark');
 }
 
 // Auto-run on load

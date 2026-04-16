@@ -921,7 +921,7 @@ function toggleDark() {
   localStorage.setItem('bb_bbx_dark', document.body.classList.contains('dark') ? '1' : '0');
   drawBidLandscape(); // Redraw chart for dark mode
 }
-if (localStorage.getItem('bb_bbx_dark') === '1' || localStorage.getItem('bb_docs_dark') === '1') document.body.classList.add('dark');
+if (['bb_bbx_dark','bb_docs_dark','bb_pg_dark','bb_status_dark','bb_signup_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
 
 // ── Animated auction replay ──
 function replayAuction() {
