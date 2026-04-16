@@ -249,6 +249,12 @@ async function supabaseHandler(action, body, req, res) {
     } else if (role === "developer") {
       const { data: dev } = await supabaseAdmin.from("developers").select("*").eq("id", data.user.id).single();
       profile = dev;
+      // Ensure API key exists (backfill for developers created before api_key column was added)
+      if (profile && !profile.api_key) {
+        const apiKey = makeApiKey("dev", data.user.id);
+        await supabaseAdmin.from("developers").update({ api_key: apiKey }).eq("id", data.user.id);
+        profile.api_key = apiKey;
+      }
     }
     return res.json({
       success: true, mode: "supabase",
@@ -301,19 +307,29 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
     });
     if (error) console.error("[Auth] Advertiser insert error:", error.message);
   } else if (role === "developer") {
+    const apiKey = makeApiKey("dev", userId);
     const { error } = await supabaseAdmin.from("developers").insert({
       id: userId, email, app_name: app_name || "My AI App",
+      api_key: apiKey, status: "active",
     });
     if (error) console.error("[Auth] Developer insert error:", error.message);
   }
 
   const { data: signInData, error: signInErr } = await supabaseAnon.auth.signInWithPassword({ email, password });
+
+  // Build profile with API key for developers
+  let profile;
+  if (role === "advertiser") {
+    profile = { company_name: company_name || email.split("@")[0], balance: 0 };
+  } else {
+    const apiKey = makeApiKey("dev", userId);
+    profile = { app_name: app_name || "My AI App", api_key: apiKey };
+  }
+
   return res.json({
     success: true, mode: "supabase",
     user: { id: userId, email, role },
-    profile: role === "advertiser"
-      ? { company_name: company_name || email.split("@")[0] }
-      : { app_name: app_name || "My AI App" },
+    profile,
     session: signInErr ? null : {
       access_token: signInData.session.access_token,
       refresh_token: signInData.session.refresh_token,

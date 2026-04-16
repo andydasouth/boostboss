@@ -3,8 +3,8 @@
   "contact_address": "Boost Boss, Inc., 8 The Green, Suite R, Dover, DE 19901, USA",
   "version": "1.0",
   "identifiers": [
-    { "name": "TAG-ID", "value": "pending-tag-certification-2026" },
-    { "name": "DUNS", "value": "00-000-0000" }
+    { "name": "TAG-ID", "value": "pending-tag-certification-2026", "_todo": "Apply at tagtoday.net once entity is registered" },
+    { "name": "DUNS", "value": "pending-duns-application", "_todo": "Apply at dnb.com/duns-number/get-a-duns.html" }
   ],
   "sellers": [
     {

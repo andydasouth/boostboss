@@ -301,6 +301,10 @@ async function handleCreate(req, res) {
   if (!b.advertiser_id || !b.headline || !b.cta_url) {
     return res.status(400).json({ error: "Missing required fields: advertiser_id, headline, cta_url" });
   }
+  // Image and video formats require a media_url
+  if (["image", "video"].includes(b.format) && !b.media_url) {
+    return res.status(400).json({ error: `media_url is required for ${b.format} format campaigns` });
+  }
 
   const now = new Date().toISOString();
   const row = {

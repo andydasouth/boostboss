@@ -530,6 +530,10 @@ async function handleWebhook(req, res) {
       console.error("[Billing] webhook signature verification failed:", err.message);
       return res.status(400).json({ error: "Invalid signature" });
     }
+  } else if (HAS_SUPABASE) {
+    // Production mode but webhook secret is missing — reject to prevent unsigned events
+    console.error("[Billing] STRIPE_WEBHOOK_SECRET is not set but Supabase is configured. Rejecting unsigned webhook.");
+    return res.status(500).json({ error: "Webhook secret not configured — cannot verify Stripe signature in production" });
   } else {
     // Demo mode — accept the event without verification but tag it as untrusted
     event = req.body;
