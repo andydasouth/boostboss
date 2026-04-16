@@ -360,6 +360,187 @@
   }
   .resp-tab.active { background: var(--ink); color: #fff; }
 
+  /* SDK TABS */
+  .sdk-tabs { display: flex; gap: 2px; padding: 4px; background: var(--bg-soft); border: 1px solid var(--line); border-radius: 8px; width: fit-content; margin-bottom: 0; }
+  .sdk-tab {
+    padding: 7px 16px; border-radius: 6px; font-size: 13px; font-weight: 600;
+    color: var(--muted); cursor: pointer; border: none; background: transparent;
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .sdk-tab:hover { color: var(--ink); }
+  .sdk-tab.active { background: var(--ink); color: #fff; }
+  .sdk-panel { display: none; }
+  .sdk-panel.active { display: block; }
+
+  /* SEARCH MODAL */
+  .search-overlay {
+    position: fixed; inset: 0; z-index: 999;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+    display: none; align-items: flex-start; justify-content: center;
+    padding-top: 120px;
+  }
+  .search-overlay.open { display: flex; }
+  .search-modal {
+    background: #fff; border-radius: 14px; border: 1.5px solid var(--ink);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    width: 580px; max-width: 92vw; max-height: 480px;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .search-input-wrap {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px; border-bottom: 1px solid var(--line);
+  }
+  .search-input-wrap svg { flex-shrink: 0; color: var(--muted); }
+  .search-input {
+    flex: 1; border: none; outline: none; font-size: 16px;
+    font-family: 'Inter', sans-serif; color: var(--ink); background: transparent;
+  }
+  .search-input::placeholder { color: var(--muted); }
+  .search-esc {
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+    background: var(--bg-soft); border: 1px solid var(--line);
+    border-radius: 4px; padding: 2px 6px; color: var(--muted);
+  }
+  .search-results {
+    overflow-y: auto; max-height: 360px; padding: 8px;
+  }
+  .search-results:empty::after {
+    content: 'Type to search docs...';
+    display: block; padding: 24px; text-align: center;
+    color: var(--muted); font-size: 14px;
+  }
+  .search-result {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 8px; cursor: pointer;
+    transition: background 0.1s;
+  }
+  .search-result:hover, .search-result.focused { background: var(--bg-soft); }
+  .search-result .sr-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; flex-shrink: 0; font-weight: 700;
+  }
+  .search-result .sr-icon.api { background: #D1FADF; color: #027A48; }
+  .search-result .sr-icon.guide { background: #FFF3D6; color: #8A6A00; }
+  .search-result .sr-icon.sdk { background: #D6F5FE; color: #0195CC; }
+  .search-result .sr-icon.rtb { background: #FFE6EE; color: var(--pink); }
+  .search-result .sr-text { flex: 1; min-width: 0; }
+  .search-result .sr-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+  .search-result .sr-desc { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .search-result .sr-badge {
+    font-size: 10px; font-weight: 700; padding: 2px 6px;
+    border-radius: 4px; background: var(--bg-soft); color: var(--muted);
+    font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+  }
+
+  /* TOAST */
+  #toastContainer {
+    position: fixed; top: 80px; right: 20px; z-index: 1000;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .toast {
+    padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 500;
+    color: #fff; transform: translateX(120%); transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15); max-width: 320px;
+  }
+  .toast.show { transform: translateX(0); }
+  .toast.success { background: #027A48; }
+  .toast.info { background: var(--ink); }
+
+  /* TRY IT BUTTON */
+  .try-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
+    background: var(--pink); color: #fff; border: none; cursor: pointer;
+    transition: all 0.15s; text-decoration: none;
+  }
+  .try-btn:hover { background: var(--pink-dark); transform: translateY(-1px); }
+
+  /* MOBILE MENU */
+  .mobile-toggle {
+    display: none; background: none; border: none; cursor: pointer;
+    padding: 6px; border-radius: 6px;
+  }
+  .mobile-toggle:hover { background: var(--bg-soft); }
+  .sidebar-backdrop {
+    display: none; position: fixed; inset: 0; z-index: 90;
+    background: rgba(0,0,0,0.4); backdrop-filter: blur(2px);
+  }
+  .sidebar-backdrop.open { display: block; }
+
+  /* DARK MODE */
+  body.dark {
+    --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF;
+    --line: #374151; --bg: #111827; --bg-soft: #1F2937; --code-bg: #0D1117;
+    --pink: #FF5C94; --pink-dark: #FF2D78; --cyan: #38BDF8; --yellow: #FACC15;
+  }
+  body.dark nav.top { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
+  body.dark .search { background: #1F2937; border-color: #374151; }
+  body.dark .endpoint { background: #1F2937; border-color: #4B5563; }
+  body.dark .doc-card { background: #1F2937; border-color: #4B5563; }
+  body.dark .doc-card:hover { box-shadow: 4px 4px 0 #4B5563; }
+  body.dark .docs-hero { background: #1F2937; border-color: #4B5563; box-shadow: 6px 6px 0 #4B5563; }
+  body.dark .code-block { background: #0D1117; border-color: #374151; }
+  body.dark .code-head { background: #0A0F18; border-bottom-color: #1F2937; }
+  body.dark .params { border-color: #374151; }
+  body.dark .params th { border-bottom-color: #374151; }
+  body.dark .params td { border-bottom-color: #374151; }
+  body.dark .params thead { background: #1F2937; }
+  body.dark main p code, body.dark main li code { background: #1F2937; border-color: #374151; }
+  body.dark .foot-nav a { border-color: #374151; }
+  body.dark .foot-nav a:hover { border-color: #6B7280; }
+  body.dark .search-modal { background: #1F2937; border-color: #4B5563; }
+  body.dark .search-input { color: #F3F4F6; }
+  body.dark .search-result:hover, body.dark .search-result.focused { background: #374151; }
+  body.dark .callout.info { background: #0D2137; border-color: #1E5278; }
+  body.dark .callout.warn { background: #291F00; border-color: #4A3A00; }
+  body.dark .callout.tip { background: #2D0A1A; border-color: #5E1A3B; }
+  body.dark .sdk-tabs { background: #1F2937; border-color: #374151; }
+  body.dark .resp-tabs { background: #1F2937; border-color: #374151; }
+  body.dark .brand-sub { color: var(--ink); }
+  body.dark .side-links li a.active { background: rgba(255,45,120,0.15); }
+  .dark-toggle {
+    background: none; border: 1px solid var(--line); border-radius: 6px;
+    cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1;
+    transition: all 0.15s; color: var(--ink);
+  }
+  .dark-toggle:hover { background: var(--bg-soft); }
+
+  /* BACK TO TOP */
+  .back-top {
+    position: fixed; bottom: 28px; right: 28px; z-index: 80;
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--ink); color: #fff; border: none; cursor: pointer;
+    display: none; align-items: center; justify-content: center;
+    font-size: 18px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+  }
+  .back-top.visible { display: flex; }
+  .back-top:hover { background: var(--pink); transform: translateY(-2px); }
+
+  /* FEEDBACK */
+  .feedback {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 0; margin-top: 8px; font-size: 13px; color: var(--muted);
+  }
+  .feedback button {
+    background: none; border: 1px solid var(--line); border-radius: 6px;
+    padding: 4px 10px; font-size: 12px; cursor: pointer; color: var(--muted);
+    transition: all 0.15s;
+  }
+  .feedback button:hover { background: var(--bg-soft); color: var(--ink); border-color: var(--ink); }
+  .feedback button.voted { background: var(--pink); color: #fff; border-color: var(--pink); }
+
+  /* VERSION PILL */
+  .version-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--muted);
+    padding: 4px 10px; border-radius: 20px;
+    background: var(--bg-soft); border: 1px solid var(--line);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .version-pill .dot { width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
+
   /* RESPONSIVE */
   @media (max-width: 1100px) {
     .docs-layout { grid-template-columns: 240px 1fr; }
@@ -367,10 +548,18 @@
   }
   @media (max-width: 768px) {
     .docs-layout { grid-template-columns: 1fr; gap: 0; padding: 0 20px; }
-    aside.sidebar { display: none; }
+    aside.sidebar {
+      position: fixed; top: 0; left: -300px; width: 280px;
+      height: 100vh; z-index: 95; background: var(--bg);
+      padding: 80px 20px 40px; transition: left 0.3s ease;
+      border-right: 1px solid var(--line);
+      overflow-y: auto;
+    }
+    aside.sidebar.open { left: 0; }
     .nav-links { display: none; }
     .search { display: none; }
     .card-grid { grid-template-columns: 1fr; }
+    .mobile-toggle { display: block; }
   }
 </style>
 </head>
@@ -399,13 +588,35 @@
       <a href="/">boostboss.ai ↗</a>
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
-      <div class="search"><span>🔍</span><span>Search docs...</span><span class="kbd">⌘K</span></div>
+      <div class="search" onclick="openSearch()"><span>🔍</span><span>Search docs...</span><span class="kbd">⌘K</span></div>
+      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌓</button>
       <div class="nav-ctas">
         <a class="btn btn-primary" href="/developer.html">Get API key</a>
       </div>
+      <button class="mobile-toggle" onclick="toggleSidebar()" aria-label="Menu">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
     </div>
   </div>
 </nav>
+
+<!-- SEARCH MODAL -->
+<div class="search-overlay" id="searchOverlay" onclick="if(event.target===this)closeSearch()">
+  <div class="search-modal">
+    <div class="search-input-wrap">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input class="search-input" id="searchInput" placeholder="Search documentation..." autocomplete="off">
+      <span class="search-esc">ESC</span>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+</div>
+
+<!-- SIDEBAR BACKDROP -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
+<!-- TOAST -->
+<div id="toastContainer"></div>
 
 <!-- LAYOUT -->
 <div class="docs-layout">
@@ -424,11 +635,7 @@
     <div class="side-group">
       <h5><span class="chip cyan"></span>SDKs</h5>
       <ul class="side-links">
-        <li><a href="#sdk-typescript">TypeScript / JS</a></li>
-        <li><a href="#sdk-python">Python</a></li>
-        <li><a href="#sdk-go">Go</a></li>
-        <li><a href="#sdk-swift">Swift</a></li>
-        <li><a href="#sdk-kotlin">Kotlin</a></li>
+        <li><a href="#sdk-typescript">All SDKs</a></li>
       </ul>
     </div>
     <div class="side-group">
@@ -473,6 +680,12 @@
         <li><a href="#rtb-win-loss"><span class="method-tag get">GET</span>Win / loss notice</a></li>
         <li><a href="#rtb-status"><span class="method-tag get">GET</span>Adapter status</a></li>
         <li><a href="#rtb-mcp-translation">OpenRTB → MCP map</a></li>
+      </ul>
+    </div>
+    <div class="side-group">
+      <h5><span class="chip ink"></span>Meta</h5>
+      <ul class="side-links">
+        <li><a href="#changelog">Changelog</a></li>
       </ul>
     </div>
   </aside>
@@ -601,12 +814,26 @@
       </tbody>
     </table>
 
-    <!-- SDK TS -->
-    <h2 id="sdk-typescript">TypeScript / JavaScript SDK</h2>
-    <p>The recommended client for browsers, Node, and Deno. Zero dependencies, 8kb gzipped.</p>
+    <!-- SDKs (TABBED) -->
+    <h2 id="sdk-typescript">SDKs</h2>
+    <p>Official clients for every major language. Zero dependencies, tiny bundles, identical API surface. <span class="version-pill"><span class="dot"></span>v1.0.0</span></p>
 
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">TypeScript</span><span class="copy">Copy</span></div>
+    <div class="sdk-tabs" id="sdkTabs">
+      <button class="sdk-tab active" data-lang="ts">TypeScript</button>
+      <button class="sdk-tab" data-lang="py">Python</button>
+      <button class="sdk-tab" data-lang="go">Go</button>
+      <button class="sdk-tab" data-lang="swift">Swift</button>
+      <button class="sdk-tab" data-lang="kotlin">Kotlin</button>
+    </div>
+
+    <div class="sdk-panel active" data-lang="ts" id="sdk-py-anchor">
+      <p style="margin-top:14px">The recommended client for browsers, Node, and Deno. Zero dependencies, 8kb gzipped.</p>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+        <pre>npm install @boostboss/sdk</pre>
+      </div>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">TypeScript</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
 <pre><span class="k">import</span> { BoostBoss, <span class="n">NativeAd</span> } <span class="k">from</span> <span class="s">'@boostboss/sdk'</span>;
 
 <span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({ apiKey: <span class="s">'bb_sk_live_***'</span> });
@@ -625,12 +852,17 @@
   cta: ad.cta_text,
   onClick: () =&gt; ad.<span class="f">trackClick</span>(),
 });</pre>
+      </div>
     </div>
 
-    <!-- SDK Python -->
-    <h2 id="sdk-python">Python SDK</h2>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">Python</span><span class="copy">Copy</span></div>
+    <div class="sdk-panel" data-lang="py" id="sdk-python">
+      <p style="margin-top:14px">Full async support, type hints throughout. Works with asyncio, trio, and anyio.</p>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+        <pre>pip install boostboss</pre>
+      </div>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">Python</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
 <pre><span class="k">from</span> <span class="n">boostboss</span> <span class="k">import</span> BoostBoss
 
 bb = BoostBoss(api_key=<span class="s">"bb_sk_live_***"</span>)
@@ -645,12 +877,17 @@ ad = bb.<span class="f">fetch</span>(
 <span class="k">if</span> ad:
     render_card(ad.headline, ad.body, ad.cta_text)
     ad.<span class="f">track_click</span>()  <span class="c"># on user click</span></pre>
+      </div>
     </div>
 
-    <!-- SDK Go -->
-    <h2 id="sdk-go">Go SDK</h2>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">Go</span><span class="copy">Copy</span></div>
+    <div class="sdk-panel" data-lang="go" id="sdk-go">
+      <p style="margin-top:14px">Idiomatic Go with context support and structured errors.</p>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+        <pre>go get github.com/boostboss/go-sdk</pre>
+      </div>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">Go</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
 <pre><span class="k">import</span> <span class="s">"github.com/boostboss/go-sdk"</span>
 
 bb := boostboss.<span class="f">New</span>(<span class="s">"bb_sk_live_***"</span>)
@@ -662,12 +899,17 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
     Model:    <span class="s">"claude-sonnet-4"</span>,
 })
 <span class="k">if</span> err != <span class="b">nil</span> { <span class="f">log</span>.<span class="f">Fatal</span>(err) }</pre>
+      </div>
     </div>
 
-    <!-- SDK Swift -->
-    <h2 id="sdk-swift">Swift SDK</h2>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">Swift</span><span class="copy">Copy</span></div>
+    <div class="sdk-panel" data-lang="swift" id="sdk-swift">
+      <p style="margin-top:14px">Swift concurrency with async/await. SPM and CocoaPods support.</p>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">Swift Package Manager</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+        <pre>.package(url: "https://github.com/boostboss/swift-sdk", from: "1.0.0")</pre>
+      </div>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">Swift</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
 <pre><span class="k">import</span> BoostBoss
 
 <span class="k">let</span> bb = BoostBoss(apiKey: <span class="s">"bb_sk_live_***"</span>)
@@ -677,12 +919,17 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
     context: userMessage,
     mcpTools: [<span class="s">"filesystem"</span>, <span class="s">"github"</span>]
 )</pre>
+      </div>
     </div>
 
-    <!-- SDK Kotlin -->
-    <h2 id="sdk-kotlin">Kotlin SDK</h2>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">Kotlin</span><span class="copy">Copy</span></div>
+    <div class="sdk-panel" data-lang="kotlin" id="sdk-kotlin">
+      <p style="margin-top:14px">Coroutine-based with Kotlin Multiplatform support. JVM, Android, and JS targets.</p>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">Gradle</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+        <pre>implementation("ai.boostboss:sdk:1.0.0")</pre>
+      </div>
+      <div class="code-block with-head">
+        <div class="code-head"><span class="lang">Kotlin</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
 <pre><span class="k">import</span> ai.boostboss.BoostBoss
 
 <span class="k">val</span> bb = BoostBoss(apiKey = <span class="s">"bb_sk_live_***"</span>)
@@ -692,11 +939,15 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
     context = userMessage,
     mcpTools = <span class="f">listOf</span>(<span class="s">"filesystem"</span>, <span class="s">"github"</span>)
 )</pre>
+      </div>
     </div>
 
     <!-- FETCH AD -->
     <h2 id="api-fetch-ad">Fetch ad</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/ads/fetch</span><span class="desc">Run an auction and return the winning ad.</span></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div class="endpoint" style="margin-bottom:0;flex:1"><span class="method post">POST</span><span class="path">/v1/ads/fetch</span><span class="desc">Run an auction and return the winning ad.</span></div>
+      <a class="try-btn" href="/playground.html?endpoint=fetch" title="Open in Playground">▶ Try it</a>
+    </div>
 
     <p>Runs a real-time auction against your targeting parameters and returns the winning ad creative with signed beacon URLs. Median latency: <strong>47ms p50</strong>, <strong>180ms p99</strong>.</p>
 
@@ -729,9 +980,15 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
   }'</span></pre>
     </div>
 
-    <h4>Example response</h4>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy">Copy</span></div>
+    <h4>Response</h4>
+    <div class="resp-tabs" data-group="fetch">
+      <button class="resp-tab active" data-tab="fetch-200">200 OK</button>
+      <button class="resp-tab" data-tab="fetch-401">401 Unauthorized</button>
+      <button class="resp-tab" data-tab="fetch-429">429 Rate Limited</button>
+    </div>
+    <div class="resp-panel active" data-tab="fetch-200">
+      <div class="code-block with-head" style="margin-top:0;border-radius:0 0 10px 10px;">
+        <div class="code-head"><span class="lang">JSON · 200 OK</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
 <pre>{
   <span class="s">"id"</span>: <span class="s">"ad_3Xc9wZ8fK4"</span>,
   <span class="s">"format"</span>: <span class="s">"native"</span>,
@@ -749,6 +1006,32 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
   <span class="s">"match_score"</span>: <span class="n">0.91</span>,
   <span class="s">"latency_ms"</span>: <span class="n">47</span>
 }</pre>
+      </div>
+    </div>
+    <div class="resp-panel" data-tab="fetch-401" style="display:none">
+      <div class="code-block with-head" style="margin-top:0;border-radius:0 0 10px 10px;">
+        <div class="code-head"><span class="lang">JSON · 401 Unauthorized</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+<pre>{
+  <span class="s">"error"</span>: {
+    <span class="s">"code"</span>: <span class="s">"invalid_api_key"</span>,
+    <span class="s">"message"</span>: <span class="s">"API key is missing, revoked, or for the wrong environment."</span>,
+    <span class="s">"request_id"</span>: <span class="s">"req_8f3a2c9d"</span>
+  }
+}</pre>
+      </div>
+    </div>
+    <div class="resp-panel" data-tab="fetch-429" style="display:none">
+      <div class="code-block with-head" style="margin-top:0;border-radius:0 0 10px 10px;">
+        <div class="code-head"><span class="lang">JSON · 429 Too Many Requests</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
+<pre>{
+  <span class="s">"error"</span>: {
+    <span class="s">"code"</span>: <span class="s">"rate_limited"</span>,
+    <span class="s">"message"</span>: <span class="s">"Rate limit exceeded. Retry after 1.2s."</span>,
+    <span class="s">"retry_after"</span>: <span class="n">1.2</span>,
+    <span class="s">"request_id"</span>: <span class="s">"req_4b7e1f2a"</span>
+  }
+}</pre>
+      </div>
     </div>
 
     <!-- IMPRESSION -->
@@ -768,7 +1051,10 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
 
     <!-- LIST CAMPAIGNS -->
     <h2 id="api-campaigns">List campaigns</h2>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/v1/campaigns</span><span class="desc">List all campaigns for the authenticated advertiser.</span></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div class="endpoint" style="margin-bottom:0;flex:1"><span class="method get">GET</span><span class="path">/v1/campaigns</span><span class="desc">List all campaigns for the authenticated advertiser.</span></div>
+      <a class="try-btn" href="/playground.html?endpoint=campaigns" title="Open in Playground">▶ Try it</a>
+    </div>
 
     <table class="params">
       <thead><tr><th>Query param</th><th>Type</th><th>Description</th></tr></thead>
@@ -846,7 +1132,10 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
 
     <!-- BENNA SCORE -->
     <h2 id="benna-score">Score a bid request</h2>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Rank a single bid against your own demand.</span></div>
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+      <div class="endpoint" style="margin-bottom:0;flex:1"><span class="method post">POST</span><span class="path">/api/benna</span><span class="desc">Rank a single bid against your own demand.</span></div>
+      <a class="try-btn" href="/playground.html?endpoint=benna" title="Open in Playground">▶ Try it</a>
+    </div>
     <p>Submit a bid context and a campaign spec; Benna returns an effective bid in USD plus click / convert probabilities and a signal attribution map. Billed at $0.002 per call; latency budget is 20ms end-to-end (model itself is 3–6ms, the rest is network &amp; JSON).</p>
 
     <h4>Request</h4>
@@ -1273,6 +1562,29 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
 <span class="f">x-bbx-processing-ms</span>:   <span class="n">4</span></pre>
     </div>
 
+    <!-- CHANGELOG -->
+    <h2 id="changelog">Changelog</h2>
+    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
+      <h4 style="margin-top:0">v1.0.0 — April 2026</h4>
+      <p>Initial public release of the Boost Boss API. Includes Fetch Ad, Beacon, Campaign Management, Stats, Benna scoring, OpenRTB 2.6 adapter (BBX), and SDKs for TypeScript, Python, Go, Swift, and Kotlin.</p>
+      <h4>v0.9.0-beta — March 2026</h4>
+      <p>Closed beta with 12 launch partners. Added MCP-native targeting signals, frequency capping, and webhook support.</p>
+    </div>
+
+    <!-- FEEDBACK -->
+    <div style="background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:20px 24px;margin-top:32px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <strong style="font-size:15px">Was this page helpful?</strong>
+          <p style="margin:4px 0 0;font-size:13px;color:var(--muted)">Help us improve the docs by sharing your feedback.</p>
+        </div>
+        <div class="feedback" style="margin:0;padding:0;">
+          <button onclick="voteFeedback(this,'up')">👍 Yes</button>
+          <button onclick="voteFeedback(this,'down')">👎 Could be better</button>
+        </div>
+      </div>
+    </div>
+
     <div class="foot-nav">
       <a href="/publish.html" class="prev">
         <div class="dir">← Overview</div>
@@ -1295,21 +1607,59 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
       <li><a href="#environments">Environments</a></li>
       <li><a href="#sdk-typescript">SDKs</a></li>
       <li><a href="#api-fetch-ad">Fetch ad</a></li>
+      <li><a href="#api-impression">Beacons</a></li>
       <li><a href="#api-campaigns">Campaigns</a></li>
       <li><a href="#api-stats">Stats</a></li>
+      <li><a href="#benna-overview">Benna engine</a></li>
+      <li><a href="#benna-score">Score a bid</a></li>
+      <li><a href="#benna-signals">Signal reference</a></li>
       <li><a href="#ad-formats">Ad formats</a></li>
       <li><a href="#ai-targeting">AI targeting</a></li>
+      <li><a href="#mcp-integration">MCP integration</a></li>
       <li><a href="#webhooks">Webhooks</a></li>
       <li><a href="#rate-limits">Rate limits</a></li>
       <li><a href="#errors">Errors</a></li>
       <li><a href="#rtb-overview">OpenRTB (BBX)</a></li>
       <li><a href="#rtb-mcp-translation">MCP signal map</a></li>
+      <li><a href="#changelog">Changelog</a></li>
     </ul>
   </aside>
 </div>
 
+<!-- BACK TO TOP -->
+<button class="back-top" id="backTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
 <script>
-  // Scroll-spy for TOC
+  // ── Toast ──
+  function showToast(message, type = 'success', duration = 2500) {
+    const c = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast ' + type;
+    t.textContent = message;
+    c.appendChild(t);
+    requestAnimationFrame(() => t.classList.add('show'));
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 300); }, duration);
+  }
+
+  // ── Copy code ──
+  function copyCode(btn) {
+    const block = btn.closest('.code-block');
+    const text = block.querySelector('pre').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = 'Copied ✓';
+      showToast('Copied to clipboard');
+      setTimeout(() => btn.textContent = orig, 1400);
+    });
+  }
+  // Also wire up any .copy buttons that don't have onclick
+  document.querySelectorAll('.copy').forEach(btn => {
+    if (!btn.getAttribute('onclick')) {
+      btn.addEventListener('click', () => copyCode(btn));
+    }
+  });
+
+  // ── Scroll-spy ──
   const tocLinks = document.querySelectorAll('aside.toc a');
   const sideLinks = document.querySelectorAll('aside.sidebar .side-links a');
   const headings = document.querySelectorAll('main h2, main h1');
@@ -1317,29 +1667,193 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
   function onScroll() {
     let current = 'introduction';
     headings.forEach(h => {
-      const rect = h.getBoundingClientRect();
-      if (rect.top < 180) current = h.id;
+      if (h.getBoundingClientRect().top < 180) current = h.id;
     });
     [...tocLinks, ...sideLinks].forEach(a => {
-      const href = a.getAttribute('href');
-      a.classList.toggle('active', href === '#' + current);
+      a.classList.toggle('active', a.getAttribute('href') === '#' + current);
     });
+    // Back to top visibility
+    document.getElementById('backTop').classList.toggle('visible', window.scrollY > 600);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  // Copy-button placeholder
-  document.querySelectorAll('.copy').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const block = btn.closest('.code-block');
-      const text = block.querySelector('pre').innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        const orig = btn.textContent;
-        btn.textContent = 'Copied ✓';
-        setTimeout(() => btn.textContent = orig, 1400);
-      });
+  // ── SDK Tabs ──
+  document.querySelectorAll('.sdk-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const lang = tab.dataset.lang;
+      document.querySelectorAll('.sdk-tab').forEach(t => t.classList.toggle('active', t.dataset.lang === lang));
+      document.querySelectorAll('.sdk-panel').forEach(p => p.classList.toggle('active', p.dataset.lang === lang));
     });
   });
+
+  // ── Response Tabs ──
+  document.querySelectorAll('.resp-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      const group = tab.closest('.resp-tabs').dataset.group;
+      const target = tab.dataset.tab;
+      tab.closest('.resp-tabs').querySelectorAll('.resp-tab').forEach(t => t.classList.toggle('active', t === tab));
+      // Find sibling resp-panels
+      let el = tab.closest('.resp-tabs').nextElementSibling;
+      while (el && el.classList.contains('resp-panel')) {
+        el.style.display = el.dataset.tab === target ? 'block' : 'none';
+        el.classList.toggle('active', el.dataset.tab === target);
+        el = el.nextElementSibling;
+      }
+    });
+  });
+
+  // ── Search ──
+  const searchIndex = [];
+  function buildSearchIndex() {
+    const sections = document.querySelectorAll('main h2, main h3');
+    sections.forEach(h => {
+      if (!h.id) return;
+      const parent = h.closest('main');
+      let desc = '';
+      let next = h.nextElementSibling;
+      while (next && !['H2','H3'].includes(next.tagName)) {
+        if (next.tagName === 'P') desc += next.textContent + ' ';
+        next = next.nextElementSibling;
+      }
+      let cat = 'guide';
+      if (h.id.startsWith('api-') || h.id.startsWith('benna-score')) cat = 'api';
+      else if (h.id.startsWith('sdk-')) cat = 'sdk';
+      else if (h.id.startsWith('rtb-')) cat = 'rtb';
+      searchIndex.push({
+        id: h.id, title: h.textContent.trim(),
+        desc: desc.trim().substring(0, 120), cat
+      });
+    });
+  }
+  buildSearchIndex();
+
+  function openSearch() {
+    document.getElementById('searchOverlay').classList.add('open');
+    const input = document.getElementById('searchInput');
+    input.value = '';
+    input.focus();
+    document.getElementById('searchResults').innerHTML = '';
+  }
+  function closeSearch() {
+    document.getElementById('searchOverlay').classList.remove('open');
+  }
+
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') { e.preventDefault(); openSearch(); }
+    if (e.key === 'Escape') closeSearch();
+  });
+
+  let focusedIdx = -1;
+  document.getElementById('searchInput').addEventListener('input', function() {
+    const q = this.value.toLowerCase().trim();
+    const results = document.getElementById('searchResults');
+    focusedIdx = -1;
+    if (!q) { results.innerHTML = ''; return; }
+    const matches = searchIndex.filter(s =>
+      s.title.toLowerCase().includes(q) || s.desc.toLowerCase().includes(q)
+    ).slice(0, 10);
+    results.innerHTML = matches.map((m, i) => `
+      <div class="search-result" data-href="#${m.id}" onclick="goToResult(this)">
+        <div class="sr-icon ${m.cat}">${m.cat === 'api' ? 'API' : m.cat === 'sdk' ? 'SDK' : m.cat === 'rtb' ? 'RTB' : '📖'}</div>
+        <div class="sr-text">
+          <div class="sr-title">${highlightMatch(m.title, q)}</div>
+          <div class="sr-desc">${m.desc}</div>
+        </div>
+        <span class="sr-badge">${m.cat}</span>
+      </div>
+    `).join('');
+  });
+
+  document.getElementById('searchInput').addEventListener('keydown', function(e) {
+    const items = document.querySelectorAll('.search-result');
+    if (!items.length) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); focusedIdx = Math.min(focusedIdx + 1, items.length - 1); updateFocus(items); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); focusedIdx = Math.max(focusedIdx - 1, 0); updateFocus(items); }
+    if (e.key === 'Enter' && focusedIdx >= 0) { e.preventDefault(); goToResult(items[focusedIdx]); }
+  });
+
+  function updateFocus(items) {
+    items.forEach((it, i) => it.classList.toggle('focused', i === focusedIdx));
+    if (focusedIdx >= 0) items[focusedIdx].scrollIntoView({ block: 'nearest' });
+  }
+
+  function goToResult(el) {
+    const href = el.dataset.href;
+    closeSearch();
+    const target = document.querySelector(href);
+    if (target) {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.replaceState(null, '', href);
+    }
+  }
+
+  function highlightMatch(text, q) {
+    const idx = text.toLowerCase().indexOf(q);
+    if (idx < 0) return text;
+    return text.substring(0, idx) + '<strong style="color:var(--pink)">' + text.substring(idx, idx + q.length) + '</strong>' + text.substring(idx + q.length);
+  }
+
+  // ── Dark mode ──
+  function toggleDark() {
+    document.body.classList.toggle('dark');
+    localStorage.setItem('bb_docs_dark', document.body.classList.contains('dark') ? '1' : '0');
+  }
+  if (localStorage.getItem('bb_docs_dark') === '1') document.body.classList.add('dark');
+
+  // ── Mobile sidebar ──
+  function toggleSidebar() {
+    const sidebar = document.querySelector('aside.sidebar');
+    const backdrop = document.getElementById('sidebarBackdrop');
+    sidebar.classList.toggle('open');
+    backdrop.classList.toggle('open');
+  }
+  // Close sidebar on link click (mobile)
+  document.querySelectorAll('aside.sidebar a').forEach(a => {
+    a.addEventListener('click', () => {
+      if (window.innerWidth <= 768) toggleSidebar();
+    });
+  });
+
+  // ── Feedback ──
+  function voteFeedback(btn, type) {
+    btn.closest('.feedback').querySelectorAll('button').forEach(b => b.classList.remove('voted'));
+    btn.classList.add('voted');
+    showToast(type === 'up' ? 'Thanks for your feedback!' : 'Thanks — we\'ll work on improving this.', 'info');
+  }
+
+  // ── Smooth anchor links ──
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      const target = document.querySelector(a.getAttribute('href'));
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        history.replaceState(null, '', a.getAttribute('href'));
+      }
+    });
+  });
+
+  // ── Update breadcrumb on scroll ──
+  const crumbSpan = document.querySelector('.crumbs span:last-child');
+  const crumbSections = {
+    'introduction': 'Introduction', 'quickstart': 'Quickstart', 'authentication': 'Authentication',
+    'environments': 'Environments', 'sdk-typescript': 'SDKs', 'api-fetch-ad': 'Fetch ad',
+    'api-impression': 'Beacons', 'api-campaigns': 'Campaigns', 'api-create-campaign': 'Create campaign',
+    'api-update-campaign': 'Update campaign', 'api-stats': 'Stats', 'benna-overview': 'Benna',
+    'benna-score': 'Score a bid', 'benna-engine-status': 'Engine status', 'benna-signals': 'Signal reference',
+    'ad-formats': 'Ad formats', 'ai-targeting': 'AI targeting', 'mcp-integration': 'MCP integration',
+    'webhooks': 'Webhooks', 'rate-limits': 'Rate limits', 'errors': 'Errors',
+    'rtb-overview': 'OpenRTB (BBX)', 'rtb-bid': 'Bid request', 'rtb-response': 'Bid response',
+    'rtb-win-loss': 'Win / loss', 'rtb-status': 'Adapter status', 'rtb-mcp-translation': 'MCP signal map',
+    'changelog': 'Changelog'
+  };
+  function updateBreadcrumb() {
+    let current = 'introduction';
+    headings.forEach(h => { if (h.getBoundingClientRect().top < 180) current = h.id; });
+    if (crumbSpan && crumbSections[current]) crumbSpan.textContent = crumbSections[current];
+  }
+  window.addEventListener('scroll', updateBreadcrumb, { passive: true });
 </script>
 
 </body>
