@@ -188,7 +188,10 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  return res.status(400).json({ error: "Unknown MCP method" });
+  return res.status(400).json({
+    jsonrpc: "2.0", id: body.id || null,
+    error: { code: -32601, message: `Unknown MCP method: ${body.method || "(none)"}` },
+  });
 };
 
 // ── get_sponsored_content ───────────────────────────────────────────────

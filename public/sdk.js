@@ -274,9 +274,13 @@
       }
 
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 8000); // 8s timeout
+
         const resp = await fetch(`${API_BASE}/mcp`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
           body: JSON.stringify({
             jsonrpc: "2.0",
             id: Date.now(),
@@ -294,6 +298,13 @@
             },
           }),
         });
+
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) {
+          console.warn("[BoostBoss] Server returned", resp.status);
+          return null;
+        }
 
         const data = await resp.json();
         const text = data?.result?.content?.[0]?.text;

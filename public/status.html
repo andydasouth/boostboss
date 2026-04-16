@@ -270,6 +270,7 @@ function startRefreshBar() {
     { name: "Auth Service",   desc: "Authentication & session management",endpoint: "/api/auth?action=demo",             method: "POST", body: { role: "advertiser" }, check: r => r.session && r.session.access_token },
     { name: "Billing API",    desc: "Stripe billing & payouts",           endpoint: "/api/billing?action=balance&id=status_probe", check: r => typeof r.balance === "number" },
     { name: "Event Tracking", desc: "Impression, click & conversion pixel",endpoint: "/api/track",                       method: "POST", body: { event: "impression", campaign_id: "status_probe", session_id: "status" }, check: r => r.tracked === true },
+    { name: "Stats & Reporting",desc: "Analytics aggregation & dashboards",endpoint: "/api/stats?type=advertiser&id=status_probe", check: r => r.daily && Array.isArray(r.daily) },
     { name: "Trust Artifacts", desc: "sellers.json, ads.txt, security.txt",endpoint: "/sellers.json",                    check: r => r.sellers && r.sellers.length > 0 },
   ];
 
@@ -315,7 +316,7 @@ function startRefreshBar() {
 
   function renderUptimeBars() {
     const container = document.getElementById("uptime-bars");
-    const services = ["BBX Exchange", "Benna AI", "SuperBoost API", "Lumi SDK"];
+    const services = SERVICES.map(s => s.name);
     let html = "";
     const today = new Date();
 
