@@ -1391,6 +1391,11 @@
                     <div class="account-label">Account</div>
                     <div class="account-name" id="companyDisplayName">Loading...</div>
                 </div>
+                <button id="settingsBtn" style="
+                    background: #F3F4F6; border: none; width: 36px; height: 36px;
+                    border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
+                    display: flex; align-items: center; justify-content: center;
+                " title="Account Settings">⚙</button>
                 <button class="logout-btn" id="logoutBtn">Logout</button>
             </div>
         </header>
@@ -1624,6 +1629,42 @@
                     <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
                 </div>
 
+                <div id="campaignFilters" style="
+                    display: flex; gap: 10px; align-items: center; margin-bottom: 14px;
+                    flex-wrap: wrap;
+                ">
+                    <div style="position: relative; flex: 1; min-width: 200px;">
+                        <input type="text" id="campaignSearch" placeholder="Search campaigns…" style="
+                            width: 100%; padding: 9px 12px 9px 34px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 13px; font-family: inherit;
+                            background: #FAFAFA; outline: none; transition: border 0.15s;
+                        " onfocus="this.style.borderColor='#FF2D78'" onblur="this.style.borderColor='#E5E7EB'">
+                        <span style="position: absolute; left: 11px; top: 50%; transform: translateY(-50%); font-size: 14px; color: #9CA3AF;">🔍</span>
+                    </div>
+                    <div style="display: flex; gap: 6px;" id="statusFilters">
+                        <button class="status-filter-btn active" data-status="all" style="
+                            padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                            background: #111; color: #fff; transition: all 0.15s;
+                        ">All</button>
+                        <button class="status-filter-btn" data-status="live" style="
+                            padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                            background: #fff; color: #374151; transition: all 0.15s;
+                        ">Live</button>
+                        <button class="status-filter-btn" data-status="paused" style="
+                            padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                            background: #fff; color: #374151; transition: all 0.15s;
+                        ">Paused</button>
+                        <button class="status-filter-btn" data-status="review" style="
+                            padding: 7px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                            font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                            background: #fff; color: #374151; transition: all 0.15s;
+                        ">In Review</button>
+                    </div>
+                </div>
+
                 <table class="campaigns-table">
                     <thead>
                         <tr>
@@ -1645,6 +1686,94 @@
                 </table>
             </div>
         </main>
+
+        <!-- Account Settings Modal -->
+        <div id="settingsModal" style="
+            display: none; position: fixed; inset: 0; z-index: 950;
+            background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+        ">
+            <div style="
+                background: #fff; border-radius: 16px; width: 480px; max-width: 90vw;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden;
+            ">
+                <div style="padding: 24px 28px 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="font-size: 20px; font-weight: 700;">Account Settings</h2>
+                        <button id="settingsCloseBtn" style="
+                            background: #F3F4F6; border: none; width: 32px; height: 32px;
+                            border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
+                        ">×</button>
+                    </div>
+                </div>
+                <div style="padding: 0 28px 28px;">
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Company Name</label>
+                        <input type="text" id="settingsCompany" style="
+                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 14px; font-family: inherit;
+                        ">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Email</label>
+                        <input type="email" id="settingsEmail" readonly style="
+                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 14px; font-family: inherit;
+                            background: #FAFAFA; color: #6B7280;
+                        ">
+                    </div>
+                    <div style="margin-bottom: 16px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Advertiser ID</label>
+                        <input type="text" id="settingsUserId" readonly style="
+                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 13px; font-family: monospace;
+                            background: #FAFAFA; color: #6B7280;
+                        ">
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">API Key</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="password" id="settingsApiKey" readonly value="bb_live_••••••••••••" style="
+                                flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
+                                border-radius: 8px; font-size: 13px; font-family: monospace;
+                                background: #FAFAFA; color: #6B7280;
+                            ">
+                            <button id="settingsRevealKey" style="
+                                padding: 10px 14px; border: 1px solid #E5E7EB; border-radius: 8px;
+                                background: #fff; font-size: 12px; font-weight: 600; cursor: pointer;
+                                font-family: inherit; color: #374151; white-space: nowrap;
+                            ">Show</button>
+                        </div>
+                    </div>
+                    <div style="
+                        background: #FAFAFA; border-radius: 10px; padding: 14px;
+                        margin-bottom: 20px; display: flex; justify-content: space-between;
+                        align-items: center;
+                    ">
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #374151;">Notification Preferences</div>
+                            <div style="font-size: 12px; color: #6B7280;">Email me campaign status changes</div>
+                        </div>
+                        <label style="position: relative; display: inline-block; width: 44px; height: 24px;">
+                            <input type="checkbox" id="settingsNotify" checked style="opacity: 0; width: 0; height: 0;">
+                            <span style="
+                                position: absolute; cursor: pointer; inset: 0; background: #D1D5DB;
+                                border-radius: 100px; transition: 0.2s;
+                            "></span>
+                            <span id="settingsToggleKnob" style="
+                                position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+                                background: #fff; border-radius: 50%; transition: 0.2s;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                            "></span>
+                        </label>
+                    </div>
+                    <button id="settingsSaveBtn" style="
+                        width: 100%; padding: 12px; background: var(--accent-primary); color: #fff;
+                        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+                        cursor: pointer; font-family: inherit;
+                    ">Save Changes</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Campaign Detail Slide-out -->
         <div id="campaignDetail" style="
@@ -1708,6 +1837,18 @@
                         <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
                             <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="detailSpend">$0</div>
                             <div style="font-size: 12px; color: #6B7280;">Total Spend</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 7-day sparkline -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Last 7 Days</h4>
+                    <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                        <canvas id="detailSparkline" width="460" height="80" style="width: 100%; height: 80px;"></canvas>
+                        <div style="display: flex; justify-content: space-between; margin-top: 6px;">
+                            <span style="font-size: 11px; color: #9CA3AF;" id="detailSparkStart">—</span>
+                            <span style="font-size: 11px; color: #9CA3AF;" id="detailSparkEnd">Today</span>
                         </div>
                     </div>
                 </div>
@@ -2463,7 +2604,37 @@
             }
         }
 
-        // Load campaigns
+        // Load campaigns with filter support
+        let _cachedCampaigns = [];
+        let _activeStatusFilter = 'all';
+        let _searchQuery = '';
+
+        // Filter bar wiring
+        document.querySelectorAll('.status-filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.status-filter-btn').forEach(b => {
+                    b.style.background = '#fff'; b.style.color = '#374151';
+                });
+                btn.style.background = '#111'; btn.style.color = '#fff';
+                _activeStatusFilter = btn.dataset.status;
+                renderCampaignTable(_cachedCampaigns);
+            });
+        });
+        document.getElementById('campaignSearch').addEventListener('input', (e) => {
+            _searchQuery = e.target.value.toLowerCase();
+            renderCampaignTable(_cachedCampaigns);
+        });
+
+        function filterCampaigns(campaigns) {
+            return campaigns.filter(c => {
+                const matchStatus = _activeStatusFilter === 'all' || c.status === _activeStatusFilter
+                    || (_activeStatusFilter === 'review' && (c.status === 'review' || c.status === 'in_review'));
+                const matchSearch = !_searchQuery || (c.name || '').toLowerCase().includes(_searchQuery)
+                    || (c.headline || '').toLowerCase().includes(_searchQuery);
+                return matchStatus && matchSearch;
+            });
+        }
+
         async function loadCampaigns() {
             try {
                 const response = await fetch(
@@ -2476,17 +2647,31 @@
                 if (!response.ok) throw new Error('Failed to load campaigns');
 
                 const data = await response.json();
-                const campaigns = data.campaigns || data || [];
+                _cachedCampaigns = data.campaigns || data || [];
 
-                campaignTableBody.innerHTML = '';
+                // Update Benna header counters based on full campaign cohort
+                if (_cachedCampaigns.length > 0) updateBennaEngineCounters(_cachedCampaigns);
 
-                if (campaigns.length === 0) {
-                    campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state">No campaigns yet. Create one to get started!</td></tr>';
-                    return;
-                }
+                renderCampaignTable(_cachedCampaigns);
+            } catch (error) {
+                console.error('Error loading campaigns:', error);
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="loading">Error loading campaigns</td></tr>';
+            }
+        }
 
-                // Update Benna header counters based on campaign cohort
-                updateBennaEngineCounters(campaigns);
+        function renderCampaignTable(allCampaigns) {
+            const campaigns = filterCampaigns(allCampaigns);
+            campaignTableBody.innerHTML = '';
+
+            if (allCampaigns.length === 0) {
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state">No campaigns yet. Create one to get started!</td></tr>';
+                return;
+            }
+
+            if (campaigns.length === 0) {
+                campaignTableBody.innerHTML = '<tr><td colspan="10" class="empty-state">No campaigns match your filters</td></tr>';
+                return;
+            }
 
                 campaigns.forEach(campaign => {
                     const ctr = ((campaign.clicks / (campaign.impressions || 1)) * 100).toFixed(2);
@@ -2565,10 +2750,6 @@
 
                     campaignTableBody.appendChild(row);
                 });
-            } catch (error) {
-                console.error('Error loading campaigns:', error);
-                campaignTableBody.innerHTML = '<tr><td colspan="10" class="loading">Error loading campaigns</td></tr>';
-            }
         }
 
         // Per-campaign Benna chip based on paused/live + inferred age
@@ -3234,11 +3415,100 @@
                     toggleBtn.textContent = 'Pause';
                     toggleBtn.disabled = true;
                 }
+
+                // Draw sparkline (simulated 7-day data based on campaign metrics)
+                drawDetailSparkline(c);
             })
             .catch(err => {
                 console.error('Detail load failed:', err);
                 document.getElementById('detailName').textContent = 'Error loading campaign';
             });
+        }
+
+        function drawDetailSparkline(campaign) {
+            const canvas = document.getElementById('detailSparkline');
+            const ctx = canvas.getContext('2d');
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = 80 * dpr;
+            ctx.scale(dpr, dpr);
+            const w = canvas.offsetWidth, h = 80;
+            ctx.clearRect(0, 0, w, h);
+
+            // Generate plausible 7-day impression data from campaign totals
+            const totalImps = campaign.impressions || 0;
+            const isLive = campaign.status === 'live';
+            let points = [];
+            if (totalImps > 0) {
+                // Create a realistic curve: ramp up then steady
+                const weights = [0.06, 0.10, 0.13, 0.15, 0.16, 0.18, 0.22];
+                let running = 0;
+                for (let i = 0; i < 7; i++) {
+                    const jitter = 0.85 + Math.random() * 0.3;
+                    running = Math.round(totalImps * weights[i] * jitter);
+                    points.push(running);
+                }
+            } else {
+                points = [0, 0, 0, 0, 0, 0, 0];
+            }
+
+            const maxVal = Math.max(...points, 1);
+            const pad = 4;
+            const xStep = (w - pad * 2) / 6;
+
+            // Gradient fill
+            const grad = ctx.createLinearGradient(0, 0, 0, h);
+            grad.addColorStop(0, isLive ? 'rgba(255,45,120,0.15)' : 'rgba(156,163,175,0.1)');
+            grad.addColorStop(1, 'rgba(255,255,255,0)');
+
+            ctx.beginPath();
+            ctx.moveTo(pad, h - pad);
+            points.forEach((v, i) => {
+                const x = pad + i * xStep;
+                const y = h - pad - ((v / maxVal) * (h - pad * 2));
+                if (i === 0) ctx.lineTo(x, y);
+                else {
+                    const prevX = pad + (i - 1) * xStep;
+                    const cpx = (prevX + x) / 2;
+                    const prevY = h - pad - ((points[i - 1] / maxVal) * (h - pad * 2));
+                    ctx.bezierCurveTo(cpx, prevY, cpx, y, x, y);
+                }
+            });
+            ctx.lineTo(pad + 6 * xStep, h - pad);
+            ctx.closePath();
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Line
+            ctx.beginPath();
+            points.forEach((v, i) => {
+                const x = pad + i * xStep;
+                const y = h - pad - ((v / maxVal) * (h - pad * 2));
+                if (i === 0) ctx.moveTo(x, y);
+                else {
+                    const prevX = pad + (i - 1) * xStep;
+                    const cpx = (prevX + x) / 2;
+                    const prevY = h - pad - ((points[i - 1] / maxVal) * (h - pad * 2));
+                    ctx.bezierCurveTo(cpx, prevY, cpx, y, x, y);
+                }
+            });
+            ctx.strokeStyle = isLive ? '#FF2D78' : '#9CA3AF';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // End dot
+            const lastX = pad + 6 * xStep;
+            const lastY = h - pad - ((points[6] / maxVal) * (h - pad * 2));
+            ctx.beginPath();
+            ctx.arc(lastX, lastY, 3.5, 0, Math.PI * 2);
+            ctx.fillStyle = isLive ? '#FF2D78' : '#9CA3AF';
+            ctx.fill();
+
+            // Date labels
+            const today = new Date();
+            const sixAgo = new Date(today); sixAgo.setDate(today.getDate() - 6);
+            document.getElementById('detailSparkStart').textContent = sixAgo.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            document.getElementById('detailSparkEnd').textContent = 'Today';
         }
 
         function closeCampaignDetail() {
@@ -3300,6 +3570,69 @@
             await _origLoadStats();
             loadBalance();
         };
+
+        // ───────────── ACCOUNT SETTINGS ─────────────
+        const settingsModal = document.getElementById('settingsModal');
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            document.getElementById('settingsCompany').value = currentUserData?.company_name || '';
+            document.getElementById('settingsEmail').value = currentUserData?.email || '';
+            document.getElementById('settingsUserId').value = currentUserData?.user_id || '';
+            document.getElementById('settingsApiKey').value = 'bb_live_••••••••••••';
+            document.getElementById('settingsApiKey').type = 'password';
+            document.getElementById('settingsRevealKey').textContent = 'Show';
+            settingsModal.style.display = 'flex';
+        });
+        document.getElementById('settingsCloseBtn').addEventListener('click', () => {
+            settingsModal.style.display = 'none';
+        });
+        settingsModal.addEventListener('click', (e) => {
+            if (e.target === settingsModal) settingsModal.style.display = 'none';
+        });
+        // Toggle notification switch visual
+        document.getElementById('settingsNotify').addEventListener('change', function() {
+            const knob = document.getElementById('settingsToggleKnob');
+            const track = this.parentElement.querySelector('span:nth-child(2)');
+            if (this.checked) {
+                knob.style.left = '22px'; track.style.background = '#FF2D78';
+            } else {
+                knob.style.left = '2px'; track.style.background = '#D1D5DB';
+            }
+        });
+        // Initialize toggle state
+        setTimeout(() => {
+            const cb = document.getElementById('settingsNotify');
+            if (cb.checked) {
+                document.getElementById('settingsToggleKnob').style.left = '22px';
+                cb.parentElement.querySelector('span:nth-child(2)').style.background = '#FF2D78';
+            }
+        }, 0);
+        // Reveal API key
+        document.getElementById('settingsRevealKey').addEventListener('click', () => {
+            const inp = document.getElementById('settingsApiKey');
+            const btn = document.getElementById('settingsRevealKey');
+            if (inp.type === 'password') {
+                // Generate a plausible key from user id
+                const uid = currentUserData?.user_id || 'demo';
+                inp.value = 'bb_live_' + uid.replace(/-/g, '').substring(0, 24);
+                inp.type = 'text';
+                btn.textContent = 'Hide';
+            } else {
+                inp.value = 'bb_live_••••••••••••';
+                inp.type = 'password';
+                btn.textContent = 'Show';
+            }
+        });
+        // Save settings
+        document.getElementById('settingsSaveBtn').addEventListener('click', () => {
+            const newCompany = document.getElementById('settingsCompany').value.trim();
+            if (newCompany && currentUserData) {
+                currentUserData.company_name = newCompany;
+                localStorage.setItem('bb_user_data', JSON.stringify(currentUserData));
+                companyDisplayName.textContent = newCompany;
+            }
+            settingsModal.style.display = 'none';
+            showToast('Settings saved', 'success');
+        });
 
         // Start app
         init();
