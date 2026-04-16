@@ -1308,6 +1308,21 @@
             color: var(--text-secondary);
             font-size: 0.85rem;
         }
+        /* Toast notifications */
+        .toast-container {
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            display: flex; flex-direction: column; gap: 8px;
+        }
+        .toast {
+            padding: 14px 20px; border-radius: 10px; font-size: 14px;
+            font-weight: 500; color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transform: translateX(120%); transition: transform 0.3s ease;
+            max-width: 360px; font-family: 'Inter', sans-serif;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: #059669; }
+        .toast.error { background: #DC2626; }
+        .toast.info { background: #2563EB; }
     </style>
 </head>
 <body>
@@ -1631,6 +1646,149 @@
             </div>
         </main>
 
+        <!-- Campaign Detail Slide-out -->
+        <div id="campaignDetail" style="
+            display: none; position: fixed; top: 0; right: 0; bottom: 0; width: 520px;
+            background: #fff; box-shadow: -8px 0 40px rgba(0,0,0,0.12); z-index: 900;
+            overflow-y: auto; transform: translateX(100%); transition: transform 0.25s ease;
+        ">
+            <div style="padding: 28px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <h2 id="detailName" style="font-size: 20px; font-weight: 700;">Campaign</h2>
+                    <button id="detailClose" style="
+                        background: #F3F4F6; border: none; width: 32px; height: 32px;
+                        border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
+                    ">×</button>
+                </div>
+
+                <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                    <span id="detailStatus" class="badge" style="font-size: 12px;"></span>
+                    <span id="detailFormat" style="
+                        font-size: 12px; background: #F3F4F6; color: #374151;
+                        padding: 4px 10px; border-radius: 100px; font-weight: 500;
+                    "></span>
+                    <span id="detailBilling" style="
+                        font-size: 12px; background: #F3F4F6; color: #374151;
+                        padding: 4px 10px; border-radius: 100px; font-weight: 500;
+                    "></span>
+                </div>
+
+                <!-- Creative preview -->
+                <div style="
+                    background: #0A0A14; border-radius: 12px; overflow: hidden;
+                    margin-bottom: 20px;
+                ">
+                    <div style="padding: 16px;">
+                        <div style="font-size: 9px; font-weight: 700; color: #FFE600; letter-spacing: 1px; margin-bottom: 8px;">SPONSORED</div>
+                        <h3 id="detailHeadline" style="font-size: 16px; font-weight: 700; color: #F5F5F7; margin-bottom: 4px;"></h3>
+                        <p id="detailSubtext" style="font-size: 13px; color: #B0B0C7; margin-bottom: 12px;"></p>
+                        <a id="detailCta" target="_blank" style="
+                            display: inline-block; background: #FF2D78; color: #fff; padding: 8px 16px;
+                            border-radius: 8px; font-size: 13px; font-weight: 700; text-decoration: none;
+                        "></a>
+                    </div>
+                </div>
+
+                <!-- Performance metrics -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Performance</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 24px; font-weight: 700;" id="detailImpressions">0</div>
+                            <div style="font-size: 12px; color: #6B7280;">Impressions</div>
+                        </div>
+                        <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 24px; font-weight: 700;" id="detailClicks">0</div>
+                            <div style="font-size: 12px; color: #6B7280;">Clicks</div>
+                        </div>
+                        <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="detailCtr">0%</div>
+                            <div style="font-size: 12px; color: #6B7280;">CTR</div>
+                        </div>
+                        <div style="background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--accent-primary);" id="detailSpend">$0</div>
+                            <div style="font-size: 12px; color: #6B7280;">Total Spend</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Budget -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Budget</h4>
+                    <div style="display: flex; gap: 10px;">
+                        <div style="flex: 1; background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 18px; font-weight: 700;" id="detailDailyBudget">$0</div>
+                            <div style="font-size: 12px; color: #6B7280;">Daily</div>
+                        </div>
+                        <div style="flex: 1; background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 18px; font-weight: 700;" id="detailTotalBudget">$0</div>
+                            <div style="font-size: 12px; color: #6B7280;">Total</div>
+                        </div>
+                        <div style="flex: 1; background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                            <div style="font-size: 18px; font-weight: 700;" id="detailBid">$0</div>
+                            <div style="font-size: 12px; color: #6B7280;">Bid / CPA Target</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 10px; background: #FAFAFA; border-radius: 10px; padding: 14px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                            <span style="font-size: 12px; color: #6B7280;">Budget utilization</span>
+                            <span style="font-size: 12px; font-weight: 600;" id="detailUtilPct">0%</span>
+                        </div>
+                        <div style="height: 6px; background: #E5E7EB; border-radius: 100px; overflow: hidden;">
+                            <div id="detailUtilBar" style="height: 100%; background: var(--accent-primary); border-radius: 100px; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Targeting -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Targeting</h4>
+                    <div id="detailTargeting" style="display: flex; flex-wrap: wrap; gap: 6px;"></div>
+                </div>
+
+                <!-- Metadata -->
+                <div style="margin-bottom: 20px;">
+                    <h4 style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 12px;">Details</h4>
+                    <div style="font-size: 13px; color: #374151;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
+                            <span style="color: #6B7280;">Campaign ID</span>
+                            <span id="detailId" style="font-family: monospace; font-size: 12px;"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
+                            <span style="color: #6B7280;">Created</span>
+                            <span id="detailCreated"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
+                            <span style="color: #6B7280;">Ad Domain</span>
+                            <span id="detailAdomain"></span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span style="color: #6B7280;">CTA URL</span>
+                            <a id="detailCtaUrl" target="_blank" style="color: var(--accent-primary); font-size: 12px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div style="display: flex; gap: 8px;">
+                    <button id="detailEditBtn" style="
+                        flex: 1; padding: 12px; background: var(--accent-primary); color: #fff;
+                        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+                        cursor: pointer; font-family: inherit;
+                    ">Edit Campaign</button>
+                    <button id="detailToggleBtn" style="
+                        padding: 12px 20px; background: #F3F4F6; color: #374151;
+                        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+                        cursor: pointer; font-family: inherit;
+                    ">Pause</button>
+                </div>
+            </div>
+        </div>
+        <div id="detailOverlay" style="
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.3);
+            z-index: 899; opacity: 0; transition: opacity 0.25s;
+        "></div>
+
         <!-- Create Campaign Modal -->
         <div id="campaignModal" class="modal">
             <div class="modal-content">
@@ -1916,7 +2074,23 @@
         </footer>
     </div>
 
+    <div class="toast-container" id="toastContainer"></div>
+
     <script>
+        // Toast notification system
+        function showToast(message, type = 'success', duration = 3500) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = 'toast ' + type;
+            toast.textContent = message;
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
         // Supabase Configuration
         const SUPABASE_URL = "https://glogijhwbrdkkjdsjujc.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0";
@@ -2326,7 +2500,7 @@
 
                     const row = document.createElement('tr');
                     row.innerHTML = `
-                        <td><strong>${campaign.name}</strong></td>
+                        <td><strong><a href="#" class="campaign-name-link" data-id="${campaign.id}" style="color: inherit; text-decoration: none; border-bottom: 1px dashed #D1D5DB;">${campaign.name}</a></strong></td>
                         <td><span class="badge ${statusBadge}">${campaign.status}</span></td>
                         <td>${bennaChip}</td>
                         <td>${campaign.format || 'N/A'}</td>
@@ -2344,6 +2518,12 @@
                             </div>
                         </td>
                     `;
+
+                    // Campaign name → detail panel
+                    row.querySelector('.campaign-name-link')?.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        openCampaignDetail(campaign.id);
+                    });
 
                     row.querySelectorAll('.action-btn').forEach(btn => {
                         btn.addEventListener('click', async () => {
@@ -2371,11 +2551,11 @@
                                     if (response.ok) {
                                         await loadCampaigns();
                                     } else {
-                                        alert('Failed to update campaign status');
+                                        showToast('Failed to update campaign status', 'error');
                                     }
                                 } catch (error) {
                                     console.error('Error updating campaign:', error);
-                                    alert('Error updating campaign');
+                                    showToast('Error updating campaign', 'error');
                                 }
                             } else if (action === 'edit') {
                                 openEditModal(campaignId);
@@ -2728,12 +2908,12 @@
                     throw new Error(error.error || 'Failed to create campaign');
                 }
 
-                alert('Campaign created successfully!');
+                showToast('Campaign created successfully!', 'success');
                 closeModal();
                 loadCampaigns();
                 loadStats();
             } catch (error) {
-                alert('Error: ' + error.message);
+                showToast(error.message, 'error');
             }
         }
 
@@ -2800,7 +2980,7 @@
         document.getElementById('depositConfirmBtn').addEventListener('click', async () => {
             const amount = parseFloat(depositAmountInput.value);
             if (!amount || amount < 10) {
-                alert('Minimum deposit is $10');
+                showToast('Minimum deposit is $10', 'error');
                 return;
             }
             const btn = document.getElementById('depositConfirmBtn');
@@ -2822,12 +3002,12 @@
                     window.location.href = j.checkout_url;
                 } else if (j.mode === 'demo') {
                     // Demo mode — balance credited instantly
-                    alert(`Demo deposit of $${amount} credited!`);
+                    showToast(`Demo deposit of $${amount} credited!`, 'success');
                     depositModal.style.display = 'none';
                     loadBalance();
                 }
             } catch (e) {
-                alert('Deposit failed: ' + e.message);
+                showToast('Deposit failed: ' + e.message, 'error');
             } finally {
                 btn.textContent = 'Deposit via Stripe';
                 btn.disabled = false;
@@ -2839,7 +3019,7 @@
             const params = new URLSearchParams(window.location.search);
             if (params.get('deposit') === 'success') {
                 setTimeout(() => {
-                    alert('Deposit successful! Your balance has been updated.');
+                    showToast('Deposit successful! Your balance has been updated.', 'success');
                     loadBalance();
                 }, 500);
                 window.history.replaceState({}, '', window.location.pathname);
@@ -2888,7 +3068,7 @@
 
                 openModal();
             } catch (e) {
-                alert('Failed to load campaign: ' + e.message);
+                showToast('Failed to load campaign: ' + e.message, 'error');
             }
         }
 
@@ -2928,13 +3108,13 @@
                         const err = await r.json();
                         throw new Error(err.error || 'Update failed');
                     }
-                    alert('Campaign updated!');
+                    showToast('Campaign updated!', 'success');
                     editingCampaignId = null;
                     closeModal();
                     loadCampaigns();
                     loadStats();
                 } catch (err) {
-                    alert('Error: ' + err.message);
+                    showToast(err.message, 'error');
                 }
             } else {
                 // CREATE mode — call original handler
@@ -2950,6 +3130,169 @@
             if (modalTitle) modalTitle.textContent = 'Create New Campaign';
             _origClose();
         };
+
+        // ───────────── CAMPAIGN DETAIL SLIDE-OUT ─────────────
+        const detailPanel = document.getElementById('campaignDetail');
+        const detailOverlay = document.getElementById('detailOverlay');
+        let detailCampaignId = null;
+
+        function openCampaignDetail(campaignId) {
+            detailCampaignId = campaignId;
+            // Show panel + overlay
+            detailPanel.style.display = 'block';
+            detailOverlay.style.display = 'block';
+            requestAnimationFrame(() => {
+                detailPanel.style.transform = 'translateX(0)';
+                detailOverlay.style.opacity = '1';
+            });
+            // Fetch campaign data
+            fetch(`${API_BASE}/api/campaigns?action=get&id=${campaignId}`, {
+                headers: { 'Authorization': `Bearer ${currentUser.token}` }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const c = data.campaign || data;
+                // Name & badges
+                document.getElementById('detailName').textContent = c.name || 'Campaign';
+                const statusEl = document.getElementById('detailStatus');
+                const statusClass = c.status === 'live' ? 'live' : c.status === 'paused' ? 'paused' : 'review';
+                statusEl.className = 'badge ' + statusClass;
+                statusEl.textContent = c.status || 'draft';
+                document.getElementById('detailFormat').textContent = (c.format || 'native').toUpperCase();
+                document.getElementById('detailBilling').textContent = (c.billing_model || 'cpm').toUpperCase();
+
+                // Creative preview
+                document.getElementById('detailHeadline').textContent = c.headline || '';
+                document.getElementById('detailSubtext').textContent = c.subtext || c.cta_label || '';
+                const ctaEl = document.getElementById('detailCta');
+                ctaEl.textContent = c.cta_label || 'Learn More';
+                ctaEl.href = c.cta_url || '#';
+
+                // Performance metrics
+                const impressions = c.impressions || 0;
+                const clicks = c.clicks || 0;
+                const ctr = impressions > 0 ? ((clicks / impressions) * 100).toFixed(2) : '0.00';
+                const spend = c.spent_total || c.spent_today || 0;
+                document.getElementById('detailImpressions').textContent = formatNumber(impressions);
+                document.getElementById('detailClicks').textContent = formatNumber(clicks);
+                document.getElementById('detailCtr').textContent = ctr + '%';
+                document.getElementById('detailSpend').textContent = '$' + formatNumber(spend, true);
+
+                // Budget
+                document.getElementById('detailDailyBudget').textContent = '$' + formatNumber(c.daily_budget || 0, true);
+                document.getElementById('detailTotalBudget').textContent = '$' + formatNumber(c.total_budget || 0, true);
+                document.getElementById('detailBid').textContent = '$' + formatNumber(c.bid_amount || c.target_cpa || 0, true);
+
+                // Budget utilization bar
+                const totalBudget = c.total_budget || 0;
+                const utilPct = totalBudget > 0 ? Math.min(100, ((spend / totalBudget) * 100)).toFixed(0) : 0;
+                document.getElementById('detailUtilPct').textContent = utilPct + '%';
+                document.getElementById('detailUtilBar').style.width = utilPct + '%';
+
+                // Targeting chips
+                const targetingEl = document.getElementById('detailTargeting');
+                const keywords = c.target_keywords || c.intent_signals || [];
+                const hosts = c.host_apps || [];
+                const tools = c.mcp_tools || [];
+                const models = c.ai_models || [];
+                const allChips = [
+                    ...keywords.map(k => ({ label: k, color: '#FF2D78' })),
+                    ...hosts.map(h => ({ label: h, color: '#00B8D9' })),
+                    ...tools.map(t => ({ label: t, color: '#6554C0' })),
+                    ...models.map(m => ({ label: m, color: '#FFAB00' })),
+                ];
+                if (allChips.length === 0) {
+                    targetingEl.innerHTML = '<span style="font-size: 13px; color: #9CA3AF;">No targeting signals set</span>';
+                } else {
+                    targetingEl.innerHTML = allChips.map(c => `
+                        <span style="
+                            font-size: 12px; padding: 4px 10px; border-radius: 100px;
+                            background: ${c.color}18; color: ${c.color}; font-weight: 500;
+                        ">${escapeHtml(c.label)}</span>
+                    `).join('');
+                }
+
+                // Metadata
+                document.getElementById('detailId').textContent = c.id || '';
+                document.getElementById('detailCreated').textContent = c.created_at
+                    ? new Date(c.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : '—';
+                document.getElementById('detailAdomain').textContent = c.cta_url
+                    ? (function() { try { return new URL(c.cta_url).hostname; } catch(e) { return '—'; } })()
+                    : '—';
+                const ctaUrlEl = document.getElementById('detailCtaUrl');
+                ctaUrlEl.href = c.cta_url || '#';
+                ctaUrlEl.textContent = c.cta_url || '—';
+
+                // Toggle button label
+                const toggleBtn = document.getElementById('detailToggleBtn');
+                if (c.status === 'live') {
+                    toggleBtn.textContent = 'Pause';
+                } else if (c.status === 'paused') {
+                    toggleBtn.textContent = 'Resume';
+                } else {
+                    toggleBtn.textContent = 'Pause';
+                    toggleBtn.disabled = true;
+                }
+            })
+            .catch(err => {
+                console.error('Detail load failed:', err);
+                document.getElementById('detailName').textContent = 'Error loading campaign';
+            });
+        }
+
+        function closeCampaignDetail() {
+            detailPanel.style.transform = 'translateX(100%)';
+            detailOverlay.style.opacity = '0';
+            setTimeout(() => {
+                detailPanel.style.display = 'none';
+                detailOverlay.style.display = 'none';
+                document.getElementById('detailToggleBtn').disabled = false;
+            }, 250);
+            detailCampaignId = null;
+        }
+
+        document.getElementById('detailClose').addEventListener('click', closeCampaignDetail);
+        detailOverlay.addEventListener('click', closeCampaignDetail);
+
+        // Edit button inside detail panel
+        document.getElementById('detailEditBtn').addEventListener('click', () => {
+            if (detailCampaignId) {
+                closeCampaignDetail();
+                setTimeout(() => openEditModal(detailCampaignId), 300);
+            }
+        });
+
+        // Pause/Resume button inside detail panel
+        document.getElementById('detailToggleBtn').addEventListener('click', async () => {
+            if (!detailCampaignId) return;
+            const btn = document.getElementById('detailToggleBtn');
+            const newStatus = btn.textContent.trim() === 'Pause' ? 'paused' : 'live';
+            btn.disabled = true;
+            btn.textContent = 'Updating…';
+            try {
+                const r = await fetch(`${API_BASE}/api/campaigns?action=update`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify({ id: detailCampaignId, status: newStatus })
+                });
+                if (r.ok) {
+                    // Refresh
+                    openCampaignDetail(detailCampaignId);
+                    loadCampaigns();
+                } else {
+                    showToast('Failed to update campaign status', 'error');
+                    btn.disabled = false;
+                    btn.textContent = newStatus === 'paused' ? 'Resume' : 'Pause';
+                }
+            } catch (e) {
+                showToast(e.message, 'error');
+                btn.disabled = false;
+            }
+        });
 
         // ───────────── PATCH loadStats to also load balance ─────────────
         const _origLoadStats = loadStats;
