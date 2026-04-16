@@ -12,7 +12,11 @@
     { "source": "/admin", "destination": "/admin.html" },
     { "source": "/login", "destination": "/signup.html" },
     { "source": "/status", "destination": "/status.html" },
-    { "source": "/playground", "destination": "/playground.html" }
+    { "source": "/playground", "destination": "/playground.html" },
+    { "source": "/docs", "destination": "/docs.html" },
+    { "source": "/exchange", "destination": "/exchange.html" },
+    { "source": "/publish", "destination": "/publish.html" },
+    { "source": "/trust", "destination": "/trust.html" }
   ],
   "headers": [
     {

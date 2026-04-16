@@ -337,6 +337,18 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
       <div id="review-list">
         <div class="empty-state"><div class="icon">✨</div>Loading review queue...</div>
       </div>
+
+      <div style="margin-top:32px;">
+        <div class="section-header"><h2>Review History</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Time</th><th>Decision</th><th>Campaign</th><th>Notes</th></tr></thead>
+            <tbody id="audit-log-body">
+              <tr><td colspan="4" class="empty-state">No review actions yet this session</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- ── ALL CAMPAIGNS ── -->
@@ -440,6 +452,7 @@ function showDashboard() {
   document.getElementById("admin-name").textContent = user?.email || "admin";
   loadOverview();
   loadReviewQueue();
+  renderAuditLog();
   detectModes();
 }
 
@@ -603,6 +616,32 @@ async function loadReviewQueue() {
   }
 }
 
+// ── Admin Audit Log (session-scoped, also persists to sessionStorage) ──
+const _auditLog = JSON.parse(sessionStorage.getItem("bb_admin_audit") || "[]");
+function logAudit(action, campaignId, campaignName, details) {
+  const entry = { at: new Date().toISOString(), action, campaignId, campaignName, details };
+  _auditLog.unshift(entry);
+  if (_auditLog.length > 50) _auditLog.length = 50;
+  sessionStorage.setItem("bb_admin_audit", JSON.stringify(_auditLog));
+  renderAuditLog();
+}
+function renderAuditLog() {
+  const el = document.getElementById("audit-log-body");
+  if (!el) return;
+  if (_auditLog.length === 0) {
+    el.innerHTML = '<tr><td colspan="4" class="empty-state">No review actions yet this session</td></tr>';
+    return;
+  }
+  el.innerHTML = _auditLog.slice(0, 20).map(e => `
+    <tr>
+      <td style="font-size:12px;color:var(--muted);">${new Date(e.at).toLocaleTimeString()}</td>
+      <td><span class="badge-status ${e.action === 'approve' ? 'active' : 'rejected'}">${e.action}</span></td>
+      <td><strong>${esc(e.campaignName || e.campaignId)}</strong></td>
+      <td style="font-size:12px;color:var(--muted);">${esc(e.details || "—")}</td>
+    </tr>
+  `).join("");
+}
+
 async function reviewAction(campaignId, decision, reason) {
   if (decision === "reject" && !reason) return;
   try {
@@ -613,7 +652,9 @@ async function reviewAction(campaignId, decision, reason) {
     });
     const j = await r.json();
     if (j.error) throw new Error(j.error);
+    const campaignName = j.campaign?.name || campaignId;
     toast(`Campaign ${decision === "approve" ? "approved" : "rejected"}`, "success");
+    logAudit(decision, campaignId, campaignName, reason || "No notes");
     // Remove from DOM
     const el = document.getElementById("review-" + campaignId);
     if (el) el.remove();
