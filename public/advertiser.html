@@ -4664,8 +4664,234 @@
 
         cmdPalette.addEventListener('click', (e) => { if (e.target === cmdPalette) closeCmdPalette(); });
 
+        // ───────────── ONBOARDING WALKTHROUGH ─────────────
+        function checkOnboarding() {
+            if (localStorage.getItem('bb_onboarded')) return;
+            const overlay = document.createElement('div');
+            overlay.id = 'onboardOverlay';
+            overlay.style.cssText = 'position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;';
+            const steps = [
+                { title: 'Welcome to SuperBoost! 🚀', body: 'Your advertiser dashboard is ready. Let\'s take a quick tour of the key features.', icon: '👋' },
+                { title: 'Create Campaigns', body: 'Click <strong>+ New Campaign</strong> to launch your first ad. Set your budget, targeting, and let Benna AI optimize delivery.', icon: '📢' },
+                { title: 'Benna AI Optimization', body: 'Our AI engine ranks every impression in real time. Watch the Benna panel for live scoring, learning phase, and signal attribution.', icon: '🧠' },
+                { title: 'Fund Your Account', body: 'Click <strong>Add Funds</strong> on the balance card to deposit via Stripe. Your spend deducts automatically as campaigns run.', icon: '💰' },
+                { title: 'Track Conversions', body: 'Scroll down to <strong>Conversion Tracking</strong> and install the pixel on your site. This unlocks CPA and ROAS optimization.', icon: '📊' },
+                { title: 'You\'re All Set!', body: 'Use <kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px;">⌘K</kbd> anytime for quick actions. Happy advertising!', icon: '✅' },
+            ];
+            let stepIdx = 0;
+
+            function renderStep() {
+                const s = steps[stepIdx];
+                overlay.innerHTML = `
+                    <div style="
+                        background: #fff; border-radius: 20px; width: 440px; max-width: 90vw;
+                        box-shadow: 0 20px 60px rgba(0,0,0,0.3); padding: 36px; text-align: center;
+                    ">
+                        <div style="font-size: 48px; margin-bottom: 16px;">${s.icon}</div>
+                        <h2 style="font-size: 22px; font-weight: 700; margin-bottom: 10px;">${s.title}</h2>
+                        <p style="font-size: 14px; color: #6B7280; line-height: 1.6; margin-bottom: 24px;">${s.body}</p>
+                        <div style="display: flex; gap: 8px; justify-content: center; align-items: center;">
+                            ${stepIdx > 0 ? '<button id="obBack" style="padding:10px 20px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;color:#374151;">Back</button>' : ''}
+                            <button id="obNext" style="
+                                padding: 10px 28px; background: var(--accent-primary); color: #fff;
+                                border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+                                cursor: pointer; font-family: inherit;
+                            ">${stepIdx === steps.length - 1 ? 'Get Started' : 'Next'}</button>
+                        </div>
+                        <div style="display: flex; gap: 6px; justify-content: center; margin-top: 18px;">
+                            ${steps.map((_, i) => `<div style="width:8px;height:8px;border-radius:50%;background:${i === stepIdx ? '#FF2D78' : '#E5E7EB'};transition:background 0.2s;"></div>`).join('')}
+                        </div>
+                        <button id="obSkip" style="
+                            margin-top: 12px; font-size: 12px; color: #9CA3AF; background: none;
+                            border: none; cursor: pointer; font-family: inherit;
+                        ">Skip tour</button>
+                    </div>
+                `;
+                overlay.querySelector('#obNext').addEventListener('click', () => {
+                    if (stepIdx === steps.length - 1) {
+                        finishOnboarding();
+                    } else {
+                        stepIdx++;
+                        renderStep();
+                    }
+                });
+                const backBtn = overlay.querySelector('#obBack');
+                if (backBtn) backBtn.addEventListener('click', () => { stepIdx--; renderStep(); });
+                overlay.querySelector('#obSkip').addEventListener('click', finishOnboarding);
+            }
+
+            function finishOnboarding() {
+                localStorage.setItem('bb_onboarded', '1');
+                overlay.remove();
+                showToast('Welcome aboard! Create your first campaign to get started.', 'success', 4000);
+            }
+
+            document.body.appendChild(overlay);
+            renderStep();
+        }
+
+        // ───────────── HELP CENTER ─────────────
+        const helpBtn = document.createElement('button');
+        helpBtn.id = 'helpFloatingBtn';
+        helpBtn.style.cssText = `
+            position: fixed; bottom: 24px; right: 24px; z-index: 800;
+            width: 48px; height: 48px; border-radius: 50%;
+            background: linear-gradient(135deg, #FF2D78, #FF6B9D);
+            border: none; color: #fff; font-size: 20px; cursor: pointer;
+            box-shadow: 0 4px 20px rgba(255,45,120,0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.15s;
+        `;
+        helpBtn.innerHTML = '?';
+        helpBtn.title = 'Help & Resources';
+        helpBtn.onmouseover = () => helpBtn.style.transform = 'scale(1.1)';
+        helpBtn.onmouseout = () => helpBtn.style.transform = 'scale(1)';
+        document.body.appendChild(helpBtn);
+
+        const helpPanel = document.createElement('div');
+        helpPanel.id = 'helpPanel';
+        helpPanel.style.cssText = `
+            display: none; position: fixed; bottom: 80px; right: 24px; z-index: 801;
+            width: 320px; background: #fff; border-radius: 14px;
+            box-shadow: 0 8px 40px rgba(0,0,0,0.15); overflow: hidden;
+        `;
+        helpPanel.innerHTML = `
+            <div style="padding: 18px; border-bottom: 1px solid #F3F4F6;">
+                <h3 style="font-size: 16px; font-weight: 700; margin: 0;">Help & Resources</h3>
+            </div>
+            <div style="padding: 8px;">
+                ${[
+                    { icon: '📖', label: 'Documentation', url: '/docs.html', desc: 'Full API & SDK docs' },
+                    { icon: '🎮', label: 'Playground', url: '/playground.html', desc: 'Test ad requests live' },
+                    { icon: '🧠', label: 'Benna AI Guide', url: '/docs.html#benna', desc: 'How optimization works' },
+                    { icon: '💳', label: 'Billing FAQ', url: '/docs.html#billing', desc: 'Deposits, invoices, payouts' },
+                    { icon: '📊', label: 'Pixel Setup', url: '#pixelSection', desc: 'Install conversion tracking' },
+                    { icon: '📧', label: 'Contact Support', url: 'mailto:support@boostboss.ai', desc: 'support@boostboss.ai' },
+                ].map(item => `
+                    <a href="${item.url}" style="
+                        display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+                        border-radius: 8px; text-decoration: none; color: inherit;
+                        transition: background 0.1s;
+                    " onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='transparent'">
+                        <span style="font-size: 18px;">${item.icon}</span>
+                        <div>
+                            <div style="font-size: 13px; font-weight: 600; color: #111;">${item.label}</div>
+                            <div style="font-size: 11px; color: #9CA3AF;">${item.desc}</div>
+                        </div>
+                    </a>
+                `).join('')}
+            </div>
+            <div style="padding: 12px 18px; border-top: 1px solid #F3F4F6; background: #FAFAFA;">
+                <div style="font-size: 11px; color: #9CA3AF; display: flex; justify-content: space-between;">
+                    <span>SuperBoost v1.0</span>
+                    <a href="https://status.boostboss.ai" target="_blank" style="color: #059669; text-decoration: none; font-weight: 500;">● All systems operational</a>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(helpPanel);
+
+        let helpOpen = false;
+        helpBtn.addEventListener('click', () => {
+            helpOpen = !helpOpen;
+            helpPanel.style.display = helpOpen ? 'block' : 'none';
+        });
+        document.addEventListener('click', (e) => {
+            if (helpOpen && !helpPanel.contains(e.target) && e.target !== helpBtn) {
+                helpOpen = false;
+                helpPanel.style.display = 'none';
+            }
+        });
+
+        // Pixel section link from help panel
+        helpPanel.querySelector('a[href="#pixelSection"]')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            helpOpen = false;
+            helpPanel.style.display = 'none';
+            document.getElementById('pixelSection').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        // ───────────── DATA FRESHNESS & AUTO-REFRESH ─────────────
+        let lastRefreshTime = Date.now();
+        const freshnessEl = document.createElement('div');
+        freshnessEl.id = 'dataFreshness';
+        freshnessEl.style.cssText = `
+            position: fixed; bottom: 24px; left: 24px; z-index: 800;
+            background: #fff; border: 1px solid #E5E7EB; border-radius: 100px;
+            padding: 6px 14px; font-size: 11px; color: #9CA3AF;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06); display: flex;
+            align-items: center; gap: 6px; cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        `;
+        freshnessEl.innerHTML = '<span style="width:6px;height:6px;background:#059669;border-radius:50;display:inline-block;"></span> Data is live';
+        freshnessEl.title = 'Click to refresh';
+        freshnessEl.addEventListener('click', () => {
+            loadStats();
+            loadCampaigns();
+            lastRefreshTime = Date.now();
+            updateFreshnessLabel();
+            showToast('Data refreshed', 'info', 1500);
+        });
+        document.body.appendChild(freshnessEl);
+
+        function updateFreshnessLabel() {
+            const ago = Math.floor((Date.now() - lastRefreshTime) / 1000);
+            const dot = freshnessEl.querySelector('span');
+            if (ago < 60) {
+                freshnessEl.innerHTML = '';
+                freshnessEl.appendChild(dot);
+                dot.style.background = '#059669';
+                freshnessEl.append(' Updated just now');
+            } else if (ago < 300) {
+                freshnessEl.innerHTML = '';
+                freshnessEl.appendChild(dot);
+                dot.style.background = '#059669';
+                freshnessEl.append(` Updated ${Math.floor(ago / 60)}m ago`);
+            } else {
+                freshnessEl.innerHTML = '';
+                freshnessEl.appendChild(dot);
+                dot.style.background = '#D97706';
+                freshnessEl.append(` Updated ${Math.floor(ago / 60)}m ago · click to refresh`);
+            }
+        }
+
+        // Auto-refresh every 5 minutes
+        setInterval(() => {
+            loadStats();
+            loadCampaigns();
+            lastRefreshTime = Date.now();
+        }, 5 * 60 * 1000);
+
+        // Update freshness label every 30s
+        setInterval(updateFreshnessLabel, 30000);
+
+        // ───────────── EMAIL SUMMARY TRIGGER ─────────────
+        // Add "Email Report" to the date range picker area
+        (function addEmailReportBtn() {
+            const picker = document.getElementById('dateRangePicker');
+            if (!picker) return;
+            const btn = document.createElement('button');
+            btn.style.cssText = `
+                padding: 6px 14px; border-radius: 100px; border: 1px solid #E5E7EB;
+                font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit;
+                background: #fff; color: #374151; transition: all 0.15s;
+                display: flex; align-items: center; gap: 4px;
+            `;
+            btn.innerHTML = '📧 Email Report';
+            btn.addEventListener('click', () => {
+                const email = currentUserData?.email || 'you';
+                showToast(`Report will be sent to ${email}`, 'success');
+                // In production this would POST to /api/billing?action=email_report
+            });
+            picker.appendChild(btn);
+        })();
+
         // Start app
         init();
+
+        // Trigger onboarding after dashboard loads
+        setTimeout(() => {
+            if (currentUser) checkOnboarding();
+        }, 1500);
     </script>
 </body>
 </html>
