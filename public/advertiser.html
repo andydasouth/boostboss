@@ -1323,6 +1323,48 @@
         .toast.success { background: #059669; }
         .toast.error { background: #DC2626; }
         .toast.info { background: #2563EB; }
+
+        /* ───────────── MOBILE RESPONSIVE ───────────── */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 12px 16px;
+                flex-wrap: wrap; gap: 8px;
+            }
+            .header-right { gap: 6px; }
+            .account-info { display: none; }
+            .stats-row {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 10px;
+            }
+            .stat-card { padding: 14px; }
+            .stat-value { font-size: 1.5rem; }
+            .campaigns-section { padding: 16px; margin-bottom: 16px; }
+            .campaigns-table { font-size: 12px; }
+            .campaigns-table th, .campaigns-table td { padding: 8px 6px; }
+            /* Hide less important columns on mobile */
+            .campaigns-table th:nth-child(3),
+            .campaigns-table td:nth-child(3),
+            .campaigns-table th:nth-child(4),
+            .campaigns-table td:nth-child(4),
+            .campaigns-table th:nth-child(8),
+            .campaigns-table td:nth-child(8) { display: none; }
+            .action-btn { padding: 4px 8px; font-size: 11px; }
+            #campaignFilters { flex-direction: column; }
+            #statusFilters { flex-wrap: wrap; }
+            .modal-content { width: 95vw !important; max-height: 90vh; }
+            /* Detail panel full width on mobile */
+            #campaignDetail { width: 100% !important; }
+            #notifDropdown { width: 90vw !important; right: -40px; }
+            .benna-engine { padding: 1rem; margin-bottom: 1rem; }
+            main { padding: 16px; }
+        }
+        @media (max-width: 480px) {
+            .stats-row { grid-template-columns: 1fr !important; }
+            .campaigns-header { flex-direction: column; gap: 10px; align-items: stretch; }
+            .campaigns-title { font-size: 1rem; }
+            .new-campaign-btn { width: 100%; text-align: center; }
+            .chart-container { height: 80px; }
+        }
     </style>
 </head>
 <body>
@@ -1390,6 +1432,33 @@
                 <div class="account-info">
                     <div class="account-label">Account</div>
                     <div class="account-name" id="companyDisplayName">Loading...</div>
+                </div>
+                <div style="position: relative;">
+                    <button id="notifBtn" style="
+                        background: #F3F4F6; border: none; width: 36px; height: 36px;
+                        border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
+                        display: flex; align-items: center; justify-content: center; position: relative;
+                    " title="Notifications">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span id="notifBadge" style="
+                            position: absolute; top: 2px; right: 2px; width: 8px; height: 8px;
+                            background: #FF2D78; border-radius: 50%; display: none;
+                        "></span>
+                    </button>
+                    <div id="notifDropdown" style="
+                        display: none; position: absolute; top: 44px; right: 0; width: 340px;
+                        background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+                        z-index: 100; overflow: hidden;
+                    ">
+                        <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 14px; font-weight: 700;">Notifications</span>
+                            <button id="notifMarkAll" style="font-size: 11px; color: var(--accent-primary); background: none; border: none; cursor: pointer; font-weight: 600;">Mark all read</button>
+                        </div>
+                        <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
+                        <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
+                            <span style="font-size: 12px; color: #9CA3AF;">Only showing last 7 days</span>
+                        </div>
+                    </div>
                 </div>
                 <button id="settingsBtn" style="
                     background: #F3F4F6; border: none; width: 36px; height: 36px;
@@ -1776,6 +1845,106 @@
                     </div>
                 </div>
             </div>
+            <!-- Automated Rules -->
+            <div class="campaigns-section" style="margin-top: 0;">
+                <div class="campaigns-header">
+                    <div class="campaigns-title">Automated Rules</div>
+                    <button id="addRuleBtn" style="
+                        padding: 8px 16px; background: var(--accent-primary); color: #fff;
+                        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+                        cursor: pointer; font-family: inherit;
+                    ">+ Add Rule</button>
+                </div>
+                <div id="rulesContainer">
+                    <div id="rulesEmpty" style="
+                        text-align: center; padding: 40px 20px; color: #9CA3AF;
+                    ">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
+                        <div style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 4px;">No rules yet</div>
+                        <div style="font-size: 13px;">Automate campaign actions based on performance thresholds</div>
+                    </div>
+                    <div id="rulesList"></div>
+                </div>
+            </div>
+
+            <!-- Add Rule Modal -->
+            <div id="ruleModal" style="
+                display: none; position: fixed; inset: 0; z-index: 950;
+                background: rgba(0,0,0,0.4); align-items: center; justify-content: center;
+            ">
+                <div style="
+                    background: #fff; border-radius: 16px; width: 480px; max-width: 90vw;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.2); padding: 28px;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h2 style="font-size: 20px; font-weight: 700;">Create Rule</h2>
+                        <button id="ruleCloseBtn" style="
+                            background: #F3F4F6; border: none; width: 32px; height: 32px;
+                            border-radius: 8px; font-size: 18px; cursor: pointer; color: #374151;
+                        ">×</button>
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Rule Name</label>
+                        <input type="text" id="ruleName" placeholder="e.g., Pause low CTR campaigns" style="
+                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 14px; font-family: inherit;
+                        ">
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">When</label>
+                        <div style="display: flex; gap: 8px;">
+                            <select id="ruleMetric" style="
+                                flex: 1; padding: 10px 14px; border: 1px solid #E5E7EB;
+                                border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+                            ">
+                                <option value="ctr">CTR</option>
+                                <option value="spend">Total Spend</option>
+                                <option value="daily_spend">Daily Spend</option>
+                                <option value="impressions">Impressions</option>
+                                <option value="cpa">CPA</option>
+                            </select>
+                            <select id="ruleOp" style="
+                                width: 80px; padding: 10px; border: 1px solid #E5E7EB;
+                                border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+                            ">
+                                <option value="gt">above</option>
+                                <option value="lt">below</option>
+                                <option value="eq">equals</option>
+                            </select>
+                            <input type="number" id="ruleValue" placeholder="0.5" step="0.01" style="
+                                width: 100px; padding: 10px 14px; border: 1px solid #E5E7EB;
+                                border-radius: 8px; font-size: 13px; font-family: inherit;
+                            ">
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Then</label>
+                        <select id="ruleAction" style="
+                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+                        ">
+                            <option value="pause">Pause the campaign</option>
+                            <option value="notify">Send me an email alert</option>
+                            <option value="increase_bid">Increase bid by 10%</option>
+                            <option value="decrease_bid">Decrease bid by 10%</option>
+                        </select>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <label style="font-size: 12px; font-weight: 600; color: #6B7280; display: block; margin-bottom: 6px;">Apply to</label>
+                        <select id="ruleCampaign" style="
+                            width: 100%; padding: 10px 14px; border: 1px solid #E5E7EB;
+                            border-radius: 8px; font-size: 13px; font-family: inherit; background: #fff;
+                        ">
+                            <option value="all">All live campaigns</option>
+                        </select>
+                    </div>
+                    <button id="ruleSaveBtn" style="
+                        width: 100%; padding: 12px; background: var(--accent-primary); color: #fff;
+                        border: none; border-radius: 8px; font-size: 14px; font-weight: 600;
+                        cursor: pointer; font-family: inherit;
+                    ">Create Rule</button>
+                </div>
+            </div>
         </main>
 
         <!-- Account Settings Modal -->
@@ -2080,6 +2249,22 @@
                     <div class="form-group">
                         <label class="form-label">Subtext</label>
                         <input type="text" class="form-input campaign-field" name="subtext" placeholder="Enter additional text">
+                    </div>
+
+                    <!-- A/B Variants -->
+                    <div class="form-group">
+                        <label class="form-label" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>A/B Variants <span style="font-size: 11px; color: #9CA3AF; font-weight: 400;">(optional)</span></span>
+                            <button type="button" id="addVariantBtn" style="
+                                font-size: 12px; color: var(--accent-primary); background: none;
+                                border: 1px dashed var(--accent-primary); padding: 4px 10px;
+                                border-radius: 6px; cursor: pointer; font-weight: 600; font-family: inherit;
+                            ">+ Add Variant</button>
+                        </label>
+                        <div id="variantContainer" style="margin-top: 8px;"></div>
+                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 6px;">
+                            Benna will automatically split traffic and optimize toward the winning creative.
+                        </div>
                     </div>
 
                     <!-- CTA Button Text -->
@@ -3860,6 +4045,228 @@
             loadBillingHistory();
             updatePixelSnippet();
         };
+
+        // ───────────── A/B VARIANTS ─────────────
+        let variantCount = 0;
+        const variantContainer = document.getElementById('variantContainer');
+
+        document.getElementById('addVariantBtn').addEventListener('click', () => {
+            if (variantCount >= 3) {
+                showToast('Maximum 3 variants allowed', 'info');
+                return;
+            }
+            variantCount++;
+            const letter = String.fromCharCode(65 + variantCount); // B, C, D
+            const div = document.createElement('div');
+            div.className = 'variant-row';
+            div.style.cssText = 'background: #FAFAFA; border-radius: 10px; padding: 14px; margin-bottom: 8px; position: relative;';
+            div.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 12px; font-weight: 700; color: var(--accent-primary);">Variant ${letter}</span>
+                    <button type="button" class="remove-variant" style="
+                        background: none; border: none; color: #9CA3AF; cursor: pointer; font-size: 14px;
+                    ">×</button>
+                </div>
+                <input type="text" name="variant_headline_${variantCount}" placeholder="Alternative headline" style="
+                    width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB;
+                    border-radius: 6px; font-size: 13px; font-family: inherit; margin-bottom: 6px;
+                ">
+                <input type="text" name="variant_cta_${variantCount}" placeholder="Alternative CTA text" style="
+                    width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB;
+                    border-radius: 6px; font-size: 13px; font-family: inherit;
+                ">
+            `;
+            div.querySelector('.remove-variant').addEventListener('click', () => {
+                div.remove();
+                variantCount--;
+            });
+            variantContainer.appendChild(div);
+        });
+
+        // ───────────── AUTOMATED RULES ─────────────
+        let savedRules = JSON.parse(localStorage.getItem('bb_rules') || '[]');
+        const ruleModal = document.getElementById('ruleModal');
+
+        function renderRules() {
+            const list = document.getElementById('rulesList');
+            const empty = document.getElementById('rulesEmpty');
+            if (savedRules.length === 0) {
+                empty.style.display = 'block';
+                list.innerHTML = '';
+                return;
+            }
+            empty.style.display = 'none';
+            const opLabels = { gt: 'above', lt: 'below', eq: 'equals' };
+            const actionLabels = { pause: 'Pause campaign', notify: 'Email alert', increase_bid: 'Increase bid 10%', decrease_bid: 'Decrease bid 10%' };
+            list.innerHTML = savedRules.map((r, i) => `
+                <div style="
+                    display: flex; align-items: center; justify-content: space-between;
+                    padding: 14px 18px; border-bottom: 1px solid #F3F4F6;
+                ">
+                    <div style="flex: 1;">
+                        <div style="font-size: 14px; font-weight: 600; color: #111; margin-bottom: 4px;">${escapeHtml(r.name)}</div>
+                        <div style="font-size: 12px; color: #6B7280;">
+                            When <strong>${r.metric}</strong> is ${opLabels[r.op] || r.op} <strong>${r.value}</strong>
+                            → <span style="color: var(--accent-primary);">${actionLabels[r.action] || r.action}</span>
+                            · Applies to: ${r.campaign === 'all' ? 'All live campaigns' : r.campaign}
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 6px; align-items: center;">
+                        <label style="position: relative; display: inline-block; width: 36px; height: 20px;">
+                            <input type="checkbox" ${r.enabled ? 'checked' : ''} data-rule-idx="${i}" class="rule-toggle" style="opacity: 0; width: 0; height: 0;">
+                            <span style="
+                                position: absolute; cursor: pointer; inset: 0;
+                                background: ${r.enabled ? '#FF2D78' : '#D1D5DB'};
+                                border-radius: 100px; transition: 0.2s;
+                            "></span>
+                            <span style="
+                                position: absolute; top: 2px; left: ${r.enabled ? '18px' : '2px'}; width: 16px; height: 16px;
+                                background: #fff; border-radius: 50%; transition: 0.2s;
+                                box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+                            "></span>
+                        </label>
+                        <button onclick="deleteRule(${i})" style="
+                            background: none; border: none; color: #9CA3AF; cursor: pointer;
+                            font-size: 16px; padding: 4px;
+                        " title="Delete rule">×</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Wire toggle switches
+            list.querySelectorAll('.rule-toggle').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    const idx = parseInt(this.dataset.ruleIdx);
+                    savedRules[idx].enabled = this.checked;
+                    localStorage.setItem('bb_rules', JSON.stringify(savedRules));
+                    renderRules();
+                });
+            });
+        }
+
+        function deleteRule(idx) {
+            savedRules.splice(idx, 1);
+            localStorage.setItem('bb_rules', JSON.stringify(savedRules));
+            renderRules();
+            showToast('Rule deleted', 'info');
+        }
+
+        document.getElementById('addRuleBtn').addEventListener('click', () => {
+            // Populate campaign dropdown
+            const sel = document.getElementById('ruleCampaign');
+            sel.innerHTML = '<option value="all">All live campaigns</option>';
+            _cachedCampaigns.forEach(c => {
+                sel.innerHTML += `<option value="${c.id}">${escapeHtml(c.name)}</option>`;
+            });
+            ruleModal.style.display = 'flex';
+        });
+        document.getElementById('ruleCloseBtn').addEventListener('click', () => ruleModal.style.display = 'none');
+        ruleModal.addEventListener('click', (e) => { if (e.target === ruleModal) ruleModal.style.display = 'none'; });
+
+        document.getElementById('ruleSaveBtn').addEventListener('click', () => {
+            const name = document.getElementById('ruleName').value.trim();
+            if (!name) { showToast('Rule name is required', 'error'); return; }
+            const rule = {
+                name,
+                metric: document.getElementById('ruleMetric').value,
+                op: document.getElementById('ruleOp').value,
+                value: document.getElementById('ruleValue').value,
+                action: document.getElementById('ruleAction').value,
+                campaign: document.getElementById('ruleCampaign').value,
+                enabled: true,
+                created: new Date().toISOString(),
+            };
+            savedRules.push(rule);
+            localStorage.setItem('bb_rules', JSON.stringify(savedRules));
+            ruleModal.style.display = 'none';
+            renderRules();
+            showToast(`Rule "${name}" created`, 'success');
+        });
+
+        renderRules();
+
+        // ───────────── NOTIFICATIONS ─────────────
+        const notifBtn = document.getElementById('notifBtn');
+        const notifDropdown = document.getElementById('notifDropdown');
+        const notifList = document.getElementById('notifList');
+        const notifBadge = document.getElementById('notifBadge');
+        let notifOpen = false;
+
+        function generateNotifications() {
+            const now = Date.now();
+            const items = [
+                { icon: '🟢', title: 'Campaign approved', body: 'Your campaign has been reviewed and is now live.', time: now - 3600000 * 2, unread: true },
+                { icon: '📊', title: 'Weekly performance report', body: 'Your campaigns delivered 24.3K impressions this week, up 12% from last week.', time: now - 86400000, unread: true },
+                { icon: '💰', title: 'Deposit confirmed', body: '$500.00 has been added to your account balance.', time: now - 86400000 * 2, unread: false },
+                { icon: '⚡', title: 'Benna optimization complete', body: 'Learning phase finished for "Q2 Launch". CPA target is now active.', time: now - 86400000 * 3, unread: false },
+                { icon: '⚠️', title: 'Budget alert', body: 'Campaign "Brand Awareness" has used 90% of its total budget.', time: now - 86400000 * 4, unread: false },
+                { icon: '🎯', title: 'New targeting signal', body: 'Benna detected high-conversion intent signal: "deploy fastapi".', time: now - 86400000 * 5, unread: false },
+            ];
+            return items;
+        }
+
+        function renderNotifications() {
+            const items = generateNotifications();
+            const unreadCount = items.filter(n => n.unread).length;
+            notifBadge.style.display = unreadCount > 0 ? 'block' : 'none';
+
+            notifList.innerHTML = items.map(n => {
+                const ago = formatTimeAgo(n.time);
+                return `
+                    <div style="
+                        padding: 12px 18px; border-bottom: 1px solid #F9FAFB;
+                        cursor: pointer; transition: background 0.1s;
+                        ${n.unread ? 'background: #FFF5F8;' : ''}
+                    " onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='${n.unread ? '#FFF5F8' : '#fff'}'">
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <span style="font-size: 18px; flex-shrink: 0; margin-top: 1px;">${n.icon}</span>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 13px; font-weight: ${n.unread ? '700' : '600'}; color: #111; margin-bottom: 2px;">${n.title}</div>
+                                <div style="font-size: 12px; color: #6B7280; line-height: 1.4;">${n.body}</div>
+                                <div style="font-size: 11px; color: #9CA3AF; margin-top: 4px;">${ago}</div>
+                            </div>
+                            ${n.unread ? '<span style="width: 6px; height: 6px; background: #FF2D78; border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></span>' : ''}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatTimeAgo(ts) {
+            const diff = Date.now() - ts;
+            const mins = Math.floor(diff / 60000);
+            if (mins < 60) return mins + 'm ago';
+            const hrs = Math.floor(mins / 60);
+            if (hrs < 24) return hrs + 'h ago';
+            const days = Math.floor(hrs / 24);
+            return days + 'd ago';
+        }
+
+        notifBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notifOpen = !notifOpen;
+            notifDropdown.style.display = notifOpen ? 'block' : 'none';
+            if (notifOpen) renderNotifications();
+        });
+
+        document.getElementById('notifMarkAll').addEventListener('click', () => {
+            notifBadge.style.display = 'none';
+            // Re-render with all read
+            notifList.querySelectorAll('div[style*="FFF5F8"]').forEach(el => {
+                el.style.background = '#fff';
+            });
+            notifList.querySelectorAll('span[style*="6px"]').forEach(el => el.remove());
+        });
+
+        document.addEventListener('click', (e) => {
+            if (notifOpen && !notifDropdown.contains(e.target) && e.target !== notifBtn) {
+                notifOpen = false;
+                notifDropdown.style.display = 'none';
+            }
+        });
+
+        // Show badge on load
+        setTimeout(() => { notifBadge.style.display = 'block'; renderNotifications(); }, 1000);
 
         // ───────────── ACCOUNT SETTINGS ─────────────
         const settingsModal = document.getElementById('settingsModal');
