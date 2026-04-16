@@ -309,6 +309,7 @@ async function handleUpdate(req, res) {
     "target_keywords", "target_regions", "target_languages",
     "target_cpa", "billing_model", "bid_amount",
     "daily_budget", "total_budget", "status", "skippable_after_sec",
+    "start_date", "end_date", "optimization_goal", "target_roas",
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];

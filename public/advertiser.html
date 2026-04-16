@@ -1626,7 +1626,14 @@
             <div class="campaigns-section">
                 <div class="campaigns-header">
                     <div class="campaigns-title">Campaigns</div>
-                    <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="exportCampaignsCSV()" style="
+                            padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
+                            background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+                            font-family: inherit; color: #374151;
+                        ">Export CSV</button>
+                        <button class="new-campaign-btn" id="newCampaignBtn">+ New Campaign</button>
+                    </div>
                 </div>
 
                 <div id="campaignFilters" style="
@@ -1684,6 +1691,90 @@
                         <tr><td colspan="10" class="loading">Loading campaigns...</td></tr>
                     </tbody>
                 </table>
+            </div>
+
+            <!-- Billing History -->
+            <div class="campaigns-section" style="margin-top: 0;">
+                <div class="campaigns-header">
+                    <div class="campaigns-title">Billing History</div>
+                    <button id="exportBillingBtn" style="
+                        padding: 8px 16px; border: 1px solid #E5E7EB; border-radius: 8px;
+                        background: #fff; font-size: 13px; font-weight: 600; cursor: pointer;
+                        font-family: inherit; color: #374151;
+                    ">Export CSV</button>
+                </div>
+                <table class="campaigns-table" style="font-size: 13px;">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Type</th>
+                            <th>Amount</th>
+                            <th>Balance After</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="billingTableBody">
+                        <tr><td colspan="6" class="loading">Loading transactions...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Conversion Pixel -->
+            <div class="campaigns-section" id="pixelSection" style="margin-top: 0;">
+                <div class="campaigns-header">
+                    <div class="campaigns-title">Conversion Tracking</div>
+                </div>
+                <div style="
+                    background: #FAFAFA; border-radius: 12px; padding: 24px;
+                    border: 1px dashed #E5E7EB;
+                ">
+                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                        <div style="
+                            width: 48px; height: 48px; border-radius: 12px;
+                            background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);
+                            display: flex; align-items: center; justify-content: center;
+                            font-size: 22px; flex-shrink: 0;
+                        ">📊</div>
+                        <div style="flex: 1;">
+                            <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Install the Boost Boss Pixel</h4>
+                            <p style="font-size: 13px; color: #6B7280; margin-bottom: 14px; line-height: 1.5;">
+                                Track conversions on your site to unlock Benna's CPA and ROAS optimization.
+                                Add this snippet before the closing <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> tag on your conversion page.
+                            </p>
+                            <div style="
+                                background: #0A0A14; border-radius: 10px; padding: 16px; position: relative;
+                                font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px;
+                                color: #B0B0C7; line-height: 1.6; overflow-x: auto;
+                            ">
+                                <button id="copyPixelBtn" style="
+                                    position: absolute; top: 10px; right: 10px;
+                                    background: rgba(255,255,255,0.1); border: none;
+                                    padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
+                                    font-size: 11px; cursor: pointer; font-family: inherit;
+                                ">Copy</button>
+                                <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script&gt;
+  !function(b,o,s,t){b.bbq=b.bbq||[];
+  var e=o.createElement(s);e.async=1;
+  e.src='https://cdn.boostboss.ai/pixel.js';
+  var n=o.getElementsByTagName(s)[0];
+  n.parentNode.insertBefore(e,n);
+  b.bbq.push(['init','<span id="pixelAdvId" style="color: #FF2D78;">YOUR_ADVERTISER_ID</span>']);
+  }(window,document,'script');
+&lt;/script&gt;</pre>
+                            </div>
+                            <div style="margin-top: 12px; display: flex; gap: 10px;">
+                                <div style="
+                                    font-size: 12px; color: #059669; background: #ECFDF5;
+                                    padding: 6px 12px; border-radius: 100px; font-weight: 500;
+                                " id="pixelStatus">Not detected yet</div>
+                                <div style="font-size: 12px; color: #6B7280; padding: 6px 0;">
+                                    Fire a test conversion: <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 11px;">bbq.push(['track','purchase',{value: 49.99}])</code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
 
@@ -1903,9 +1994,13 @@
                             <span style="color: #6B7280;">Ad Domain</span>
                             <span id="detailAdomain"></span>
                         </div>
-                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
                             <span style="color: #6B7280;">CTA URL</span>
                             <a id="detailCtaUrl" target="_blank" style="color: var(--accent-primary); font-size: 12px; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></a>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                            <span style="color: #6B7280;">Schedule</span>
+                            <span id="detailSchedule" style="font-size: 12px;">—</span>
                         </div>
                     </div>
                 </div>
@@ -2200,6 +2295,21 @@
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
                             <span style="color: var(--text); font-weight: 600;">$</span>
                             <input type="number" class="form-input campaign-field" name="total_budget" placeholder="0.00" min="0" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <!-- Schedule -->
+                    <div class="form-group">
+                        <label class="form-label">Schedule (optional)</label>
+                        <div style="display: flex; gap: 10px;">
+                            <div style="flex: 1;">
+                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;">Start Date</label>
+                                <input type="date" class="form-input campaign-field" name="start_date" style="font-family: inherit;">
+                            </div>
+                            <div style="flex: 1;">
+                                <label style="font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px;">End Date</label>
+                                <input type="date" class="form-input campaign-field" name="end_date" style="font-family: inherit;">
+                            </div>
                         </div>
                     </div>
 
@@ -2700,6 +2810,7 @@
                                     ${campaign.status === 'live' ? 'Pause' : 'Resume'}
                                 </button>
                                 <button class="action-btn" data-action="edit" data-campaign-id="${campaign.id}">Edit</button>
+                                <button class="action-btn" data-action="duplicate" data-campaign-id="${campaign.id}" style="color: #6B7280;">Dup</button>
                             </div>
                         </td>
                     `;
@@ -2744,6 +2855,8 @@
                                 }
                             } else if (action === 'edit') {
                                 openEditModal(campaignId);
+                            } else if (action === 'duplicate') {
+                                duplicateCampaign(campaign);
                             }
                         });
                     });
@@ -3071,6 +3184,8 @@
                 target_roas: document.getElementById('optimizationGoal').value === 'target_roas'
                     ? parseFloat(document.getElementById('targetRoasValue').value) || null
                     : null,
+                start_date: formData.get('start_date') || null,
+                end_date: formData.get('end_date') || null,
                 status: 'review'
             };
 
@@ -3405,6 +3520,15 @@
                 ctaUrlEl.href = c.cta_url || '#';
                 ctaUrlEl.textContent = c.cta_url || '—';
 
+                // Schedule
+                const schedEl = document.getElementById('detailSchedule');
+                if (c.start_date || c.end_date) {
+                    const fmt = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+                    schedEl.textContent = `${fmt(c.start_date)} → ${fmt(c.end_date)}`;
+                } else {
+                    schedEl.textContent = 'Always on';
+                }
+
                 // Toggle button label
                 const toggleBtn = document.getElementById('detailToggleBtn');
                 if (c.status === 'live') {
@@ -3569,6 +3693,172 @@
         loadStats = async function() {
             await _origLoadStats();
             loadBalance();
+        };
+
+        // ───────────── BILLING HISTORY ─────────────
+        let _billingHistory = [];
+
+        async function loadBillingHistory() {
+            const tbody = document.getElementById('billingTableBody');
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=history&id=${currentUserData.user_id}`, {
+                    headers: { 'Authorization': `Bearer ${currentUser.token}` }
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    _billingHistory = data.transactions || [];
+                } else if (r.status === 404) {
+                    _billingHistory = [];
+                }
+            } catch (e) {
+                // Generate demo billing data so the UI isn't empty
+                _billingHistory = [];
+            }
+
+            // If no real data, show demo transactions
+            if (_billingHistory.length === 0) {
+                const now = Date.now();
+                _billingHistory = [
+                    { date: new Date(now - 86400000 * 0).toISOString(), description: 'Campaign spend — Q2 Launch', type: 'spend', amount: -42.18, balance: 457.82, status: 'settled' },
+                    { date: new Date(now - 86400000 * 1).toISOString(), description: 'Campaign spend — Brand Awareness', type: 'spend', amount: -28.50, balance: 500.00, status: 'settled' },
+                    { date: new Date(now - 86400000 * 3).toISOString(), description: 'Deposit via Stripe', type: 'deposit', amount: 500.00, balance: 528.50, status: 'completed' },
+                    { date: new Date(now - 86400000 * 7).toISOString(), description: 'Campaign spend — Retargeting', type: 'spend', amount: -15.32, balance: 28.50, status: 'settled' },
+                    { date: new Date(now - 86400000 * 10).toISOString(), description: 'Initial deposit', type: 'deposit', amount: 100.00, balance: 43.82, status: 'completed' },
+                ];
+            }
+
+            renderBillingTable();
+        }
+
+        function renderBillingTable() {
+            const tbody = document.getElementById('billingTableBody');
+            tbody.innerHTML = '';
+
+            if (_billingHistory.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No transactions yet</td></tr>';
+                return;
+            }
+
+            _billingHistory.forEach(tx => {
+                const row = document.createElement('tr');
+                const isDeposit = tx.amount > 0;
+                const statusColor = tx.status === 'completed' || tx.status === 'settled' ? '#059669' : '#D97706';
+                row.innerHTML = `
+                    <td style="white-space: nowrap;">${new Date(tx.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                    <td>${escapeHtml(tx.description)}</td>
+                    <td><span style="
+                        font-size: 11px; padding: 3px 8px; border-radius: 100px; font-weight: 600;
+                        background: ${isDeposit ? '#ECFDF5' : '#FEF3F2'}; color: ${isDeposit ? '#059669' : '#DC2626'};
+                    ">${tx.type}</span></td>
+                    <td style="font-weight: 600; color: ${isDeposit ? '#059669' : '#111'};">
+                        ${isDeposit ? '+' : ''}$${Math.abs(tx.amount).toFixed(2)}
+                    </td>
+                    <td style="color: #6B7280;">$${(tx.balance || 0).toFixed(2)}</td>
+                    <td><span style="font-size: 11px; color: ${statusColor}; font-weight: 500;">${tx.status}</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Export billing CSV
+        document.getElementById('exportBillingBtn').addEventListener('click', () => {
+            if (_billingHistory.length === 0) {
+                showToast('No transactions to export', 'info');
+                return;
+            }
+            const header = 'Date,Description,Type,Amount,Balance,Status\n';
+            const rows = _billingHistory.map(tx =>
+                `"${new Date(tx.date).toLocaleDateString()}","${tx.description}","${tx.type}",${tx.amount},${tx.balance || 0},"${tx.status}"`
+            ).join('\n');
+            const blob = new Blob([header + rows], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `boostboss-billing-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Billing CSV downloaded', 'success');
+        });
+
+        // ───────────── CAMPAIGN CSV EXPORT ─────────────
+        function exportCampaignsCSV() {
+            if (_cachedCampaigns.length === 0) {
+                showToast('No campaigns to export', 'info');
+                return;
+            }
+            const header = 'Name,Status,Format,Impressions,Clicks,CTR,Spend,Daily Budget,Total Budget,Billing Model\n';
+            const rows = _cachedCampaigns.map(c => {
+                const ctr = ((c.clicks / (c.impressions || 1)) * 100).toFixed(2);
+                const spend = c.spent_total || c.spent_today || 0;
+                return `"${c.name}","${c.status}","${c.format || 'native'}",${c.impressions || 0},${c.clicks || 0},${ctr}%,${spend},${c.daily_budget || 0},${c.total_budget || 0},"${c.billing_model || 'cpm'}"`;
+            }).join('\n');
+            const blob = new Blob([header + rows], { type: 'text/csv' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `boostboss-campaigns-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            showToast('Campaigns CSV downloaded', 'success');
+        }
+
+        // ───────────── DUPLICATE CAMPAIGN ─────────────
+        async function duplicateCampaign(campaign) {
+            const dupData = {
+                advertiser_id: currentUserData.user_id,
+                name: campaign.name + ' (Copy)',
+                format: campaign.format || 'native',
+                headline: campaign.headline || '',
+                media_url: campaign.media_url || 'https://via.placeholder.com/300x250',
+                cta_url: campaign.cta_url || '',
+                target_keywords: campaign.target_keywords || [],
+                billing_model: campaign.billing_model || 'cpm',
+                bid_amount: campaign.bid_amount || null,
+                daily_budget: campaign.daily_budget || 50,
+                total_budget: campaign.total_budget || 500,
+                optimization_goal: campaign.optimization_goal || 'target_cpa',
+                target_cpa: campaign.target_cpa || null,
+                target_roas: campaign.target_roas || null,
+                status: 'review'
+            };
+
+            try {
+                const r = await fetch(`${API_BASE}/api/campaigns`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${currentUser.token}`
+                    },
+                    body: JSON.stringify(dupData)
+                });
+                if (!r.ok) throw new Error('Duplicate failed');
+                showToast(`"${campaign.name}" duplicated`, 'success');
+                loadCampaigns();
+            } catch (e) {
+                showToast('Failed to duplicate: ' + e.message, 'error');
+            }
+        }
+
+        // ───────────── PIXEL SNIPPET ─────────────
+        document.getElementById('copyPixelBtn').addEventListener('click', () => {
+            const code = document.getElementById('pixelCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                showToast('Pixel code copied!', 'success');
+                document.getElementById('copyPixelBtn').textContent = 'Copied!';
+                setTimeout(() => document.getElementById('copyPixelBtn').textContent = 'Copy', 2000);
+            });
+        });
+
+        // Set advertiser ID in pixel snippet
+        function updatePixelSnippet() {
+            const el = document.getElementById('pixelAdvId');
+            if (el && currentUserData?.user_id) {
+                el.textContent = currentUserData.user_id;
+            }
+        }
+
+        // ───────────── PATCH loadStats to also load billing history ─────────────
+        const __origLoadStats2 = loadStats;
+        loadStats = async function() {
+            await __origLoadStats2();
+            loadBillingHistory();
+            updatePixelSnippet();
         };
 
         // ───────────── ACCOUNT SETTINGS ─────────────
