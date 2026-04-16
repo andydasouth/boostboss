@@ -306,6 +306,20 @@ async function handleCreate(req, res) {
     return res.status(400).json({ error: `media_url is required for ${b.format} format campaigns` });
   }
 
+  // Validate numeric bounds on financial fields
+  const bidAmount = Number(b.bid_amount || 5);
+  const dailyBudget = Number(b.daily_budget || 50);
+  const totalBudget = Number(b.total_budget || 1000);
+  if (!Number.isFinite(bidAmount) || bidAmount < 0.01 || bidAmount > 1000) {
+    return res.status(400).json({ error: "bid_amount must be between $0.01 and $1,000" });
+  }
+  if (!Number.isFinite(dailyBudget) || dailyBudget < 1 || dailyBudget > 1000000) {
+    return res.status(400).json({ error: "daily_budget must be between $1 and $1,000,000" });
+  }
+  if (!Number.isFinite(totalBudget) || totalBudget < 1 || totalBudget > 10000000) {
+    return res.status(400).json({ error: "total_budget must be between $1 and $10,000,000" });
+  }
+
   const now = new Date().toISOString();
   const row = {
     id: b.id || "cam_" + crypto.randomBytes(6).toString("hex"),

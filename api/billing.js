@@ -74,6 +74,7 @@ const DEMO = {
   invoices:    new Map(), // id → invoice record
   payouts:     new Map(), // id → payout record
   events:      [],        // append-only event log (mirrors webhook events)
+  processedWebhookIds: new Set(), // idempotency guard for webhook events
 };
 
 function ensureDemoAdvertiser(id, extras = {}) {
@@ -104,7 +105,16 @@ function ensureDemoDeveloper(id, extras = {}) {
 //                                HANDLER
 // ────────────────────────────────────────────────────────────────────────
 module.exports = async function handler(req, res) {
-  res.setHeader("Access-Control-Allow-Origin", "*");
+  // Restrict CORS in production to BoostBoss origins only; allow * in demo for local dev
+  const allowedOrigins = HAS_STRIPE
+    ? ["https://boostboss.ai", "https://www.boostboss.ai", PUBLIC_BASE_URL]
+    : ["*"];
+  const origin = req.headers && req.headers.origin;
+  if (allowedOrigins.includes("*") || allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin || "*");
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", PUBLIC_BASE_URL);
+  }
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Stripe-Signature");
   res.setHeader("x-billing-mode", HAS_STRIPE ? "stripe" : "demo");
@@ -268,7 +278,9 @@ async function handleCreateCheckout(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "POST only" });
   const { advertiser_id, amount, email } = req.body || {};
   if (!advertiser_id || !amount) return res.status(400).json({ error: "Missing advertiser_id or amount" });
-  if (Number(amount) < 10) return res.status(400).json({ error: "Minimum deposit is $10" });
+  const parsedAmount = Number(amount);
+  if (!Number.isFinite(parsedAmount) || parsedAmount < 10) return res.status(400).json({ error: "Minimum deposit is $10" });
+  if (parsedAmount > 100000) return res.status(400).json({ error: "Maximum single deposit is $100,000" });
 
   const s = stripe();
   if (!s) {
@@ -537,7 +549,25 @@ async function handleWebhook(req, res) {
     event.untrusted = true;
   }
 
-  DEMO.events.push({ at: new Date().toISOString(), type: event.type, untrusted: !!event.untrusted });
+  // Idempotency: skip already-processed events (Stripe may retry)
+  const eventId = event.id || `demo_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  if (DEMO.processedWebhookIds.has(eventId)) {
+    return res.json({ received: true, event_type: event.type, duplicate: true });
+  }
+  // In production, check the DB for duplicate event IDs
+  const sb = supa();
+  if (sb && event.id) {
+    try {
+      const { data: existing } = await sb.from("transactions")
+        .select("id").eq("stripe_session_id", event.id).limit(1);
+      if (existing && existing.length > 0) {
+        return res.json({ received: true, event_type: event.type, duplicate: true });
+      }
+    } catch (_) { /* transactions table may not exist yet — continue */ }
+  }
+  DEMO.processedWebhookIds.add(eventId);
+
+  DEMO.events.push({ at: new Date().toISOString(), type: event.type, event_id: eventId, untrusted: !!event.untrusted });
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
@@ -553,12 +583,20 @@ async function handleWebhook(req, res) {
         });
         // Fallback: if the RPC doesn't exist, do read-then-write
         if (rpcErr && rpcErr.message && rpcErr.message.includes("does not exist")) {
-          const { data: adv } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
-          if (adv) {
-            await sb.from("advertisers")
-              .update({ balance: parseFloat(adv.balance) + amount })
-              .eq("id", advertiserId);
+          try {
+            const { data: adv, error: advErr } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
+            if (advErr) {
+              console.error("[Billing] webhook balance fallback lookup failed:", advErr.message);
+            } else if (adv) {
+              await sb.from("advertisers")
+                .update({ balance: parseFloat(adv.balance) + amount })
+                .eq("id", advertiserId);
+            }
+          } catch (fallbackErr) {
+            console.error("[Billing] webhook balance fallback error:", fallbackErr.message);
           }
+        } else if (rpcErr) {
+          console.error("[Billing] webhook RPC credit failed:", rpcErr.message);
         }
         // Also record the transaction for history
         try {
@@ -580,7 +618,6 @@ async function handleWebhook(req, res) {
   if (event.type === "account.updated") {
     const account = event.data.object;
     if (account.charges_enabled && account.metadata && account.metadata.developer_id) {
-      const sb = supa();
       if (sb) {
         await sb.from("developers")
           .update({ stripe_account_id: account.id, updated_at: new Date().toISOString() })
@@ -588,6 +625,55 @@ async function handleWebhook(req, res) {
       } else {
         const d = ensureDemoDeveloper(account.metadata.developer_id);
         d.stripe_account_id = account.id;
+      }
+    }
+  }
+
+  // Handle failed charges — flag the transaction so payout doesn't fire on reversed deposits
+  if (event.type === "charge.failed") {
+    const charge = event.data.object;
+    console.warn("[Billing] charge.failed:", charge.id, charge.failure_message);
+    if (sb && charge.metadata && charge.metadata.advertiser_id) {
+      try {
+        await sb.from("transactions").insert({
+          advertiser_id: charge.metadata.advertiser_id, type: "deposit",
+          amount: (charge.amount || 0) / 100, description: `Failed charge: ${charge.failure_message || "unknown"}`,
+          stripe_session_id: charge.id, status: "failed",
+        });
+      } catch (_) {}
+    }
+  }
+
+  // Handle refunds — deduct from advertiser balance
+  if (event.type === "charge.refunded") {
+    const charge = event.data.object;
+    const refundAmount = (charge.amount_refunded || 0) / 100;
+    const advertiserId = charge.metadata && charge.metadata.advertiser_id;
+    if (advertiserId && refundAmount > 0) {
+      if (sb) {
+        const { error: rpcErr } = await sb.rpc("bbx_credit_advertiser_balance", {
+          p_advertiser_id: advertiserId, p_amount_usd: -refundAmount,
+        });
+        if (rpcErr) {
+          try {
+            const { data: adv } = await sb.from("advertisers").select("balance").eq("id", advertiserId).single();
+            if (adv) {
+              await sb.from("advertisers")
+                .update({ balance: Math.max(0, parseFloat(adv.balance) - refundAmount) })
+                .eq("id", advertiserId);
+            }
+          } catch (_) {}
+        }
+        try {
+          await sb.from("transactions").insert({
+            advertiser_id: advertiserId, type: "refund",
+            amount: -refundAmount, description: "Stripe refund",
+            stripe_session_id: charge.id, status: "completed",
+          });
+        } catch (_) {}
+      } else {
+        const a = ensureDemoAdvertiser(advertiserId);
+        a.balance = Math.max(0, a.balance - refundAmount);
       }
     }
   }
@@ -612,4 +698,5 @@ module.exports._reset = function () {
   DEMO.invoices.clear();
   DEMO.payouts.clear();
   DEMO.events.length = 0;
+  DEMO.processedWebhookIds.clear();
 };
