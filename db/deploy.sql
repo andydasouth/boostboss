@@ -110,6 +110,22 @@ create table if not exists public.daily_stats (
   unique(date, campaign_id, developer_id)
 );
 
+create table if not exists public.transactions (
+  id                uuid primary key default gen_random_uuid(),
+  advertiser_id     uuid references public.advertisers(id) on delete cascade,
+  developer_id      uuid references public.developers(id) on delete set null,
+  type              text not null check (type in ('deposit','spend','refund','payout')),
+  amount            numeric(12,4) not null,
+  description       text,
+  stripe_session_id text,
+  stripe_transfer_id text,
+  status            text default 'completed' check (status in ('pending','completed','failed')),
+  created_at        timestamptz default now()
+);
+
+create index if not exists idx_transactions_advertiser on public.transactions(advertiser_id, created_at desc);
+create index if not exists idx_transactions_developer on public.transactions(developer_id, created_at desc);
+
 -- ── 2. DSP SEATS (RTB buy-side integrations) ──────────────────────────
 
 create table if not exists public.dsp_seats (

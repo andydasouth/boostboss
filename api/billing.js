@@ -477,16 +477,12 @@ async function handlePayout(req, res) {
     const sb = supa();
     for (const t of transfers) {
       if (!t.eligible) continue;
-      // Map publisher → stripe_account_id (look up by app_domain or app_bundle)
+      // Map publisher → stripe_account_id via publisher_domain in the developers table
       let acct = null;
       if (sb) {
-        // Try app_domain first, then app_bundle — these match what rtb.js stores in auction records
-        let { data } = await sb.from("developers")
-          .select("stripe_account_id").eq("app_domain", t.publisher).single();
-        if (!data) {
-          ({ data } = await sb.from("developers")
-            .select("stripe_account_id").eq("app_bundle", t.publisher).single());
-        }
+        // publisher_domain matches site.domain from auction records (e.g. "cursor.com")
+        const { data } = await sb.from("developers")
+          .select("stripe_account_id").eq("publisher_domain", t.publisher).single();
         acct = data && data.stripe_account_id;
       }
       if (!acct) { t.transfer_skipped = "no Stripe Connect account on file"; continue; }

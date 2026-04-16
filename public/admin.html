@@ -281,6 +281,24 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
           <div class="value green" id="stat-rtb">—</div>
         </div>
       </div>
+      <div class="stats-row" style="margin-top:16px;">
+        <div class="stat-card">
+          <div class="label">Total Impressions</div>
+          <div class="value" style="color:#7C3AED" id="stat-impressions">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Spend</div>
+          <div class="value green" id="stat-spend">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Platform Revenue</div>
+          <div class="value pink" id="stat-revenue">—</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Avg eCPM</div>
+          <div class="value cyan" id="stat-ecpm">—</div>
+        </div>
+      </div>
 
       <div class="section">
         <div class="section-header">
@@ -517,6 +535,26 @@ async function loadOverview() {
     }
   } catch(e) {
     document.getElementById("stat-active").textContent = "?";
+  }
+
+  // Load revenue metrics from stats API
+  try {
+    const r = await fetch(API + "/api/stats");
+    const j = await r.json();
+    const impressions = j.impressions || j.total_impressions || 0;
+    const spend = j.total_spend || j.spend_usd || 0;
+    const takeRate = 0.15;
+    const revenue = spend * takeRate;
+    const ecpm = impressions > 0 ? (spend / impressions) * 1000 : 0;
+    document.getElementById("stat-impressions").textContent = impressions.toLocaleString();
+    document.getElementById("stat-spend").textContent = "$" + spend.toFixed(2);
+    document.getElementById("stat-revenue").textContent = "$" + revenue.toFixed(2);
+    document.getElementById("stat-ecpm").textContent = "$" + ecpm.toFixed(2);
+  } catch(e) {
+    document.getElementById("stat-impressions").textContent = "—";
+    document.getElementById("stat-spend").textContent = "—";
+    document.getElementById("stat-revenue").textContent = "—";
+    document.getElementById("stat-ecpm").textContent = "—";
   }
 }
 
