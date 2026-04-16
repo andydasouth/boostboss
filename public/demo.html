@@ -852,17 +852,25 @@ window.BoostBoss = (() => {
   }
 
   function trackEvent(event, payload) {
-    // In production: POST to https://api.boostboss.ai/track
-    const data = {
-      event,
-      ad_id: payload.id,
-      advertiser: payload.advertiser,
-      timestamp: new Date().toISOString(),
-      session_id: "demo_session",
-      user_region: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      user_language: navigator.language,
-    };
-    console.log("[BoostBoss] Track:", JSON.stringify(data));
+    // Fire pixel if tracking URLs exist (from real MCP response)
+    if (payload._tracking && payload._tracking[event]) {
+      const img = new Image();
+      img.src = payload._tracking[event];
+    }
+    // Also POST to /api/track for campaigns with IDs
+    const campaignId = payload.campaign_id || payload.id;
+    if (campaignId) {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event,
+          campaign_id: campaignId,
+          session_id: 'demo_session_' + Date.now(),
+        }),
+      }).catch(() => {});
+    }
+    console.log("[BoostBoss] Track:", event, campaignId);
   }
 
   function startSkip(el, sec) {
@@ -934,12 +942,66 @@ window.BoostBoss = (() => {
     alert("Boost Boss Premium\n\nRemove all ads for $4.99/month.\n\nThis feature will be connected to Stripe in production.\n\nDeveloper earns 65% of subscription revenue.");
   }
 
-  function trigger(format, type) {
+  async function trigger(format, type) {
+    // Try real MCP endpoint first
+    try {
+      const resp = await fetch('/api/mcp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          id: Date.now(),
+          method: 'tools/call',
+          params: {
+            name: 'get_sponsored_content',
+            arguments: {
+              context_summary: 'user is building a landing page for their startup',
+              user_region: 'US',
+              user_language: 'en',
+              session_id: 'demo_session_' + Date.now(),
+              format_preference: type === 'video' ? 'video' : 'image',
+              host: 'demo.boostboss.ai',
+            },
+          },
+        }),
+      });
+      const data = await resp.json();
+      const text = data?.result?.content?.[0]?.text;
+      if (text) {
+        const parsed = JSON.parse(text);
+        if (parsed.sponsored) {
+          const s = parsed.sponsored;
+          const ad = {
+            id: s.campaign_id,
+            campaign_id: s.campaign_id,
+            type: s.type || type,
+            advertiser: s.headline.split(' ')[0],
+            headline: s.headline,
+            subtext: s.subtext,
+            media_url: s.media_url,
+            poster_url: s.poster_url,
+            cta_label: s.cta_label,
+            cta_url: s.cta_url,
+            skippable_after_sec: s.skippable_after_sec || 3,
+            _tracking: s.tracking,
+            targeting: { keywords: [], regions: ['global'] },
+          };
+          show(ad, format);
+          // Feed Benna inspector with real auction data
+          if (window.__renderBennaDecisionFromMCP) {
+            window.__renderBennaDecisionFromMCP(ad, parsed.benna, format, type);
+          }
+          return;
+        }
+      }
+    } catch (e) {
+      console.log('[BoostBoss Demo] MCP fetch failed, using local catalog:', e.message);
+    }
+    // Fallback to local catalog
     const ad = (type === "video")
       ? ADS.video[vidIdx++ % ADS.video.length]
       : ADS.image[imgIdx++ % ADS.image.length];
     show(ad, format);
-    // Feed the Benna inspector with this auction's decision trail
     if (window.__renderBennaDecision) window.__renderBennaDecision(ad, format, type);
   }
 
@@ -1050,7 +1112,45 @@ window.BoostBoss = (() => {
     };
   }
 
-  // ── Render the inspector ──
+  // ── Render inspector from real MCP response ──
+  window.__renderBennaDecisionFromMCP = function (ad, benna, format, type) {
+    if (!benna) return;
+    if (!autoOpenedOnce) { autoOpenedOnce = true; window.toggleBennaInspector(true); }
+
+    document.getElementById('bi-winner-title').textContent = ad.advertiser;
+
+    const ctx = benna.context || {};
+    document.getElementById('bi-ctx').innerHTML =
+      `<span class="k">intent=</span><span class="v">${ctx.intent || '—'}</span><br>` +
+      `<span class="k">mcp_tool=</span><span class="v">${ctx.mcp_tool || '—'}</span><br>` +
+      `<span class="k">host=</span><span class="v">${ctx.host || '—'}</span><br>` +
+      `<span class="k">session_len=</span><span class="v">${ctx.session_len || '—'}m</span><br>` +
+      `<span class="k">region=</span><span class="v">${ctx.region || '—'}</span>`;
+
+    document.getElementById('bi-win-headline').textContent = ad.headline;
+    document.getElementById('bi-win-adv').textContent = `${ad.advertiser} · format=${format} · type=${type}`;
+    document.getElementById('bi-win-bid').textContent = '$' + (benna.effective_bid_usd || benna.bid_usd || 0).toFixed(4);
+
+    document.getElementById('bi-pclick').textContent = ((benna.p_click || 0) * 100).toFixed(2) + '%';
+    document.getElementById('bi-pconv').textContent = ((benna.p_convert || 0) * 100).toFixed(2) + '%';
+    document.getElementById('bi-latency').textContent = (benna.latency_ms || 0) + 'ms';
+    document.getElementById('bi-candidates').textContent = benna.candidates_considered || 0;
+
+    const sigs = benna.signal_contributions || [];
+    const maxLift = Math.max(...sigs.map(s => s.lift), 1);
+    const sigHtml = sigs.length === 0
+      ? '<div style="color:#6B6B83;font-size:11px;">No matching priors — cold start.</div>'
+      : sigs.slice(0, 5).map(s => `
+          <div class="bi-sig">
+            <div class="nm">${s.signal}</div>
+            <div class="bar"><div class="fill" style="width:${Math.max(12, (s.lift / maxLift) * 100).toFixed(0)}%;"></div></div>
+            <div class="lift">+${s.lift.toFixed(1)}%</div>
+          </div>`).join('');
+    document.getElementById('bi-signals').innerHTML = sigHtml;
+    document.getElementById('bi-model').textContent = benna.model_version || 'benna-rc3';
+  };
+
+  // ── Render the inspector (local fallback) ──
   window.__renderBennaDecision = async function (ad, format, type) {
     const ctx = contextFor(ad);
     const targetCpa = 4.5;

@@ -21,7 +21,9 @@
     { "name": "MCP", "description": "Model Context Protocol endpoint (publisher SDK talks here)" },
     { "name": "RTB", "description": "OpenRTB 2.6 programmatic exchange endpoint (external DSPs bid here)" },
     { "name": "Tracking", "description": "Impression, click, and conversion beacons" },
+    { "name": "Auth", "description": "Authentication — JWT tokens for API access" },
     { "name": "Campaigns", "description": "Advertiser campaign management" },
+    { "name": "Billing", "description": "Stripe deposits, transaction history, developer payouts" },
     { "name": "Benna", "description": "Benna API licensing — plug our ranking engine into any mediation stack ($0.002 / inference)" },
     { "name": "Reporting", "description": "Stats, analytics, and engine status" }
   ],
@@ -218,15 +220,118 @@
         "responses": { "200": { "description": "Updated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Campaign" } } } } }
       }
     },
+    "/api/auth": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "Authenticate and receive a JWT",
+        "description": "Pass email + password to receive a signed JWT. Demo mode issues tokens without Supabase. Include the JWT as `Authorization: Bearer <token>` on subsequent requests.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "password"],
+                "properties": {
+                  "email": { "type": "string", "format": "email" },
+                  "password": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "JWT token", "content": { "application/json": { "schema": { "type": "object", "properties": { "token": { "type": "string" }, "role": { "type": "string" }, "email": { "type": "string" } } } } } },
+          "401": { "description": "Invalid credentials" }
+        }
+      }
+    },
+    "/api/billing": {
+      "post": {
+        "tags": ["Billing"],
+        "summary": "Billing operations — deposit, history, earnings, payout, webhook",
+        "description": "Multiplex endpoint. Use `action` query param: `deposit` (Stripe Checkout), `history` (transaction log), `earnings` (developer payouts), `payout` (Stripe Connect), `webhook` (Stripe events).",
+        "parameters": [
+          { "name": "action", "in": "query", "required": true, "schema": { "type": "string", "enum": ["deposit", "history", "earnings", "payout", "webhook"] } }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "advertiser_id": { "type": "string" },
+                  "developer_id": { "type": "string" },
+                  "amount": { "type": "number" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Action-specific response" },
+          "400": { "description": "Missing or invalid parameters" }
+        }
+      }
+    },
     "/api/stats": {
       "get": {
         "tags": ["Reporting"],
         "summary": "Aggregated stats for the authenticated account",
+        "description": "Returns impressions, clicks, spend, CTR, eCPM, and daily breakdown. Pass `type=developer&developer_id=X` for publisher stats, or `type=campaign&campaign_id=X` for advertiser stats.",
         "parameters": [
+          { "name": "type", "in": "query", "schema": { "type": "string", "enum": ["overview", "campaign", "developer"] } },
+          { "name": "campaign_id", "in": "query", "schema": { "type": "string" } },
+          { "name": "developer_id", "in": "query", "schema": { "type": "string" } },
           { "name": "since", "in": "query", "schema": { "type": "string", "format": "date" } },
           { "name": "until", "in": "query", "schema": { "type": "string", "format": "date" } }
         ],
         "responses": { "200": { "description": "Aggregated metrics", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Stats" } } } } }
+      },
+      "post": {
+        "tags": ["Reporting"],
+        "summary": "Trigger stats aggregation ETL",
+        "description": "POST with `type=aggregate` to trigger daily stats roll-up. Used by pg_cron in production; callable manually for backfills.",
+        "parameters": [
+          { "name": "type", "in": "query", "required": true, "schema": { "type": "string", "enum": ["aggregate"] } },
+          { "name": "date", "in": "query", "schema": { "type": "string", "format": "date" }, "description": "Date to aggregate (defaults to yesterday)" }
+        ],
+        "responses": { "200": { "description": "Aggregation results", "content": { "application/json": { "schema": { "type": "object", "properties": { "aggregated": { "type": "boolean" }, "rows": { "type": "integer" } } } } } } }
+      }
+    },
+    "/api/campaigns?action=pause": {
+      "post": {
+        "tags": ["Campaigns"],
+        "summary": "Pause an active campaign",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["id"], "properties": { "id": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "Campaign paused" }, "400": { "description": "Campaign not active or not found" } }
+      }
+    },
+    "/api/campaigns?action=resume": {
+      "post": {
+        "tags": ["Campaigns"],
+        "summary": "Resume a paused campaign",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["id"], "properties": { "id": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "Campaign resumed" }, "400": { "description": "Campaign not paused or not found" } }
+      }
+    },
+    "/api/campaigns?action=review_queue": {
+      "get": {
+        "tags": ["Campaigns"],
+        "summary": "Get campaigns pending admin review",
+        "description": "Requires admin JWT. Returns campaigns with status=pending_review.",
+        "security": [{ "BBApiKey": [] }],
+        "responses": { "200": { "description": "Queue of pending campaigns" }, "401": { "description": "Missing or invalid admin token" } }
+      }
+    },
+    "/api/campaigns?action=review": {
+      "post": {
+        "tags": ["Campaigns"],
+        "summary": "Approve or reject a campaign",
+        "description": "Requires admin JWT. Sets campaign status to active or rejected.",
+        "security": [{ "BBApiKey": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "type": "object", "required": ["id", "decision"], "properties": { "id": { "type": "string" }, "decision": { "type": "string", "enum": ["approved", "rejected"] }, "notes": { "type": "string" } } } } } },
+        "responses": { "200": { "description": "Review recorded" }, "401": { "description": "Missing or invalid admin token" } }
       }
     }
   },

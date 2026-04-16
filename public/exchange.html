@@ -924,14 +924,38 @@ function toggleDark() {
 if (['bb_bbx_dark','bb_docs_dark','bb_pg_dark','bb_status_dark','bb_signup_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
 
 // ── Animated auction replay ──
-function replayAuction() {
+async function replayAuction() {
   const rows = document.querySelectorAll('.bid-row');
   rows.forEach(r => r.classList.remove('visible'));
+
+  // Try to fetch a real auction from /api/rtb
+  let realBid = null;
+  try {
+    const resp = await fetch('/api/rtb', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-openrtb-version': '2.6' },
+      body: JSON.stringify({
+        id: 'demo_' + Date.now(), at: 1, cur: ['USD'],
+        imp: [{ id: '1', tagid: 'cursor.com/editor', bidfloor: 1.5,
+          native: { ver: '1.2', request: '{"ver":"1.2","assets":[{"id":1,"required":1,"title":{"len":60}}]}' } }],
+        site: { domain: 'cursor.com', keywords: 'python debugging' },
+        device: { geo: { country: 'USA', region: 'us-west' } },
+        user: { ext: { session_len_min: 42 } },
+      }),
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data.seatbid && data.seatbid[0] && data.seatbid[0].bid[0]) {
+        const b = data.seatbid[0].bid[0];
+        realBid = { price: b.price, adm: b.adm, latency: data.ext && data.ext.benna ? data.ext.benna.latency_ms : null };
+      }
+    }
+  } catch (_) {}
 
   const dsps = [
     { name: 'The Trade Desk', bid: '$' + (3.2 + Math.random() * 1.8).toFixed(2), ms: Math.round(30 + Math.random() * 20) },
     { name: 'DV360', bid: '$' + (3.0 + Math.random() * 2.0).toFixed(2), ms: Math.round(35 + Math.random() * 15) },
-    { name: 'Amazon Ads', bid: '$' + (3.5 + Math.random() * 2.5).toFixed(2), ms: Math.round(32 + Math.random() * 18) },
+    { name: 'Amazon Ads', bid: realBid ? '$' + realBid.price.toFixed(2) : '$' + (3.5 + Math.random() * 2.5).toFixed(2), ms: realBid && realBid.latency ? Math.round(realBid.latency) : Math.round(32 + Math.random() * 18) },
     { name: 'MediaMath', bid: '$' + (2.8 + Math.random() * 1.6).toFixed(2), ms: Math.round(38 + Math.random() * 12) },
   ];
 
@@ -948,7 +972,6 @@ function replayAuction() {
     if (i === winnerIdx) {
       row.classList.add('winner');
       row.querySelector('.tag').textContent = 'Winning bid · ' + d.ms + 'ms';
-      // Update flow node
       document.querySelector('.flow-node:last-child p').textContent = d.ms + 'ms · ' + d.bid + ' CPM';
     } else {
       row.querySelector('.tag').textContent = 'Bid received · ' + d.ms + 'ms';

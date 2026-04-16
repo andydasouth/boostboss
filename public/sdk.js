@@ -15,7 +15,7 @@
   "use strict";
 
   const VERSION = "1.0.0";
-  const API_BASE = "https://boostboss.ai/api";
+  let API_BASE = "https://boostboss.ai/api";
   const SESSION_ID = "bb_" + Math.random().toString(36).substr(2, 12) + "_" + Date.now();
 
   let config = {
@@ -252,9 +252,12 @@
 
     init(opts) {
       Object.assign(config, opts || {});
+      if (opts && opts.apiBase) {
+        API_BASE = opts.apiBase.replace(/\/+$/, "");
+      }
       injectStyles();
       state.initialized = true;
-      console.log(`[BoostBoss SDK v${VERSION}] Initialized`, config.apiKey ? `key: ${config.apiKey.substr(0, 12)}...` : "(no key)");
+      console.log(`[BoostBoss SDK v${VERSION}] Initialized`, config.apiKey ? `key: ${config.apiKey.substr(0, 12)}...` : "(no key)", `→ ${API_BASE}`);
     },
 
     async requestAd(opts = {}) {
@@ -373,8 +376,9 @@
   const scripts = document.querySelectorAll('script[src*="sdk.js"]');
   for (const s of scripts) {
     const key = s.getAttribute("data-api-key");
-    if (key) {
-      BoostBoss.init({ apiKey: key });
+    const base = s.getAttribute("data-api-base");
+    if (key || base) {
+      BoostBoss.init({ apiKey: key || null, apiBase: base || undefined });
       break;
     }
   }

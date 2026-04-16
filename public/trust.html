@@ -201,6 +201,34 @@
   .foot-tag { font-size: 13px; color: var(--muted); margin-top: 12px; max-width: 280px; line-height: 1.5; }
   .foot-bottom { padding-top: 24px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; font-size: 13px; color: var(--muted); }
   @media (max-width: 880px) { .nav-links { display: none; } .foot-bottom { flex-direction: column; gap: 12px; } }
+
+  /* DARK MODE */
+  body.dark { --ink: #F3F4F6; --ink-soft: #D1D5DB; --muted: #9CA3AF; --line: #374151; --bg: #111827; --bg-soft: #1F2937; --green-soft: rgba(22,163,74,0.15); --violet-soft: rgba(124,58,237,0.15); --code-bg: #0A0E1A; }
+  body.dark nav { background: rgba(17,24,39,0.88); border-bottom-color: #374151; }
+  body.dark .hero { background: linear-gradient(180deg, #0d1a12 0%, #111827 100%); border-bottom-color: #374151; }
+  body.dark .badge { background: #1F2937; border-color: #374151; }
+  body.dark .hero-status { background: #1F2937; border-color: var(--green); }
+  body.dark .comp-card { background: #1F2937; border-color: #4B5563; box-shadow: 4px 4px 0 #374151; }
+  body.dark .comp-icon.green { background: rgba(22,163,74,0.2); color: #4ADE80; }
+  body.dark .comp-icon.cyan { background: rgba(4,190,254,0.15); color: #67E8F9; }
+  body.dark .comp-icon.yellow { background: rgba(255,230,0,0.15); color: #FDE68A; }
+  body.dark .comp-icon.violet { background: rgba(124,58,237,0.15); color: #C4B5FD; }
+  body.dark .comp-icon.pink { background: rgba(255,45,120,0.15); color: #FDA4AF; }
+  body.dark .comp-icon.ink { background: rgba(255,255,255,0.1); color: #E5E7EB; }
+  body.dark table.bb-table { background: #1F2937; border-color: #4B5563; }
+  body.dark table.bb-table thead { background: #374151; }
+  body.dark table.bb-table td { border-top-color: #374151; }
+  body.dark table.bb-table td code { background: #111827; }
+  body.dark .section.alt { background: #1F2937; border-color: #374151; }
+  body.dark .callout { background: rgba(22,163,74,0.1); border-left-color: var(--green); }
+  body.dark .callout p { color: #86EFAC; }
+  body.dark .callout p strong { color: #4ADE80; }
+  body.dark .code-panel { border-color: #4B5563; box-shadow: 4px 4px 0 #374151; }
+  body.dark .btn-outline { background: #1F2937; color: #F3F4F6; border-color: #F3F4F6; box-shadow: 3px 3px 0 #374151; }
+  body.dark footer { background: #111827; border-top-color: #374151; }
+  body.dark .foot-grid { border-bottom: none; }
+  .dark-toggle { background: none; border: 1px solid var(--line); border-radius: 6px; cursor: pointer; padding: 5px 8px; font-size: 14px; line-height: 1; transition: all 0.15s; color: var(--ink); }
+  .dark-toggle:hover { background: var(--bg-soft); }
 </style>
 </head>
 <body>
