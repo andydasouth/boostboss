@@ -1264,6 +1264,31 @@
                 </div>
             </div>
 
+            <!-- First-time guidance (hidden once first ad is served) -->
+            <div class="section" id="onboardingBanner" style="display:none; background: linear-gradient(135deg, #04BEFE11, #FF2D7811); border: 1px solid #04BEFE33;">
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+                    <div style="width:36px;height:36px;border-radius:10px;background:#04BEFE;display:flex;align-items:center;justify-content:center;font-size:18px;">🚀</div>
+                    <div>
+                        <div style="font-weight:700;font-size:15px;color:#1A1A2E;">Welcome! Let's serve your first ad</div>
+                        <div style="font-size:12px;color:#6B7280;">Follow these 3 steps to start earning</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-direction:column;font-size:13px;color:#374151;">
+                    <div style="display:flex;align-items:center;gap:8px;" id="ob-step1">
+                        <span style="width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">1</span>
+                        <span>Copy your API key from above</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;" id="ob-step2">
+                        <span style="width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">2</span>
+                        <span>Add the SDK to your app (see Integration Guide below)</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;" id="ob-step3">
+                        <span style="width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">3</span>
+                        <span>Click <strong>Run Test</strong> below to verify your integration</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Integration Guide -->
             <div class="section">
                 <div class="section-title">Integration Guide</div>
@@ -1382,7 +1407,7 @@
                     </div>
                 </div>
                 <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                    <button class="payout-btn" onclick="requestPayout()">Request Payout</button>
+                    <button class="payout-btn" id="payoutBtn" onclick="requestPayout()" disabled title="Payouts are processed automatically when your balance reaches the minimum threshold and Stripe Connect is linked">Request Payout</button>
                     <button onclick="connectStripe()" style="
                         padding: 12px 24px; background: #635BFF; color: #fff;
                         border: none; border-radius: 10px; font-size: 14px; font-weight: 600;
@@ -1873,6 +1898,10 @@
             // Update integration guide with real keys
             updateIntegrationGuide();
 
+            // Show onboarding banner for new publishers with no impressions
+            const ob = document.getElementById('onboardingBanner');
+            if (ob) ob.style.display = stats.total_impressions === 0 ? 'block' : 'none';
+
             // Render chart (handle empty data)
             if (stats.daily && stats.daily.length > 0) {
                 renderChart(stats.daily);
@@ -1966,10 +1995,20 @@
         }
 
         function updateAdFormat(format, enabled) {
+            if (!userProfile.formats) userProfile.formats = {};
             userProfile.formats[format] = enabled;
-            // Save to localStorage for now (no API endpoint exists yet)
-            localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
-            console.log(`${format} format ${enabled ? 'enabled' : 'disabled'}`);
+            localStorage.setItem('bb_dev_formats', JSON.stringify(userProfile.formats));
+            showToast(`${format.charAt(0).toUpperCase() + format.slice(1)} ads ${enabled ? 'enabled' : 'disabled'}`, 'success');
+        }
+
+        // Restore saved format preferences on load
+        function restoreSavedFormats() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('bb_dev_formats'));
+                if (saved && userProfile) {
+                    userProfile.formats = { ...userProfile.formats, ...saved };
+                }
+            } catch (_) {}
         }
 
         function renderEarningsTable(dailyStats) {
@@ -2166,6 +2205,18 @@
                 if (data.next_payout_date) {
                     const d = new Date(data.next_payout_date);
                     document.getElementById('nextPayoutDate').textContent = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                }
+                // Enable payout button only if above threshold and Stripe connected
+                const threshold = parseFloat(data.payout_threshold) || 100;
+                const stripeConnected = !!(userProfile && userProfile.stripe_account_id);
+                const btn = document.getElementById('payoutBtn');
+                if (btn) {
+                    btn.disabled = !(pending >= threshold && stripeConnected);
+                    btn.title = !stripeConnected
+                        ? 'Connect Stripe first to enable payouts'
+                        : pending < threshold
+                            ? `Minimum payout threshold is $${threshold.toFixed(2)}`
+                            : 'Request your payout';
                 }
             } catch (e) {
                 console.error('Earnings load error:', e);

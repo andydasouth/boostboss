@@ -417,7 +417,7 @@ document.getElementById("login-form").addEventListener("submit", async e => {
     saveSession(j);
     showToast('Signed in! Redirecting...', 'success');
     // Redirect straight to dashboard
-    const dest = j.user?.role === "developer" ? "/publish.html" : "/ads.html";
+    const dest = j.user?.role === "developer" ? "/developer.html" : "/advertiser.html";
     setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("login-error", err.message);
@@ -439,7 +439,7 @@ async function launchDemo(role) {
     if (!r.ok || j.error) throw new Error(j.error || "Demo failed");
     saveSession(j);
     showToast('Demo session started!', 'success');
-    const dest = j.user?.role === "developer" ? "/publish.html" : "/ads.html";
+    const dest = j.user?.role === "developer" ? "/developer.html" : "/advertiser.html";
     setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("error", err.message);
@@ -468,9 +468,9 @@ function showWelcome(j) {
     role === "developer"
       ? "Your publisher account is live. Install the Lumi SDK to start earning."
       : "Your advertiser account is live. Launch your first campaign in SuperBoost.";
-  document.getElementById("go-dashboard").href = role === "developer" ? "/publish.html" : "/ads.html";
+  document.getElementById("go-dashboard").href = role === "developer" ? "/developer.html" : "/advertiser.html";
   document.getElementById("go-dashboard").textContent =
-    role === "developer" ? "Go to Lumi SDK dashboard →" : "Go to SuperBoost dashboard →";
+    role === "developer" ? "Go to Publisher Dashboard →" : "Go to Advertiser Dashboard →";
 }
 
 function showError(id, msg) {
@@ -504,7 +504,7 @@ function copyKey() {
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       }).then(r => {
         if (r.ok) {
-          const dest = u.role === "developer" ? "/publish.html" : "/ads.html";
+          const dest = u.role === "developer" ? "/developer.html" : "/advertiser.html";
           window.location.href = dest;
         } else {
           // Token expired — clear and show form

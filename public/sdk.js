@@ -29,6 +29,8 @@
     onImpression: null,
     onClick: null,
     onClose: null,
+    onError: null,
+    debug: false,
   };
 
   let state = {
@@ -39,6 +41,16 @@
     skipTimer: null,
     progressTimer: null,
   };
+
+  // ── Error & debug helpers ──
+  let lastError = null;
+  function sdkError(code, message, detail) {
+    lastError = { code, message, detail, ts: Date.now() };
+    if (config.debug) console.warn(`[BoostBoss] ${code}: ${message}`, detail || "");
+    if (typeof config.onError === "function") {
+      try { config.onError(lastError); } catch (_) {}
+    }
+  }
 
   // ── Inject CSS ──
   function injectStyles() {
@@ -280,7 +292,8 @@
       }
       injectStyles();
       state.initialized = true;
-      console.log(`[BoostBoss SDK v${VERSION}] Initialized`, config.apiKey ? `key: ${config.apiKey.substr(0, 12)}...` : "(no key)", `→ ${API_BASE}`);
+      if (!config.apiKey) sdkError("NO_API_KEY", "No API key provided — ads will not serve. Pass apiKey in init() or via data-api-key attribute.");
+      if (config.debug) console.log(`[BoostBoss SDK v${VERSION}] Initialized`, config.apiKey ? `key: ${config.apiKey.substr(0, 12)}...` : "(no key)", `→ ${API_BASE}`);
     },
 
     async requestAd(opts = {}) {
@@ -288,11 +301,11 @@
 
       // Check rate limit
       if (Date.now() - state.lastAdTime < config.minIntervalMs && state.adsShown > 0) {
-        console.log("[BoostBoss] Rate limited — too soon");
+        sdkError("RATE_LIMITED", "Ad request too soon — minimum interval is " + config.minIntervalMs + "ms");
         return null;
       }
       if (state.adsShown >= config.maxAdsPerSession) {
-        console.log("[BoostBoss] Session ad cap reached");
+        sdkError("SESSION_CAP", "Session ad cap reached (" + config.maxAdsPerSession + ")");
         return null;
       }
 
@@ -323,23 +336,23 @@
         });
 
         if (!resp.ok) {
-          console.warn("[BoostBoss] Server returned", resp.status);
+          sdkError("SERVER_ERROR", "Server returned HTTP " + resp.status, { status: resp.status });
           return null;
         }
 
         const data = await resp.json();
         const text = data?.result?.content?.[0]?.text;
-        if (!text) return null;
+        if (!text) { sdkError("EMPTY_RESPONSE", "Server returned empty ad response"); return null; }
 
         let parsed;
         try {
           parsed = JSON.parse(text);
         } catch (parseErr) {
-          console.error("[BoostBoss] Failed to parse ad response:", parseErr);
+          sdkError("PARSE_ERROR", "Failed to parse ad response JSON", parseErr);
           return null;
         }
         if (!parsed.sponsored) {
-          console.log("[BoostBoss] No ad:", parsed.reason);
+          sdkError("NO_FILL", "No ad available" + (parsed.reason ? ": " + parsed.reason : ""), { reason: parsed.reason });
           return null;
         }
 
@@ -347,7 +360,7 @@
         showAd(parsed.sponsored, format);
         return parsed.sponsored;
       } catch (err) {
-        console.error("[BoostBoss] Error fetching ad:", err);
+        sdkError("FETCH_ERROR", err.name === "AbortError" ? "Ad request timed out (8s)" : "Network error fetching ad", err);
         return null;
       } finally {
         clearTimeout(timeoutId);
@@ -413,6 +426,12 @@
     getStats() {
       return { session: SESSION_ID, adsShown: state.adsShown, lastAdTime: state.lastAdTime };
     },
+
+    /** Returns the last error object or null. Useful for debugging ad delivery issues. */
+    getLastError() { return lastError; },
+
+    /** Enable debug mode at runtime */
+    setDebug(on) { config.debug = !!on; },
   };
 
   // Auto-init from script tag data attributes

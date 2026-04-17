@@ -68,7 +68,13 @@ class BoostBoss {
     };
     const res = await this._fetch(this.endpoint, body);
     const text = res?.result?.content?.[0]?.text;
-    const parsed = text ? JSON.parse(text) : { sponsored: null };
+    let parsed;
+    try {
+      parsed = text ? JSON.parse(text) : { sponsored: null };
+    } catch (e) {
+      this._emit("error", { code: "PARSE_ERROR", message: "Failed to parse ad response", detail: e });
+      return { sponsored: null };
+    }
     this._emit("ad_response", parsed);
     return parsed;
   }
