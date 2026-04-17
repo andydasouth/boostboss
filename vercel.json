@@ -5,6 +5,7 @@
   "buildCommand": null,
   "outputDirectory": "public",
   "rewrites": [
+    { "source": "/ads", "destination": "/ads.html" },
     { "source": "/advertiser", "destination": "/advertiser.html" },
     { "source": "/developer", "destination": "/developer.html" },
     { "source": "/demo", "destination": "/demo.html" },

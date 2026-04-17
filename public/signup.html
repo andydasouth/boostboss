@@ -201,7 +201,7 @@ body.dark .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink)
       <span class="brand-name">Boost Boss</span>
     </a>
     <div style="display:flex;gap:10px;align-items:center;">
-      <a href="/docs.html" style="font-size:14px;font-weight:500;color:var(--ink-soft);">Docs</a>
+      <a href="/docs" style="font-size:14px;font-weight:500;color:var(--ink-soft);">Docs</a>
       <button class="dark-toggle" onclick="document.body.classList.toggle('dark');localStorage.setItem('bb_signup_dark',document.body.classList.contains('dark')?'1':'0')" title="Toggle dark mode">🌓</button>
     </div>
   </div>
@@ -303,7 +303,7 @@ body.dark .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink)
         <p style="font-size:12px;color:var(--muted);margin-top:6px;">Save this — you won't see it again in production.</p>
       </div>
 
-      <a class="btn-submit" id="go-dashboard" href="/ads.html" style="display:block;text-align:center;text-decoration:none;">Go to dashboard →</a>
+      <a class="btn-submit" id="go-dashboard" href="/ads" style="display:block;text-align:center;text-decoration:none;">Go to dashboard →</a>
     </div>
   </div>
 </div>
@@ -417,7 +417,7 @@ document.getElementById("login-form").addEventListener("submit", async e => {
     saveSession(j);
     showToast('Signed in! Redirecting...', 'success');
     // Redirect straight to dashboard
-    const dest = j.user?.role === "developer" ? "/developer.html" : "/advertiser.html";
+    const dest = j.user?.role === "developer" ? "/developer" : "/advertiser";
     setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("login-error", err.message);
@@ -439,7 +439,7 @@ async function launchDemo(role) {
     if (!r.ok || j.error) throw new Error(j.error || "Demo failed");
     saveSession(j);
     showToast('Demo session started!', 'success');
-    const dest = j.user?.role === "developer" ? "/developer.html" : "/advertiser.html";
+    const dest = j.user?.role === "developer" ? "/developer" : "/advertiser";
     setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("error", err.message);
@@ -468,7 +468,7 @@ function showWelcome(j) {
     role === "developer"
       ? "Your publisher account is live. Install the Lumi SDK to start earning."
       : "Your advertiser account is live. Launch your first campaign in SuperBoost.";
-  document.getElementById("go-dashboard").href = role === "developer" ? "/developer.html" : "/advertiser.html";
+  document.getElementById("go-dashboard").href = role === "developer" ? "/developer" : "/advertiser";
   document.getElementById("go-dashboard").textContent =
     role === "developer" ? "Go to Publisher Dashboard →" : "Go to Advertiser Dashboard →";
 }
@@ -504,7 +504,7 @@ function copyKey() {
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
       }).then(r => {
         if (r.ok) {
-          const dest = u.role === "developer" ? "/developer.html" : "/advertiser.html";
+          const dest = u.role === "developer" ? "/developer" : "/advertiser";
           window.location.href = dest;
         } else {
           // Token expired — clear and show form
