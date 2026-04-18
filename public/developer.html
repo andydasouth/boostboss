@@ -1484,12 +1484,21 @@
                     " id="copyQsBtn">Copy</button>
                     <pre id="quickStartCode" style="margin: 0; white-space: pre-wrap;"><span style="color:#9D7AFF;">const</span> bb = <span style="color:#9D7AFF;">require</span>(<span style="color:#FFE600;">"@boostbossai/lumi-sdk"</span>);
 
+<span style="color:#6B7280;">// 1. Authenticate so impressions are attributed to your account.</span>
+bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KEY });
+
+<span style="color:#6B7280;">// 2. Request a Benna-ranked ad for the current user context.</span>
 <span style="color:#9D7AFF;">const</span> ad = <span style="color:#04BEFE;">await</span> bb.<span style="color:#FF2D78;">getSponsoredContent</span>({
   context: <span style="color:#FFE600;">"user is debugging a python traceback"</span>,
-  host: <span style="color:#FFE600;">"your-app.com"</span>
+  host:    <span style="color:#FFE600;">"your-app.com"</span>,
+  format:  <span style="color:#FFE600;">"native"</span>      <span style="color:#6B7280;">// "image" | "video" | "native"</span>
 });
 
-<span style="color:#9D7AFF;">if</span> (ad.sponsored) render(ad.sponsored);</pre>
+<span style="color:#6B7280;">// 3. Render and track. SDK fires the impression beacon for you.</span>
+<span style="color:#9D7AFF;">if</span> (ad.sponsored) {
+  showAd(ad.sponsored);
+  bb.<span style="color:#FF2D78;">trackEvent</span>(<span style="color:#FFE600;">"impression"</span>, ad.sponsored.id);
+}</pre>
                 </div>
                 <div style="margin-top: 12px; display: flex; gap: 12px; flex-wrap: wrap;">
                     <a href="/docs" style="
@@ -2324,6 +2333,35 @@
                         document.getElementById('tm-bid').textContent = '$' + bid.toFixed(4);
                         document.getElementById('tm-payout').textContent = '$' + payout;
                         showToast('Integration test passed — ad served in ' + elapsed + 'ms', 'success');
+
+                        // Fire a synthetic impression so the dashboard counter ticks up.
+                        // Lets brand-new publishers see their main stats move, not just
+                        // the test card. Failures here are silent — the test itself
+                        // already passed.
+                        try {
+                            const adId = parsed.sponsored.id || parsed.sponsored.creative_id;
+                            await fetch(`${API_BASE}/api/mcp`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    jsonrpc: '2.0',
+                                    id: Date.now() + 1,
+                                    method: 'tools/call',
+                                    params: {
+                                        name: 'track_event',
+                                        arguments: {
+                                            event_type: 'impression',
+                                            ad_id: adId,
+                                            session_id: 'test_' + Date.now(),
+                                            developer_api_key: apiKey,
+                                            host: 'integration-test.local',
+                                        },
+                                    },
+                                }),
+                            });
+                            // Refresh the dashboard stats so the publisher sees the bump.
+                            if (typeof loadStats === 'function') setTimeout(loadStats, 600);
+                        } catch (_) { /* silent — test already passed */ }
                     } else {
                         document.getElementById('tm-status').textContent = 'No ad';
                         document.getElementById('tm-status').style.color = '#F59E0B';

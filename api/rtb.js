@@ -19,6 +19,12 @@ const benna = require("./benna.js");
 const ledger = require("./_lib/ledger.js");
 const seats = require("./_lib/seats.js");
 
+// Verbose auction logging — on by default in non-production, opt-in via
+// BBX_DEBUG=1 in production. Errors always log; routine WIN/LOSS/NO_BID
+// chatter is gated to keep production logs clean.
+const DEBUG = process.env.BBX_DEBUG === "1" || process.env.NODE_ENV !== "production";
+const dbg = (...a) => { if (DEBUG) console.log(...a); };
+
 // Supabase is optional — if env vars aren't set, we fall back to an in-memory
 // demo pool so the adapter is exercisable without a live DB (useful for QA,
 // the public /exchange page, and DSP smoke-tests).
@@ -359,7 +365,7 @@ module.exports = async function handler(req, res) {
       const updated = await ledger.recordWin(bid, price);
       res.setHeader("x-bbx-win-recorded", updated ? "1" : "0");
       res.setHeader("x-bbx-cleared-price-cpm", String(Number(price) || 0));
-      console.log("[BBX RTB] WIN", { imp, price, bid, campaign: camp, persisted: !!updated });
+      dbg("[BBX RTB] WIN", { imp, price, bid, campaign: camp, persisted: !!updated });
       // Return a 1×1 GIF — many SSPs treat the nurl as an image beacon.
       res.setHeader("Content-Type", "image/gif");
       return res.status(200).send(Buffer.from([
@@ -376,7 +382,7 @@ module.exports = async function handler(req, res) {
       const { imp, reason, bid } = req.query || {};
       const updated = await ledger.recordLoss(bid, reason);
       res.setHeader("x-bbx-loss-recorded", updated ? "1" : "0");
-      console.log("[BBX RTB] LOSS", { imp, reason, bid, persisted: !!updated });
+      dbg("[BBX RTB] LOSS", { imp, reason, bid, persisted: !!updated });
       res.setHeader("Content-Type", "image/gif");
       return res.status(200).send(Buffer.from([
         0x47,0x49,0x46,0x38,0x39,0x61,0x01,0x00,0x01,0x00,0x80,0x00,0x00,0x00,0x00,0x00,
@@ -486,7 +492,7 @@ module.exports = async function handler(req, res) {
 
     // No bid for any impression → 204 per OpenRTB convention
     if (seatbidBids.length === 0) {
-      console.log("[BBX RTB] NO_BID", { auction_id: bidReq.id, imp_count: bidReq.imp.length, reason: "no eligible campaigns or all bids below floor" });
+      dbg("[BBX RTB] NO_BID", { auction_id: bidReq.id, imp_count: bidReq.imp.length, reason: "no eligible campaigns or all bids below floor" });
       return res.status(204).end();
     }
 
