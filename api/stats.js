@@ -120,7 +120,9 @@ module.exports = async function handler(req, res) {
 
     // ── Daily Stats ETL ── (POST /api/stats?type=aggregate)
     // Rolls up events into daily_stats table. Designed to be called by cron.
-    if (type === "aggregate" && req.method === "POST") {
+    // Aggregate runs daily via Vercel cron (GET) and can also be triggered
+    // manually via POST. Vercel crons only send GET, so we accept both.
+    if (type === "aggregate" && (req.method === "POST" || req.method === "GET")) {
       return await handleAggregate(req, res);
     }
 
@@ -149,6 +151,11 @@ async function handleAdvertiserStats(id, req, res) {
         .in("campaign_id", campaignIds)
         .order("date", { ascending: true }).limit(60);
       dailyStats = data || [];
+
+      // Merge in live events for the last 7 days. daily_stats is only
+      // populated by the aggregate cron, so without this merge a brand-new
+      // advertiser sees zero impressions even after their ad was served.
+      dailyStats = await mergeLiveEvents(sb, dailyStats, { campaignIds });
     }
 
     const totals = rollUpTotals(dailyStats);
@@ -196,13 +203,19 @@ async function handleDeveloperStats(devKey, req, res) {
       .from("developers").select("*").eq("api_key", devKey).single();
     if (dErr || !dev) return res.status(404).json({ error: "Developer not found", detail: dErr?.message });
 
-    const { data: dailyStats } = await sb.from("daily_stats").select("*")
+    let { data: dailyStats } = await sb.from("daily_stats").select("*")
       .eq("developer_id", dev.id).order("date", { ascending: true }).limit(60);
+    dailyStats = dailyStats || [];
 
-    const totals = rollUpDevTotals(dailyStats || []);
+    // Merge in live events from the last 7 days so brand-new publishers
+    // see their first impressions immediately (not after the nightly
+    // aggregate cron).
+    dailyStats = await mergeLiveEvents(sb, dailyStats, { developerId: dev.id });
+
+    const totals = rollUpDevTotals(dailyStats);
     return res.json({
       developer: formatDeveloper(dev),
-      daily: dailyStats || [],
+      daily: dailyStats,
       totals,
     });
   }
@@ -398,6 +411,63 @@ async function handleAggregateClientSide(sb, targetDate, res) {
     rows_upserted: upserted,
     message: "Daily stats aggregated (client-side fallback)",
   });
+}
+
+// ── Live-events merge ─────────────────────────────────────────────────
+// Pulls the past N days of raw events from the events table and rolls
+// them up by date, then merges over the daily_stats array so fresh
+// impressions show up without waiting for the aggregate cron. Accepts
+// either { campaignIds } (advertiser view) or { developerId } (publisher
+// view) as the filter. Silently returns the input on any error — we
+// never want to break the dashboard over a fallback-merge failure.
+async function mergeLiveEvents(sb, dailyStats, filter) {
+  try {
+    const sinceDate = new Date(Date.now() - 7 * 86400000);
+    const sinceIso = sinceDate.toISOString();
+    let q = sb.from("events")
+      .select("event_type, campaign_id, developer_id, cost, developer_payout, created_at")
+      .gte("created_at", sinceIso);
+    if (filter.campaignIds && filter.campaignIds.length) q = q.in("campaign_id", filter.campaignIds);
+    if (filter.developerId) q = q.eq("developer_id", filter.developerId);
+
+    const { data: events, error } = await q;
+    if (error || !events || events.length === 0) return dailyStats;
+
+    // Roll up events by (date, campaign_id, developer_id)
+    const buckets = new Map();
+    for (const ev of events) {
+      const date = (ev.created_at || "").slice(0, 10);
+      const key = `${date}|${ev.campaign_id || "null"}|${ev.developer_id || "null"}`;
+      if (!buckets.has(key)) {
+        buckets.set(key, {
+          date,
+          campaign_id: ev.campaign_id || null,
+          developer_id: ev.developer_id || null,
+          impressions: 0, clicks: 0, conversions: 0,
+          spend: 0, developer_earnings: 0,
+        });
+      }
+      const b = buckets.get(key);
+      if (ev.event_type === "impression") b.impressions++;
+      else if (ev.event_type === "click") b.clicks++;
+      else if (ev.event_type === "video_complete") b.conversions++;
+      b.spend += Number(ev.cost || 0);
+      b.developer_earnings += Number(ev.developer_payout || 0);
+    }
+
+    // Replace any matching rows in dailyStats with live rollups, append new.
+    const live = [...buckets.values()];
+    const filtered = (dailyStats || []).filter(d => {
+      return !live.some(l =>
+        l.date === d.date &&
+        (l.campaign_id || null) === (d.campaign_id || null) &&
+        (l.developer_id || null) === (d.developer_id || null)
+      );
+    });
+    return [...filtered, ...live].sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  } catch (_) {
+    return dailyStats;
+  }
 }
 
 // ── Exports for testing ───────────────────────────────────────────────

@@ -330,7 +330,10 @@ async function handleCreate(req, res) {
 
   const now = new Date().toISOString();
   const row = {
-    id: b.id || "cam_" + crypto.randomBytes(6).toString("hex"),
+    // UUID required — Supabase campaigns.id is a UUID column. The old
+    // "cam_<hex>" format worked for the in-memory demo Map but caused
+    // 500s in production ("invalid input syntax for type uuid").
+    id: b.id || crypto.randomUUID(),
     advertiser_id: b.advertiser_id,
     name: b.name || b.headline.slice(0, 40),
     status: "in_review", // always starts in review

@@ -108,7 +108,12 @@ async function test(name, fn) {
     assert.strictEqual(r._status, 201);
     assert.strictEqual(r._body.campaign.status, "in_review");
     assert.strictEqual(r._body.campaign.advertiser_id, "adv_test");
-    assert(r._body.campaign.id.startsWith("cam_"));
+    // Campaign IDs must be valid UUIDs — Supabase campaigns.id is a UUID
+    // column, so any non-UUID generator (e.g. the old "cam_<hex>" form)
+    // causes 500s in production.
+    assert.match(r._body.campaign.id,
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      "campaign.id must be a valid UUID");
     assert(r._body.policy, "should include policy check result");
   });
 
