@@ -84,10 +84,24 @@ module.exports = async function handler(req, res) {
   const event      = params.event;
   const campaignId = params.campaign_id;
   const sessionId  = params.session || params.session_id || null;
-  const developerId = params.dev || params.developer_id || null;
+  // Callers (MCP handler, SDK pixel, direct API) may pass EITHER the
+  // publisher's UUID or their api_key ("bb_dev_live_..."). events.developer_id
+  // is a UUID column, so we resolve api_keys to UUIDs before insert —
+  // otherwise Postgres rejects the insert and the impression vanishes.
+  let developerId = params.dev || params.developer_id || null;
 
   if (!event || !campaignId) {
     return res.status(400).json({ error: "Missing event or campaign_id" });
+  }
+
+  // Resolve api_key → UUID for Supabase inserts
+  if (developerId && typeof developerId === "string" && developerId.startsWith("bb_dev_")) {
+    const sbResolve = supa();
+    if (sbResolve) {
+      const { data: dev } = await sbResolve.from("developers")
+        .select("id").eq("api_key", developerId).single();
+      developerId = dev ? dev.id : null;
+    }
   }
 
   const valid = ["impression", "click", "close", "skip", "video_complete"];
@@ -177,8 +191,10 @@ module.exports = async function handler(req, res) {
     if (["impression", "click", "video_complete"].includes(event)) {
       let campaign = null;
       try {
-        const camps = require("./campaigns.js")._DEMO_CAMPAIGNS || [];
-        campaign = camps.find(c => c.id === campaignId);
+        // _DEMO_CAMPAIGNS is a Map in campaigns.js — use .get() not .find()
+        const camps = require("./campaigns.js")._DEMO_CAMPAIGNS;
+        if (camps && typeof camps.get === "function") campaign = camps.get(campaignId);
+        else if (Array.isArray(camps)) campaign = camps.find(c => c.id === campaignId);
       } catch (_) {}
       if (campaign) {
         const cost = computeCost(event, campaign);
