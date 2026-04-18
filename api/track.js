@@ -94,15 +94,22 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: "Missing event or campaign_id" });
   }
 
-  // Resolve api_key → UUID for Supabase inserts
+  // Resolve api_key → UUID for Supabase inserts. Diagnostic header tells
+  // the E2E whether the publisher's events will be queryable later.
+  let _devResolved = "n/a";
   if (developerId && typeof developerId === "string" && developerId.startsWith("bb_dev_")) {
     const sbResolve = supa();
     if (sbResolve) {
-      const { data: dev } = await sbResolve.from("developers")
+      const { data: dev, error: devErr } = await sbResolve.from("developers")
         .select("id").eq("api_key", developerId).single();
-      developerId = dev ? dev.id : null;
-    }
+      if (dev) { developerId = dev.id; _devResolved = "ok"; }
+      else { developerId = null; _devResolved = "miss:" + (devErr?.code || "no_rows"); }
+    } else { _devResolved = "no_sb"; }
   }
+  res.setHeader("x-track-dev-resolved", _devResolved);
+  res.setHeader("x-track-key-type",
+    process.env.SUPABASE_SERVICE_ROLE_KEY ? "service_role" :
+    process.env.SUPABASE_ANON_KEY ? "anon" : "none");
 
   const valid = ["impression", "click", "close", "skip", "video_complete"];
   if (!valid.includes(event)) {

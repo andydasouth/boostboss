@@ -103,6 +103,13 @@ module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   res.setHeader("x-stats-mode", HAS_SUPABASE ? "supabase" : "demo");
+  // Diagnostic: surface whether we're using the service role (bypasses
+  // RLS) or the anon key (will hit RLS policies). RLS on events filters
+  // by auth.uid() = developer_id, so anon-key reads always return zero
+  // for cross-user queries — making this header essential for debugging.
+  res.setHeader("x-stats-key-type",
+    process.env.SUPABASE_SERVICE_ROLE_KEY ? "service_role" :
+    process.env.SUPABASE_ANON_KEY ? "anon (RLS-restricted)" : "none");
   if (req.method === "OPTIONS") return res.status(200).end();
 
   try {

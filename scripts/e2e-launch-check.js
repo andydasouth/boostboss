@@ -54,7 +54,9 @@ async function call(path, opts = {}) {
     return { ok: false, status: 0, err: err.message, ms: Date.now() - t0 };
   }
   return { ok: resp.ok, status: resp.status, json, text, ms: Date.now() - t0,
-           mode: resp.headers.get("x-stats-mode") || resp.headers.get("x-mcp-mode") || resp.headers.get("x-bbx-mode") };
+           mode: resp.headers.get("x-stats-mode") || resp.headers.get("x-mcp-mode") || resp.headers.get("x-bbx-mode"),
+           devResolved: resp.headers.get("x-track-dev-resolved"),
+           keyType: resp.headers.get("x-stats-key-type") || resp.headers.get("x-track-key-type") };
 }
 
 function uid() { return Math.random().toString(36).slice(2, 8); }
@@ -224,7 +226,8 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
       },
     });
     if (!imp.ok) log("FAIL", "track_event impression", `HTTP ${imp.status}: ${imp.text?.slice(0, 200)}`);
-    else log("PASS", "Impression tracked", `${imp.ms}ms`);
+    else log("PASS", "Impression tracked",
+      `${imp.ms}ms · dev-resolved=${imp.devResolved || "?"} · key=${imp.keyType || "?"}`);
 
     // Click event
     const click = await call("/api/mcp", {
@@ -256,7 +259,7 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
       const imps = s.impressions ?? s.total_impressions ?? s.stats?.impressions ?? 0;
       const earn = s.earnings ?? s.revenue ?? s.stats?.earnings ?? 0;
       log(imps > 0 ? "PASS" : "WARN", `Publisher stats — impressions=${imps} earnings=$${earn}`,
-          imps === 0 ? "Stats endpoint returned 0 impressions despite track_event. Check stats query against events table." : null);
+          imps === 0 ? `Stats returned 0 despite track_event. key=${pubStats.keyType || "?"}. If key=anon, SUPABASE_SERVICE_ROLE_KEY is missing in Vercel env — RLS blocks reads.` : null);
     }
   }
   if (advId) {
