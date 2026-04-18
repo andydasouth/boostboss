@@ -262,7 +262,6 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
     } else {
       log("PASS", "Click tracked", `${click.ms}ms`);
     }
-    else log("PASS", "Click tracked", `${click.ms}ms`);
   } else {
     log("WARN", "Skipping track_event (no ad was served)");
   }
