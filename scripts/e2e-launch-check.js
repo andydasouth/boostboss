@@ -208,6 +208,10 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
   }
 
   // ── 6. Track impression ────────────────────────────────────────────
+  // The MCP track_event tool's inputSchema requires `event` and
+  // `campaign_id` (per api/mcp.js line 166). The Lumi SDK uses these
+  // exact names; only earlier versions of this E2E used the shorter
+  // event_type/ad_id, which is why every impression silently dropped.
   if (servedAdId) {
     const imp = await call("/api/mcp", {
       method: "POST",
@@ -216,8 +220,8 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
         params: {
           name: "track_event",
           arguments: {
-            event_type: "impression",
-            ad_id: servedAdId,
+            event: "impression",
+            campaign_id: servedAdId,
             session_id: `e2e_${Date.now()}`,
             developer_api_key: pubApiKey,
             host: "e2e-test.local",
@@ -225,8 +229,6 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
         },
       },
     });
-    // Parse the inner JSON-RPC payload — the MCP wrapper now includes
-    // tracked:true|false, error, and dev_resolved in the result text.
     let impInner = {};
     try { impInner = JSON.parse(imp.json?.result?.content?.[0]?.text || "{}"); } catch {}
     const impDevResolved = impInner.dev_resolved || imp.devResolved || "?";
@@ -239,20 +241,27 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
         `${imp.ms}ms · dev-resolved=${impDevResolved} · key=${impKey}`);
     }
 
-    // Click event
+    // Click event — same correct field names
     const click = await call("/api/mcp", {
       method: "POST",
       body: {
         jsonrpc: "2.0", id: 102, method: "tools/call",
         params: {
           name: "track_event",
-          arguments: { event_type: "click", ad_id: servedAdId,
+          arguments: { event: "click", campaign_id: servedAdId,
                        session_id: `e2e_${Date.now()}`,
                        developer_api_key: pubApiKey, host: "e2e-test.local" },
         },
       },
     });
-    if (!click.ok) log("FAIL", "track_event click", `HTTP ${click.status}: ${click.text?.slice(0, 200)}`);
+    let clickInner = {};
+    try { clickInner = JSON.parse(click.json?.result?.content?.[0]?.text || "{}"); } catch {}
+    if (!click.ok || clickInner.tracked === false) {
+      log("FAIL", "track_event click",
+        `HTTP ${click.status} · tracked=${clickInner.tracked} · err=${clickInner.error || "?"}`);
+    } else {
+      log("PASS", "Click tracked", `${click.ms}ms`);
+    }
     else log("PASS", "Click tracked", `${click.ms}ms`);
   } else {
     log("WARN", "Skipping track_event (no ad was served)");
