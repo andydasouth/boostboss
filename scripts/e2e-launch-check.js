@@ -273,21 +273,30 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
     const pubStats = await call(`/api/stats?type=developer&key=${encodeURIComponent(pubApiKey)}`);
     if (!pubStats.ok) log("FAIL", "Publisher stats", `HTTP ${pubStats.status}: ${pubStats.text?.slice(0, 200)}`);
     else {
+      // Real response shape (from rollUpDevTotals + handleDeveloperStats):
+      //   { developer, daily: [...], totals: { impressions, clicks, developer_earnings } }
       const s = pubStats.json || {};
-      const imps = s.impressions ?? s.total_impressions ?? s.stats?.impressions ?? 0;
-      const earn = s.earnings ?? s.revenue ?? s.stats?.earnings ?? 0;
+      const t = s.totals || {};
+      const imps = t.impressions ?? s.impressions ?? 0;
+      const earn = t.developer_earnings ?? t.earnings ?? s.earnings ?? 0;
+      const dayCount = (s.daily || []).length;
       log(imps > 0 ? "PASS" : "WARN", `Publisher stats — impressions=${imps} earnings=$${earn}`,
-          imps === 0 ? `Stats returned 0 despite track_event. key=${pubStats.keyType || "?"}. If key=anon, SUPABASE_SERVICE_ROLE_KEY is missing in Vercel env — RLS blocks reads.` : null);
+          imps === 0 ? `daily-rows=${dayCount} key=${pubStats.keyType || "?"}. Events were tracked successfully but stats query returned no matching rows. Check developers table has api_key match for ${pubApiKey ? pubApiKey.slice(0,16)+'...' : '?'}.` : `daily-rows=${dayCount}`);
     }
   }
   if (advId) {
     const advStats = await call(`/api/stats?type=advertiser&id=${encodeURIComponent(advId)}`);
     if (!advStats.ok) log("FAIL", "Advertiser stats", `HTTP ${advStats.status}: ${advStats.text?.slice(0, 200)}`);
     else {
+      // Real response shape (from rollUpTotals + handleAdvertiserStats):
+      //   { campaigns: [...], daily: [...], totals: { impressions, clicks, spend } }
       const s = advStats.json || {};
-      const imps = s.impressions ?? s.total_impressions ?? s.stats?.impressions ?? 0;
-      const spend = s.spend ?? s.spent ?? s.stats?.spend ?? 0;
-      log(imps > 0 ? "PASS" : "WARN", `Advertiser stats — impressions=${imps} spend=$${spend}`);
+      const t = s.totals || {};
+      const imps = t.impressions ?? s.impressions ?? 0;
+      const spend = t.spend ?? s.spend ?? 0;
+      const campCount = (s.campaigns || []).length;
+      log(imps > 0 ? "PASS" : "WARN", `Advertiser stats — impressions=${imps} spend=$${spend}`,
+          `campaigns=${campCount}` + (imps === 0 ? " (zero is expected — our new campaign is in_review so no impressions can attribute to it yet)" : ""));
     }
   }
 
