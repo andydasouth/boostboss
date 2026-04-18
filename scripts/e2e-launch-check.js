@@ -225,9 +225,19 @@ function uid() { return Math.random().toString(36).slice(2, 8); }
         },
       },
     });
-    if (!imp.ok) log("FAIL", "track_event impression", `HTTP ${imp.status}: ${imp.text?.slice(0, 200)}`);
-    else log("PASS", "Impression tracked",
-      `${imp.ms}ms · dev-resolved=${imp.devResolved || "?"} · key=${imp.keyType || "?"}`);
+    // Parse the inner JSON-RPC payload — the MCP wrapper now includes
+    // tracked:true|false, error, and dev_resolved in the result text.
+    let impInner = {};
+    try { impInner = JSON.parse(imp.json?.result?.content?.[0]?.text || "{}"); } catch {}
+    const impDevResolved = impInner.dev_resolved || imp.devResolved || "?";
+    const impKey = imp.keyType || "?";
+    if (!imp.ok || impInner.tracked === false) {
+      log("FAIL", "track_event impression",
+        `HTTP ${imp.status} · tracked=${impInner.tracked} · err=${impInner.error || "?"} · dev=${impDevResolved}`);
+    } else {
+      log("PASS", "Impression tracked",
+        `${imp.ms}ms · dev-resolved=${impDevResolved} · key=${impKey}`);
+    }
 
     // Click event
     const click = await call("/api/mcp", {

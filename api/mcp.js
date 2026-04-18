@@ -317,10 +317,19 @@ async function handleTrackEvent(body, args, res) {
       developer_id: args.developer_api_key || null,
     },
   };
+  let trackErr = null;
   try {
     await trackHandler(mockReq, mockRes);
   } catch (e) {
+    trackErr = e.message;
     console.error("[MCP track_event]", e.message);
+  }
+  // Forward track's diagnostic headers so callers can see if the
+  // api_key→UUID resolution succeeded, the key type used, etc. Before
+  // this, these were set on the mock response and discarded — silent
+  // insert failures were invisible from outside.
+  for (const [k, v] of Object.entries(mockRes._headers || {})) {
+    if (k.toLowerCase().startsWith("x-track-")) res.setHeader(k, v);
   }
   // Also store in MCP's local events for the test suite
   DEMO_EVENTS.push({
@@ -329,7 +338,14 @@ async function handleTrackEvent(body, args, res) {
     session_id: args.session_id || null,
     created_at: new Date().toISOString(),
   });
-  return jsonRpc(res, body.id, { tracked: true });
+  // Return the REAL outcome instead of always {tracked:true}. Publishers
+  // (and the E2E test) need to see when an insert fails.
+  const ok = !trackErr && mockRes._status < 400;
+  return jsonRpc(res, body.id, {
+    tracked: ok,
+    ...(ok ? {} : { error: (mockRes._body && mockRes._body.error) || trackErr || `HTTP ${mockRes._status}` }),
+    ...(mockRes._headers["x-track-dev-resolved"] ? { dev_resolved: mockRes._headers["x-track-dev-resolved"] } : {}),
+  });
 }
 
 function jsonRpc(res, id, result) {
