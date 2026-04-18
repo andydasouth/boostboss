@@ -41,12 +41,14 @@ function hashCode(s) {
   return Math.abs(h);
 }
 
-// Import campaigns for demo
-let _campaigns;
+// Import campaigns for demo. _DEMO_CAMPAIGNS is a Map in campaigns.js,
+// so materialize its values into an array for .filter()/.map() use here.
 function demoCampaigns() {
-  if (_campaigns) return _campaigns;
-  try { _campaigns = require("./campaigns.js")._DEMO_CAMPAIGNS || []; } catch (_) { _campaigns = []; }
-  return _campaigns;
+  try {
+    const raw = require("./campaigns.js")._DEMO_CAMPAIGNS;
+    if (raw && typeof raw.values === "function") return Array.from(raw.values());
+    return Array.isArray(raw) ? raw : [];
+  } catch (_) { return []; }
 }
 
 // Import track events for demo
