@@ -1631,59 +1631,64 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                                      : active.some(r => r.dataset.source === 'house') ? '100%' : '94.2%';
         }
 
+        // Server is the single source of truth. On page load we ALWAYS hit
+        // /api/auth?action=me with the session token to get the authoritative
+        // profile for whichever account this session belongs to. localStorage
+        // is only used as a fallback if the network call fails (offline mode).
+        // This prevents the stale-cache bug where a publisher with two accounts
+        // in the same browser saw the wrong dashboard data.
         async function checkAuthStatus() {
-            const session = localStorage.getItem('bb_dev_session');
-            const userData = localStorage.getItem('bb_dev_data');
+            const sessionRaw = localStorage.getItem('bb_dev_session');
+            if (!sessionRaw) { showAuthView(); return; }
 
-            if (session && userData) {
+            let sessionData;
+            try { sessionData = JSON.parse(sessionRaw); }
+            catch { clearSessionAndShowAuth(); return; }
+
+            if (!sessionData.token) { clearSessionAndShowAuth(); return; }
+
+            // Fetch the authoritative profile for this session token.
+            let me;
+            try {
+                const resp = await fetch(`${API_BASE}/api/auth?action=me`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${sessionData.token}`,
+                    },
+                });
+                if (resp.status === 401) { clearSessionAndShowAuth(); return; }
+                if (!resp.ok) throw new Error('me call failed: ' + resp.status);
+                me = await resp.json();
+            } catch (networkErr) {
+                // Network failure — fall back to cached profile if we have one,
+                // otherwise kick to auth. This keeps the dashboard usable offline
+                // but never shows wrong-account data when the server is reachable.
+                console.warn('Profile refresh failed, using cache:', networkErr);
+                const cached = localStorage.getItem('bb_dev_data');
+                if (!cached) { clearSessionAndShowAuth(); return; }
                 try {
-                    const sessionData = JSON.parse(session);
-                    const data = JSON.parse(userData);
-
-                    if (sessionData.token && sessionData.user_id) {
-                        // Show dashboard immediately from cache so the UI isn't blank,
-                        // then refresh the profile from the server. This fixes a stale-
-                        // localStorage bug where publishers who signed up multiple
-                        // accounts in the same browser saw 0 impressions because the
-                        // dashboard was calling stats with an old account's api_key.
-                        userProfile = data;
-                        loadDashboard();
-
-                        try {
-                            const meResp = await fetch(`${API_BASE}/api/auth?action=me`, {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': `Bearer ${sessionData.token}`,
-                                },
-                            });
-                            if (meResp.ok) {
-                                const me = await meResp.json();
-                                const freshKey = me.profile?.api_key;
-                                if (freshKey && freshKey !== userProfile.api_key) {
-                                    // Server says this user's current api_key is different
-                                    // from what's cached. Update and reload stats so the
-                                    // dashboard matches the account actually in use.
-                                    userProfile = { ...userProfile, ...me.profile, email: me.user?.email || userProfile.email };
-                                    localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
-                                    if (typeof loadStats === 'function') {
-                                        const fresh = await loadStats();
-                                        if (fresh) updateDashboard(fresh);
-                                    }
-                                }
-                            }
-                        } catch (_) { /* keep cached profile — never break dashboard on refresh */ }
-
-                        return;
-                    }
-                } catch (e) {
-                    console.error('Session parsing error:', e);
-                }
+                    userProfile = JSON.parse(cached);
+                    loadDashboard();
+                } catch { clearSessionAndShowAuth(); }
+                return;
             }
 
-            // Clear invalid session and show auth
+            if (!me?.profile) { clearSessionAndShowAuth(); return; }
+
+            // We have the authoritative profile. Save it and render.
+            userProfile = {
+                ...me.profile,
+                email: me.user?.email || me.profile.email,
+            };
+            localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
+            loadDashboard();
+        }
+
+        function clearSessionAndShowAuth() {
             localStorage.removeItem('bb_dev_session');
             localStorage.removeItem('bb_dev_data');
+            userProfile = null;
             showAuthView();
         }
 
