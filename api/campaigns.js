@@ -366,14 +366,40 @@ async function handleCreate(req, res) {
   // Run creative policy check immediately
   const policy = validateCreativePolicy(row);
 
+  // Auto-approve on first campaign: new advertisers' first campaign goes
+  // straight to "active" if creative policy passes. This unblocks self-serve
+  // — without it, an advertiser's first campaign sits in_review forever
+  // waiting on a manual admin approval. Subsequent campaigns still go
+  // through review so we can still police abuse from established accounts.
   const sb = supa();
+  let autoApproved = false;
+  if (policy.ok) {
+    let priorCount = 0;
+    if (sb) {
+      const { count } = await sb.from("campaigns")
+        .select("id", { count: "exact", head: true })
+        .eq("advertiser_id", b.advertiser_id);
+      priorCount = count || 0;
+    } else {
+      for (const c of DEMO_CAMPAIGNS.values()) {
+        if (c.advertiser_id === b.advertiser_id) priorCount++;
+      }
+    }
+    if (priorCount === 0) {
+      row.status = "active";
+      row.reviewed_at = now;
+      row.review_notes = "Auto-approved (first campaign, creative policy passed)";
+      autoApproved = true;
+    }
+  }
+
   if (sb) {
     const { data, error } = await sb.from("campaigns").insert(row).select().single();
     if (error) return res.status(500).json({ error: error.message });
-    return res.status(201).json({ campaign: data, policy });
+    return res.status(201).json({ campaign: data, policy, auto_approved: autoApproved });
   }
   DEMO_CAMPAIGNS.set(row.id, row);
-  return res.status(201).json({ campaign: row, policy });
+  return res.status(201).json({ campaign: row, policy, auto_approved: autoApproved });
 }
 
 // ── update ──────────────────────────────────────────────────────────────

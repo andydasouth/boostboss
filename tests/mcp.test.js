@@ -186,6 +186,83 @@ async function test(name, fn) {
     assert(content.benna.context.session_len === 25);
   });
 
+  await test("self-promote: publisher's own campaign wins when host matches cta_url domain", async () => {
+    // Seed a campaign whose cta_url points at fissbot.chat. When the
+    // publisher asks for an ad with host=fissbot.chat, self-promote mode
+    // should make that campaign win the auction even if another campaign
+    // has a higher Benna-scored bid.
+    const campaigns = require("../api/campaigns.js");
+    const fissbotCampaign = {
+      id: "00000000-0000-0000-0000-000000000111",
+      advertiser_id: "adv_fissbot_test",
+      name: "Fissbot Self-Promote",
+      status: "active", format: "native",
+      headline: "Try Fissbot — your AI task agent",
+      subtext: "Get tasks done with AI",
+      cta_label: "Try Fissbot",
+      cta_url: "https://fissbot.chat",
+      adomain: ["fissbot.chat"],
+      target_keywords: [], target_regions: ["global"], target_languages: ["en"],
+      billing_model: "cpm", bid_amount: 0.5,  // deliberately low
+      daily_budget: 100, total_budget: 1000,
+      spent_today: 0, spent_total: 0,
+    };
+    campaigns._DEMO_CAMPAIGNS.set(fissbotCampaign.id, fissbotCampaign);
+    mcp._reset();
+
+    const r = await run({
+      method: "POST",
+      body: {
+        method: "tools/call", id: 13,
+        params: {
+          name: "get_sponsored_content",
+          arguments: { host: "fissbot.chat", session_id: "test_selfpromote_1" },
+        },
+      },
+    });
+    const content = JSON.parse(r._body.result.content[0].text);
+    assert(content.sponsored, "should serve an ad");
+    assert.strictEqual(content.sponsored.campaign_id, fissbotCampaign.id,
+      "fissbot's own campaign should win on its own domain");
+    assert.strictEqual(content.benna.self_promote, true,
+      "benna metadata should flag self_promote=true");
+
+    // Also matches via apex domain (www.fissbot.chat, fissbot.com both work)
+    mcp._reset();
+    const r2 = await run({
+      method: "POST",
+      body: {
+        method: "tools/call", id: 14,
+        params: {
+          name: "get_sponsored_content",
+          arguments: { host: "www.fissbot.chat", session_id: "test_selfpromote_2" },
+        },
+      },
+    });
+    const content2 = JSON.parse(r2._body.result.content[0].text);
+    assert.strictEqual(content2.sponsored.campaign_id, fissbotCampaign.id,
+      "www-prefixed host should still self-promote");
+  });
+
+  await test("self-promote: host mismatch falls through to normal auction", async () => {
+    mcp._reset();
+    const r = await run({
+      method: "POST",
+      body: {
+        method: "tools/call", id: 15,
+        params: {
+          name: "get_sponsored_content",
+          arguments: { host: "unrelated-publisher.com", session_id: "test_selfpromote_3" },
+        },
+      },
+    });
+    const content = JSON.parse(r._body.result.content[0].text);
+    assert(content.sponsored, "should still serve an ad");
+    assert.notStrictEqual(content.sponsored.campaign_id, "00000000-0000-0000-0000-000000000111",
+      "should NOT self-promote fissbot on an unrelated publisher");
+    assert.strictEqual(content.benna.self_promote, false);
+  });
+
   // ── tools/call: track_event ────────────────────────────────────────
   mcp._reset();
   await test("track_event records impression in demo store", async () => {

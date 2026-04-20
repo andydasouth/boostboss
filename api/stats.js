@@ -299,10 +299,11 @@ function formatDeveloper(dev) {
     app_id: dev.app_id,
     revenue_share_pct: dev.revenue_share_pct,
     formats: {
-      corner: dev.format_corner,
+      native:     dev.format_native,
+      image:      dev.format_image,
+      corner:     dev.format_corner,
+      video:      dev.format_video,
       fullscreen: dev.format_fullscreen,
-      video: dev.format_video,
-      native: dev.format_native,
     },
   };
 }

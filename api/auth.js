@@ -218,7 +218,22 @@ function demoHandler(action, body, req, res) {
     return res.json({ success: true, mode: "demo" });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, me, logout" });
+  // Update a publisher's accepted ad formats. The auction reads this to filter
+  // campaigns so publishers only receive formats they've opted into.
+  if (action === "update_formats") {
+    const { api_key, formats } = body;
+    if (!api_key || !formats) return res.status(400).json({ error: "Missing api_key or formats" });
+    // Demo mode: find the developer by api_key and update in-memory.
+    for (const user of DEMO_USERS.values()) {
+      if (user.profile?.api_key === api_key) {
+        user.profile.formats = { ...(user.profile.formats || {}), ...formats };
+        return res.json({ success: true, mode: "demo", formats: user.profile.formats });
+      }
+    }
+    return res.status(404).json({ error: "Developer not found" });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, me, logout, update_formats" });
 }
 
 // ─────────────────── SUPABASE IMPLEMENTATION ────────────────────────
@@ -294,7 +309,55 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ success: true, mode: "supabase" });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, me, logout" });
+  if (action === "update_formats") {
+    const { api_key, formats } = body;
+    if (!api_key || !formats) return res.status(400).json({ error: "Missing api_key or formats" });
+    // Schema stores format prefs as individual boolean columns for indexing
+    // clarity (format_native, format_image, format_corner, format_video,
+    // format_fullscreen). Translate the JSON toggles the client sent into
+    // column updates, ignoring unknown keys.
+    const columnMap = {
+      native:     "format_native",
+      image:      "format_image",
+      corner:     "format_corner",
+      video:      "format_video",
+      fullscreen: "format_fullscreen",
+    };
+    const updates = {};
+    for (const [key, value] of Object.entries(formats)) {
+      const col = columnMap[key];
+      if (col) updates[col] = !!value;
+    }
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ error: "No recognized format keys" });
+    }
+    const { data: dev, error: lookupErr } = await supabaseAdmin
+      .from("developers")
+      .select("id")
+      .eq("api_key", api_key)
+      .single();
+    if (lookupErr || !dev) return res.status(404).json({ error: "Developer not found" });
+    const { data: updated, error: updateErr } = await supabaseAdmin
+      .from("developers")
+      .update(updates)
+      .eq("id", dev.id)
+      .select("format_native, format_image, format_corner, format_video, format_fullscreen")
+      .single();
+    if (updateErr) return res.status(500).json({ error: updateErr.message });
+    return res.json({
+      success: true,
+      mode: "supabase",
+      formats: {
+        native:     updated.format_native,
+        image:      updated.format_image,
+        corner:     updated.format_corner,
+        video:      updated.format_video,
+        fullscreen: updated.format_fullscreen,
+      },
+    });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, me, logout, update_formats" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {

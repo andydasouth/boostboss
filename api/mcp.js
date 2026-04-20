@@ -79,6 +79,43 @@ function deriveBennaContext(args) {
   return out;
 }
 
+// ── Self-promote host matching ─────────────────────────────────────────
+// Normalizes a host string to its apex domain-ish form so that
+// "www.fissbot.com", "https://fissbot.com/path", and "fissbot.com:443"
+// all compare equal.
+function normalizeHost(h) {
+  if (!h) return null;
+  try {
+    // Accept both bare hosts and full URLs
+    let s = String(h).trim().toLowerCase();
+    if (!/^https?:\/\//.test(s)) s = "https://" + s;
+    const u = new URL(s);
+    return u.hostname.replace(/^www\./, "");
+  } catch (_) { return null; }
+}
+
+// Returns true if the campaign belongs to the same "brand" as publisherHost.
+// Checks the campaign.adomain array (preferred, advertiser-supplied) then
+// falls back to the hostname of cta_url.
+function campaignMatchesHost(campaign, publisherHost) {
+  if (!publisherHost) return false;
+  const candidates = [];
+  for (const d of (campaign.adomain || [])) {
+    const n = normalizeHost(d);
+    if (n) candidates.push(n);
+  }
+  const ctaHost = normalizeHost(campaign.cta_url);
+  if (ctaHost) candidates.push(ctaHost);
+  // Match either direction of subdomain relationship so
+  // fissbot.chat and fissbot.com both match fissbot.com.
+  const baseOf = (h) => {
+    const parts = h.split(".");
+    return parts.length >= 2 ? parts.slice(-2).join(".") : h;
+  };
+  const pubBase = baseOf(publisherHost);
+  return candidates.some((c) => baseOf(c) === pubBase);
+}
+
 // ── Eligibility filters ────────────────────────────────────────────────
 function eligible(campaign, userRegion, userLanguage) {
   if ((campaign.spent_today || 0) >= (campaign.daily_budget || 0)) return false;
@@ -220,12 +257,27 @@ async function handleGetSponsoredContent(body, args, res) {
     }
   }
 
-  // Resolve developer
+  // Resolve developer — and load their accepted-formats preferences.
+  // Auction will filter out campaigns whose format this publisher rejects,
+  // so publishers stay in control of their UX without writing code per-format.
+  // Schema stores each format as an individual boolean column; we assemble
+  // the preference object for the filter step.
   let developerId = null;
+  let developerFormats = null; // null = no filter (accept all, back-compat)
   if (args.developer_api_key && sb) {
     const { data: dev } = await sb.from("developers")
-      .select("id").eq("api_key", args.developer_api_key).eq("status", "active").single();
-    if (dev) developerId = dev.id;
+      .select("id, format_native, format_image, format_corner, format_video, format_fullscreen")
+      .eq("api_key", args.developer_api_key).eq("status", "active").single();
+    if (dev) {
+      developerId = dev.id;
+      developerFormats = {
+        native:     dev.format_native !== false,
+        image:      dev.format_image !== false,
+        corner:     dev.format_corner !== false,
+        video:      dev.format_video !== false,
+        fullscreen: dev.format_fullscreen !== false,
+      };
+    }
   }
 
   // Benna-powered first-price auction
@@ -233,8 +285,23 @@ async function handleGetSponsoredContent(body, args, res) {
   const lang = args.user_language || "en";
   const bennaCtx = deriveBennaContext(args);
 
+  // Self-promote: if the publisher host matches the advertiser's own domain,
+  // the advertiser's campaign wins automatically (house ad / fallback).
+  // Every publisher who is also an advertiser wants this — it fills inventory
+  // other advertisers wouldn't bid on, and lets you test your own ads on your
+  // own product without gaming the auction.
+  const publisherHost = normalizeHost(args.host);
+
   const scored = campaigns
     .filter((c) => eligible(c, region, lang))
+    .filter((c) => {
+      // Publisher format filter: respect the toggles in the developer dashboard.
+      // If developerFormats is null (demo mode or no toggles set), accept all.
+      if (!developerFormats) return true;
+      const fmt = c.format || "native";
+      // Explicit false = off; missing/undefined/true = on (generous default).
+      return developerFormats[fmt] !== false;
+    })
     .map((c) => {
       const kwBoost = keywordContextBoost(c, args.context_summary);
       const prediction = benna.scoreBid(bennaCtx, {
@@ -243,10 +310,15 @@ async function handleGetSponsoredContent(body, args, res) {
         format: c.format,
       });
       const effectiveBid = prediction.bid_usd * (1 + kwBoost * 0.15);
-      return { c, prediction, kwBoost, effectiveBid };
+      const selfPromote = publisherHost && campaignMatchesHost(c, publisherHost);
+      return { c, prediction, kwBoost, effectiveBid, selfPromote };
     })
     .filter((x) => x.effectiveBid > 0)
-    .sort((a, b) => b.effectiveBid - a.effectiveBid);
+    // Self-promoted campaigns win first; among the rest, highest bid wins.
+    .sort((a, b) => {
+      if (a.selfPromote !== b.selfPromote) return a.selfPromote ? -1 : 1;
+      return b.effectiveBid - a.effectiveBid;
+    });
 
   if (scored.length === 0) {
     return jsonRpc(res, body.id, { sponsored: null, reason: "no_match" });
@@ -288,6 +360,7 @@ async function handleGetSponsoredContent(body, args, res) {
       latency_ms: p.latency_ms,
       candidates_considered: scored.length,
       context: bennaCtx,
+      self_promote: !!winner.selfPromote,
     },
   });
 }

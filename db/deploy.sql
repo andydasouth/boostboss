@@ -34,6 +34,7 @@ create table if not exists public.developers (
   format_fullscreen  boolean default true,
   format_video       boolean default true,
   format_native      boolean default true,
+  format_image       boolean default true,
   status             text default 'active' check (status in ('active','suspended','pending')),
   created_at         timestamptz default now(),
   updated_at         timestamptz default now()
@@ -224,6 +225,12 @@ do $$ begin
   end if;
   if not exists (select 1 from information_schema.columns where table_name='campaigns' and column_name='target_roas') then
     alter table public.campaigns add column target_roas numeric(8,2);
+  end if;
+  -- Publisher format toggles: image format added after initial deploy.
+  if not exists (select 1 from information_schema.columns where table_name='developers' and column_name='format_image') then
+    alter table public.developers add column format_image boolean default true;
+    -- Backfill existing rows so no publisher loses inventory during rollout.
+    update public.developers set format_image = true where format_image is null;
   end if;
 end $$;
 

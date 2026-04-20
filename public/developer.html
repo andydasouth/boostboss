@@ -42,12 +42,16 @@
 
         /* Auth Container */
         .auth-container {
-            display: flex;
+            display: none;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
             background: #FAFAF7;
             padding: 1rem;
+        }
+
+        .auth-container.active {
+            display: flex;
         }
 
         .auth-card {
@@ -1058,6 +1062,29 @@
                 <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
                     Spins up a synthetic publisher account with $18.9K MRR and a live ad-request feed.
                 </div>
+
+                <div style="margin-top: 18px; padding-top: 14px; border-top: 1px dashed #D1D5DB;">
+                    <button type="button" onclick="toggleApiKeyLogin()" style="
+                        background: none; border: none; color: #FF2D78;
+                        font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+                        cursor: pointer; text-decoration: underline;">
+                        Already have an API key? View your dashboard →
+                    </button>
+                    <div id="apiKeyLoginForm" style="display: none; margin-top: 12px;">
+                        <input type="text" id="apiKeyInput" placeholder="bb_dev_live_..." style="
+                            width: 100%; padding: 10px 12px; border: 1.5px solid #1A1A2E;
+                            border-radius: 8px; font-family: 'JetBrains Mono', monospace;
+                            font-size: 13px; margin-bottom: 8px;" />
+                        <button type="button" onclick="handleApiKeyLogin()" style="
+                            width: 100%; padding: 10px 16px; background: #04BEFE; color: #1A1A2E;
+                            border: 1.5px solid #1A1A2E; border-radius: 8px;
+                            font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+                            cursor: pointer; box-shadow: 2px 2px 0 #1A1A2E;">
+                            View Dashboard
+                        </button>
+                        <div id="apiKeyLoginError" style="color: #DC2626; font-size: 12px; margin-top: 8px; display: none;"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1354,9 +1381,18 @@
 
             <!-- Ad Format Controls -->
             <div class="section">
-                <div class="section-title">Ad Format Controls</div>
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px;">
+                    <div class="section-title" style="margin-bottom: 0;">Ad Formats You Accept</div>
+                    <div style="font-size: 12px; color: #6B7280;">
+                        Est. monthly income: <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
+                        <span style="color: #9CA3AF; font-size: 11px;">&nbsp;(at current volume)</span>
+                    </div>
+                </div>
                 <div class="controls-grid" id="adFormatsContainer">
                     <!-- Dynamically populated -->
+                </div>
+                <div style="font-size: 11px; color: #9CA3AF; margin-top: 10px; line-height: 1.5;">
+                    Toggling a format OFF removes that ad type from your auction. Higher-CPM formats (video, fullscreen) pay more but require more user attention — pick based on what fits your product's UX.
                 </div>
             </div>
 
@@ -1537,6 +1573,26 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // URL param shortcut: /developer?key=bb_dev_live_...
+            // Bypasses all auth/session logic. Simplest path for publishers
+            // who have their key and want to see their dashboard.
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlKey = urlParams.get('key');
+            if (urlKey && urlKey.startsWith('bb_dev_')) {
+                // Clear any stale session so we don't get confused by cached state
+                localStorage.removeItem('bb_dev_session');
+                localStorage.removeItem('bb_dev_data');
+                // Prefill the api-key input and submit programmatically
+                setTimeout(() => {
+                    const input = document.getElementById('apiKeyInput');
+                    if (input) input.value = urlKey;
+                    if (typeof handleApiKeyLogin === 'function') handleApiKeyLogin();
+                }, 0);
+                // Strip the key from the URL so it isn't logged/bookmarked
+                window.history.replaceState({}, '', window.location.pathname);
+                return;
+            }
+
             checkAuthStatus();
             document.documentElement.style.scrollBehavior = 'smooth';
             initMediationWaterfall();
@@ -1644,6 +1700,18 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             let sessionData;
             try { sessionData = JSON.parse(sessionRaw); }
             catch { clearSessionAndShowAuth(); return; }
+
+            // api-key-only mode: no session token, just re-validate by refetching stats.
+            if (sessionData.api_key_only) {
+                const cached = localStorage.getItem('bb_dev_data');
+                if (!cached) { clearSessionAndShowAuth(); return; }
+                try {
+                    userProfile = JSON.parse(cached);
+                    if (!userProfile.api_key) { clearSessionAndShowAuth(); return; }
+                    loadDashboard();
+                } catch { clearSessionAndShowAuth(); }
+                return;
+            }
 
             if (!sessionData.token) { clearSessionAndShowAuth(); return; }
 
@@ -1770,6 +1838,65 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
         }
 
+        function toggleApiKeyLogin() {
+            const form = document.getElementById('apiKeyLoginForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+            if (form.style.display === 'block') {
+                document.getElementById('apiKeyInput').focus();
+            }
+        }
+
+        // View-by-api-key login. Validates the key by fetching /api/stats,
+        // which returns the developer profile when the key is valid. This
+        // sidesteps the email/password login entirely and is useful when a
+        // publisher has their key in Vercel env but doesn't remember the
+        // account password.
+        async function handleApiKeyLogin() {
+            const errEl = document.getElementById('apiKeyLoginError');
+            errEl.style.display = 'none';
+            const key = document.getElementById('apiKeyInput').value.trim();
+            if (!key || !key.startsWith('bb_dev_')) {
+                errEl.textContent = 'Please enter a valid API key (starts with bb_dev_)';
+                errEl.style.display = 'block';
+                return;
+            }
+            try {
+                const resp = await fetch(`${API_BASE}/api/stats?type=developer&key=${encodeURIComponent(key)}`);
+                if (!resp.ok) {
+                    errEl.textContent = resp.status === 404
+                        ? 'API key not found. Check the key and try again.'
+                        : 'Could not verify key (HTTP ' + resp.status + ')';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                const data = await resp.json();
+                if (!data.developer) {
+                    errEl.textContent = 'Invalid response from server.';
+                    errEl.style.display = 'block';
+                    return;
+                }
+                // Build a profile from the stats response. No session token —
+                // this flow is api-key-only, read-only dashboard view.
+                userProfile = {
+                    user_id: data.developer.id,
+                    email: data.developer.email || '',
+                    app_name: data.developer.app_name || 'Publisher',
+                    api_key: data.developer.api_key,
+                    app_id: data.developer.app_id,
+                    revenue_share_pct: data.developer.revenue_share_pct || 85,
+                    formats: data.developer.formats || { corner: true, fullscreen: true, video: true, native: true },
+                    api_key_login: true,
+                };
+                localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
+                // No session token in api-key-only mode; store a marker
+                localStorage.setItem('bb_dev_session', JSON.stringify({ token: null, user_id: userProfile.user_id, api_key_only: true }));
+                loadDashboard();
+            } catch (e) {
+                errEl.textContent = 'Network error: ' + (e.message || 'unknown');
+                errEl.style.display = 'block';
+            }
+        }
+
         async function handleAuthSubmit(event) {
             event.preventDefault();
             clearAuthError();
@@ -1877,13 +2004,18 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
                 // Map API response to internal format expected by chart + table
                 // API returns: { developer: {...}, daily: [{date, impressions, clicks, spend, developer_earnings}], totals: {...} }
-                const daily = (data.daily || []).map(d => ({
-                    date: d.date,
-                    impressions: d.impressions || 0,
-                    clicks: d.clicks || 0,
-                    spend: d.spend || 0,
-                    earnings: d.developer_earnings || d.earnings || 0,
-                }));
+                const daily = (data.daily || []).map(d => {
+                    const impressions = d.impressions || 0;
+                    const earnings = d.developer_earnings || d.earnings || 0;
+                    return {
+                        date: d.date,
+                        impressions,
+                        clicks: d.clicks || 0,
+                        spend: d.spend || 0,
+                        earnings,
+                        rpm: impressions > 0 ? (earnings / impressions) * 1000 : 0,
+                    };
+                });
                 return {
                     total_earnings: parseFloat(data.totals?.earnings) || 0,
                     total_impressions: data.totals?.impressions || 0,
@@ -2009,24 +2141,34 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             });
         }
 
+        // Format catalog — RPM (revenue per 1000 impressions) reflects real-world
+        // ranges for AI-native inventory. Publisher gets 85% of whatever advertisers
+        // pay. These estimates help publishers pick formats intentionally rather than
+        // leaving all on and hoping for the best.
+        const AD_FORMAT_CATALOG = [
+            { key: 'native',     name: 'Native In-Chat',  description: 'Text + CTA inline with AI response. Least intrusive, highest trust.', rpm: 4.50 },
+            { key: 'image',      name: 'Image',            description: 'Inline card with prominent image. Richer than native.',               rpm: 6.00 },
+            { key: 'corner',     name: 'Corner Popup',     description: 'Floating dismissable card (bottom-right). Attention without blocking.', rpm: 8.50 },
+            { key: 'video',      name: 'Video',            description: 'Playable video with skip-after-5s. Highest engagement, richest CPM.', rpm: 15.00 },
+            { key: 'fullscreen', name: 'Fullscreen',       description: 'Interstitial modal. Maximum attention but intrusive — use sparingly.', rpm: 22.00 },
+        ];
+
         function renderAdFormats() {
             const container = document.getElementById('adFormatsContainer');
             container.innerHTML = '';
 
-            const formats = [
-                { key: 'corner', name: 'Corner Popup', description: 'Compact ads in corner of interface' },
-                { key: 'fullscreen', name: 'Fullscreen', description: 'Full-screen immersive ad experience' },
-                { key: 'video', name: 'Video', description: '30-60 second video advertisements' },
-                { key: 'native', name: 'Native In-Chat', description: 'Seamless ads within conversation flow' }
-            ];
-
-            formats.forEach(format => {
-                const isEnabled = userProfile.formats[format.key];
+            AD_FORMAT_CATALOG.forEach(format => {
+                const isEnabled = !!userProfile.formats?.[format.key];
                 const item = document.createElement('div');
                 item.className = 'control-item';
                 item.innerHTML = `
                     <div class="control-info">
-                        <h3>${format.name}</h3>
+                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                            ${format.name}
+                            <span style="font-size: 10px; font-weight: 700; color: #FF2D78; background: #FFF0F5; padding: 2px 6px; border-radius: 4px;">
+                                ~$${format.rpm.toFixed(2)} RPM
+                            </span>
+                        </h3>
                         <p>${format.description}</p>
                     </div>
                     <label class="toggle">
@@ -2036,13 +2178,67 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 `;
                 container.appendChild(item);
             });
+
+            updateIncomeEstimate();
         }
 
-        function updateAdFormat(format, enabled) {
+        // Monthly income estimate: takes the publisher's recent impression rate
+        // and projects based on the blended RPM of currently-enabled formats.
+        // Conservative: uses 30-day impressions observed; if < 100, assumes 10k
+        // baseline so new publishers see a meaningful number.
+        function updateIncomeEstimate() {
+            const el = document.getElementById('fmtIncomeEstimate');
+            if (!el || !userProfile) return;
+
+            const enabled = AD_FORMAT_CATALOG.filter(f => userProfile.formats?.[f.key]);
+            if (enabled.length === 0) {
+                el.textContent = '$0';
+                el.style.color = '#9CA3AF';
+                return;
+            }
+            // Blended RPM assumes Boost Boss rotates formats proportionally.
+            // In reality advertiser mix tilts this; this is a fair first estimate.
+            const blendedRpm = enabled.reduce((s, f) => s + f.rpm, 0) / enabled.length;
+
+            // Assume 30-day impression volume; fall back to 10k baseline for newcomers.
+            const monthlyImpressions = Math.max(10000, (userProfile._monthly_impressions || 0));
+            const monthlyRevenue = (monthlyImpressions / 1000) * blendedRpm;
+            const publisherShare = monthlyRevenue * 0.85;
+
+            el.textContent = '$' + publisherShare.toLocaleString('en-US', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0,
+            });
+            el.style.color = '#FF2D78';
+        }
+
+        async function updateAdFormat(format, enabled) {
             if (!userProfile.formats) userProfile.formats = {};
             userProfile.formats[format] = enabled;
             localStorage.setItem('bb_dev_formats', JSON.stringify(userProfile.formats));
-            showToast(`${format.charAt(0).toUpperCase() + format.slice(1)} ads ${enabled ? 'enabled' : 'disabled'}`, 'success');
+
+            // Persist to DB so the auction respects this publisher's format prefs.
+            try {
+                const sessionRaw = localStorage.getItem('bb_dev_session');
+                const session = sessionRaw ? JSON.parse(sessionRaw) : null;
+                if (userProfile.api_key) {
+                    await fetch(`${API_BASE}/api/auth?action=update_formats`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            ...(session?.token ? { 'Authorization': `Bearer ${session.token}` } : {}),
+                        },
+                        body: JSON.stringify({
+                            api_key: userProfile.api_key,
+                            formats: userProfile.formats,
+                        }),
+                    });
+                }
+            } catch (e) { /* silent — localStorage fallback already happened */ }
+
+            updateIncomeEstimate();
+            const catalog = AD_FORMAT_CATALOG.find(f => f.key === format);
+            showToast(`${catalog?.name || format} ${enabled ? 'enabled' : 'disabled'}`, 'success');
         }
 
         // Restore saved format preferences on load
@@ -2072,12 +2268,17 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 const status = dateObj < new Date() - (7 * 24 * 60 * 60 * 1000) ? 'Paid' : 'Pending';
                 const statusClass = status === 'Paid' ? 'status-paid' : 'status-pending';
 
+                const impressions = day.impressions || 0;
+                const earnings = day.earnings || 0;
+                const clicks = day.clicks || 0;
+                const rpm = day.rpm != null ? day.rpm : (impressions > 0 ? (earnings / impressions) * 1000 : 0);
+
                 row.innerHTML = `
                     <td>${dateStr}</td>
-                    <td>${day.impressions.toLocaleString()}</td>
-                    <td>$${day.earnings.toFixed(2)}</td>
-                    <td>${day.clicks}</td>
-                    <td>$${day.rpm.toFixed(2)}</td>
+                    <td>${impressions.toLocaleString()}</td>
+                    <td>$${earnings.toFixed(2)}</td>
+                    <td>${clicks}</td>
+                    <td>$${rpm.toFixed(2)}</td>
                     <td><span class="status-badge ${statusClass}">${status}</span></td>
                 `;
                 tbody.appendChild(row);

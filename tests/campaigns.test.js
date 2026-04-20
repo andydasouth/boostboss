@@ -95,26 +95,44 @@ async function test(name, fn) {
 
   // ── Create ─────────────────────────────────────────────────────────
   campaigns._reset(); campaigns._seed();
-  await test("POST action=create creates campaign in_review", async () => {
+  await test("POST action=create auto-approves first campaign per advertiser", async () => {
     const r = await run({
       method: "POST", query: { action: "create" },
       body: {
-        advertiser_id: "adv_test",
+        advertiser_id: "adv_first_campaign",
         headline: "Test Campaign Headline",
         cta_url: "https://example.com/test",
         daily_budget: 100, total_budget: 5000,
       },
     });
     assert.strictEqual(r._status, 201);
-    assert.strictEqual(r._body.campaign.status, "in_review");
-    assert.strictEqual(r._body.campaign.advertiser_id, "adv_test");
-    // Campaign IDs must be valid UUIDs — Supabase campaigns.id is a UUID
-    // column, so any non-UUID generator (e.g. the old "cam_<hex>" form)
-    // causes 500s in production.
+    // Auto-approve-on-first unblocks self-serve: the first campaign goes
+    // straight to active so the advertiser can see their ad serve without
+    // waiting on manual review.
+    assert.strictEqual(r._body.campaign.status, "active");
+    assert.strictEqual(r._body.auto_approved, true);
+    assert.strictEqual(r._body.campaign.advertiser_id, "adv_first_campaign");
     assert.match(r._body.campaign.id,
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
       "campaign.id must be a valid UUID");
     assert(r._body.policy, "should include policy check result");
+  });
+
+  await test("POST action=create sends second campaign to in_review", async () => {
+    // Second campaign from the same advertiser goes through normal review
+    // so we retain abuse-prevention controls for established accounts.
+    const r = await run({
+      method: "POST", query: { action: "create" },
+      body: {
+        advertiser_id: "adv_first_campaign",
+        headline: "Second Campaign Goes To Review",
+        cta_url: "https://example.com/second",
+        daily_budget: 200, total_budget: 10000,
+      },
+    });
+    assert.strictEqual(r._status, 201);
+    assert.strictEqual(r._body.campaign.status, "in_review");
+    assert.strictEqual(r._body.auto_approved, false);
   });
 
   await test("create rejects missing required fields", async () => {
