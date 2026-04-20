@@ -1631,7 +1631,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                                      : active.some(r => r.dataset.source === 'house') ? '100%' : '94.2%';
         }
 
-        function checkAuthStatus() {
+        async function checkAuthStatus() {
             const session = localStorage.getItem('bb_dev_session');
             const userData = localStorage.getItem('bb_dev_data');
 
@@ -1640,10 +1640,40 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     const sessionData = JSON.parse(session);
                     const data = JSON.parse(userData);
 
-                    // Validate session has user_id
                     if (sessionData.token && sessionData.user_id) {
+                        // Show dashboard immediately from cache so the UI isn't blank,
+                        // then refresh the profile from the server. This fixes a stale-
+                        // localStorage bug where publishers who signed up multiple
+                        // accounts in the same browser saw 0 impressions because the
+                        // dashboard was calling stats with an old account's api_key.
                         userProfile = data;
                         loadDashboard();
+
+                        try {
+                            const meResp = await fetch(`${API_BASE}/api/auth?action=me`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${sessionData.token}`,
+                                },
+                            });
+                            if (meResp.ok) {
+                                const me = await meResp.json();
+                                const freshKey = me.profile?.api_key;
+                                if (freshKey && freshKey !== userProfile.api_key) {
+                                    // Server says this user's current api_key is different
+                                    // from what's cached. Update and reload stats so the
+                                    // dashboard matches the account actually in use.
+                                    userProfile = { ...userProfile, ...me.profile, email: me.user?.email || userProfile.email };
+                                    localStorage.setItem('bb_dev_data', JSON.stringify(userProfile));
+                                    if (typeof loadStats === 'function') {
+                                        const fresh = await loadStats();
+                                        if (fresh) updateDashboard(fresh);
+                                    }
+                                }
+                            }
+                        } catch (_) { /* keep cached profile — never break dashboard on refresh */ }
+
                         return;
                     }
                 } catch (e) {
