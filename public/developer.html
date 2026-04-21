@@ -411,6 +411,85 @@
             box-shadow: var(--shadow-card);
         }
 
+        /* ═══ Onboarding stepper ════════════════════════════════════════ */
+        .ob-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            background: rgba(255,255,255,0.6);
+            border: 1px solid rgba(4,190,254,0.2);
+            border-radius: 10px;
+            transition: all 0.18s ease;
+        }
+        .ob-step:hover {
+            border-color: rgba(4,190,254,0.5);
+            transform: translateX(2px);
+        }
+        .ob-step.done {
+            background: rgba(16,185,129,0.06);
+            border-color: rgba(16,185,129,0.25);
+        }
+        .ob-step.done .ob-bullet {
+            background: #10B981;
+            color: #fff;
+        }
+        .ob-step.done .ob-title {
+            color: #10B981;
+            text-decoration: line-through;
+            text-decoration-color: rgba(16,185,129,0.4);
+        }
+        .ob-step.done .ob-cta {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .ob-bullet {
+            width: 28px; height: 28px;
+            min-width: 28px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #04BEFE, #FF2D78);
+            color: #fff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .ob-body { flex: 1; min-width: 0; }
+        .ob-title {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 2px;
+        }
+        .ob-desc {
+            font-size: 12px;
+            color: #6B7280;
+            line-height: 1.45;
+        }
+        .ob-cta {
+            background: #FFFFFF;
+            border: 1px solid #1A1A2E;
+            color: #1A1A2E;
+            padding: 7px 14px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .ob-cta:hover { background: #1A1A2E; color: #fff; }
+        .ob-cta-primary {
+            background: #FF2D78; border-color: #FF2D78; color: #fff;
+        }
+        .ob-cta-primary:hover { background: #D91E5E; border-color: #D91E5E; }
+        @media (max-width: 680px) {
+            .ob-step { flex-wrap: wrap; }
+            .ob-cta { margin-left: auto; }
+        }
+
         .section-title {
             font-size: 1.3rem;
             font-weight: 800;
@@ -1292,26 +1371,51 @@
             </div>
 
             <!-- First-time guidance (hidden once first ad is served) -->
-            <div class="section" id="onboardingBanner" style="display:none; background: linear-gradient(135deg, #04BEFE11, #FF2D7811); border: 1px solid #04BEFE33;">
-                <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-                    <div style="width:36px;height:36px;border-radius:10px;background:#04BEFE;display:flex;align-items:center;justify-content:center;font-size:18px;">🚀</div>
+            <div class="section" id="onboardingBanner" style="display:none; background: linear-gradient(135deg, #04BEFE11, #FF2D7811); border: 1px solid #04BEFE33; position: relative;">
+                <button id="obDismissBtn" onclick="dismissOnboarding()" title="Dismiss"
+                    style="position:absolute;top:14px;right:14px;background:none;border:none;color:#6B7280;cursor:pointer;font-size:16px;line-height:1;padding:4px 8px;border-radius:6px;">×</button>
+                <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+                    <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,#04BEFE,#FF2D78);display:flex;align-items:center;justify-content:center;font-size:20px;">🚀</div>
                     <div>
-                        <div style="font-weight:700;font-size:15px;color:#1A1A2E;">Welcome! Let's serve your first ad</div>
-                        <div style="font-size:12px;color:#6B7280;">Follow these 3 steps to start earning</div>
+                        <div style="font-weight:700;font-size:16px;color:#1A1A2E;">Welcome, <span id="obAppName">there</span>! Let's ship your first ad</div>
+                        <div style="font-size:12px;color:#6B7280;">
+                            <span id="obStepsDone">0</span> of 4 complete
+                            <span style="margin-left:8px;color:#9CA3AF;">· ~10 min total</span>
+                        </div>
                     </div>
                 </div>
-                <div style="display:flex;gap:8px;flex-direction:column;font-size:13px;color:#374151;">
-                    <div style="display:flex;align-items:center;gap:8px;" id="ob-step1">
-                        <span style="width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">1</span>
-                        <span>Copy your API key from above</span>
+                <div style="display:flex;gap:10px;flex-direction:column;">
+                    <div class="ob-step" id="ob-step1" data-step="1">
+                        <span class="ob-bullet">1</span>
+                        <div class="ob-body">
+                            <div class="ob-title">Copy your API key</div>
+                            <div class="ob-desc">Click the key above to copy. You'll paste it into your app's environment.</div>
+                        </div>
+                        <button class="ob-cta" onclick="onboardCopyKey()">Copy key</button>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;" id="ob-step2">
-                        <span style="width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">2</span>
-                        <span>Add the SDK to your app (see Integration Guide below)</span>
+                    <div class="ob-step" id="ob-step2" data-step="2">
+                        <span class="ob-bullet">2</span>
+                        <div class="ob-body">
+                            <div class="ob-title">Install the Lumi SDK</div>
+                            <div class="ob-desc"><code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 6px;border-radius:4px;">npm install @boostbossai/lumi-sdk</code> — then see the Integration Guide below.</div>
+                        </div>
+                        <button class="ob-cta" onclick="onboardScrollToGuide()">View guide</button>
                     </div>
-                    <div style="display:flex;align-items:center;gap:8px;" id="ob-step3">
-                        <span style="width:22px;height:22px;border-radius:50%;background:#E5E7EB;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;">3</span>
-                        <span>Click <strong>Run Test</strong> below to verify your integration</span>
+                    <div class="ob-step" id="ob-step3" data-step="3">
+                        <span class="ob-bullet">3</span>
+                        <div class="ob-body">
+                            <div class="ob-title">Pick which ad formats to accept</div>
+                            <div class="ob-desc">Toggle below. Higher-CPM formats (video, fullscreen) pay more but require more user attention.</div>
+                        </div>
+                        <button class="ob-cta" onclick="onboardScrollToFormats()">Set formats</button>
+                    </div>
+                    <div class="ob-step" id="ob-step4" data-step="4">
+                        <span class="ob-bullet">4</span>
+                        <div class="ob-body">
+                            <div class="ob-title">Send a test impression</div>
+                            <div class="ob-desc">Click below to fire a synthetic ad request and watch your dashboard light up.</div>
+                        </div>
+                        <button class="ob-cta ob-cta-primary" onclick="onboardRunTest()">Run test</button>
                     </div>
                 </div>
             </div>
@@ -2062,6 +2166,64 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
         }
 
+        // ── Onboarding stepper handlers ─────────────────────────────────
+        // Tracks progress on 4 concrete steps each new publisher completes.
+        // Step completion is stored in localStorage so the UI stays consistent
+        // across page reloads until the publisher earns their first impression.
+        function isOnboardingStepDone(n) {
+            return localStorage.getItem('bb_ob_step_' + n) === '1';
+        }
+        function markOnboardingStepDone(n) {
+            localStorage.setItem('bb_ob_step_' + n, '1');
+            const el = document.getElementById('ob-step' + n);
+            if (el) el.classList.add('done');
+            refreshOnboardingProgress();
+        }
+        function refreshOnboardingProgress(stats) {
+            // Step 4 (test impression) is auto-detected from real traffic.
+            if (stats && stats.total_impressions > 0) markOnboardingStepDone(4);
+            // Paint existing done states on page load.
+            for (let i = 1; i <= 4; i++) {
+                const el = document.getElementById('ob-step' + i);
+                if (!el) continue;
+                if (isOnboardingStepDone(i)) el.classList.add('done');
+            }
+            const count = [1,2,3,4].filter(isOnboardingStepDone).length;
+            const countEl = document.getElementById('obStepsDone');
+            if (countEl) countEl.textContent = String(count);
+            // Personalize greeting
+            const nameEl = document.getElementById('obAppName');
+            if (nameEl && userProfile?.app_name) nameEl.textContent = userProfile.app_name;
+        }
+        async function onboardCopyKey() {
+            if (!userProfile?.api_key) return;
+            try { await navigator.clipboard.writeText(userProfile.api_key); }
+            catch (_) { /* insecure context — still mark done since user tried */ }
+            showToast('API key copied', 'success');
+            markOnboardingStepDone(1);
+        }
+        function onboardScrollToGuide() {
+            const el = document.querySelector('.integration-steps');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            markOnboardingStepDone(2);
+        }
+        function onboardScrollToFormats() {
+            const el = document.getElementById('adFormatsContainer');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            markOnboardingStepDone(3);
+        }
+        function onboardRunTest() {
+            const btn = document.querySelector('[onclick*="runIntegrationTest"]');
+            if (btn) { btn.click(); markOnboardingStepDone(4); }
+            else if (typeof runIntegrationTest === 'function') { runIntegrationTest(); markOnboardingStepDone(4); }
+            else { showToast('Run Test button not found — scroll down to the Integration Guide', 'error'); }
+        }
+        function dismissOnboarding() {
+            localStorage.setItem('bb_onboarding_dismissed', '1');
+            const ob = document.getElementById('onboardingBanner');
+            if (ob) ob.style.display = 'none';
+        }
+
         function updateDashboard(stats) {
             // Update stats cards
             document.getElementById('totalEarnings').textContent = '$' + stats.total_earnings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -2074,9 +2236,14 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             // Update integration guide with real keys
             updateIntegrationGuide();
 
-            // Show onboarding banner for new publishers with no impressions
+            // Show onboarding banner for new publishers with no impressions.
+            // Once they have traffic, the banner is redundant — hide it.
             const ob = document.getElementById('onboardingBanner');
-            if (ob) ob.style.display = stats.total_impressions === 0 ? 'block' : 'none';
+            if (ob) {
+                const dismissed = localStorage.getItem('bb_onboarding_dismissed') === '1';
+                ob.style.display = (!dismissed && stats.total_impressions === 0) ? 'block' : 'none';
+                refreshOnboardingProgress(stats);
+            }
 
             // Render chart (handle empty data)
             if (stats.daily && stats.daily.length > 0) {
