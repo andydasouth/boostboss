@@ -627,6 +627,230 @@
             gap: 0.75rem;
         }
 
+        /* ═══ Format selector cards (rich visual thumbnails) ══════════════ */
+        .format-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .format-card {
+            position: relative;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 10px 10px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            background: var(--bg-primary);
+            text-align: center;
+        }
+        .format-card:hover {
+            border-color: var(--accent-orange);
+            transform: translateY(-1px);
+        }
+        .format-card.selected {
+            border-color: var(--accent-orange);
+            background: rgba(249, 115, 22, 0.08);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.12);
+        }
+        .format-card .fc-thumb {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 6px;
+            padding: 6px;
+            height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 3px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .fc-thumb-label {
+            font-size: 6px;
+            color: #FF2D78;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-align: left;
+        }
+        .fc-thumb-media {
+            background: linear-gradient(135deg, #94A3B8 0%, #475569 100%);
+            border-radius: 3px;
+            flex: 1;
+            position: relative;
+        }
+        .fc-thumb-media.play::after {
+            content: "▶";
+            position: absolute; inset: 0; margin: auto;
+            width: 18px; height: 18px; line-height: 18px;
+            background: rgba(255,255,255,0.9);
+            color: #1A1A2E; font-size: 9px;
+            border-radius: 50%; text-align: center;
+        }
+        .fc-thumb-title {
+            height: 6px;
+            background: #1A1A2E;
+            border-radius: 2px;
+            width: 85%;
+        }
+        .fc-thumb-sub {
+            height: 4px;
+            background: #94A3B8;
+            border-radius: 2px;
+            width: 65%;
+        }
+        .fc-thumb-cta {
+            background: #FF2D78;
+            height: 9px;
+            width: 36px;
+            border-radius: 3px;
+            margin-top: 3px;
+        }
+        .fc-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+        .fc-desc {
+            font-size: 10px;
+            color: var(--text-secondary);
+            line-height: 1.35;
+            min-height: 26px;
+        }
+        .fc-reach {
+            margin-top: 6px;
+            font-size: 9px;
+            font-weight: 700;
+            color: #10B981;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+        .format-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* ═══ Live preview panel ══════════════════════════════════════════ */
+        .live-preview {
+            background: var(--bg-primary);
+            border: 1px dashed var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 4px;
+        }
+        .live-preview-header {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .live-preview-header::before {
+            content: "";
+            width: 6px; height: 6px;
+            background: #10B981;
+            border-radius: 50%;
+            animation: pulse-dot 1.8s infinite;
+        }
+        @keyframes pulse-dot {
+            0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+        }
+        .lp-card {
+            background: #FFF5F8;
+            border: 1px solid #FFE600;
+            border-left: 3px solid #FF2D78;
+            border-radius: 10px;
+            padding: 14px 16px;
+            max-width: 420px;
+            margin: 0 auto;
+        }
+        .lp-label {
+            font-size: 10px;
+            color: #FF2D78;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .lp-label .lp-bb {
+            background: #FF2D78;
+            color: #fff;
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 9px;
+            font-weight: 900;
+        }
+        .lp-media {
+            width: 100%;
+            max-height: 150px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            background: #E5E7EB;
+            display: block;
+        }
+        .lp-media-placeholder {
+            width: 100%;
+            height: 100px;
+            background: repeating-linear-gradient(45deg, #F3F4F6 0 8px, #E5E7EB 8px 16px);
+            border-radius: 6px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #9CA3AF;
+            font-size: 11px;
+        }
+        .lp-video-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 44px;
+            height: 44px;
+            background: #FF2D78;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            pointer-events: none;
+        }
+        .lp-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1A1A2E;
+            margin-bottom: 4px;
+        }
+        .lp-sub {
+            font-size: 12px;
+            color: #6B7280;
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        .lp-cta {
+            display: inline-block;
+            background: #FF2D78;
+            color: #fff;
+            padding: 7px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 520px) {
+            .format-cards { grid-template-columns: 1fr; }
+        }
+
         .radio-option,
         .checkbox-option {
             display: flex;
@@ -2312,22 +2536,49 @@
                         <input type="text" class="form-input campaign-field" name="name" placeholder="Enter campaign name" required>
                     </div>
 
-                    <!-- Format Selector -->
+                    <!-- Format Selector — visual thumbnail cards -->
                     <div class="form-group">
                         <label class="form-label">Creative Format</label>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" id="format-image" name="format" value="image" required checked>
-                                <label for="format-image">Image</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="format-video" name="format" value="video" required>
-                                <label for="format-video">Video</label>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" id="format-native" name="format" value="native" required>
-                                <label for="format-native">Native</label>
-                            </div>
+                        <div class="format-cards">
+                            <label class="format-card" data-format="native">
+                                <input type="radio" name="format" value="native" required>
+                                <div class="fc-thumb">
+                                    <div class="fc-thumb-label">SPONSORED</div>
+                                    <div class="fc-thumb-title"></div>
+                                    <div class="fc-thumb-sub"></div>
+                                    <div class="fc-thumb-cta"></div>
+                                </div>
+                                <div class="fc-name">Native</div>
+                                <div class="fc-desc">Text + CTA inline with AI response. Least intrusive.</div>
+                                <div class="fc-reach">~100% reach</div>
+                            </label>
+                            <label class="format-card selected" data-format="image">
+                                <input type="radio" name="format" value="image" required checked>
+                                <div class="fc-thumb">
+                                    <div class="fc-thumb-label">SPONSORED</div>
+                                    <div class="fc-thumb-media"></div>
+                                    <div class="fc-thumb-title"></div>
+                                    <div class="fc-thumb-cta"></div>
+                                </div>
+                                <div class="fc-name">Image</div>
+                                <div class="fc-desc">Full media card with headline, subtext, CTA.</div>
+                                <div class="fc-reach">~95% reach</div>
+                            </label>
+                            <label class="format-card" data-format="video">
+                                <input type="radio" name="format" value="video" required>
+                                <div class="fc-thumb">
+                                    <div class="fc-thumb-label">SPONSORED</div>
+                                    <div class="fc-thumb-media play"></div>
+                                    <div class="fc-thumb-title"></div>
+                                    <div class="fc-thumb-cta"></div>
+                                </div>
+                                <div class="fc-name">Video</div>
+                                <div class="fc-desc">Playable video with skip. Highest engagement.</div>
+                                <div class="fc-reach">~70% reach</div>
+                            </label>
+                        </div>
+                        <div style="font-size: 11px; color: #9CA3AF; margin-top: 8px;">
+                            Reach shows the share of publishers who currently accept that format. Higher formats = richer CPM but narrower inventory.
                         </div>
                     </div>
 
@@ -2380,6 +2631,24 @@
                     <div class="form-group">
                         <label class="form-label">CTA URL</label>
                         <input type="url" class="form-input campaign-field" name="cta_url" placeholder="https://example.com" required>
+                    </div>
+
+                    <!-- Live Preview — updates as advertiser types -->
+                    <div class="form-group">
+                        <label class="form-label">Live Preview</label>
+                        <div class="live-preview">
+                            <div class="live-preview-header">How your ad will appear on publisher sites</div>
+                            <div class="lp-card" id="livePreview">
+                                <div class="lp-label">
+                                    <span class="lp-bb">BB</span>
+                                    Sponsored · via Boost Boss
+                                </div>
+                                <div id="lpMediaSlot"></div>
+                                <div class="lp-title" id="lpTitle">Your headline goes here</div>
+                                <div class="lp-sub" id="lpSub">Your subtext goes here — describe what users get when they click.</div>
+                                <a class="lp-cta" id="lpCta" href="#" onclick="return false;">Learn More →</a>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Advertiser Domain -->
@@ -2799,6 +3068,11 @@
 
             // Campaign form
             campaignForm.addEventListener('submit', handleCreateCampaign);
+
+            // ── Format card selection + Live Preview wiring ──────────────
+            // Click a card = select its radio. Selected-state styling is driven
+            // by the `.selected` class on the card for the currently-checked radio.
+            initFormatCardsAndLivePreview();
 
             // File upload
             uploadArea.addEventListener('click', () => fileInput.click());
@@ -3476,6 +3750,100 @@
         }
 
         // Create campaign
+        // ── Format cards + Live Preview — updates preview as advertiser types.
+        function initFormatCardsAndLivePreview() {
+            const cards = document.querySelectorAll('.format-card');
+            const form = campaignForm;
+
+            // Card click → select radio + visual state.
+            cards.forEach((card) => {
+                const radio = card.querySelector('input[type="radio"]');
+                card.addEventListener('click', () => {
+                    if (!radio) return;
+                    radio.checked = true;
+                    cards.forEach(c => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    updateLivePreview();
+                });
+                radio?.addEventListener('change', () => {
+                    if (radio.checked) {
+                        cards.forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                        updateLivePreview();
+                    }
+                });
+            });
+
+            // Any form-field change updates the preview.
+            ['headline', 'subtext', 'cta_text', 'cta_url'].forEach((fieldName) => {
+                const input = form.querySelector(`[name="${fieldName}"]`);
+                if (input) input.addEventListener('input', updateLivePreview);
+            });
+            // File upload also updates preview (media slot).
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) fileInput.addEventListener('change', updateLivePreview);
+
+            updateLivePreview();
+        }
+
+        // Renders the live preview block to match what publishers would see.
+        // Handles all 3 formats + missing content gracefully (placeholders).
+        function updateLivePreview() {
+            const form = campaignForm;
+            if (!form) return;
+            const data = new FormData(form);
+            const format = data.get('format') || 'image';
+            const headline = (data.get('headline') || '').toString().trim();
+            const subtext = (data.get('subtext') || '').toString().trim();
+            const ctaLabel = (data.get('cta_text') || '').toString().trim();
+
+            document.getElementById('lpTitle').textContent = headline || 'Your headline goes here';
+            document.getElementById('lpSub').textContent = subtext || 'Your subtext goes here — describe what users get when they click.';
+            document.getElementById('lpSub').style.display = (format === 'native' || subtext) ? '' : 'none';
+            document.getElementById('lpCta').textContent = (ctaLabel || 'Learn More') + ' →';
+
+            const mediaSlot = document.getElementById('lpMediaSlot');
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput?.files?.[0];
+
+            mediaSlot.innerHTML = '';
+            if (format === 'image') {
+                if (file && file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.className = 'lp-media';
+                    img.src = URL.createObjectURL(file);
+                    img.alt = '';
+                    mediaSlot.appendChild(img);
+                } else {
+                    mediaSlot.innerHTML = '<div class="lp-media-placeholder">Upload an image to see it here</div>';
+                }
+            } else if (format === 'video') {
+                const wrap = document.createElement('div');
+                wrap.style.position = 'relative';
+                wrap.style.marginBottom = '10px';
+                if (file && file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.className = 'lp-media';
+                    video.src = URL.createObjectURL(file);
+                    video.muted = true;
+                    video.playsInline = true;
+                    wrap.appendChild(video);
+                } else {
+                    const ph = document.createElement('div');
+                    ph.className = 'lp-media-placeholder';
+                    ph.style.height = '150px';
+                    ph.textContent = 'Upload a video to see it here';
+                    wrap.appendChild(ph);
+                }
+                const play = document.createElement('div');
+                play.className = 'lp-video-play';
+                play.textContent = '▶';
+                wrap.appendChild(play);
+                mediaSlot.appendChild(wrap);
+            }
+            // native: no media slot content
+        }
+
         async function handleCreateCampaign(e) {
             e.preventDefault();
 
