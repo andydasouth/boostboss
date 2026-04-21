@@ -58,10 +58,15 @@
     border-bottom: 1px solid var(--line);
   }
   .nav-inner {
-    display: flex; align-items: center; justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
     height: 64px;
     max-width: 1200px; margin: 0 auto; padding: 0 24px;
   }
+  .nav-inner > .brand    { justify-self: start; }
+  .nav-inner > .nav-links { justify-self: center; }
+  .nav-inner > .nav-ctas { justify-self: end; }
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 36px; height: 36px; flex-shrink: 0; }
   .brand-name {
