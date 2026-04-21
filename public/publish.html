@@ -47,6 +47,47 @@
   .nav-links { display: flex; gap: 28px; align-items: center; }
   .nav-links a { font-size: 14.5px; font-weight: 500; color: rgba(255,255,255,0.7); transition: color 0.15s; }
   .nav-links a:hover { color: #fff; }
+
+  /* ── Sparkling gradient link (Lumi SDK) ───────────────────────────── */
+  .nav-links a.nav-link-sparkle {
+    background-image: linear-gradient(
+      90deg,
+      #FF2D78 0%,
+      #FFE600 25%,
+      #04BEFE 50%,
+      #FFE600 75%,
+      #FF2D78 100%
+    );
+    background-size: 220% 100%;
+    background-position: 0% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: 700;
+    letter-spacing: -0.1px;
+    animation: sdkSparkle 4s linear infinite;
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .nav-links a.nav-link-sparkle .spark {
+    -webkit-text-fill-color: #FFE600;
+    color: #FFE600;
+    font-size: 11px;
+    text-shadow: 0 0 8px rgba(255, 230, 0, 0.55);
+    animation: sparkBlink 1.8s ease-in-out infinite;
+    display: inline-block;
+  }
+  .nav-links a.nav-link-sparkle:hover {
+    filter: brightness(1.15);
+  }
+  @keyframes sdkSparkle {
+    0%   { background-position:   0% 50%; }
+    100% { background-position: 220% 50%; }
+  }
+  @keyframes sparkBlink {
+    0%, 100% { opacity: 1;   transform: scale(1)   rotate(0deg); }
+    50%      { opacity: 0.5; transform: scale(1.3) rotate(180deg); }
+  }
   .nav-ctas { display: flex; gap: 10px; }
 
   .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; padding: 9px 20px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; text-decoration: none; }
@@ -273,6 +314,7 @@
       <a href="#how">How it works</a>
       <a href="#formats">Ad formats</a>
       <a href="#calc">Revenue</a>
+      <a href="#sdk" class="nav-link-sparkle">Lumi SDK <span class="spark">✦</span></a>
     </div>
     <div class="nav-ctas">
       <a class="btn btn-ghost" href="/developer">Sign in</a>
