@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "publishers": "Publishers",
+    "bbx": "BBX",
+    "live_demo": "Live Demo ↗",
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+  },
+  "hero": {
+    "badge": "Now live on the Model Context Protocol",
+    "h1_html": "The ad network<br>built for <span class=\"accent-pink\">AI apps</span>.",
+    "sub": "Boost Boss helps AI developers monetize their apps and advertisers reach AI-native users. One MCP-powered API. Zero ops.",
+    "cta_monetize": "Start monetizing →",
+    "cta_campaign": "Run a campaign",
+    "mock_earnings": "Earnings (7d)",
+    "mock_earnings_trend": "▲ 23% vs last week",
+    "mock_impressions": "Impressions",
+    "mock_impressions_trend": "▲ 18%",
+    "mock_daily": "Daily revenue",
+    "mock_sponsored": "◆ Sponsored · via Boost Boss",
+    "mock_ad_title": "Ship better code 10× faster",
+    "mock_ad_body": "The AI coding assistant that actually reads your codebase. Used by 50,000+ devs.",
+    "mock_ad_cta": "Try Cursor free →"
+  },
+  "trusted": {
+    "label": "Built for AI apps running on"
+  },
+  "dev": {
+    "eyebrow": "For developers",
+    "h2": "Monetize your AI app in one line of code.",
+    "p": "Drop in the Boost Boss SDK and turn free users into revenue without ruining UX. Native, contextual placements that fit naturally into AI chats, agents, and assistants.",
+    "b1_html": "<strong>Native ad formats</strong> — built for conversations, not banners.",
+    "b2_html": "<strong>Real-time payouts</strong> — track impressions, clicks, and earnings live.",
+    "b3_html": "<strong>Full creative control</strong> — decide what, when, and where ads appear.",
+    "cta": "Integrate the SDK →"
+  },
+  "adv": {
+    "eyebrow": "For advertisers",
+    "h2": "Reach the people building the future with AI.",
+    "p": "Our network delivers your ads directly inside AI applications — where the highest-intent, highest-value audience spends their time. Launch a campaign in minutes.",
+    "b1_html": "<strong>Precise targeting</strong> — by app category, user intent, and context.",
+    "b2_html": "<strong>Performance pricing</strong> — CPM, CPC, CPA. Pay for what works.",
+    "b3_html": "<strong>Transparent analytics</strong> — every impression, attribution and ROAS.",
+    "cta": "Launch a campaign →",
+    "camp1_title": "Q2 Dev Tool Push",
+    "camp2_title": "AI Learners Retarget",
+    "camp3_title": "New user welcome",
+    "pill_active": "Active",
+    "pill_paused": "Paused",
+    "stat_impressions": "impressions",
+    "stat_ctr": "CTR",
+    "stat_cpc": "CPC"
+  },
+  "mcp": {
+    "eyebrow": "Built on MCP",
+    "h2": "A new protocol for a new era of ads.",
+    "p_html": "The Model Context Protocol lets any AI agent call into Boost Boss to fetch, render, and measure ads — with consent, transparency, and attribution baked in.",
+    "card1_h": "Millisecond delivery",
+    "card1_p": "Ads fetched and rendered in under 80ms — no jarring load states, no UX hit.",
+    "card2_h": "Context-aware",
+    "card2_p_html": "Every impression is scored by <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a> — our AI optimization engine — so ads match what the user is actually trying to do.",
+    "card3_h": "Privacy-first",
+    "card3_p": "No third-party cookies. No fingerprints. Targeting lives inside your app, not outside."
+  },
+  "benna": {
+    "eyebrow": "The engine under the network",
+    "title": "Benna AI — AI optimization, built in.",
+    "p": "Benna AI is the optimization layer that powers every decision on the Boost Boss network — predicting conversion probability on every impression, selecting the winning ad, and auto-tuning bids in under 5ms. Advertisers set targets, Benna AI does the rest.",
+    "cta": "Learn more at benna.ai →"
+  },
+  "stats": {
+    "label_calls": "Monthly ad calls",
+    "label_apps": "AI apps on network",
+    "label_ctr": "Avg. CTR",
+    "label_paid": "Paid to publishers"
+  },
+  "how": {
+    "h2": "Zero to revenue in under 10 minutes.",
+    "p": "Whether you're an AI app developer or a brand trying to reach them, getting set up is fast.",
+    "s1_h": "Get your API key",
+    "s1_p": "Sign up as a developer or advertiser. Your keys are ready instantly — no waitlist, no demo required.",
+    "s2_h": "Drop in the SDK",
+    "s2_p": "One import. One function call. Your AI app is connected to the entire Boost Boss network.",
+    "s3_h": "Launch and earn",
+    "s3_p": "Go live, track performance in real time, and get paid out weekly — or spend budget and scale reach."
+  },
+  "cta_big": {
+    "h2_html": "Open the box.<br>Start earning.",
+    "p": "Join the AI apps already monetizing with Boost Boss — and the brands reaching them.",
+    "cta_dev": "Start as a developer",
+    "cta_adv": "Start as an advertiser"
+  },
+  "foot": {
+    "tag": "The MCP-powered ad network for AI applications. Built for developers. Designed for advertisers.",
+    "col_product": "Product",
+    "col_resources": "Resources",
+    "col_company": "Company",
+    "col_trust": "Trust & legal",
+    "l_publishers": "Publishers",
+    "l_superboost": "SuperBoost",
+    "l_bbx": "BBX",
+    "l_live_demo": "Live demo",
+    "l_how_it_works": "How it works",
+    "l_docs": "Documentation",
+    "l_api": "API reference",
+    "l_sdk": "SDK",
+    "l_changelog": "Changelog",
+    "l_about": "About",
+    "l_blog": "Blog",
+    "l_careers": "Careers",
+    "l_contact": "Contact",
+    "l_trust_center": "Trust center",
+    "l_compliance": "SOC 2 · GDPR · CCPA",
+    "l_security": "Security",
+    "l_privacy": "Privacy",
+    "l_terms": "Terms",
+    "copy": "© 2026 Boost Boss, Inc.",
+    "tagline": "Made for the AI era."
+  }
+}

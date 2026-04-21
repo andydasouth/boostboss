@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "publishers": "퍼블리셔",
+    "bbx": "BBX",
+    "live_demo": "라이브 데모 ↗",
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+  },
+  "hero": {
+    "badge": "Model Context Protocol에서 가동 중",
+    "h1_html": "<span class=\"accent-pink\">AI 앱</span>을 위해<br>만들어진 광고 네트워크.",
+    "sub": "Boost Boss는 AI 개발자가 앱을 수익화하고, 광고주가 AI 네이티브 사용자에게 도달하도록 돕습니다. MCP 기반 API 하나, 운영 제로.",
+    "cta_monetize": "수익화 시작 →",
+    "cta_campaign": "캠페인 실행",
+    "mock_earnings": "수익 (7일)",
+    "mock_earnings_trend": "▲ 지난주 대비 23%",
+    "mock_impressions": "노출",
+    "mock_impressions_trend": "▲ 18%",
+    "mock_daily": "일일 수익",
+    "mock_sponsored": "◆ 스폰서 · Boost Boss 제공",
+    "mock_ad_title": "10배 빠르게 더 나은 코드 배포",
+    "mock_ad_body": "코드베이스를 실제로 읽는 AI 코딩 어시스턴트. 50,000명 이상의 개발자가 사용 중.",
+    "mock_ad_cta": "Cursor 무료 체험 →"
+  },
+  "trusted": {
+    "label": "다음 AI 앱에서 구동 중"
+  },
+  "dev": {
+    "eyebrow": "개발자를 위해",
+    "h2": "코드 한 줄로 AI 앱을 수익화하세요.",
+    "p": "Boost Boss SDK를 넣어 UX를 해치지 않으면서 무료 사용자를 수익으로 전환하세요. AI 채팅·에이전트·어시스턴트에 자연스럽게 어울리는 네이티브·맥락 기반 광고 배치입니다.",
+    "b1_html": "<strong>네이티브 광고 포맷</strong> — 배너가 아니라 대화를 위해 설계.",
+    "b2_html": "<strong>실시간 정산</strong> — 노출·클릭·수익을 실시간으로 추적.",
+    "b3_html": "<strong>완전한 크리에이티브 제어</strong> — 무엇을, 언제, 어디에 노출할지 직접 결정.",
+    "cta": "SDK 통합 →"
+  },
+  "adv": {
+    "eyebrow": "광고주를 위해",
+    "h2": "AI로 미래를 만드는 사람들에게 도달하세요.",
+    "p": "저희 네트워크는 광고를 AI 애플리케이션 안으로 직접 전달합니다 — 가장 의도가 명확하고 가치가 높은 사용자가 머무는 곳입니다. 몇 분 안에 캠페인을 시작하세요.",
+    "b1_html": "<strong>정밀 타겟팅</strong> — 앱 카테고리, 사용자 의도, 맥락 기반.",
+    "b2_html": "<strong>성과 기반 과금</strong> — CPM, CPC, CPA. 효과에 대해서만 지불.",
+    "b3_html": "<strong>투명한 분석</strong> — 모든 노출, 어트리뷰션, ROAS.",
+    "cta": "캠페인 실행 →",
+    "camp1_title": "Q2 개발자 도구 푸시",
+    "camp2_title": "AI 학습자 리타겟",
+    "camp3_title": "신규 사용자 환영",
+    "pill_active": "진행 중",
+    "pill_paused": "일시 중지",
+    "stat_impressions": "노출",
+    "stat_ctr": "CTR",
+    "stat_cpc": "CPC"
+  },
+  "mcp": {
+    "eyebrow": "MCP 위에 구축",
+    "h2": "광고의 새 시대를 위한 새 프로토콜.",
+    "p_html": "Model Context Protocol을 통해 어떤 AI 에이전트든 Boost Boss를 호출해 광고를 가져오고, 렌더링하고, 측정할 수 있습니다 — 동의, 투명성, 어트리뷰션이 내장되어 있습니다.",
+    "card1_h": "밀리초 단위 배송",
+    "card1_p": "80ms 이내에 광고를 가져와 렌더링 — 로딩 지연도 UX 손상도 없음.",
+    "card2_h": "맥락 인식",
+    "card2_p_html": "모든 노출은 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a>(당사 AI 최적화 엔진)가 점수화합니다 — 사용자가 실제로 하려는 일에 광고를 맞춥니다.",
+    "card3_h": "프라이버시 우선",
+    "card3_p": "서드파티 쿠키도 지문 인식도 없음. 타겟팅은 앱 외부가 아닌 내부에서 이뤄집니다."
+  },
+  "benna": {
+    "eyebrow": "네트워크를 움직이는 엔진",
+    "title": "Benna AI — 내장된 AI 최적화.",
+    "p": "Benna AI는 Boost Boss 네트워크의 모든 결정을 움직이는 최적화 레이어입니다 — 모든 노출에서 전환 확률을 예측하고, 승리 광고를 선택하고, 5ms 이내에 입찰을 자동 조정합니다. 광고주는 목표만 설정하세요, 나머지는 Benna AI가 처리합니다.",
+    "cta": "benna.ai에서 자세히 보기 →"
+  },
+  "stats": {
+    "label_calls": "월간 광고 호출 수",
+    "label_apps": "네트워크의 AI 앱 수",
+    "label_ctr": "평균 CTR",
+    "label_paid": "퍼블리셔에게 지급액"
+  },
+  "how": {
+    "h2": "10분 이내, 제로에서 수익까지.",
+    "p": "AI 앱 개발자든, 그들에게 도달하려는 브랜드든, 셋업은 빠르게 끝납니다.",
+    "s1_h": "API 키 받기",
+    "s1_p": "개발자 또는 광고주로 가입. 키는 즉시 발급 — 대기줄도, 데모도 필요 없음.",
+    "s2_h": "SDK 통합",
+    "s2_p": "한 번의 import, 한 번의 함수 호출. 이제 당신의 AI 앱은 Boost Boss 네트워크 전체와 연결됩니다.",
+    "s3_h": "출시하고 벌기",
+    "s3_p": "라이브 후 성과를 실시간 추적하고 매주 정산 받기 — 혹은 예산을 투입해 도달 범위 확대."
+  },
+  "cta_big": {
+    "h2_html": "상자를 열고.<br>수익을 시작하세요.",
+    "p": "이미 Boost Boss로 수익화 중인 AI 앱 — 그리고 그들에게 도달하는 브랜드에 합류하세요.",
+    "cta_dev": "개발자로 시작",
+    "cta_adv": "광고주로 시작"
+  },
+  "foot": {
+    "tag": "AI 애플리케이션을 위한 MCP 기반 광고 네트워크. 개발자를 위해 만들고, 광고주를 위해 설계했습니다.",
+    "col_product": "제품",
+    "col_resources": "리소스",
+    "col_company": "회사",
+    "col_trust": "트러스트 & 법적 고지",
+    "l_publishers": "퍼블리셔",
+    "l_superboost": "SuperBoost",
+    "l_bbx": "BBX",
+    "l_live_demo": "라이브 데모",
+    "l_how_it_works": "작동 방식",
+    "l_docs": "문서",
+    "l_api": "API 레퍼런스",
+    "l_sdk": "SDK",
+    "l_changelog": "변경 이력",
+    "l_about": "회사 소개",
+    "l_blog": "블로그",
+    "l_careers": "채용",
+    "l_contact": "문의",
+    "l_trust_center": "트러스트 센터",
+    "l_compliance": "SOC 2 · GDPR · CCPA",
+    "l_security": "보안",
+    "l_privacy": "개인정보",
+    "l_terms": "이용 약관",
+    "copy": "© 2026 Boost Boss, Inc.",
+    "tagline": "AI 시대를 위해 만들어졌습니다."
+  }
+}

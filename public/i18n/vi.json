@@ -1,0 +1,119 @@
+{
+  "nav": {
+    "publishers": "Nhà phát hành",
+    "bbx": "BBX",
+    "live_demo": "Dùng thử trực tiếp ↗",
+    "superboost_html": "Super<span style=\"color: var(--pink);\">Boost Ads</span>"
+  },
+  "hero": {
+    "badge": "Đã chạy trên Model Context Protocol",
+    "h1_html": "Mạng quảng cáo được<br>xây dựng cho <span class=\"accent-pink\">ứng dụng AI</span>.",
+    "sub": "Boost Boss giúp nhà phát triển AI kiếm tiền từ ứng dụng và giúp nhà quảng cáo tiếp cận người dùng AI-native. Một API chạy trên MCP, vận hành bằng không.",
+    "cta_monetize": "Bắt đầu kiếm tiền →",
+    "cta_campaign": "Chạy chiến dịch",
+    "mock_earnings": "Doanh thu (7 ngày)",
+    "mock_earnings_trend": "▲ 23% so với tuần trước",
+    "mock_impressions": "Lượt hiển thị",
+    "mock_impressions_trend": "▲ 18%",
+    "mock_daily": "Doanh thu hằng ngày",
+    "mock_sponsored": "◆ Được tài trợ · qua Boost Boss",
+    "mock_ad_title": "Ship code tốt hơn, nhanh gấp 10 lần",
+    "mock_ad_body": "Trợ lý lập trình AI thật sự đọc hiểu codebase của bạn. 50.000+ dev đang dùng.",
+    "mock_ad_cta": "Dùng thử Cursor miễn phí →"
+  },
+  "trusted": {
+    "label": "Chạy trên các ứng dụng AI sau"
+  },
+  "dev": {
+    "eyebrow": "Cho nhà phát triển",
+    "h2": "Kiếm tiền từ ứng dụng AI chỉ với một dòng code.",
+    "p": "Cài Boost Boss SDK và biến người dùng miễn phí thành doanh thu mà không làm hỏng trải nghiệm. Quảng cáo native, theo ngữ cảnh, hòa vào tự nhiên trong chat AI, agent và assistant.",
+    "b1_html": "<strong>Định dạng quảng cáo native</strong> — thiết kế cho hội thoại, không phải banner.",
+    "b2_html": "<strong>Thanh toán theo thời gian thực</strong> — theo dõi impression, click và doanh thu trực tiếp.",
+    "b3_html": "<strong>Kiểm soát sáng tạo toàn diện</strong> — bạn quyết định cái gì, khi nào và ở đâu xuất hiện.",
+    "cta": "Tích hợp SDK →"
+  },
+  "adv": {
+    "eyebrow": "Cho nhà quảng cáo",
+    "h2": "Tiếp cận những người đang dùng AI để tạo ra tương lai.",
+    "p": "Mạng của chúng tôi đưa quảng cáo của bạn vào thẳng bên trong ứng dụng AI — nơi tập trung nhóm có ý định cao nhất, giá trị cao nhất. Khởi chạy chiến dịch trong vài phút.",
+    "b1_html": "<strong>Nhắm mục tiêu chính xác</strong> — theo danh mục app, ý định người dùng và ngữ cảnh.",
+    "b2_html": "<strong>Tính giá theo hiệu quả</strong> — CPM, CPC, CPA. Chỉ trả cho cái hiệu quả.",
+    "b3_html": "<strong>Phân tích minh bạch</strong> — mọi impression, attribution và ROAS.",
+    "cta": "Khởi chạy chiến dịch →",
+    "camp1_title": "Q2 Dev Tool Push",
+    "camp2_title": "AI Learners Retarget",
+    "camp3_title": "Chào người dùng mới",
+    "pill_active": "Đang chạy",
+    "pill_paused": "Tạm dừng",
+    "stat_impressions": "impression",
+    "stat_ctr": "CTR",
+    "stat_cpc": "CPC"
+  },
+  "mcp": {
+    "eyebrow": "Xây dựng trên MCP",
+    "h2": "Một giao thức mới cho kỷ nguyên quảng cáo mới.",
+    "p_html": "Model Context Protocol cho phép mọi AI agent gọi tới Boost Boss để lấy, hiển thị và đo lường quảng cáo — với consent, minh bạch và attribution tích hợp sẵn.",
+    "card1_h": "Giao hàng theo mili-giây",
+    "card1_p": "Quảng cáo được lấy và render trong dưới 80ms — không khựng, không ảnh hưởng UX.",
+    "card2_h": "Hiểu ngữ cảnh",
+    "card2_p_html": "Mỗi impression đều được <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a> chấm điểm — bộ máy tối ưu AI của chúng tôi — để quảng cáo khớp với điều người dùng đang thực sự làm.",
+    "card3_h": "Ưu tiên quyền riêng tư",
+    "card3_p": "Không cookie bên thứ ba. Không fingerprint. Targeting sống bên trong app của bạn, không phải bên ngoài."
+  },
+  "benna": {
+    "eyebrow": "Bộ máy đằng sau mạng",
+    "title": "Benna AI — Tối ưu AI, được xây sẵn.",
+    "p": "Benna AI là lớp tối ưu vận hành mọi quyết định trên mạng Boost Boss — dự đoán xác suất chuyển đổi trên mỗi impression, chọn quảng cáo thắng và tự điều chỉnh giá đấu trong dưới 5ms. Nhà quảng cáo đặt mục tiêu, Benna AI lo phần còn lại.",
+    "cta": "Tìm hiểu thêm tại benna.ai →"
+  },
+  "stats": {
+    "label_calls": "Lượt gọi quảng cáo mỗi tháng",
+    "label_apps": "Ứng dụng AI trên mạng",
+    "label_ctr": "CTR trung bình",
+    "label_paid": "Đã trả cho nhà phát hành"
+  },
+  "how": {
+    "h2": "Từ số 0 đến doanh thu trong dưới 10 phút.",
+    "p": "Dù bạn là nhà phát triển ứng dụng AI hay thương hiệu muốn tiếp cận họ, thiết lập đều rất nhanh.",
+    "s1_h": "Lấy API key",
+    "s1_p": "Đăng ký làm nhà phát triển hoặc nhà quảng cáo. Key được cấp ngay — không chờ, không cần demo.",
+    "s2_h": "Cài SDK",
+    "s2_p": "Một dòng import. Một lần gọi hàm. Ứng dụng AI của bạn đã kết nối với toàn bộ mạng Boost Boss.",
+    "s3_h": "Khởi chạy và kiếm tiền",
+    "s3_p": "Lên sóng, theo dõi hiệu quả theo thời gian thực và nhận tiền hằng tuần — hoặc chi ngân sách để mở rộng tầm với."
+  },
+  "cta_big": {
+    "h2_html": "Mở chiếc hộp.<br>Bắt đầu kiếm tiền.",
+    "p": "Tham gia cùng các ứng dụng AI đã đang kiếm tiền với Boost Boss — và các thương hiệu đang tiếp cận họ.",
+    "cta_dev": "Bắt đầu với tư cách nhà phát triển",
+    "cta_adv": "Bắt đầu với tư cách nhà quảng cáo"
+  },
+  "foot": {
+    "tag": "Mạng quảng cáo chạy trên MCP cho ứng dụng AI. Xây cho nhà phát triển. Thiết kế cho nhà quảng cáo.",
+    "col_product": "Sản phẩm",
+    "col_resources": "Tài nguyên",
+    "col_company": "Công ty",
+    "col_trust": "Tin cậy & Pháp lý",
+    "l_publishers": "Nhà phát hành",
+    "l_superboost": "SuperBoost",
+    "l_bbx": "BBX",
+    "l_live_demo": "Dùng thử trực tiếp",
+    "l_how_it_works": "Cách hoạt động",
+    "l_docs": "Tài liệu",
+    "l_api": "Tham chiếu API",
+    "l_sdk": "SDK",
+    "l_changelog": "Nhật ký thay đổi",
+    "l_about": "Về chúng tôi",
+    "l_blog": "Blog",
+    "l_careers": "Tuyển dụng",
+    "l_contact": "Liên hệ",
+    "l_trust_center": "Trung tâm tin cậy",
+    "l_compliance": "SOC 2 · GDPR · CCPA",
+    "l_security": "Bảo mật",
+    "l_privacy": "Quyền riêng tư",
+    "l_terms": "Điều khoản",
+    "copy": "© 2026 Boost Boss, Inc.",
+    "tagline": "Xây cho kỷ nguyên AI."
+  }
+}
