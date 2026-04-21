@@ -45,7 +45,7 @@
   .brand-mark { width: 36px; height: 36px; }
   .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
   .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.7); transition: color 0.15s; }
+  .nav-links a { font-size: 14.5px; font-weight: 500; color: rgba(255,255,255,0.7); transition: color 0.15s; }
   .nav-links a:hover { color: #fff; }
   .nav-ctas { display: flex; gap: 10px; }
 
@@ -212,6 +212,40 @@
     .foot-inner { flex-direction: column; text-align: center; }
     .foot-links { flex-wrap: wrap; justify-content: center; }
   }
+
+  footer {
+    background: #fff;
+    padding: 64px 0 32px;
+    border-top: 1px solid var(--line);
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 48px;
+    border-bottom: 1px solid var(--line);
+  }
+  .foot-col h4 {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .foot-col ul { list-style: none; }
+  .foot-col li { padding: 6px 0; }
+  .foot-col a { font-size: 14.5px; color: var(--ink-soft); }
+  .foot-col a:hover { color: var(--pink); }
+  .foot-brand { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .foot-tag { font-size: 14px; color: var(--ink-soft); line-height: 1.6; max-width: 280px; }
+  .foot-bottom {
+    display: flex; justify-content: space-between;
+    padding-top: 24px; font-size: 13px; color: var(--muted);
+  }
+  @media (max-width: 900px) {
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+
 </style>
 </head>
 <body>
@@ -535,9 +569,10 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 <!-- FOOTER -->
 <footer>
   <div class="wrap">
-    <div class="foot-inner">
-      <div class="foot-brand">
-        <svg width="28" height="28" viewBox="0 0 80 80" fill="none"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
+    <div class="foot-grid">
+      <div class="foot-col">
+        <div class="foot-brand">
+          <svg width="32" height="32" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
 <line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
 <line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
 <line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
@@ -550,19 +585,55 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 <text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
-        <span class="brand-name">Boost Boss</span>
+          <span class="brand-name">Boost Boss</span>
+        </div>
+        <p class="foot-tag">The MCP‑powered ad network for AI applications. Built for developers. Designed for advertisers.</p>
       </div>
-      <div class="foot-links">
-        <a href="/">Home</a>
-        <a href="/ads">Advertisers</a>
-        <a href="/exchange">Exchange</a>
-        <a href="/docs">Docs</a>
-        <a href="/trust">Trust</a>
-        <a href="/developer">Dashboard</a>
-        <a href="mailto:hello@boostboss.ai">Contact</a>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <ul>
+          <li><a href="/publish">Publishers</a></li>
+          <li><a href="/ads">SuperBoost</a></li>
+          <li><a href="/exchange">BBX</a></li>
+          <li><a href="/demo">Live demo</a></li>
+          <li><a href="#how">How it works</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <ul>
+          <li><a href="/docs">Documentation</a></li>
+          <li><a href="/docs.html#api-reference">API reference</a></li>
+          <li><a href="/docs.html#sdks">SDK</a></li>
+          <li><a href="/docs">Changelog</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="/">About</a></li>
+          <li><a href="/docs">Blog</a></li>
+          <li><a href="mailto:careers@boostboss.ai">Careers</a></li>
+          <li><a href="mailto:hello@boostboss.ai">Contact</a></li>
+        </ul>
+      </div>
+      <div class="foot-col">
+        <h4>Trust &amp; legal</h4>
+        <ul>
+          <li><a href="/trust">Trust center</a></li>
+          <li><a href="/trust.html#compliance">SOC 2 · GDPR · CCPA</a></li>
+          <li><a href="/trust.html#security">Security</a></li>
+          <li><a href="/sellers.json">sellers.json</a></li>
+          <li><a href="/ads.txt">ads.txt</a></li>
+          <li><a href="/trust">Privacy</a></li>
+          <li><a href="/trust">Terms</a></li>
+        </ul>
       </div>
     </div>
-    <div class="foot-copy">© 2026 Boost Boss, Inc.</div>
+    <div class="foot-bottom">
+      <span>© 2026 Boost Boss, Inc.</span>
+      <span>Made for the AI era.</span>
+    </div>
   </div>
 </footer>
 
