@@ -1,21 +1,49 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 80" fill="none">
-  <!-- Icon: surprise box with BB inside -->
-  <g transform="translate(4 4)">
-    <!-- Main box body -->
-    <rect x="6" y="32" width="60" height="38" rx="4" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
-    <!-- Horizontal band (box seam) -->
-    <rect x="6" y="46" width="60" height="4" fill="#1A1A2E"/>
-    <!-- Lid (popped open, tilted) -->
-    <g transform="rotate(-6 36 22)">
-      <rect x="2" y="14" width="68" height="14" rx="3" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3"/>
-    </g>
-    <!-- BB letters on box -->
-    <text x="36" y="65" text-anchor="middle" font-family="Arial Black, -apple-system, sans-serif" font-size="20" font-weight="900" fill="white" letter-spacing="-1">BB</text>
-    <!-- Sparkle top right -->
-    <path d="M66 4 L69 -1 L72 4 L77 7 L72 10 L69 15 L66 10 L61 7 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
-    <!-- Sparkle top left -->
-    <circle cx="4" cy="8" r="2.5" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.2"/>
+  <!-- Icon: rocket with BB on body -->
+  <g transform="translate(2 4)">
+    <!-- Sparkle signature at top-right (retained motion mark) -->
+    <path d="M 64 6 L 66.5 1 L 69 6 L 74 8.5 L 69 11 L 66.5 16 L 64 11 L 59 8.5 Z"
+          fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
+
+    <!-- Speed lines (motion trail) -->
+    <line x1="12" y1="26" x2="22" y2="26" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
+    <line x1="6"  y1="38" x2="22" y2="38" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
+    <line x1="14" y1="50" x2="22" y2="50" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
+
+    <!-- Left fin -->
+    <path d="M 28 48 L 19 65 L 30 60 Z"
+          fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
+    <!-- Right fin -->
+    <path d="M 50 48 L 59 65 L 48 60 Z"
+          fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
+
+    <!-- Rocket body -->
+    <rect x="28" y="24" width="22" height="36"
+          fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>
+
+    <!-- Nose cone (yellow twist) -->
+    <path d="M 28 24 L 39 5 L 50 24 Z"
+          fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>
+
+    <!-- Cockpit window -->
+    <circle cx="39" cy="33" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>
+
+    <!-- Body seam -->
+    <line x1="28" y1="42" x2="50" y2="42" stroke="#1A1A2E" stroke-width="2"/>
+
+    <!-- BB letters -->
+    <text x="39" y="56" text-anchor="middle"
+          font-family="Arial Black, -apple-system, sans-serif"
+          font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
+
+    <!-- Flame outer -->
+    <path d="M 29 60 L 34 75 L 39 64 L 44 75 L 49 60 Z"
+          fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
+    <!-- Flame inner -->
+    <path d="M 34 60 L 39 70 L 44 60 Z" fill="#FF2D78"/>
   </g>
-  <!-- Wordmark "Boost Boss" -->
-  <text x="92" y="54" font-family="'Space Grotesk', 'Arial Black', sans-serif" font-size="32" font-weight="700" fill="#1A1A2E" letter-spacing="-1.5">Boost Boss</text>
+
+  <!-- Wordmark "Boost Boss" (unchanged) -->
+  <text x="92" y="54" font-family="'Space Grotesk', 'Arial Black', sans-serif"
+        font-size="32" font-weight="700" fill="#1A1A2E" letter-spacing="-1.5">Boost Boss</text>
 </svg>
