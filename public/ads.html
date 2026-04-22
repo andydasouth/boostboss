@@ -634,9 +634,10 @@
   /* ═══════════════════════════════════════════════════════════════════
      AD-FORMAT BELT — 6 browser-screenshot cards on a single horizontal
      conveyor that scrolls edge-to-edge in an infinite loop. JS clones
-     the card set once on init, and CSS animates the track by
-     translateX(-50%) = one full cycle. Hover pauses the belt so
-     visitors can read a specific card.
+     the card set once on init, then drives the belt via
+     requestAnimationFrame at ~62 px/s. Hover/focus pauses the belt;
+     click-and-drag (or swipe on touch) lets visitors scrub it manually.
+     Position wraps seamlessly via x = x % halfWidth.
      ═══════════════════════════════════════════════════════════════════ */
   .ad-carousel {
     position: relative;
@@ -647,11 +648,19 @@
     max-width: none;
     padding: 48px 0 72px;
     overflow: hidden;                  /* clip the belt at viewport edges */
+    cursor: grab;                      /* signal draggable */
+    user-select: none;                 /* no text selection while dragging */
+    -webkit-user-select: none;
+    touch-action: pan-y;               /* allow vertical page scroll, horizontal = belt drag */
   }
+  .ad-carousel.is-dragging { cursor: grabbing; }
+  .ad-carousel.is-dragging .ad-slide { transition: none; }
+  .ad-carousel.is-dragging * { pointer-events: none; }
   /* Infinite horizontal belt — all 6 cards scroll in a single continuous row.
-     JS clones the card set once on init so translateX(-50%) = one full cycle.
-     NOTE: using per-card margin-right (not `gap`) so the total track width is
-     a clean multiple of (card + margin) and the loop is perfectly seamless. */
+     JS clones the card set once on init, then a requestAnimationFrame loop
+     drives translateX at ~60 px/s. CSS animation below is the pre-JS
+     fallback; JS overrides the inline transform once initBelt() runs.
+     Per-card margin-right keeps the loop mathematically seamless. */
   .ad-carousel .ad-frame {
     display: flex;
     flex-wrap: nowrap;                 /* ONE row, no wrapping */
@@ -663,12 +672,8 @@
     box-shadow: none;
     overflow: visible;
     min-height: 0;
-    animation: beltScroll 55s linear infinite;
+    animation: beltScroll 55s linear infinite;  /* fallback if JS disabled */
     will-change: transform;
-  }
-  .ad-carousel:hover .ad-frame,
-  .ad-carousel:focus-within .ad-frame {
-    animation-play-state: paused;      /* pause so viewers can read on hover */
   }
   @keyframes beltScroll {
     from { transform: translateX(0); }
@@ -1964,12 +1969,17 @@
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // (3) BELT CAROUSEL — clone the 6 ad-slide cards once so the
-    //     infinite translateX(-50%) loop appears seamless.
+    // (3) BELT CAROUSEL — clone the 6 ad-slide cards once, then drive the
+    //     belt with a requestAnimationFrame loop (so we can: auto-scroll
+    //     at ~60 px/s, pause on hover/focus, and drag left/right via
+    //     mouse OR touch). Position wraps seamlessly at -halfWidth.
     // ─────────────────────────────────────────────────────────────────
     function initBelt() {
-      var frame = document.querySelector('.ad-carousel .ad-frame');
+      var carousel = document.querySelector('.ad-carousel');
+      var frame    = carousel && carousel.querySelector('.ad-frame');
       if (!frame) return;
+
+      // Clone card set once so translateX(-halfWidth) = one full cycle
       var originals = frame.querySelectorAll(':scope > .ad-slide');
       if (!originals.length || frame.dataset.cloned === '1') return;
       originals.forEach(function (node) {
@@ -1979,6 +1989,108 @@
         frame.appendChild(copy);
       });
       frame.dataset.cloned = '1';
+
+      // JS takes over the transform — disable the CSS fallback animation
+      frame.style.animation = 'none';
+
+      var offset       = 0;               // current translateX in px
+      var halfWidth    = 0;               // width of one card set
+      var lastTs       = 0;
+      var autoSpeed    = 62;              // px / second
+      var paused       = false;           // hover / focus
+      var dragging     = false;
+      var dragStartX   = 0;
+      var dragOffset0  = 0;
+      var moved        = false;
+      var DRAG_THRESH  = 5;                // px before we call it a drag
+
+      function recalc() {
+        halfWidth = frame.scrollWidth / 2;
+      }
+      recalc();
+      window.addEventListener('resize', recalc);
+
+      function wrap(x) {
+        if (halfWidth <= 0) return 0;
+        x = x % halfWidth;
+        if (x > 0) x -= halfWidth;
+        return x;
+      }
+
+      function apply() {
+        frame.style.transform = 'translate3d(' + offset + 'px, 0, 0)';
+      }
+
+      function tick(ts) {
+        if (!lastTs) lastTs = ts;
+        var dt = Math.min(0.1, (ts - lastTs) / 1000);  // clamp huge jumps after tab-switch
+        lastTs = ts;
+        if (!dragging && !paused && !prefersReduced) {
+          offset -= autoSpeed * dt;
+          offset = wrap(offset);
+          apply();
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+
+      // Hover / focus pause (ignored while actively dragging)
+      carousel.addEventListener('mouseenter', function () { paused = true; });
+      carousel.addEventListener('mouseleave', function () { paused = false; lastTs = 0; });
+      carousel.addEventListener('focusin',    function () { paused = true; });
+      carousel.addEventListener('focusout',   function () { paused = false; lastTs = 0; });
+
+      // Shared drag start/move/end
+      function onDown(clientX) {
+        dragging    = true;
+        dragStartX  = clientX;
+        dragOffset0 = offset;
+        moved       = false;
+        carousel.classList.add('is-dragging');
+      }
+      function onMove(clientX) {
+        if (!dragging) return;
+        var dx = clientX - dragStartX;
+        if (!moved && Math.abs(dx) > DRAG_THRESH) moved = true;
+        if (moved) {
+          offset = wrap(dragOffset0 + dx);
+          apply();
+        }
+      }
+      function onUp() {
+        if (!dragging) return;
+        dragging = false;
+        carousel.classList.remove('is-dragging');
+        lastTs = 0;              // reset so auto-scroll has no jump
+      }
+
+      // Mouse — bind move/up on window so the drag survives exiting the belt
+      carousel.addEventListener('mousedown', function (e) {
+        if (e.button !== 0) return;
+        onDown(e.clientX);
+        e.preventDefault();
+      });
+      window.addEventListener('mousemove', function (e) { onMove(e.clientX); });
+      window.addEventListener('mouseup',   onUp);
+      window.addEventListener('mouseleave', onUp);
+
+      // Touch
+      carousel.addEventListener('touchstart', function (e) {
+        if (e.touches.length !== 1) return;
+        onDown(e.touches[0].clientX);
+      }, { passive: true });
+      carousel.addEventListener('touchmove', function (e) {
+        if (e.touches.length !== 1) return;
+        onMove(e.touches[0].clientX);
+      }, { passive: true });
+      carousel.addEventListener('touchend',    onUp);
+      carousel.addEventListener('touchcancel', onUp);
+
+      // Swallow the click that fires at the end of a real drag so any
+      // interactive child elements don't trigger accidentally.
+      carousel.addEventListener('click', function (e) {
+        if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
+      }, true);
     }
 
     function init() {
