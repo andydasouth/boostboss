@@ -1044,39 +1044,111 @@
     display: flex; align-items: center; justify-content: center;
   }
 
-  /* ── FORMAT 6: SUGGESTED CHIPS — pill row under AI reply, one sponsored ── */
-  .fmt-chips {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    margin-top: 6px;
+  /* ── FORMAT 6: CORNER VIDEO COUNTDOWN — mini video ad pinned bottom-right ── */
+  .fmt-video-corner {
+    position: absolute; bottom: 14px; right: 14px;
+    width: 238px;
+    background: #0A0A14;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+    animation: cornerBob 3s ease-in-out infinite;
+    border: 1px solid rgba(139, 92, 246, 0.3);
   }
-  .fmt-chips .chip {
-    display: inline-flex; align-items: center;
-    background: var(--bg-soft);
-    border: 1px solid var(--line);
-    color: var(--ink);
-    padding: 8px 14px;
-    border-radius: 100px;
-    font-size: 12.5px;
-    font-weight: 600;
-    white-space: nowrap;
-    transition: all 0.18s;
+  .fmt-video-corner .vc-video {
+    position: relative;
+    height: 118px;
+    background:
+      radial-gradient(ellipse 45% 55% at 50% 50%, rgba(139, 92, 246, 0.45), transparent 65%),
+      linear-gradient(135deg, #2A1454 0%, #0F0318 100%);
+    display: flex; align-items: center; justify-content: center;
   }
-  .fmt-chips .chip:hover {
-    background: #fff; border-color: var(--ink-soft);
+  .fmt-video-corner .vc-video::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(to right,
+        transparent 0 9%,
+        rgba(255,255,255,0.05) 9% 10%,
+        transparent 10% 18%);
   }
-  .fmt-chips .chip.sponsored {
-    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
-    border-color: var(--pink);
-    color: var(--ink);
-    box-shadow: 0 6px 16px rgba(255, 45, 120, 0.18);
-    font-weight: 700;
+  .fmt-video-corner .vc-countdown {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(0, 0, 0, 0.62); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 4px 9px; border-radius: 100px;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 2;
+    display: inline-flex; align-items: center; gap: 1px;
   }
-  .fmt-chips .chip.sponsored:hover {
-    background: var(--pink); color: #fff;
+  .fmt-video-corner .vc-countdown b {
+    display: inline-block;
+    font-size: 0;               /* hide static "5" inner text — pseudo element renders ticking digit */
+    min-width: 8px; text-align: center;
+  }
+  .fmt-video-corner .vc-countdown b::before {
+    content: "5";
+    display: inline-block;
+    color: #FFE600; font-size: 11px; font-weight: 800;
+    animation: vcDigit 5s steps(1, end) infinite;
+  }
+  @keyframes vcDigit {
+    0%   { content: "5"; }
+    20%  { content: "4"; }
+    40%  { content: "3"; }
+    60%  { content: "2"; }
+    80%  { content: "1"; }
+    100% { content: "5"; }
+  }
+  .fmt-video-corner .vc-play {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.96);
+    color: #0A0A14;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; padding-left: 3px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.4),
+                0 0 0 6px rgba(255, 255, 255, 0.08);
+    position: relative; z-index: 1;
+    animation: pulseRing 2s ease-out infinite;
+  }
+  .fmt-video-corner .vc-progress {
+    position: absolute; bottom: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #8B5CF6, var(--pink));
+    animation: vcProgress 5s linear infinite;
+  }
+  @keyframes vcProgress {
+    from { width: 0%; }
+    to   { width: 100%; }
+  }
+  .fmt-video-corner .vc-caption {
+    padding: 9px 12px 11px;
+    background: linear-gradient(180deg, rgba(10, 10, 20, 0.9), #0A0A14);
+    color: #fff;
+  }
+  .fmt-video-corner .vcl {
+    font-size: 9px; font-weight: 800; color: #C4B5FD;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .fmt-video-corner .vct {
+    font-size: 12px; font-weight: 700; line-height: 1.25;
+    color: #fff;
+  }
+  .fmt-video-corner .vcc {
+    display: inline-block; margin-top: 4px;
+    font-size: 10.5px; font-weight: 700;
+    color: #FF6B9D;
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .fmt-video .play-btn, .fmt-corner { animation: none !important; }
+    .fmt-video .play-btn,
+    .fmt-corner,
+    .fmt-video-corner,
+    .fmt-video-corner .vc-play,
+    .fmt-video-corner .vc-progress,
+    .fmt-video-corner .vc-countdown b::before { animation: none !important; }
     .ad-slide:hover { transform: none !important; }
   }
 
@@ -1242,8 +1314,8 @@
           </div>
         </div>
 
-        <!-- ⑥ SUGGESTED CHIP · Mira (sample AI) · Figma -->
-        <div class="ad-slide" data-format="chip">
+        <!-- ⑥ CORNER VIDEO COUNTDOWN · Mira (sample AI) · Figma -->
+        <div class="ad-slide" data-format="video-corner">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>mira.ai</span>
@@ -1251,15 +1323,22 @@
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #4285F4 0%, #9B72CB 50%, #D96570 100%);">M</div>
             <div class="name">Mira<small>Multimodal AI · via MCP</small></div>
-            <span class="fmt-tag" style="background: #4285F4">Suggested chip</span>
+            <span class="fmt-tag" style="background: #8B5CF6">Corner video</span>
           </div>
-          <div class="ad-body">
-            <div class="mini-user">What's the best tool for UI wireframing?</div>
-            <div class="mini-ai">Popular picks are Figma, Balsamiq, and Whimsical — Figma is the industry standard, with real-time collaboration built in.</div>
-            <div class="fmt-chips">
-              <span class="chip">Compare tools</span>
-              <span class="chip sponsored">✨ Try Figma free →</span>
-              <span class="chip">Wireframing 101</span>
+          <div class="ad-body fmt-corner-parent">
+            <div class="mini-user">How can I prototype a mobile app quickly?</div>
+            <div class="mini-ai">Sketch wireframes first, then jump into a design tool with shared component libraries so your team can iterate in parallel.</div>
+            <div class="fmt-video-corner">
+              <div class="vc-video">
+                <div class="vc-countdown">Skip in <b>5</b>s</div>
+                <div class="vc-play">▶</div>
+                <div class="vc-progress"></div>
+              </div>
+              <div class="vc-caption">
+                <div class="vcl">◆ Sponsored · 15s</div>
+                <div class="vct">Figma — design, prototype, ship</div>
+                <div class="vcc">Watch demo →</div>
+              </div>
             </div>
           </div>
         </div>
