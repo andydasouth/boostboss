@@ -63,7 +63,7 @@
   },
   "benna": {
     "eyebrow": "The engine under the network",
-    "title": "Benna — AI optimization, built in.",
+    "title": "benna — AI optimization, built in.",
     "p": "Benna is the optimization layer that powers every decision on the Boost Boss network — predicting conversion probability on every impression, selecting the winning ad, and auto-tuning bids in under 5ms. Advertisers set targets, Benna does the rest.",
     "cta": "Learn more at benna.ai →"
   },
