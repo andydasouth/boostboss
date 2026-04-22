@@ -636,8 +636,10 @@
      conveyor that scrolls edge-to-edge in an infinite loop. JS clones
      the card set once on init, then drives the belt via
      requestAnimationFrame at ~62 px/s. Hover/focus pauses the belt;
-     click-and-drag (or swipe on touch) lets visitors scrub it manually.
-     Position wraps seamlessly via x = x % halfWidth.
+     click-and-drag, touch swipe, AND trackpad two-finger horizontal
+     swipe (wheel deltaX) all let visitors scrub manually. Vertical
+     wheel motion is NOT hijacked — page scroll still works over the
+     belt. Position wraps seamlessly via x = x % halfWidth.
      ═══════════════════════════════════════════════════════════════════ */
   .ad-carousel {
     position: relative;
@@ -2091,6 +2093,29 @@
       carousel.addEventListener('click', function (e) {
         if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
       }, true);
+
+      // Trackpad two-finger swipe (and Shift+wheel on a regular mouse):
+      // browsers fire `wheel` events with deltaX for horizontal scrolling.
+      // We hijack ONLY when horizontal motion dominates so vertical page
+      // scrolling over the belt continues to work normally.
+      var wheelResumeTimer = null;
+      carousel.addEventListener('wheel', function (e) {
+        var dx = e.deltaX;
+        var dy = e.deltaY;
+        if (Math.abs(dx) <= Math.abs(dy)) return;   // vertical intent → let page scroll
+        e.preventDefault();
+        offset -= dx;                                // natural-scroll direction
+        offset = wrap(offset);
+        apply();
+        // Pause auto-scroll briefly so the user's swipe + trackpad momentum
+        // doesn't fight the belt; resume ~700ms after the last wheel event.
+        paused = true;
+        if (wheelResumeTimer) clearTimeout(wheelResumeTimer);
+        wheelResumeTimer = setTimeout(function () {
+          paused = false;
+          lastTs = 0;
+        }, 700);
+      }, { passive: false });
     }
 
     function init() {
