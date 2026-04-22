@@ -648,8 +648,8 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    gap: 32px 28px;                    /* row gap 32 · col gap 28 */
-    max-width: 1440px;
+    gap: 36px 30px;                    /* row gap 36 · col gap 30 */
+    max-width: 1760px;
     margin: 0 auto;
     /* frame itself is transparent — each slide is its own card now */
     background: none;
@@ -660,15 +660,17 @@
   }
   .ad-slide {
     position: relative;
-    width: 440px;                      /* wider, desktop-browser proportions */
-    min-height: 460px;
+    width: 560px;                      /* landscape browser-screenshot width */
+    min-height: 420px;
     flex-shrink: 0;
     background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 18px;
+    border: 1px solid #E4E6EB;
+    border-radius: 14px;               /* slightly tighter like a browser window */
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(15, 15, 26, 0.10),
-                0 6px 18px rgba(15, 15, 26, 0.06);
+    box-shadow:
+      0 1px 2px rgba(15, 15, 26, 0.04),
+      0 8px 24px rgba(15, 15, 26, 0.08),
+      0 28px 60px rgba(15, 15, 26, 0.12);
     opacity: 1;
     pointer-events: auto;
     transform-origin: center bottom;
@@ -678,6 +680,44 @@
       box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     display: flex; flex-direction: column;
   }
+
+  /* ── Browser chrome (macOS-style traffic lights + URL pill) ── */
+  .browser-bar {
+    display: flex; align-items: center;
+    gap: 12px;
+    height: 32px;
+    padding: 0 14px;
+    background: linear-gradient(180deg, #F1F2F4 0%, #E8EAED 100%);
+    border-bottom: 1px solid #D9DCE0;
+    flex-shrink: 0;
+    position: relative;
+  }
+  .browser-bar .bb-dots { display: flex; gap: 6px; }
+  .browser-bar .bb-dots i {
+    display: block; width: 11px; height: 11px; border-radius: 50%;
+    box-shadow: inset 0 0 0 0.5px rgba(0,0,0,0.1);
+  }
+  .browser-bar .bb-dots i:nth-child(1) { background: #FF5F57; }
+  .browser-bar .bb-dots i:nth-child(2) { background: #FEBC2E; }
+  .browser-bar .bb-dots i:nth-child(3) { background: #28C840; }
+  .browser-bar .bb-url {
+    position: absolute;
+    left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    display: inline-flex; align-items: center; gap: 5px;
+    background: #FFFFFF;
+    border: 1px solid #D9DCE0;
+    border-radius: 6px;
+    padding: 3px 14px;
+    font-size: 11.5px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    color: var(--ink-soft);
+    max-width: 58%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .browser-bar .bb-lock { flex-shrink: 0; color: #6B7280; }
   /* Natural vertical stagger — alternating slight offset, no rotation */
   .ad-slide:nth-child(2) { margin-top: 22px; }
   .ad-slide:nth-child(4) { margin-top: 22px; }
@@ -691,12 +731,13 @@
   .ad-slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
   /* Below 3-per-row threshold: drop the stagger so pairs align cleanly */
-  @media (max-width: 1400px) {
+  @media (max-width: 1780px) {
     .ad-slide:nth-child(2), .ad-slide:nth-child(4) { margin-top: 0; }
   }
-  @media (max-width: 960px) {
+  @media (max-width: 1180px) {
     .ad-carousel { padding: 24px 0 48px; }
     .ad-carousel .ad-frame { padding: 0 20px; gap: 24px; }
+    .ad-slide { width: min(560px, 100%); }
   }
 
   .ad-slide .ad-head {
@@ -1038,7 +1079,7 @@
   </div>
 </section>
 
-<!-- AD-FORMAT SPREAD — 5 light cards fanned across, hover to pop forward -->
+<!-- AD-FORMAT SPREAD — 5 browser-screenshot cards in a 3-2 grid -->
 <section style="padding: 0 0 72px;" data-reveal>
   <div class="wrap">
     <div class="ad-carousel" id="adCarousel">
@@ -1046,6 +1087,10 @@
 
         <!-- ① NATIVE · Claude · HubSpot -->
         <div class="ad-slide" data-format="native">
+          <div class="browser-bar">
+            <span class="bb-dots"><i></i><i></i><i></i></span>
+            <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>claude.ai</span>
+          </div>
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #FF8A1F, #FF5E3A);">C</div>
             <div class="name">Claude<small>AI assistant · via MCP</small></div>
@@ -1064,6 +1109,10 @@
 
         <!-- ② VIDEO POP-UP · ChatGPT · Notion AI -->
         <div class="ad-slide" data-format="video">
+          <div class="browser-bar">
+            <span class="bb-dots"><i></i><i></i><i></i></span>
+            <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>chat.openai.com</span>
+          </div>
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #25D366, #128C7E);">💬</div>
             <div class="name">ChatGPT<small>OpenAI · via MCP</small></div>
@@ -1086,6 +1135,10 @@
 
         <!-- ③ PICTURE POP-UP · Cursor · Sentry -->
         <div class="ad-slide" data-format="picture">
+          <div class="browser-bar">
+            <span class="bb-dots"><i></i><i></i><i></i></span>
+            <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>cursor.com</span>
+          </div>
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #000, #333);">c</div>
             <div class="name">Cursor<small>AI code editor · via MCP</small></div>
@@ -1108,6 +1161,10 @@
 
         <!-- ④ RICH BANNER · Perplexity · Amplitude -->
         <div class="ad-slide" data-format="banner">
+          <div class="browser-bar">
+            <span class="bb-dots"><i></i><i></i><i></i></span>
+            <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>perplexity.ai</span>
+          </div>
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #20808D, #0EA5E9);">P</div>
             <div class="name">Perplexity<small>AI answer engine · via MCP</small></div>
@@ -1129,6 +1186,10 @@
 
         <!-- ⑤ CORNER NOTIF · Replit · Railway -->
         <div class="ad-slide" data-format="corner">
+          <div class="browser-bar">
+            <span class="bb-dots"><i></i><i></i><i></i></span>
+            <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>replit.com</span>
+          </div>
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #F26207, #FFE600);">R</div>
             <div class="name">Replit<small>AI dev environment · via MCP</small></div>
