@@ -636,10 +636,10 @@
      conveyor that scrolls edge-to-edge in an infinite loop. JS clones
      the card set once on init, then drives the belt via
      requestAnimationFrame at ~62 px/s. Hover/focus pauses the belt;
-     click-and-drag, touch swipe, AND trackpad two-finger horizontal
-     swipe (wheel deltaX) all let visitors scrub manually. Vertical
-     wheel motion is NOT hijacked — page scroll still works over the
-     belt. Position wraps seamlessly via x = x % halfWidth.
+     trackpad two-finger horizontal swipe (wheel deltaX) or mobile
+     touch swipe scrubs it manually. Vertical wheel motion is NOT
+     hijacked — page scroll still works over the belt. Position wraps
+     seamlessly via x = x % halfWidth.
      ═══════════════════════════════════════════════════════════════════ */
   .ad-carousel {
     position: relative;
@@ -650,14 +650,10 @@
     max-width: none;
     padding: 48px 0 72px;
     overflow: hidden;                  /* clip the belt at viewport edges */
-    cursor: grab;                      /* signal draggable */
-    user-select: none;                 /* no text selection while dragging */
+    user-select: none;                 /* prevent text highlight flashes on touch-drag */
     -webkit-user-select: none;
-    touch-action: pan-y;               /* allow vertical page scroll, horizontal = belt drag */
+    touch-action: pan-y;               /* allow vertical page scroll; horizontal = belt drag on touch */
   }
-  .ad-carousel.is-dragging { cursor: grabbing; }
-  .ad-carousel.is-dragging .ad-slide { transition: none; }
-  .ad-carousel.is-dragging * { pointer-events: none; }
   /* Infinite horizontal belt — all 6 cards scroll in a single continuous row.
      JS clones the card set once on init, then a requestAnimationFrame loop
      drives translateX at ~60 px/s. CSS animation below is the pre-JS
@@ -1972,9 +1968,10 @@
 
     // ─────────────────────────────────────────────────────────────────
     // (3) BELT CAROUSEL — clone the 6 ad-slide cards once, then drive the
-    //     belt with a requestAnimationFrame loop (so we can: auto-scroll
-    //     at ~60 px/s, pause on hover/focus, and drag left/right via
-    //     mouse OR touch). Position wraps seamlessly at -halfWidth.
+    //     belt with a requestAnimationFrame loop: auto-scroll at ~62 px/s,
+    //     pause on hover/focus, and scrub horizontally via trackpad
+    //     two-finger swipe (wheel deltaX) OR touch swipe on mobile.
+    //     Position wraps seamlessly at -halfWidth.
     // ─────────────────────────────────────────────────────────────────
     function initBelt() {
       var carousel = document.querySelector('.ad-carousel');
@@ -1999,12 +1996,10 @@
       var halfWidth    = 0;               // width of one card set
       var lastTs       = 0;
       var autoSpeed    = 62;              // px / second
-      var paused       = false;           // hover / focus
-      var dragging     = false;
-      var dragStartX   = 0;
-      var dragOffset0  = 0;
-      var moved        = false;
-      var DRAG_THRESH  = 5;                // px before we call it a drag
+      var paused       = false;           // hover / focus / wheel inertia
+      var touching     = false;           // active touch drag
+      var touchStartX  = 0;
+      var touchOffset0 = 0;
 
       function recalc() {
         halfWidth = frame.scrollWidth / 2;
@@ -2027,7 +2022,7 @@
         if (!lastTs) lastTs = ts;
         var dt = Math.min(0.1, (ts - lastTs) / 1000);  // clamp huge jumps after tab-switch
         lastTs = ts;
-        if (!dragging && !paused && !prefersReduced) {
+        if (!touching && !paused && !prefersReduced) {
           offset -= autoSpeed * dt;
           offset = wrap(offset);
           apply();
@@ -2036,63 +2031,32 @@
       }
       requestAnimationFrame(tick);
 
-      // Hover / focus pause (ignored while actively dragging)
+      // Hover / focus pause
       carousel.addEventListener('mouseenter', function () { paused = true; });
       carousel.addEventListener('mouseleave', function () { paused = false; lastTs = 0; });
       carousel.addEventListener('focusin',    function () { paused = true; });
       carousel.addEventListener('focusout',   function () { paused = false; lastTs = 0; });
 
-      // Shared drag start/move/end
-      function onDown(clientX) {
-        dragging    = true;
-        dragStartX  = clientX;
-        dragOffset0 = offset;
-        moved       = false;
-        carousel.classList.add('is-dragging');
-      }
-      function onMove(clientX) {
-        if (!dragging) return;
-        var dx = clientX - dragStartX;
-        if (!moved && Math.abs(dx) > DRAG_THRESH) moved = true;
-        if (moved) {
-          offset = wrap(dragOffset0 + dx);
-          apply();
-        }
-      }
-      function onUp() {
-        if (!dragging) return;
-        dragging = false;
-        carousel.classList.remove('is-dragging');
-        lastTs = 0;              // reset so auto-scroll has no jump
-      }
-
-      // Mouse — bind move/up on window so the drag survives exiting the belt
-      carousel.addEventListener('mousedown', function (e) {
-        if (e.button !== 0) return;
-        onDown(e.clientX);
-        e.preventDefault();
-      });
-      window.addEventListener('mousemove', function (e) { onMove(e.clientX); });
-      window.addEventListener('mouseup',   onUp);
-      window.addEventListener('mouseleave', onUp);
-
-      // Touch
+      // Touch swipe (mobile)
       carousel.addEventListener('touchstart', function (e) {
         if (e.touches.length !== 1) return;
-        onDown(e.touches[0].clientX);
+        touching     = true;
+        touchStartX  = e.touches[0].clientX;
+        touchOffset0 = offset;
       }, { passive: true });
       carousel.addEventListener('touchmove', function (e) {
-        if (e.touches.length !== 1) return;
-        onMove(e.touches[0].clientX);
+        if (!touching || e.touches.length !== 1) return;
+        var dx = e.touches[0].clientX - touchStartX;
+        offset = wrap(touchOffset0 + dx);
+        apply();
       }, { passive: true });
-      carousel.addEventListener('touchend',    onUp);
-      carousel.addEventListener('touchcancel', onUp);
-
-      // Swallow the click that fires at the end of a real drag so any
-      // interactive child elements don't trigger accidentally.
-      carousel.addEventListener('click', function (e) {
-        if (moved) { e.preventDefault(); e.stopPropagation(); moved = false; }
-      }, true);
+      function touchEnd() {
+        if (!touching) return;
+        touching = false;
+        lastTs = 0;
+      }
+      carousel.addEventListener('touchend',    touchEnd);
+      carousel.addEventListener('touchcancel', touchEnd);
 
       // Trackpad two-finger swipe (and Shift+wheel on a regular mouse):
       // browsers fire `wheel` events with deltaX for horizontal scrolling.
