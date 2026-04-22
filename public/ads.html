@@ -632,33 +632,69 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     AD-FORMAT MARQUEE — benna.ai-style horizontal carousel where every
-     format is visible at once, sliding continuously so visitors can
-     scan all placements (native / video / picture / banner / corner
-     notif / full-screen pop-up) across different AI products side-by-
-     side. Pure CSS animation, pauses on hover.
+     AD-FORMAT SPREAD — the original 5 example placements laid out side
+     by side with a slight overlap at their edges (fanned-hand feel).
+     Hovering a card lifts it forward above the others so you can
+     inspect any format up close. No auto-motion — static spread.
      ═══════════════════════════════════════════════════════════════════ */
-  .ad-marquee-wrap {
+  .ad-spread-wrap {
     max-width: none; margin: 56px auto 0;
-    padding: 36px 0 44px;
+    padding: 56px 40px 72px;
     position: relative;
-    /* Edge fade so cards dissolve in from left/right */
+    /* Soft edge fade so the spread dissolves at left/right */
     mask-image:
-      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
     -webkit-mask-image:
-      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+      linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
   }
-  .ad-marquee {
-    display: flex; gap: 28px;
-    width: max-content;
-    animation: adMarquee 55s linear infinite;
-    padding: 0 16px;
+  .ad-spread {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0;
+    max-width: 1440px;
+    margin: 0 auto;
   }
-  .ad-marquee-wrap:hover .ad-marquee,
-  .ad-marquee:focus-within { animation-play-state: paused; }
-  @keyframes adMarquee {
-    from { transform: translateX(0); }
-    to   { transform: translateX(calc(-50% - 14px)); }
+  /* In spread context cards are slightly narrower so 5 fit side-by-side */
+  .ad-spread .ad-card {
+    width: 290px;
+    min-height: 460px;
+    margin-left: -26px;                       /* overlap a bit */
+    transform-origin: center bottom;
+    transform: translateY(0) rotate(var(--card-rot, 0deg)) scale(1);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      z-index 0s 0.35s;
+    z-index: 1;
+  }
+  .ad-spread .ad-card:first-child { margin-left: 0; }
+
+  /* Stack-fallback for narrow screens so cards don't clip */
+  @media (max-width: 1180px) {
+    .ad-spread-wrap { padding: 40px 20px 56px; overflow-x: auto; }
+    .ad-spread { justify-content: flex-start; padding: 0 20px; }
+    .ad-spread .ad-card { flex-shrink: 0; }
+  }
+
+  /* Slight fan rotation — each card tilts a bit differently */
+  .ad-spread .ad-card:nth-child(1) { --card-rot: -4deg;  z-index: 1; }
+  .ad-spread .ad-card:nth-child(2) { --card-rot: -2deg;  z-index: 2; }
+  .ad-spread .ad-card:nth-child(3) { --card-rot:  0deg;  z-index: 3; }
+  .ad-spread .ad-card:nth-child(4) { --card-rot:  2deg;  z-index: 2; }
+  .ad-spread .ad-card:nth-child(5) { --card-rot:  4deg;  z-index: 1; }
+
+  /* Hover: card pops forward — unrotates, lifts, scales up, deeper shadow */
+  .ad-spread .ad-card:hover {
+    transform: translateY(-18px) rotate(0deg) scale(1.06);
+    z-index: 20;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      z-index 0s;
+    box-shadow:
+      0 40px 80px rgba(0, 0, 0, 0.55),
+      0 0 0 1px color-mix(in srgb, var(--ct-accent) 70%, transparent);
   }
 
   /* Per-format card — phone-shaped, per-brand theme */
@@ -1018,16 +1054,14 @@
       <a class="btn btn-outline btn-lg" href="#bidding">See how bidding works</a>
     </div>
     <div class="hero-micro" data-reveal style="--reveal-delay:320ms">No setup fees · $100 starter credit · Live in under 10 minutes</div>
-
-    <!-- Ad-format marquee: horizontal scrolling row of format cards,
-         all visible at once. 6 unique cards + duplicate row for seamless
-         infinite scroll. Pauses on hover. -->
   </div>
 </section>
-<section class="ad-marquee-wrap" data-reveal>
-  <div class="ad-marquee">
-    <!-- ═══════ FIRST ROW ═══════ -->
-    <!-- NATIVE — Claude -->
+
+<!-- AD FORMAT SPREAD — 5 examples fanned out; hover any card to pop it forward -->
+<section class="ad-spread-wrap" data-reveal>
+  <div class="ad-spread">
+
+    <!-- ① NATIVE · Claude · HubSpot -->
     <div class="ad-card th-claude">
       <span class="fmt-badge">Native</span>
       <div class="ac-head">
@@ -1037,18 +1071,18 @@
       </div>
       <div class="ac-body">
         <div class="cb-user">Best CRM for a 10-person sales team?</div>
-        <div class="cb-ai">HubSpot and Pipedrive both fit that size well — HubSpot has strong automation.</div>
+        <div class="cb-ai">HubSpot and Pipedrive both fit — HubSpot has strong automation.</div>
       </div>
       <div class="ac-sponsor">
         <span class="sp-tag">Sponsored</span>
         <span class="sp-l">Native placement</span>
-        <span class="sp-t">HubSpot Starter — growing teams</span>
+        <span class="sp-t">HubSpot Starter — built for growing teams</span>
         <span class="sp-s">CRM + marketing + sales in one. From $45/mo.</span>
         <span class="sp-c">Try free →</span>
       </div>
     </div>
 
-    <!-- VIDEO — ChatGPT -->
+    <!-- ② VIDEO POP-UP · ChatGPT · Notion AI -->
     <div class="ad-card fmt-video th-chatgpt">
       <span class="fmt-badge">Video · 15s</span>
       <div class="ac-head">
@@ -1057,8 +1091,8 @@
         <div class="dt"></div>
       </div>
       <div class="ac-body">
-        <div class="cb-user">How should I organize my team's docs?</div>
-        <div class="cb-ai">Notion and Coda both shine at this scale — Notion for structured docs, Coda for data-backed workflows.</div>
+        <div class="cb-user">How do I organize my team's docs?</div>
+        <div class="cb-ai">Notion and Coda both shine here — Notion for structured docs, Coda for data-backed workflows.</div>
       </div>
       <div class="vid-player" style="margin: 0 18px;">
         <div class="skip">Skip in 5s</div>
@@ -1067,11 +1101,12 @@
       <div class="ac-sponsor">
         <span class="sp-l">Sponsored · Video</span>
         <span class="sp-t">Notion AI — your workspace, supercharged</span>
+        <span class="sp-s">All your docs, projects, and notes, answered instantly.</span>
         <span class="sp-c">Watch 15s →</span>
       </div>
     </div>
 
-    <!-- PICTURE — Cursor -->
+    <!-- ③ PICTURE POP-UP · Cursor · Sentry -->
     <div class="ad-card fmt-picture th-cursor">
       <span class="fmt-badge">Picture</span>
       <div class="ac-head">
@@ -1084,195 +1119,54 @@
       </div>
       <div class="ac-sponsor">
         <span class="sp-l">Sponsored · Image</span>
-        <span class="sp-t">Kimpton Palm Springs — 30% off</span>
-        <span class="sp-s">Rooftop pool. Pet-friendly. Mid-century design.</span>
-        <span class="sp-c">Book now →</span>
+        <span class="sp-t">Sentry — catch CI failures before users do</span>
+        <span class="sp-s">Debug any error with full trace + env diff. Free up to 500K events/mo.</span>
+        <span class="sp-c">Start free →</span>
       </div>
     </div>
 
-    <!-- FULL-SCREEN POP-UP — GymAI -->
-    <div class="ad-card fmt-popup th-gymai">
-      <span class="fmt-badge">Pop-up · Full</span>
-      <div class="ac-head">
-        <div class="ic">G</div>
-        <div class="nm">GymAI · coach</div>
-        <div class="dt"></div>
-      </div>
-      <div class="ac-body">
-        <div class="overlay">
-          <div class="close">×</div>
-          <div class="pop-hero"></div>
-          <div class="pop-body">
-            <span class="sp-l">Sponsored · Pop-up</span>
-            <span class="sp-t">Whoop — train with your recovery</span>
-            <span class="sp-s">Match intensity to HRV & sleep.</span>
-            <span class="sp-c" style="background: #4DF0A1; color: #081810;">Try 30 days →</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- BANNER — Fissbot -->
-    <div class="ad-card th-fissbot">
+    <!-- ④ RICH BANNER · Perplexity · Amplitude -->
+    <div class="ad-card th-dochq">
       <span class="fmt-badge">Banner</span>
       <div class="ac-head">
-        <div class="ic">F</div>
-        <div class="nm">Fissbot · chat</div>
+        <div class="ic">P</div>
+        <div class="nm">Perplexity · answer engine</div>
         <div class="dt"></div>
       </div>
       <div class="ac-body">
-        <div class="cb-user">Pick a vector DB for 10M vectors.</div>
-        <div class="cb-ai">Pinecone is the smoothest serverless option at that scale.</div>
+        <div class="cb-user">What analytics platform for a 20-person startup?</div>
+        <div class="cb-ai">Mixpanel and Amplitude are top two — Mixpanel for funnels, Amplitude for retention views.</div>
       </div>
       <div class="ac-sponsor">
         <span class="sp-l">Sponsored banner</span>
-        <span class="sp-t">Pinecone — 10M vectors, $0 to start</span>
-        <span class="sp-s">Serverless vector DB. Free tier for prototyping.</span>
-        <span class="sp-c">Try free →</span>
+        <span class="sp-t">Amplitude — product analytics for the AI era</span>
+        <span class="sp-s">Ship insights 10× faster with AI-assisted cohorts. Free up to 10M events.</span>
+        <span class="sp-c">See live demo →</span>
       </div>
     </div>
 
-    <!-- CORNER NOTIF — DocHQ -->
-    <div class="ad-card fmt-corner th-dochq">
+    <!-- ⑤ CORNER NOTIF · Replit · Railway -->
+    <div class="ad-card fmt-corner th-fissbot">
       <span class="fmt-badge">Corner</span>
       <div class="ac-head">
-        <div class="ic">D</div>
-        <div class="nm">DocHQ · writer</div>
+        <div class="ic">R</div>
+        <div class="nm">Replit · AI dev env</div>
         <div class="dt"></div>
       </div>
       <div class="ac-body">
-        <div class="cb-user">How do I set up SSO for 200 users?</div>
-        <div class="cb-ai">SAML + SCIM through Auth0 or Okta is standard — both have pre-built IdP connectors.</div>
+        <div class="cb-user">Starter template for FastAPI + Postgres?</div>
+        <div class="cb-ai">Here's a minimal FastAPI + SQLAlchemy + asyncpg skeleton with migrations preconfigured.</div>
       </div>
       <div class="corner-toast">
         <span class="close">×</span>
         <div class="cn-i">🚀</div>
         <div class="cn-b">
           <div class="l">◆ Sponsored</div>
-          <div class="t">Auth0 — SSO in 10 min</div>
+          <div class="t">Railway — deploy FastAPI in 30s</div>
         </div>
       </div>
     </div>
 
-    <!-- ═══════ DUPLICATE ROW for seamless loop ═══════ -->
-    <div class="ad-card th-claude" aria-hidden="true">
-      <span class="fmt-badge">Native</span>
-      <div class="ac-head">
-        <div class="ic">C</div>
-        <div class="nm">Claude · AI assistant</div>
-        <div class="dt"></div>
-      </div>
-      <div class="ac-body">
-        <div class="cb-user">Best CRM for a 10-person sales team?</div>
-        <div class="cb-ai">HubSpot and Pipedrive both fit that size well — HubSpot has strong automation.</div>
-      </div>
-      <div class="ac-sponsor">
-        <span class="sp-tag">Sponsored</span>
-        <span class="sp-l">Native placement</span>
-        <span class="sp-t">HubSpot Starter — growing teams</span>
-        <span class="sp-s">CRM + marketing + sales in one. From $45/mo.</span>
-        <span class="sp-c">Try free →</span>
-      </div>
-    </div>
-
-    <div class="ad-card fmt-video th-chatgpt" aria-hidden="true">
-      <span class="fmt-badge">Video · 15s</span>
-      <div class="ac-head">
-        <div class="ic">💬</div>
-        <div class="nm">ChatGPT · OpenAI</div>
-        <div class="dt"></div>
-      </div>
-      <div class="ac-body">
-        <div class="cb-user">How should I organize my team's docs?</div>
-        <div class="cb-ai">Notion and Coda both shine at this scale — Notion for structured docs, Coda for data-backed workflows.</div>
-      </div>
-      <div class="vid-player" style="margin: 0 18px;">
-        <div class="skip">Skip in 5s</div>
-        <div class="play">▶</div>
-      </div>
-      <div class="ac-sponsor">
-        <span class="sp-l">Sponsored · Video</span>
-        <span class="sp-t">Notion AI — your workspace, supercharged</span>
-        <span class="sp-c">Watch 15s →</span>
-      </div>
-    </div>
-
-    <div class="ad-card fmt-picture th-cursor" aria-hidden="true">
-      <span class="fmt-badge">Picture</span>
-      <div class="ac-head">
-        <div class="ic">c</div>
-        <div class="nm">Cursor · AI editor</div>
-        <div class="dt"></div>
-      </div>
-      <div class="pic-hero"><div class="sun"></div></div>
-      <div class="ac-sponsor">
-        <span class="sp-l">Sponsored · Image</span>
-        <span class="sp-t">Kimpton Palm Springs — 30% off</span>
-        <span class="sp-s">Rooftop pool. Pet-friendly. Mid-century design.</span>
-        <span class="sp-c">Book now →</span>
-      </div>
-    </div>
-
-    <div class="ad-card fmt-popup th-gymai" aria-hidden="true">
-      <span class="fmt-badge">Pop-up · Full</span>
-      <div class="ac-head">
-        <div class="ic">G</div>
-        <div class="nm">GymAI · coach</div>
-        <div class="dt"></div>
-      </div>
-      <div class="ac-body">
-        <div class="overlay">
-          <div class="close">×</div>
-          <div class="pop-hero"></div>
-          <div class="pop-body">
-            <span class="sp-l">Sponsored · Pop-up</span>
-            <span class="sp-t">Whoop — train with your recovery</span>
-            <span class="sp-s">Match intensity to HRV & sleep.</span>
-            <span class="sp-c" style="background: #4DF0A1; color: #081810;">Try 30 days →</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="ad-card th-fissbot" aria-hidden="true">
-      <span class="fmt-badge">Banner</span>
-      <div class="ac-head">
-        <div class="ic">F</div>
-        <div class="nm">Fissbot · chat</div>
-        <div class="dt"></div>
-      </div>
-      <div class="ac-body">
-        <div class="cb-user">Pick a vector DB for 10M vectors.</div>
-        <div class="cb-ai">Pinecone is the smoothest serverless option at that scale.</div>
-      </div>
-      <div class="ac-sponsor">
-        <span class="sp-l">Sponsored banner</span>
-        <span class="sp-t">Pinecone — 10M vectors, $0 to start</span>
-        <span class="sp-s">Serverless vector DB. Free tier for prototyping.</span>
-        <span class="sp-c">Try free →</span>
-      </div>
-    </div>
-
-    <div class="ad-card fmt-corner th-dochq" aria-hidden="true">
-      <span class="fmt-badge">Corner</span>
-      <div class="ac-head">
-        <div class="ic">D</div>
-        <div class="nm">DocHQ · writer</div>
-        <div class="dt"></div>
-      </div>
-      <div class="ac-body">
-        <div class="cb-user">How do I set up SSO for 200 users?</div>
-        <div class="cb-ai">SAML + SCIM through Auth0 or Okta is standard — both have pre-built IdP connectors.</div>
-      </div>
-      <div class="corner-toast">
-        <span class="close">×</span>
-        <div class="cn-i">🚀</div>
-        <div class="cn-b">
-          <div class="l">◆ Sponsored</div>
-          <div class="t">Auth0 — SSO in 10 min</div>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
