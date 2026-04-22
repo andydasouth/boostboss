@@ -1086,6 +1086,110 @@
     font-size: 12px; font-weight: 700;
   }
 
+  /* ── LOOKOUT: search-engine interface (non-chat) ── */
+  .ad-slide .search-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    font-size: 13.5px;
+    box-shadow: 0 2px 6px rgba(15, 15, 26, 0.04);
+  }
+  .ad-slide .search-bar .sb-icon { color: var(--muted); flex-shrink: 0; }
+  .ad-slide .search-bar .sb-query { color: var(--ink); font-weight: 500; }
+  .ad-slide .search-summary {
+    position: relative;
+    padding: 12px 14px 12px 16px;
+    background: linear-gradient(135deg, #F5FBFD 0%, #EDF6FF 100%);
+    border: 1px solid #C8DBF5;
+    border-left: 3px solid var(--cyan);
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .ad-slide .search-summary .ss-label {
+    display: block;
+    font-size: 10px; font-weight: 800;
+    color: #0077B6;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .ad-slide .search-sources {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .ad-slide .search-sources .src-card {
+    padding: 10px 12px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+  .ad-slide .search-sources .src-top {
+    display: flex; gap: 6px; align-items: center;
+    font-size: 11px; color: var(--muted);
+    margin-bottom: 4px;
+  }
+  .ad-slide .search-sources .src-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .ad-slide .search-sources .src-title {
+    font-size: 12.5px; font-weight: 600; color: var(--ink);
+    line-height: 1.3;
+  }
+
+  /* ── MIRA: image-generator gallery (non-chat) ── */
+  .ad-slide .img-prompt {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px;
+    background: linear-gradient(135deg, #F5F0FF 0%, #FFEEF7 100%);
+    border: 1px solid #E5D8FF;
+    border-radius: 10px;
+    font-size: 13px;
+  }
+  .ad-slide .img-prompt .ip-icon {
+    font-size: 14px; color: #8B5CF6;
+    flex-shrink: 0;
+  }
+  .ad-slide .img-prompt .ip-text {
+    flex: 1;
+    color: var(--ink);
+    font-style: italic;
+  }
+  .ad-slide .img-prompt .ip-ratio {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; font-weight: 700;
+    color: var(--muted);
+    background: #fff; border: 1px solid var(--line);
+    padding: 2px 7px; border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .ad-slide .img-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .ad-slide .img-grid .img-tile {
+    aspect-ratio: 1;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(15, 15, 26, 0.06);
+  }
+  .ad-slide .img-grid .img-tile::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 30%, rgba(255,255,255,0.28), transparent 45%),
+      repeating-linear-gradient(45deg, transparent 0 3px, rgba(0,0,0,0.03) 3px 4px);
+  }
+  .ad-slide .img-grid .tile-1 { background: linear-gradient(135deg, #FF6B9D 0%, #8B5CF6 55%, #4285F4 100%); }
+  .ad-slide .img-grid .tile-2 { background: linear-gradient(135deg, #FFE066 0%, #FF6B9D 45%, #8B5CF6 100%); }
+  .ad-slide .img-grid .tile-3 { background: linear-gradient(135deg, #04BEFE 0%, #8B5CF6 45%, #FF6B9D 100%); }
+  .ad-slide .img-grid .tile-4 { background: linear-gradient(135deg, #F26207 0%, #FFE066 40%, #04BEFE 100%); }
+
   /* ── FORMAT 5: CORNER POP-UP — floating toast ── */
   .fmt-corner-parent { flex: 1; position: relative; }
   .fmt-corner {
@@ -1332,7 +1436,7 @@
                 <path d="M6 13.5 C6 10 8.5 8 12 8 C15.5 8 18 10 18 13.5 V18 H6 Z" fill="currentColor" stroke="none"/>
               </svg>
             </div>
-            <div class="name">Halo<small>AI assistant · via MCP</small></div>
+            <div class="name">Halo<small>AI assistant · Lumi SDK</small></div>
             <span class="fmt-tag">Native</span>
           </div>
           <div class="ad-body">
@@ -1359,7 +1463,7 @@
                 <circle cx="12" cy="12" r="2.8" fill="currentColor" stroke="none"/>
               </svg>
             </div>
-            <div class="name">Orbit<small>Conversational AI · via MCP</small></div>
+            <div class="name">Orbit<small>Conversational AI · Lumi SDK</small></div>
             <span class="fmt-tag" style="background: #8B5CF6">Video pop-up</span>
           </div>
           <div class="ad-body" style="padding: 0;">
@@ -1391,7 +1495,7 @@
                 <line x1="14" y1="5.5" x2="10" y2="18.5"/>
               </svg>
             </div>
-            <div class="name">Syntax<small>AI code review · via MCP</small></div>
+            <div class="name">Syntax<small>AI code editor · Lumi SDK</small></div>
             <span class="fmt-tag" style="background: #FF8A1F">Picture pop-up</span>
           </div>
           <div class="ad-body" style="padding: 0;">
@@ -1422,12 +1526,28 @@
                 <circle cx="12" cy="12" r="3" fill="currentColor" stroke="none"/>
               </svg>
             </div>
-            <div class="name">Lookout<small>AI answer engine · via MCP</small></div>
+            <div class="name">Lookout<small>AI answer engine · Lumi SDK</small></div>
             <span class="fmt-tag" style="background: var(--cyan); color: var(--ink)">Rich banner</span>
           </div>
           <div class="ad-body">
-            <div class="mini-user">What analytics platform should I pick for a 20-person startup?</div>
-            <div class="mini-ai">Mixpanel and Amplitude are the top two — Mixpanel for event funnels, Amplitude for richer retention views.</div>
+            <div class="search-bar">
+              <svg class="sb-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M16 16l5 5"/></svg>
+              <span class="sb-query">analytics tool for 20-person startup</span>
+            </div>
+            <div class="search-summary">
+              <span class="ss-label">◆ AI answer</span>
+              Mixpanel and Amplitude lead for startup analytics — Mixpanel excels at event funnels, Amplitude at retention cohorts.
+            </div>
+            <div class="search-sources">
+              <div class="src-card">
+                <div class="src-top"><span class="src-dot" style="background: #7856FF"></span>mixpanel.com</div>
+                <div class="src-title">Product Analytics Guide</div>
+              </div>
+              <div class="src-card">
+                <div class="src-top"><span class="src-dot" style="background: #1E61F0"></span>amplitude.com</div>
+                <div class="src-title">Retention Playbook 2026</div>
+              </div>
+            </div>
             <div class="fmt-banner">
               <div class="bn-art"></div>
               <div class="bn-body">
@@ -1451,12 +1571,21 @@
                 <path d="M12 2 L13.6 10.4 L22 12 L13.6 13.6 L12 22 L10.4 13.6 L2 12 L10.4 10.4 Z"/>
               </svg>
             </div>
-            <div class="name">Mira<small>Multimodal AI · via MCP</small></div>
+            <div class="name">Mira<small>AI image generator · Lumi SDK</small></div>
             <span class="fmt-tag" style="background: #8B5CF6">Corner video</span>
           </div>
           <div class="ad-body fmt-corner-parent">
-            <div class="mini-user">How can I prototype a mobile app quickly?</div>
-            <div class="mini-ai">Sketch wireframes first, then jump into a design tool with shared component libraries so your team can iterate in parallel.</div>
+            <div class="img-prompt">
+              <span class="ip-icon">✦</span>
+              <span class="ip-text">cyberpunk tokyo skyline, neon, golden hour</span>
+              <span class="ip-ratio">1:1</span>
+            </div>
+            <div class="img-grid">
+              <div class="img-tile tile-1"></div>
+              <div class="img-tile tile-2"></div>
+              <div class="img-tile tile-3"></div>
+              <div class="img-tile tile-4"></div>
+            </div>
             <div class="fmt-video-corner">
               <div class="vc-video">
                 <div class="vc-countdown">Skip in <b>5</b>s</div>
@@ -1484,7 +1613,7 @@
                 <path d="M12 2 C11 5 9 7 9 10 C9 11 9.4 11.8 10 12.3 C8.5 12.3 7.3 11 6.8 9.6 C6 11 5 13 5 15.5 C5 19 8 22 12 22 C16 22 19 19 19 15 C19 12.4 17.2 10 16 8 C15 10 14 10.5 13 10.5 C13 7 13 5 12 2 Z"/>
               </svg>
             </div>
-            <div class="name">Forge<small>AI dev sandbox · via MCP</small></div>
+            <div class="name">Forge<small>AI dev sandbox · Lumi SDK</small></div>
             <span class="fmt-tag" style="background: #FFE600; color: var(--ink)">Corner notif</span>
           </div>
           <div class="ad-body fmt-corner-parent">
