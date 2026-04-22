@@ -477,6 +477,7 @@
     display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
   }
+  .chat-mock-head .app-icon svg { display: block; }
   .chat-mock-head .app-name { font-size: 17px; font-weight: 700; color: var(--ink); }
   .chat-mock-head .app-name small {
     display: block; font-size: 13px; color: var(--muted);
@@ -683,7 +684,7 @@
           <span class="bb-url"><svg class="bb-lock" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg><span id="chatAppUrl">fissbot.ai</span></span>
         </div>
         <div class="chat-mock-head">
-          <div class="app-icon" id="chatAppIcon">F</div>
+          <div class="app-icon" id="chatAppIcon"><svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="3" x2="12" y2="6.5"/><circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/><rect x="5" y="7" width="14" height="12.5" rx="3"/><circle cx="9.3" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="14.7" cy="12.5" r="1.2" fill="currentColor" stroke="none"/><path d="M9.5 16 L14.5 16"/></svg></div>
           <div class="app-name">
             <span id="chatAppName">Fissbot</span>
             <small id="chatAppMeta">Your AI app · Lumi SDK active</small>
@@ -992,9 +993,35 @@ ad = bb.<span class="f">get_sponsored_content</span>(
     // ─────────────────────────────────────────────────────────────────
     // (c) Publisher-POV live chat loop
     // ─────────────────────────────────────────────────────────────────
+    // Inline SVG logo marks for each sample AI product — each uses currentColor
+    // so the white fill inherits from .app-icon color.
+    var LOGO_FISSBOT = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<line x1="12" y1="3" x2="12" y2="6.5"/>' +                   /* antenna stem */
+      '<circle cx="12" cy="2.4" r="1.1" fill="currentColor" stroke="none"/>' + /* antenna bulb */
+      '<rect x="5" y="7" width="14" height="12.5" rx="3"/>' +       /* head */
+      '<circle cx="9.3" cy="12.5" r="1.2" fill="currentColor" stroke="none"/>' + /* left eye */
+      '<circle cx="14.7" cy="12.5" r="1.2" fill="currentColor" stroke="none"/>' + /* right eye */
+      '<path d="M9.5 16 L14.5 16"/>' +                              /* mouth */
+    '</svg>';
+
+    var LOGO_GYMAI = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">' +
+      '<line x1="7.5" y1="7.5" x2="7.5" y2="16.5"/>' +              /* left inner end */
+      '<line x1="16.5" y1="7.5" x2="16.5" y2="16.5"/>' +            /* right inner end */
+      '<line x1="4.5" y1="10" x2="4.5" y2="14"/>' +                 /* left outer cap */
+      '<line x1="19.5" y1="10" x2="19.5" y2="14"/>' +               /* right outer cap */
+      '<line x1="7.5" y1="12" x2="16.5" y2="12"/>' +                /* bar */
+    '</svg>';
+
+    var LOGO_DOCHQ = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      '<path d="M6 3 H14 L20 9 V20 A1 1 0 0 1 19 21 H6 A1 1 0 0 1 5 20 V4 A1 1 0 0 1 6 3 Z"/>' +  /* doc outline */
+      '<path d="M14 3 V9 H20"/>' +                                   /* folded corner */
+      '<line x1="9" y1="13" x2="16" y2="13"/>' +                    /* text line 1 */
+      '<line x1="9" y1="16" x2="14" y2="16"/>' +                    /* text line 2 */
+    '</svg>';
+
     var chatScenarios = [
       {
-        appIcon: 'F', appIconBg: 'linear-gradient(135deg, #FFE600, #FF8A1F)',
+        appSvg: LOGO_FISSBOT, appIconBg: 'linear-gradient(135deg, #FFE600, #FF8A1F)',
         appName: 'Fissbot',  appMeta: 'Your AI app · Lumi SDK active', appUrl: 'fissbot.ai',
         user: "I'm looking for a CRM for my sales team of 12.",
         ai:   "HubSpot and Pipedrive are the two most popular at that size — HubSpot shines on automation; Pipedrive on pipeline views.",
@@ -1007,7 +1034,7 @@ ad = bb.<span class="f">get_sponsored_content</span>(
         earned: '+$0.47 earned'
       },
       {
-        appIcon: 'G', appIconBg: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+        appSvg: LOGO_GYMAI, appIconBg: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
         appName: 'GymAI', appMeta: 'Your AI app · Lumi SDK active', appUrl: 'gymai.app',
         user: "What supplement stack do you recommend for muscle recovery?",
         ai:   "Creatine monohydrate and whey protein cover 90% of the science. A high-quality brand makes a bigger difference than most people think.",
@@ -1020,7 +1047,7 @@ ad = bb.<span class="f">get_sponsored_content</span>(
         earned: '+$0.62 earned'
       },
       {
-        appIcon: 'D', appIconBg: 'linear-gradient(135deg, #4B9FFF, #0EA5E9)',
+        appSvg: LOGO_DOCHQ, appIconBg: 'linear-gradient(135deg, #4B9FFF, #0EA5E9)',
         appName: 'DocHQ', appMeta: 'Your AI app · Lumi SDK active', appUrl: 'dochq.com',
         user: "How do I set up SSO for my 200-person team?",
         ai:   "SAML through your identity provider is standard. Auth0 has prebuilt connectors for every major IdP and gets you SSO in ~30 minutes.",
@@ -1056,7 +1083,7 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 
     async function play(s) {
       if (!chatBody) return;
-      if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+      if (chatIcon) { chatIcon.innerHTML = s.appSvg; chatIcon.style.background = s.appIconBg; }
       if (chatName) chatName.textContent = s.appName;
       if (chatMeta) chatMeta.textContent = s.appMeta;
       if (chatUrl)  chatUrl.textContent  = s.appUrl;
@@ -1090,7 +1117,7 @@ ad = bb.<span class="f">get_sponsored_content</span>(
       if (prefersReduced) {
         // Static fallback — render the first scenario fully visible
         var s = chatScenarios[0];
-        if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+        if (chatIcon) { chatIcon.innerHTML = s.appSvg; chatIcon.style.background = s.appIconBg; }
         if (chatName) chatName.textContent = s.appName;
         if (chatMeta) chatMeta.textContent = s.appMeta;
         if (chatUrl)  chatUrl.textContent  = s.appUrl;
