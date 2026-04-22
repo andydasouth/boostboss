@@ -632,26 +632,31 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     AD-FORMAT SPREAD — all 5 light-themed cards visible side-by-side
-     with a slight fan (alternating rotation + edge overlap). Hovering
-     a card lifts + unrotates + scales it above its neighbors.
-     No toggle, no auto-advance — just the static spread.
+     AD-FORMAT SPREAD — 5 browser-screenshot cards scattered naturally
+     across the full viewport width. Each card has its own slight tilt
+     and offset so the layout feels organic (not grid-aligned). Cards
+     kiss/overlap at edges and the section bleeds past the .wrap.
+     Hovering a card un-rotates + lifts + scales it above neighbors.
      ═══════════════════════════════════════════════════════════════════ */
   .ad-carousel {
     position: relative;
+    /* Break out of parent .wrap to span edge-to-edge */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
     max-width: none;
-    margin: 56px auto 0;
-    padding: 24px 20px 48px;
+    padding: 48px 0 72px;
+    overflow: hidden;                  /* hide any bleed past viewport edges */
   }
   .ad-carousel .ad-frame {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    gap: 36px 30px;                    /* row gap 36 · col gap 30 */
-    max-width: 1760px;
+    gap: 24px 12px;                    /* tight spacing — cards naturally kiss/overlap */
+    max-width: none;
     margin: 0 auto;
-    /* frame itself is transparent — each slide is its own card now */
+    padding: 0 0;
     background: none;
     border: none;
     box-shadow: none;
@@ -665,7 +670,7 @@
     flex-shrink: 0;
     background: #fff;
     border: 1px solid #E4E6EB;
-    border-radius: 14px;               /* slightly tighter like a browser window */
+    border-radius: 14px;
     overflow: hidden;
     box-shadow:
       0 1px 2px rgba(15, 15, 26, 0.04),
@@ -673,13 +678,20 @@
       0 28px 60px rgba(15, 15, 26, 0.12);
     opacity: 1;
     pointer-events: auto;
-    transform-origin: center bottom;
-    transform: translateY(0);
+    transform-origin: center center;
     transition:
       transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
       box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     display: flex; flex-direction: column;
+    z-index: 1;
   }
+
+  /* Natural scatter — each card gets its own tilt + offset */
+  .ad-slide:nth-child(1) { transform: rotate(-2.4deg) translate(-10px, 6px);  z-index: 2; }
+  .ad-slide:nth-child(2) { transform: rotate( 1.6deg) translate(  0, -4px);   z-index: 3; margin-left: -14px; }
+  .ad-slide:nth-child(3) { transform: rotate(-1.8deg) translate( 12px, 10px); z-index: 2; margin-left: -14px; }
+  .ad-slide:nth-child(4) { transform: rotate( 2.2deg) translate(-24px, -10px); z-index: 4; margin-top: -18px; }
+  .ad-slide:nth-child(5) { transform: rotate(-2.0deg) translate( 24px, 4px);  z-index: 3; margin-top: -18px; margin-left: -10px; }
 
   /* ── Browser chrome (macOS-style traffic lights + URL pill) ── */
   .browser-bar {
@@ -718,26 +730,37 @@
     text-overflow: ellipsis;
   }
   .browser-bar .bb-lock { flex-shrink: 0; color: #6B7280; }
-  /* Natural vertical stagger — alternating slight offset, no rotation */
-  .ad-slide:nth-child(2) { margin-top: 22px; }
-  .ad-slide:nth-child(4) { margin-top: 22px; }
-  /* Hover: subtle lift only, no rotation/scale */
+
+  /* Hover: un-rotate, lift, jump above neighbors */
   .ad-slide:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 32px 70px rgba(15, 15, 26, 0.18),
+    transform: rotate(0deg) translateY(-14px) scale(1.02) !important;
+    z-index: 10 !important;
+    box-shadow: 0 40px 80px rgba(15, 15, 26, 0.22),
                 0 0 0 1.5px var(--pink);
   }
-  /* Kill any old .active rules — all cards are always visible now */
-  .ad-slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .ad-slide.active { opacity: 1; pointer-events: auto; }
 
-  /* Below 3-per-row threshold: drop the stagger so pairs align cleanly */
+  /* Mid screens: keep scatter but reduce card width so 3 still fit across */
   @media (max-width: 1780px) {
-    .ad-slide:nth-child(2), .ad-slide:nth-child(4) { margin-top: 0; }
+    .ad-slide { width: 520px; }
   }
-  @media (max-width: 1180px) {
+  @media (max-width: 1480px) {
+    .ad-slide { width: 460px; min-height: 380px; }
+  }
+  /* Below ~1240: 2 per row, tame the rotations a little */
+  @media (max-width: 1240px) {
+    .ad-slide:nth-child(1) { transform: rotate(-1.8deg); margin-left: 0; }
+    .ad-slide:nth-child(2) { transform: rotate( 1.2deg); margin-left: 0; }
+    .ad-slide:nth-child(3) { transform: rotate(-1.4deg); margin-left: 0; margin-top: -12px; }
+    .ad-slide:nth-child(4) { transform: rotate( 1.6deg); margin-left: 0; margin-top: -12px; }
+    .ad-slide:nth-child(5) { transform: rotate(-1.4deg); margin-left: 0; margin-top: -12px; }
+  }
+  /* Mobile: stack cleanly, no rotation */
+  @media (max-width: 720px) {
     .ad-carousel { padding: 24px 0 48px; }
-    .ad-carousel .ad-frame { padding: 0 20px; gap: 24px; }
-    .ad-slide { width: min(560px, 100%); }
+    .ad-carousel .ad-frame { padding: 0 16px; gap: 20px; }
+    .ad-slide { width: min(420px, 100%); margin: 0 !important; }
+    .ad-slide[class] { transform: none !important; }
   }
 
   .ad-slide .ad-head {
@@ -1079,7 +1102,7 @@
   </div>
 </section>
 
-<!-- AD-FORMAT SPREAD — 5 browser-screenshot cards in a 3-2 grid -->
+<!-- AD-FORMAT SPREAD — 5 browser-screenshot cards scattered edge-to-edge -->
 <section style="padding: 0 0 72px;" data-reveal>
   <div class="wrap">
     <div class="ad-carousel" id="adCarousel">
