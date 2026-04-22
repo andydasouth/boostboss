@@ -399,9 +399,21 @@
   }
   .pub-hero-visual .float-pill .emoji { font-size: 14px; }
   .pub-hero-visual .float-pill strong { color: var(--pink); }
-  .pub-hero-visual .float-pill.fp-1 { top: -8px; left: -16px; animation-delay: 0s; }
-  .pub-hero-visual .float-pill.fp-2 { top: 30%; right: -28px; animation-delay: 0.9s; }
-  .pub-hero-visual .float-pill.fp-3 { bottom: 16%; left: -36px; animation-delay: 1.8s; }
+  /* Anchor the side-edge of each pill to the OUTSIDE of the chat mock
+     (right: 100% / left: 100%) so they sit fully in the empty space beside
+     it, never overlapping the chat header or message bubbles. */
+  .pub-hero-visual .float-pill.fp-1 { top: -4px; right: calc(100% + 14px); left: auto; animation-delay: 0s; }
+  .pub-hero-visual .float-pill.fp-2 { top: 38%; left: calc(100% + 14px); right: auto; animation-delay: 0.9s; }
+  .pub-hero-visual .float-pill.fp-3 { bottom: 14%; right: calc(100% + 14px); left: auto; animation-delay: 1.8s; }
+
+  /* Narrow viewports don't have room beside the mock — tuck the pills
+     back inside the chat area but stagger vertically so they're not on
+     top of each other or on top of any single chat bubble. */
+  @media (max-width: 900px) {
+    .pub-hero-visual .float-pill.fp-1 { top: -20px; right: auto; left: 12px; }
+    .pub-hero-visual .float-pill.fp-2 { top: auto; bottom: -20px; left: auto; right: 12px; }
+    .pub-hero-visual .float-pill.fp-3 { top: auto; bottom: -20px; left: 12px; right: auto; }
+  }
   @keyframes pubFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-8px); }
