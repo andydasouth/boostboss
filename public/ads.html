@@ -642,9 +642,6 @@
     max-width: none;
     margin: 56px auto 0;
     padding: 24px 20px 48px;
-    /* Soft edge fade so cards dissolve at left/right */
-    mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
   }
   .ad-carousel .ad-frame {
     display: flex;
@@ -706,7 +703,7 @@
 
   /* Narrow-screen fallback: horizontal scroll so cards never clip */
   @media (max-width: 1240px) {
-    .ad-carousel { padding: 24px 0 48px; overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
+    .ad-carousel { padding: 24px 0 48px; overflow-x: auto; }
     .ad-carousel .ad-frame { justify-content: flex-start; padding: 0 20px; }
   }
 
