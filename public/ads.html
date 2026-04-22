@@ -684,12 +684,20 @@
     to   { transform: translateX(-50%); }
   }
 
-  .ad-slide {
+  /* Each card is now wrapped in .ad-slot so we can float a format tag
+     above the card WITHOUT needing overflow:visible on .ad-slide. */
+  .ad-slot {
     position: relative;
     flex: 0 0 540px;                   /* fixed card width — belt is uniform */
     width: 540px;
+    margin-right: 24px;                /* belt spacing */
+    padding-top: 26px;                 /* breathing room for the floating tag */
+    display: flex; flex-direction: column;
+  }
+  .ad-slide {
+    position: relative;
+    width: 100%;
     min-height: 420px;
-    margin-right: 24px;                /* belt spacing — applied to every card incl. last */
     background: #fff;
     border: 1px solid #E4E6EB;
     border-radius: 14px;
@@ -757,16 +765,20 @@
 
   /* Mid screens: shrink card width so the belt doesn't feel too long per cycle */
   @media (max-width: 1280px) {
-    .ad-slide { flex-basis: 480px; width: 480px; min-height: 380px; }
+    .ad-slot { flex-basis: 480px; width: 480px; }
+    .ad-slide { min-height: 380px; }
   }
   @media (max-width: 900px) {
-    .ad-slide { flex-basis: 420px; width: 420px; min-height: 360px; }
+    .ad-slot { flex-basis: 420px; width: 420px; }
+    .ad-slide { min-height: 360px; }
     .ad-carousel .ad-frame { animation-duration: 45s; }
   }
   /* Tablet/mobile: speed belt up slightly so users see variety quickly */
   @media (max-width: 640px) {
-    .ad-slide { flex-basis: 340px; width: 340px; min-height: 320px; margin-right: 18px; }
+    .ad-slot { flex-basis: 340px; width: 340px; margin-right: 18px; }
+    .ad-slide { min-height: 320px; }
     .ad-carousel .ad-frame { animation-duration: 38s; }
+    .ad-slot > .fmt-tag { font-size: 11px; padding: 8px 18px; letter-spacing: 1px; }
   }
   /* Reduce-motion: stop the belt completely */
   @media (prefers-reduced-motion: reduce) {
@@ -792,12 +804,19 @@
     display: block; font-size: 11.5px; color: var(--muted);
     font-weight: 500; margin-top: 1px;
   }
-  .ad-slide .ad-head .fmt-tag {
-    margin-left: auto;
+  /* Floating format tag — sits centered ABOVE each card */
+  .ad-slot > .fmt-tag {
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
     background: var(--pink); color: #fff;
-    font-size: 10px; font-weight: 800;
-    padding: 4px 10px; border-radius: 100px;
-    letter-spacing: 0.5px; text-transform: uppercase;
+    font-size: 12.5px; font-weight: 800;
+    padding: 10px 24px; border-radius: 100px;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    white-space: nowrap;
+    z-index: 5;
+    box-shadow: 0 8px 20px rgba(15, 15, 26, 0.14),
+                0 2px 6px rgba(15, 15, 26, 0.08);
   }
 
   .ad-slide .ad-body {
@@ -1303,7 +1322,9 @@
       <div class="ad-frame">
 
         <!-- ① NATIVE · Halo (sample AI) · HubSpot -->
-        <div class="ad-slide" data-format="native">
+        <div class="ad-slot">
+          <span class="fmt-tag">Native</span>
+          <div class="ad-slide" data-format="native">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>halo.ai</span>
@@ -1316,7 +1337,6 @@
               </svg>
             </div>
             <div class="name">Halo<small>AI assistant · via MCP</small></div>
-            <span class="fmt-tag">Native</span>
           </div>
           <div class="ad-body">
             <div class="mini-user">Best CRM for a 10-person sales team?</div>
@@ -1327,10 +1347,13 @@
               <span class="c">Try free →</span>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- ② VIDEO POP-UP · Orbit (sample AI) · Notion AI -->
-        <div class="ad-slide" data-format="video">
+        <div class="ad-slot">
+          <span class="fmt-tag" style="background: #8B5CF6">Video pop-up</span>
+          <div class="ad-slide" data-format="video">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>orbit.chat</span>
@@ -1343,7 +1366,6 @@
               </svg>
             </div>
             <div class="name">Orbit<small>Conversational AI · via MCP</small></div>
-            <span class="fmt-tag" style="background: #8B5CF6">Video pop-up</span>
           </div>
           <div class="ad-body" style="padding: 0;">
             <div class="fmt-video">
@@ -1358,10 +1380,13 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- ③ PICTURE POP-UP · Syntax (sample AI) · Sentry -->
-        <div class="ad-slide" data-format="picture">
+        <div class="ad-slot">
+          <span class="fmt-tag" style="background: #FF8A1F">Picture pop-up</span>
+          <div class="ad-slide" data-format="picture">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>syntax.dev</span>
@@ -1375,7 +1400,6 @@
               </svg>
             </div>
             <div class="name">Syntax<small>AI code review · via MCP</small></div>
-            <span class="fmt-tag" style="background: #FF8A1F">Picture pop-up</span>
           </div>
           <div class="ad-body" style="padding: 0;">
             <div class="fmt-picture">
@@ -1390,10 +1414,13 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- ④ RICH BANNER · Lookout (sample AI) · Amplitude -->
-        <div class="ad-slide" data-format="banner">
+        <div class="ad-slot">
+          <span class="fmt-tag" style="background: var(--cyan); color: var(--ink)">Rich banner</span>
+          <div class="ad-slide" data-format="banner">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>lookout.ai</span>
@@ -1406,7 +1433,6 @@
               </svg>
             </div>
             <div class="name">Lookout<small>AI answer engine · via MCP</small></div>
-            <span class="fmt-tag" style="background: var(--cyan); color: var(--ink)">Rich banner</span>
           </div>
           <div class="ad-body">
             <div class="mini-user">What analytics platform should I pick for a 20-person startup?</div>
@@ -1420,10 +1446,13 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- ⑥ CORNER VIDEO COUNTDOWN · Mira (sample AI) · Figma -->
-        <div class="ad-slide" data-format="video-corner">
+        <div class="ad-slot">
+          <span class="fmt-tag" style="background: #8B5CF6">Corner video</span>
+          <div class="ad-slide" data-format="video-corner">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>mira.ai</span>
@@ -1435,7 +1464,6 @@
               </svg>
             </div>
             <div class="name">Mira<small>Multimodal AI · via MCP</small></div>
-            <span class="fmt-tag" style="background: #8B5CF6">Corner video</span>
           </div>
           <div class="ad-body fmt-corner-parent">
             <div class="mini-user">How can I prototype a mobile app quickly?</div>
@@ -1453,10 +1481,13 @@
               </div>
             </div>
           </div>
+          </div>
         </div>
 
         <!-- ⑤ CORNER NOTIF · Forge (sample AI) · Railway -->
-        <div class="ad-slide" data-format="corner">
+        <div class="ad-slot">
+          <span class="fmt-tag" style="background: #FFE600; color: var(--ink)">Corner notif</span>
+          <div class="ad-slide" data-format="corner">
           <div class="browser-bar">
             <span class="bb-dots"><i></i><i></i><i></i></span>
             <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>forge.dev</span>
@@ -1468,7 +1499,6 @@
               </svg>
             </div>
             <div class="name">Forge<small>AI dev sandbox · via MCP</small></div>
-            <span class="fmt-tag" style="background: #FFE600; color: var(--ink)">Corner notif</span>
           </div>
           <div class="ad-body fmt-corner-parent">
             <div class="mini-user">Show me a starter template for a FastAPI + Postgres project.</div>
@@ -1483,6 +1513,7 @@
                 <span class="c">One-click deploy →</span>
               </div>
             </div>
+          </div>
           </div>
         </div>
 
@@ -1985,7 +2016,7 @@
       if (!frame) return;
 
       // Clone card set once so translateX(-halfWidth) = one full cycle
-      var originals = frame.querySelectorAll(':scope > .ad-slide');
+      var originals = frame.querySelectorAll(':scope > .ad-slot');
       if (!originals.length || frame.dataset.cloned === '1') return;
       originals.forEach(function (node) {
         var copy = node.cloneNode(true);
