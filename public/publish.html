@@ -316,10 +316,66 @@
   }
   .cta-box .inner { position: relative; z-index: 1; }
   .cta-box h2 { font-size: clamp(30px, 4vw, 48px); color: #fff; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1.1; }
-  .cta-box p { font-size: 17px; color: rgba(255,255,255,0.78); max-width: 520px; margin: 0 auto 32px; }
-  /* Button contrast inside the emerald CTA: ghost button reads as white outline */
+  .cta-box p { font-size: 17px; color: rgba(255,255,255,0.80); max-width: 580px; margin: 0 auto 28px; line-height: 1.55; }
+  /* Button contrast inside the CTA: ghost button reads as white outline */
   .cta-box .btn-ghost { color: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.38); background: transparent; }
   .cta-box .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
+
+  /* SDK eyebrow above the CTA headline */
+  .cta-box .sdk-eyebrow {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #FFE600;
+    background: rgba(255, 255, 255, 0.12);
+    padding: 6px 14px; border-radius: 100px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  /* One-liner install snippet box */
+  .cta-box .sdk-snippet {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: rgba(10, 10, 20, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 12px 16px 12px 20px;
+    margin: 0 auto 28px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14.5px;
+    color: #fff;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.25);
+  }
+  .cta-box .sdk-snippet .sdk-prompt { color: #FFE600; font-weight: 700; }
+  .cta-box .sdk-snippet code {
+    font-family: inherit;
+    color: #fff;
+    background: none;
+    user-select: all;
+  }
+  .cta-box .sdk-snippet .sdk-copy {
+    background: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 7px;
+    padding: 5px 11px;
+    font-family: -apple-system, 'Space Grotesk', sans-serif;
+    font-size: 12px; font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .cta-box .sdk-snippet .sdk-copy:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+  .cta-box .sdk-snippet .sdk-copy:active { transform: scale(0.96); }
+  .cta-box .sdk-snippet .sdk-copy.copied {
+    background: rgba(16, 185, 129, 0.5);
+    border-color: rgba(16, 185, 129, 0.7);
+  }
 
   /* FOOTER */
   footer { padding: 48px 0 24px; border-top: 1px solid var(--line); }
@@ -338,6 +394,8 @@
     .steps, .formats-grid, .cards-3 { grid-template-columns: 1fr; }
     .code-grid, .calc-grid, .rev-grid { grid-template-columns: 1fr; gap: 40px; }
     .cta-box { padding: 48px 24px; }
+    .cta-box .sdk-snippet { flex-wrap: wrap; font-size: 12.5px; gap: 8px; padding: 10px 14px; }
+    .cta-box .sdk-snippet code { flex: 1; min-width: 0; overflow-x: auto; }
     .foot-inner { flex-direction: column; text-align: center; }
     .foot-links { flex-wrap: wrap; justify-content: center; }
   }
@@ -830,21 +888,55 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 <!-- REVENUE CALCULATOR -->
 <!-- REVSHARE BREAKDOWN -->
 <!-- WHY PUBLISHERS -->
-<!-- FINAL CTA -->
-<section class="final-cta">
+<!-- FINAL CTA — Lumi SDK download -->
+<section class="final-cta" id="sdk">
   <div class="wrap">
     <div class="cta-box">
       <div class="inner">
-        <h2 data-reveal>Start earning from<br>your AI app today</h2>
-        <p>Sign up, drop in the SDK, and ship it in your next commit. First payout lands next Friday.</p>
+        <div class="sdk-eyebrow" data-reveal>✦ LUMI SDK · v1.4.0</div>
+        <h2 data-reveal>Drop in the Lumi SDK<br>and start earning in 3 minutes</h2>
+        <p>Lightweight, context-aware, and built for MCP-enabled AI apps. One npm install, three lines of code, and your first native ad is live. TypeScript types, edge-ready runtime, and &lt;80ms ad fetches out of the box.</p>
+        <div class="sdk-snippet" data-reveal>
+          <span class="sdk-prompt">$</span>
+          <code>npm install @boostbossai/lumi-sdk</code>
+          <button class="sdk-copy" id="sdkCopyBtn" type="button" aria-label="Copy install command">Copy</button>
+        </div>
         <div class="hero-ctas">
-          <a class="btn btn-white btn-lg" href="/signup">Get your API key</a>
-          <a class="btn btn-ghost btn-lg" href="/docs">Read the docs</a>
+          <a class="btn btn-white btn-lg" href="https://www.npmjs.com/package/@boostbossai/lumi-sdk" target="_blank" rel="noopener">Download SDK ↓</a>
+          <a class="btn btn-ghost btn-lg" href="/docs" target="_blank" rel="noopener">Read the docs</a>
         </div>
       </div>
     </div>
   </div>
 </section>
+<script>
+  (function () {
+    var btn = document.getElementById('sdkCopyBtn');
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var cmd = 'npm install @boostbossai/lumi-sdk';
+      var done = function () {
+        var original = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.classList.remove('copied');
+        }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(cmd).then(done, function () {});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = cmd;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        document.body.removeChild(ta);
+      }
+    });
+  })();
+</script>
 
 <!-- FOOTER -->
 <footer>
