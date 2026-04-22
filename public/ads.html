@@ -631,6 +631,358 @@
     to   { background-position: 0% 50%; }
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     AD-FORMAT CAROUSEL — the distinguishing hero feature for /ads.
+     Shows 5 different ad placements (native, video pop-up, picture pop-up,
+     banner, corner notif) each in a different AI host-app context. Auto-
+     advances every 5s; dots to navigate manually.
+     ═══════════════════════════════════════════════════════════════════ */
+  .ad-carousel {
+    position: relative;
+    max-width: 620px; margin: 56px auto 0;
+  }
+  .ad-carousel .ad-frame {
+    position: relative;
+    background: #fff;
+    border-radius: 22px;
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.10),
+                0 10px 28px rgba(15, 15, 26, 0.06);
+    overflow: hidden;
+    min-height: 440px;
+  }
+  .ad-slide {
+    position: absolute; inset: 0;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    pointer-events: none;
+    display: flex; flex-direction: column;
+  }
+  .ad-slide.active {
+    opacity: 1; transform: translateY(0);
+    pointer-events: auto;
+  }
+
+  /* Host app chrome — each slide has a small app header */
+  .ad-slide .ad-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .ad-slide .ad-head .icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    color: #fff; font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .ad-slide .ad-head .name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .ad-slide .ad-head .name small {
+    display: block; font-size: 11px; color: var(--muted);
+    font-weight: 500; margin-top: 1px;
+  }
+  .ad-slide .ad-head .fmt-tag {
+    margin-left: auto;
+    background: var(--pink); color: #fff;
+    font-size: 10px; font-weight: 800;
+    padding: 4px 10px; border-radius: 100px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+  }
+
+  /* Shared body padding for text-based ad slides */
+  .ad-slide .ad-body {
+    padding: 20px; flex: 1;
+    display: flex; flex-direction: column; gap: 10px;
+    text-align: left;
+    position: relative;
+  }
+
+  /* — Shared chat bubbles inside ad-body — */
+  .ad-slide .mini-user, .ad-slide .mini-ai {
+    padding: 10px 13px; border-radius: 12px;
+    font-size: 13.5px; line-height: 1.5;
+    max-width: 86%;
+  }
+  .ad-slide .mini-user {
+    align-self: flex-end;
+    background: var(--ink); color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .ad-slide .mini-ai {
+    align-self: flex-start;
+    background: var(--bg-soft); color: var(--ink);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+
+  /* ── FORMAT 1: NATIVE INLINE CARD — pink-bordered card in chat flow ── */
+  .fmt-native {
+    position: relative;
+    margin-top: 4px;
+    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 5px;
+    box-shadow: 0 10px 24px rgba(255, 45, 120, 0.16);
+  }
+  .fmt-native::before {
+    content: '✨ Sponsored';
+    position: absolute; top: -10px; left: 14px;
+    background: var(--pink); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 100px;
+    letter-spacing: 0.4px;
+  }
+  .fmt-native .t { font-size: 14.5px; font-weight: 700; color: var(--ink); }
+  .fmt-native .s { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
+  .fmt-native .c {
+    align-self: flex-start; margin-top: 4px;
+    background: var(--pink); color: #fff;
+    padding: 7px 12px; border-radius: 7px;
+    font-size: 12px; font-weight: 700;
+  }
+
+  /* ── FORMAT 2: FULL-SCREEN VIDEO POP-UP — overlays the whole app ── */
+  .fmt-video {
+    position: absolute; inset: 58px 16px 16px;
+    background: #0A0A14;
+    border-radius: 14px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  }
+  .fmt-video .vid-thumb {
+    flex: 1; position: relative;
+    background:
+      radial-gradient(ellipse 40% 50% at 50% 50%, rgba(255, 45, 120, 0.35), transparent 60%),
+      linear-gradient(135deg, #2A0A2E 0%, #0F0318 100%);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .fmt-video .vid-thumb::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      repeating-linear-gradient(to right,
+        transparent 0 8%,
+        rgba(255, 255, 255, 0.06) 8% 10%,
+        transparent 10% 16%);
+  }
+  .fmt-video .play-btn {
+    width: 66px; height: 66px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.96);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; padding-left: 4px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(255, 255, 255, 0.08);
+    position: relative; z-index: 2;
+    animation: pulseRing 2s ease-out infinite;
+  }
+  @keyframes pulseRing {
+    0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 8px rgba(255,255,255,0.08); }
+    50%      { box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 14px rgba(255,255,255,0.04); }
+  }
+  .fmt-video .skip-btn {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(0,0,0,0.55); color: #fff;
+    font-size: 11px; font-weight: 700;
+    padding: 5px 10px; border-radius: 100px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 3;
+  }
+  .fmt-video .vid-caption {
+    padding: 14px 16px;
+    background: linear-gradient(180deg, rgba(10,10,20,0.85), #0A0A14);
+    color: #fff;
+  }
+  .fmt-video .vid-caption .vlbl {
+    font-size: 10px; font-weight: 800; color: var(--pink);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+  .fmt-video .vid-caption .vt { font-size: 15px; font-weight: 700; line-height: 1.25; }
+  .fmt-video .vid-caption .vs {
+    font-size: 12.5px; color: rgba(255,255,255,0.7);
+    margin-top: 3px;
+  }
+
+  /* ── FORMAT 3: PICTURE POP-UP — image-based overlay with CTA ── */
+  .fmt-picture {
+    position: absolute; inset: 58px 16px 16px;
+    background: #fff;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  }
+  .fmt-picture .pic-hero {
+    height: 56%; position: relative;
+    background:
+      radial-gradient(ellipse 40% 60% at 60% 40%, #FFE4A3 0%, #FF8A6B 50%, #8E54C8 100%);
+  }
+  .fmt-picture .pic-hero::before {
+    content: '';
+    position: absolute; left: 0; right: 0; bottom: 28%; height: 42%;
+    background:
+      linear-gradient(180deg, transparent, rgba(10,10,30,0.5) 80%, rgba(10,10,30,0.85)),
+      radial-gradient(ellipse 25% 100% at 18% 100%, #1a0f3a 0%, transparent 65%),
+      radial-gradient(ellipse 40% 100% at 55% 100%, #2a1454 0%, transparent 60%);
+  }
+  .fmt-picture .pic-hero .sp-tag {
+    position: absolute; top: 12px; left: 12px;
+    background: rgba(0,0,0,0.45); color: #fff;
+    font-size: 10px; font-weight: 800;
+    padding: 4px 10px; border-radius: 100px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    letter-spacing: 0.5px;
+  }
+  .fmt-picture .pic-hero .close-btn {
+    position: absolute; top: 12px; right: 12px;
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(0,0,0,0.45); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; backdrop-filter: blur(6px);
+  }
+  .fmt-picture .pic-body {
+    padding: 16px 18px 18px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .fmt-picture .pic-body h5 { font-size: 16px; font-weight: 700; color: var(--ink); }
+  .fmt-picture .pic-body p  { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+  .fmt-picture .pic-body .c {
+    align-self: stretch; text-align: center;
+    background: var(--pink); color: #fff;
+    padding: 10px 14px; border-radius: 10px;
+    font-size: 13.5px; font-weight: 700;
+    margin-top: 4px;
+  }
+
+  /* ── FORMAT 4: LARGE BANNER CARD — big sponsored card below chat ── */
+  .fmt-banner {
+    display: flex; gap: 14px;
+    background: linear-gradient(135deg, #F5F7FF 0%, #DFEEFF 100%);
+    border: 1px solid #C8DBF5;
+    border-radius: 14px;
+    padding: 14px;
+    margin-top: 4px;
+    position: relative;
+    box-shadow: 0 10px 24px rgba(4, 190, 254, 0.18);
+  }
+  .fmt-banner::before {
+    content: 'Sponsored';
+    position: absolute; top: -9px; left: 12px;
+    background: var(--cyan); color: var(--ink);
+    font-size: 10px; font-weight: 800;
+    padding: 3px 9px; border-radius: 100px;
+    letter-spacing: 0.4px;
+  }
+  .fmt-banner .bn-art {
+    width: 84px; height: 84px; flex-shrink: 0;
+    border-radius: 10px;
+    background:
+      radial-gradient(circle at 30% 30%, #fff 0%, rgba(255,255,255,0.4) 20%, transparent 45%),
+      linear-gradient(135deg, var(--cyan) 0%, #0077B6 100%);
+    position: relative;
+    box-shadow: 0 6px 14px rgba(4, 190, 254, 0.3);
+  }
+  .fmt-banner .bn-art::before {
+    content: '📊';
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 34px;
+  }
+  .fmt-banner .bn-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+  .fmt-banner .bn-body h5 { font-size: 15px; font-weight: 700; color: var(--ink); }
+  .fmt-banner .bn-body p  { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
+  .fmt-banner .bn-body .c {
+    align-self: flex-start; margin-top: 5px;
+    background: var(--ink); color: #fff;
+    padding: 6px 12px; border-radius: 7px;
+    font-size: 12px; font-weight: 700;
+  }
+
+  /* ── FORMAT 5: CORNER POP-UP — floating toast in bottom-right ── */
+  .fmt-corner-parent { flex: 1; position: relative; }
+  .fmt-corner {
+    position: absolute; bottom: 14px; right: 14px;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px 12px 12px;
+    display: flex; gap: 10px;
+    max-width: 260px;
+    box-shadow: 0 16px 40px rgba(15, 15, 26, 0.18);
+    animation: cornerBob 3s ease-in-out infinite;
+  }
+  @keyframes cornerBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+  .fmt-corner .cn-icon {
+    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+    background: linear-gradient(135deg, #FFE600, #FFB800);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: var(--ink);
+  }
+  .fmt-corner .cn-body { flex: 1; min-width: 0; }
+  .fmt-corner .cn-body .cnl {
+    font-size: 9.5px; font-weight: 800; color: var(--pink);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;
+  }
+  .fmt-corner .cn-body h5 { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.25; }
+  .fmt-corner .cn-body .c {
+    display: inline-block; margin-top: 4px;
+    font-size: 11.5px; font-weight: 700; color: var(--pink);
+  }
+  .fmt-corner .cn-close {
+    position: absolute; top: 6px; right: 6px;
+    width: 18px; height: 18px; border-radius: 50%;
+    color: var(--muted); font-size: 12px;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Carousel controls: dots + format labels */
+  .carousel-controls {
+    display: flex; gap: 10px; justify-content: center;
+    margin-top: 24px; flex-wrap: wrap;
+  }
+  .carousel-controls .dot {
+    background: #fff; color: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 8px 16px; border-radius: 100px;
+    font-size: 12.5px; font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: inherit;
+  }
+  .carousel-controls .dot:hover {
+    background: var(--bg-soft);
+    border-color: var(--ink-soft);
+    color: var(--ink);
+  }
+  .carousel-controls .dot.active {
+    background: var(--ink); color: #fff; border-color: var(--ink);
+  }
+
+  /* Progress bar under the carousel to show auto-advance */
+  .carousel-progress {
+    position: absolute; bottom: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pink), var(--cyan));
+    width: 0%;
+    transition: width 0.1s linear;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fmt-video .play-btn, .fmt-corner { animation: none !important; }
+    .carousel-progress { display: none; }
+  }
+
 </style>
 </head>
 <body>
@@ -685,24 +1037,128 @@
     </div>
     <div class="hero-micro" data-reveal style="--reveal-delay:320ms">No setup fees · $100 starter credit · Live in under 10 minutes</div>
 
-    <!-- Live AI chat mockup — SuperBoost Ads dropping into a real conversation.
-         Messages type out, AI "thinks", then a sponsored card slides in.
-         Loops across 3 conversation examples. -->
-    <div class="hero-visual" data-reveal>
-      <div class="float-pill fp-1"><span class="dot-color" style="background: #10B981"></span>+$47 CPA</div>
-      <div class="float-pill fp-2"><span class="dot-color" style="background: #FFE600"></span>⚡ 5ms bid</div>
-      <div class="float-pill fp-3"><span class="dot-color" style="background: var(--pink)"></span>6.2% CTR</div>
-
-      <div class="chat-mock" id="heroChatMock">
-        <div class="chat-mock-head">
-          <div class="app-icon" id="chatAppIcon">C</div>
-          <div class="app-name">
-            <span id="chatAppName">Claude</span>
-            <small id="chatAppMeta">AI assistant · via MCP</small>
+    <!-- Ad-format carousel: 5 slides showing different ad placements
+         (native / video pop-up / picture pop-up / banner / corner notif)
+         each in a different AI host app. Auto-advances every 5s. -->
+    <div class="hero-visual ad-carousel" id="adCarousel" data-reveal>
+      <div class="ad-frame">
+        <!-- Slide 1: NATIVE inline card — Claude -->
+        <div class="ad-slide active" data-format="native">
+          <div class="ad-head">
+            <div class="icon" style="background: linear-gradient(135deg, #FF8A1F, #FF5E3A);">C</div>
+            <div class="name">Claude<small>AI assistant · via MCP</small></div>
+            <span class="fmt-tag">Native</span>
           </div>
-          <div class="live-dot" aria-label="Live"></div>
+          <div class="ad-body">
+            <div class="mini-user">Best CRM for a 10-person sales team?</div>
+            <div class="mini-ai">HubSpot and Pipedrive both fit — HubSpot has strong automation; Pipedrive shines on pipeline visualization.</div>
+            <div class="fmt-native">
+              <span class="t">HubSpot Starter — built for growing teams</span>
+              <span class="s">CRM + marketing + sales in one. From $45/mo.</span>
+              <span class="c">Try free →</span>
+            </div>
+          </div>
         </div>
-        <div class="chat-mock-body" id="chatBody"></div>
+
+        <!-- Slide 2: VIDEO POP-UP — ChatGPT -->
+        <div class="ad-slide" data-format="video">
+          <div class="ad-head">
+            <div class="icon" style="background: linear-gradient(135deg, #25D366, #128C7E);">💬</div>
+            <div class="name">ChatGPT<small>OpenAI · via MCP</small></div>
+            <span class="fmt-tag" style="background: #8B5CF6">Video pop-up</span>
+          </div>
+          <div class="ad-body" style="padding: 0;">
+            <div class="fmt-video">
+              <div class="vid-thumb">
+                <div class="skip-btn">Skip in 5s</div>
+                <div class="play-btn">▶</div>
+              </div>
+              <div class="vid-caption">
+                <div class="vlbl">◆ Sponsored · 15s</div>
+                <div class="vt">Notion AI — your workspace, supercharged</div>
+                <div class="vs">All your docs, projects, and notes, answered instantly.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 3: PICTURE POP-UP — Cursor -->
+        <div class="ad-slide" data-format="picture">
+          <div class="ad-head">
+            <div class="icon" style="background: linear-gradient(135deg, #000, #333);">c</div>
+            <div class="name">Cursor<small>AI code editor · via MCP</small></div>
+            <span class="fmt-tag" style="background: #FF8A1F">Picture pop-up</span>
+          </div>
+          <div class="ad-body" style="padding: 0;">
+            <div class="fmt-picture">
+              <div class="pic-hero">
+                <span class="sp-tag">✨ Sponsored</span>
+                <span class="close-btn">×</span>
+              </div>
+              <div class="pic-body">
+                <h5>Sentry — catch CI failures before your users do</h5>
+                <p>Debug any production error with full trace + env diff. Free for 500K events/mo.</p>
+                <span class="c">Start free trial →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 4: RICH BANNER CARD — Perplexity -->
+        <div class="ad-slide" data-format="banner">
+          <div class="ad-head">
+            <div class="icon" style="background: linear-gradient(135deg, #20808D, #0EA5E9);">P</div>
+            <div class="name">Perplexity<small>AI answer engine · via MCP</small></div>
+            <span class="fmt-tag" style="background: var(--cyan); color: var(--ink)">Rich banner</span>
+          </div>
+          <div class="ad-body">
+            <div class="mini-user">What analytics platform should I pick for a 20-person startup?</div>
+            <div class="mini-ai">Mixpanel and Amplitude are the top two — Mixpanel for event funnels, Amplitude for richer retention views.</div>
+            <div class="fmt-banner">
+              <div class="bn-art"></div>
+              <div class="bn-body">
+                <h5>Amplitude — product analytics for AI-era apps</h5>
+                <p>Ship insights 10× faster with AI-assisted cohort building. Free up to 10M events.</p>
+                <span class="c">See live demo →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Slide 5: CORNER POP-UP — Replit -->
+        <div class="ad-slide" data-format="corner">
+          <div class="ad-head">
+            <div class="icon" style="background: linear-gradient(135deg, #F26207, #FFE600);">R</div>
+            <div class="name">Replit<small>AI dev environment · via MCP</small></div>
+            <span class="fmt-tag" style="background: #FFE600; color: var(--ink)">Corner notif</span>
+          </div>
+          <div class="ad-body fmt-corner-parent">
+            <div class="mini-user">Show me a starter template for a FastAPI + Postgres project.</div>
+            <div class="mini-ai">Here's a minimal FastAPI + SQLAlchemy + asyncpg skeleton with migrations preconfigured.</div>
+            <div class="mini-ai" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: #0F0F1A; color: #E5E7EB; border-color: #0F0F1A;"><span style="color: #FF6B9D">from</span> fastapi <span style="color: #FF6B9D">import</span> FastAPI<br>app = FastAPI()</div>
+            <div class="fmt-corner">
+              <div class="cn-close">×</div>
+              <div class="cn-icon">🚀</div>
+              <div class="cn-body">
+                <div class="cnl">◆ Sponsored</div>
+                <h5>Railway — deploy FastAPI in 30 seconds</h5>
+                <span class="c">One-click deploy →</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Auto-advance progress bar -->
+        <div class="carousel-progress" id="carouselProgress"></div>
+      </div>
+
+      <!-- Format navigation pills -->
+      <div class="carousel-controls" id="carouselControls">
+        <button class="dot active" data-slide="0" type="button">Native</button>
+        <button class="dot" data-slide="1" type="button">Video</button>
+        <button class="dot" data-slide="2" type="button">Picture</button>
+        <button class="dot" data-slide="3" type="button">Banner</button>
+        <button class="dot" data-slide="4" type="button">Corner</button>
       </div>
     </div>
   </div>
@@ -1121,127 +1577,64 @@
     var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ─────────────────────────────────────────────────────────────────
-    // (1) HERO CHAT MOCKUP — 3 cycling scenarios
+    // (1) AD-FORMAT CAROUSEL — auto-advance + manual pill navigation.
+    //     Each slide shows a different ad placement in a different AI
+    //     host app. This is the distinguishing hero feature for /ads.
     // ─────────────────────────────────────────────────────────────────
-    var chatScenarios = [
-      {
-        appIcon: 'C',
-        appIconBg: 'linear-gradient(135deg, #FF8A1F, #FF5E3A)',
-        appName: 'Claude',
-        appMeta: 'AI assistant · via MCP',
-        user: "What's the best CRM for a 10-person sales team?",
-        ai: "HubSpot and Pipedrive both fit that size well. HubSpot has a generous free tier with strong automation; Pipedrive shines on pipeline visualization.",
-        sponsor: {
-          label: '◆ SPONSORED PLACEMENT',
-          title: 'HubSpot Starter — built for growing teams',
-          sub: 'CRM + marketing + sales in one. From $45/mo.',
-          cta: 'Try free →'
-        }
-      },
-      {
-        appIcon: 'c',
-        appIconBg: 'linear-gradient(135deg, #000, #333)',
-        appName: 'Cursor',
-        appMeta: 'AI code editor · via MCP',
-        user: "My Python tests pass locally but fail on CI. Fastest way to debug?",
-        ai: "Check env vars first, then timezone differences, then caching. A test-run replay tool can surface all three at once.",
-        sponsor: {
-          label: '◆ SPONSORED PLACEMENT',
-          title: 'Sentry — debug CI failures in seconds',
-          sub: 'Replay any test run with full trace + env diff.',
-          cta: 'Start free →'
-        }
-      },
-      {
-        appIcon: '💬',
-        appIconBg: 'linear-gradient(135deg, #25D366, #128C7E)',
-        appName: 'ChatGPT',
-        appMeta: 'OpenAI · via MCP',
-        user: "Planning 5 days in Tokyo — best way to get around?",
-        ai: "Tokyo's subway and JR lines are dense and efficient. A Suica IC card is the easiest way to pay across everything.",
-        sponsor: {
-          label: '◆ SPONSORED PLACEMENT',
-          title: 'Klook — Tokyo Subway 72h Pass',
-          sub: 'Unlimited rides · Instant mobile ticket · from $11',
-          cta: 'Book now →'
-        }
+    function initAdCarousel() {
+      var carousel = document.getElementById('adCarousel');
+      if (!carousel) return;
+      var slides   = carousel.querySelectorAll('.ad-slide');
+      var dots     = carousel.querySelectorAll('.carousel-controls .dot');
+      var progress = document.getElementById('carouselProgress');
+      var total    = slides.length;
+      if (!total) return;
+
+      var current  = 0;
+      var SLIDE_MS = 5500;
+      var paused   = false;
+      var tickStart = 0;
+      var rafId    = 0;
+
+      function setSlide(i) {
+        current = (i + total) % total;
+        slides.forEach(function (s, idx) { s.classList.toggle('active', idx === current); });
+        dots.forEach(function (d, idx)   { d.classList.toggle('active', idx === current); });
+        tickStart = performance.now();
+        if (progress) progress.style.width = '0%';
       }
-    ];
 
-    var chatBody = document.getElementById('chatBody');
-    var chatIcon = document.getElementById('chatAppIcon');
-    var chatName = document.getElementById('chatAppName');
-    var chatMeta = document.getElementById('chatAppMeta');
-    var scenarioIdx = 0;
+      function tick(now) {
+        if (!paused) {
+          var elapsed = now - tickStart;
+          var pct = Math.min(100, (elapsed / SLIDE_MS) * 100);
+          if (progress) progress.style.width = pct + '%';
+          if (elapsed >= SLIDE_MS) setSlide(current + 1);
+        }
+        rafId = requestAnimationFrame(tick);
+      }
 
-    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
-    function makeBubble(cls, html) {
-      var el = document.createElement('div');
-      el.className = 'chat-bubble ' + cls; el.innerHTML = html; return el;
-    }
-    function makeTyping() {
-      var el = document.createElement('div');
-      el.className = 'chat-typing';
-      el.innerHTML = '<span></span><span></span><span></span>'; return el;
-    }
-    function makeSponsor(s) {
-      var el = document.createElement('div');
-      el.className = 'chat-sponsor';
-      el.innerHTML =
-        '<span class="sp-label">' + s.label + '</span>' +
-        '<span class="sp-title">' + s.title + '</span>' +
-        '<span class="sp-sub">' + s.sub + '</span>' +
-        '<a class="sp-cta" href="/advertiser">' + s.cta + '</a>';
-      return el;
-    }
+      // Click dots to jump
+      dots.forEach(function (d, idx) {
+        d.addEventListener('click', function () { setSlide(idx); });
+      });
 
-    async function playScenario(s) {
-      if (!chatBody) return;
-      if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
-      if (chatName) chatName.textContent = s.appName;
-      if (chatMeta) chatMeta.textContent = s.appMeta;
-      chatBody.innerHTML = '';
+      // Pause on hover/focus so visitors can read slowly
+      carousel.addEventListener('mouseenter', function () { paused = true; });
+      carousel.addEventListener('mouseleave', function () { paused = false; tickStart = performance.now(); });
+      carousel.addEventListener('focusin',  function () { paused = true; });
+      carousel.addEventListener('focusout', function () { paused = false; tickStart = performance.now(); });
 
-      var userB = makeBubble('user', s.user);
-      chatBody.appendChild(userB);
-      await sleep(80);
-      requestAnimationFrame(function () { userB.classList.add('visible'); });
-      await sleep(900);
-
-      var typing = makeTyping();
-      chatBody.appendChild(typing);
-      requestAnimationFrame(function () { typing.classList.add('visible'); });
-      await sleep(1400);
-
-      typing.remove();
-      var aiB = makeBubble('ai', s.ai);
-      chatBody.appendChild(aiB);
-      requestAnimationFrame(function () { aiB.classList.add('visible'); });
-      await sleep(1100);
-
-      var sp = makeSponsor(s.sponsor);
-      chatBody.appendChild(sp);
-      requestAnimationFrame(function () { sp.classList.add('visible'); });
-      await sleep(3800);
-    }
-
-    async function chatLoop() {
-      if (!chatBody) return;
       if (prefersReduced) {
-        var s = chatScenarios[0];
-        if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
-        if (chatName) chatName.textContent = s.appName;
-        if (chatMeta) chatMeta.textContent = s.appMeta;
-        chatBody.innerHTML = '';
-        var u  = makeBubble('user', s.user); u.classList.add('visible');  chatBody.appendChild(u);
-        var a  = makeBubble('ai',   s.ai);   a.classList.add('visible');  chatBody.appendChild(a);
-        var sp = makeSponsor(s.sponsor);     sp.classList.add('visible'); chatBody.appendChild(sp);
+        // Don't auto-advance — stay on slide 0, but still allow manual navigation
+        setSlide(0);
+        if (progress) progress.style.display = 'none';
         return;
       }
-      while (true) {
-        await playScenario(chatScenarios[scenarioIdx]);
-        scenarioIdx = (scenarioIdx + 1) % chatScenarios.length;
-      }
+
+      setSlide(0);
+      tickStart = performance.now();
+      rafId = requestAnimationFrame(tick);
     }
 
     // ─────────────────────────────────────────────────────────────────
@@ -1316,7 +1709,7 @@
     function init() {
       initReveals();
       initCounters();
-      chatLoop();
+      initAdCarousel();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
