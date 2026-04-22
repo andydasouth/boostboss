@@ -632,355 +632,337 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     AD-FORMAT CAROUSEL — the distinguishing hero feature for /ads.
-     Shows 5 different ad placements (native, video pop-up, picture pop-up,
-     banner, corner notif) each in a different AI host-app context. Auto-
-     advances every 5s; dots to navigate manually.
+     AD-FORMAT MARQUEE — benna.ai-style horizontal carousel where every
+     format is visible at once, sliding continuously so visitors can
+     scan all placements (native / video / picture / banner / corner
+     notif / full-screen pop-up) across different AI products side-by-
+     side. Pure CSS animation, pauses on hover.
      ═══════════════════════════════════════════════════════════════════ */
-  .ad-carousel {
+  .ad-marquee-wrap {
+    max-width: none; margin: 56px auto 0;
+    padding: 36px 0 44px;
     position: relative;
-    max-width: 620px; margin: 56px auto 0;
+    /* Edge fade so cards dissolve in from left/right */
+    mask-image:
+      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    -webkit-mask-image:
+      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
   }
-  .ad-carousel .ad-frame {
-    position: relative;
-    background: #fff;
+  .ad-marquee {
+    display: flex; gap: 28px;
+    width: max-content;
+    animation: adMarquee 55s linear infinite;
+    padding: 0 16px;
+  }
+  .ad-marquee-wrap:hover .ad-marquee,
+  .ad-marquee:focus-within { animation-play-state: paused; }
+  @keyframes adMarquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(calc(-50% - 14px)); }
+  }
+
+  /* Per-format card — phone-shaped, per-brand theme */
+  .ad-card {
+    --ct-bg:      #12121F;
+    --ct-accent:  #FF2D78;
+    --ct-ink:     #F5F5F7;
+    --ct-sub:     #A1A1B3;
+    --ct-surface: rgba(255,255,255,0.04);
+
+    flex-shrink: 0;
+    width: 340px; min-height: 480px;
+    background: linear-gradient(180deg, var(--ct-bg) 0%, color-mix(in srgb, var(--ct-bg) 85%, #000 15%) 100%);
+    border: 1px solid color-mix(in srgb, var(--ct-accent) 30%, transparent);
     border-radius: 22px;
-    border: 1px solid var(--line);
-    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.10),
-                0 10px 28px rgba(15, 15, 26, 0.06);
-    overflow: hidden;
-    min-height: 440px;
-  }
-  .ad-slide {
-    position: absolute; inset: 0;
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-    pointer-events: none;
+    padding: 0;
     display: flex; flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px color-mix(in srgb, var(--ct-accent) 10%, transparent);
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.3s ease;
   }
-  .ad-slide.active {
-    opacity: 1; transform: translateY(0);
-    pointer-events: auto;
+  .ad-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.55),
+                0 0 0 1px color-mix(in srgb, var(--ct-accent) 50%, transparent);
   }
+  .ad-card::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at top, color-mix(in srgb, var(--ct-accent) 22%, transparent) 0%, transparent 60%);
+  }
+  .ad-card > * { position: relative; z-index: 1; }
 
-  /* Host app chrome — each slide has a small app header */
-  .ad-slide .ad-head {
+  .ad-card .ac-head {
     display: flex; align-items: center; gap: 10px;
-    padding: 14px 18px;
-    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
-    border-bottom: 1px solid var(--line);
+    padding: 16px 18px;
+    background: color-mix(in srgb, var(--ct-accent) 12%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--ct-accent) 20%, transparent);
   }
-  .ad-slide .ad-head .icon {
+  .ad-card .ac-head .ic {
     width: 30px; height: 30px; border-radius: 8px;
-    color: #fff; font-family: 'Space Grotesk', sans-serif;
-    font-weight: 800; font-size: 15px;
     display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
   }
-  .ad-slide .ad-head .name { font-size: 14px; font-weight: 700; color: var(--ink); }
-  .ad-slide .ad-head .name small {
-    display: block; font-size: 11px; color: var(--muted);
-    font-weight: 500; margin-top: 1px;
-  }
-  .ad-slide .ad-head .fmt-tag {
+  .ad-card .ac-head .nm { font-size: 13.5px; font-weight: 600; color: var(--ct-ink); }
+  .ad-card .ac-head .dt {
     margin-left: auto;
-    background: var(--pink); color: #fff;
-    font-size: 10px; font-weight: 800;
-    padding: 4px 10px; border-radius: 100px;
-    letter-spacing: 0.5px; text-transform: uppercase;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ct-accent);
+    box-shadow: 0 0 10px var(--ct-accent);
   }
 
-  /* Shared body padding for text-based ad slides */
-  .ad-slide .ad-body {
-    padding: 20px; flex: 1;
+  .ad-card .ac-body {
+    padding: 16px 18px;
     display: flex; flex-direction: column; gap: 10px;
-    text-align: left;
-    position: relative;
+    flex: 1;
   }
-
-  /* — Shared chat bubbles inside ad-body — */
-  .ad-slide .mini-user, .ad-slide .mini-ai {
-    padding: 10px 13px; border-radius: 12px;
-    font-size: 13.5px; line-height: 1.5;
-    max-width: 86%;
+  .ad-card .cb-user, .ad-card .cb-ai {
+    font-size: 13px; line-height: 1.5;
+    padding: 9px 12px;
   }
-  .ad-slide .mini-user {
-    align-self: flex-end;
-    background: var(--ink); color: #fff;
-    border-bottom-right-radius: 4px;
-  }
-  .ad-slide .mini-ai {
+  .ad-card .cb-user {
+    background: color-mix(in srgb, var(--ct-accent) 20%, var(--ct-surface));
+    color: var(--ct-ink);
+    border-radius: 12px 12px 12px 4px;
     align-self: flex-start;
-    background: var(--bg-soft); color: var(--ink);
-    border: 1px solid var(--line);
-    border-bottom-left-radius: 4px;
+    max-width: 92%;
+    border: 1px solid color-mix(in srgb, var(--ct-accent) 18%, transparent);
+  }
+  .ad-card .cb-ai {
+    color: color-mix(in srgb, var(--ct-ink) 88%, transparent);
+    padding-left: 12px; position: relative;
+  }
+  .ad-card .cb-ai::before {
+    content: '';
+    position: absolute; left: 2px; top: 14px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--ct-accent); opacity: 0.6;
   }
 
-  /* ── FORMAT 1: NATIVE INLINE CARD — pink-bordered card in chat flow ── */
-  .fmt-native {
-    position: relative;
-    margin-top: 4px;
-    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
-    border: 1.5px solid var(--pink);
+  /* Ad block at bottom — all formats share this container */
+  .ad-card .ac-sponsor {
+    margin: 8px 18px 18px;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--ct-accent) 18%, #1A1A2E) 0%, color-mix(in srgb, var(--ct-accent) 8%, #12121F) 100%);
+    border: 1px solid color-mix(in srgb, var(--ct-accent) 40%, transparent);
     border-radius: 14px;
     padding: 14px 16px;
-    display: flex; flex-direction: column; gap: 5px;
-    box-shadow: 0 10px 24px rgba(255, 45, 120, 0.16);
+    display: flex; flex-direction: column; gap: 6px;
+    color: #fff;
+    position: relative;
   }
-  .fmt-native::before {
-    content: '✨ Sponsored';
+  .ad-card .ac-sponsor .sp-l {
+    font-size: 9.5px; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--ct-accent);
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 4px;
+  }
+  .ad-card .ac-sponsor .sp-l::before {
+    content: 'BB';
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 17px; height: 17px; border-radius: 4px;
+    background: var(--ct-accent); color: #0A0A14;
+    font-size: 9px; font-weight: 900;
+  }
+  .ad-card .ac-sponsor .sp-t { font-weight: 700; font-size: 14.5px; line-height: 1.3; }
+  .ad-card .ac-sponsor .sp-s { color: color-mix(in srgb, #fff 75%, transparent); font-size: 12px; line-height: 1.45; }
+  .ad-card .ac-sponsor .sp-c {
+    display: inline-block; margin-top: 8px;
+    background: var(--ct-accent); color: #0A0A14;
+    padding: 7px 14px; border-radius: 8px;
+    font-size: 12px; font-weight: 700; align-self: flex-start;
+  }
+  .ad-card .ac-sponsor .sp-tag {
     position: absolute; top: -10px; left: 14px;
-    background: var(--pink); color: #fff;
-    font-size: 10px; font-weight: 700;
-    padding: 3px 9px; border-radius: 100px;
+    background: var(--ct-accent); color: #0A0A14;
+    font-size: 10px; font-weight: 800;
+    padding: 3px 10px; border-radius: 100px;
     letter-spacing: 0.4px;
   }
-  .fmt-native .t { font-size: 14.5px; font-weight: 700; color: var(--ink); }
-  .fmt-native .s { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
-  .fmt-native .c {
-    align-self: flex-start; margin-top: 4px;
-    background: var(--pink); color: #fff;
-    padding: 7px 12px; border-radius: 7px;
-    font-size: 12px; font-weight: 700;
-  }
 
-  /* ── FORMAT 2: FULL-SCREEN VIDEO POP-UP — overlays the whole app ── */
-  .fmt-video {
-    position: absolute; inset: 58px 16px 16px;
-    background: #0A0A14;
-    border-radius: 14px;
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
-  }
-  .fmt-video .vid-thumb {
-    flex: 1; position: relative;
+  /* ── FORMAT: VIDEO POP-UP ── */
+  .ad-card.fmt-video .ac-body { padding: 0; }
+  .ad-card.fmt-video .vid-player {
+    aspect-ratio: 16 / 10;
+    position: relative;
     background:
-      radial-gradient(ellipse 40% 50% at 50% 50%, rgba(255, 45, 120, 0.35), transparent 60%),
-      linear-gradient(135deg, #2A0A2E 0%, #0F0318 100%);
-    display: flex; align-items: center; justify-content: center;
-  }
-  .fmt-video .vid-thumb::before {
-    content: ''; position: absolute; inset: 0;
-    background:
+      radial-gradient(ellipse 22% 30% at 62% 40%, rgba(255, 72, 90, 0.55) 0%, transparent 70%),
       repeating-linear-gradient(to right,
         transparent 0 8%,
-        rgba(255, 255, 255, 0.06) 8% 10%,
-        transparent 10% 16%);
+        rgba(185, 95, 255, 0.3) 8% 10%,
+        transparent 10% 16%,
+        rgba(185, 95, 255, 0.2) 16% 18%),
+      linear-gradient(160deg, #2a0a2e 0%, #0f0318 100%);
   }
-  .fmt-video .play-btn {
-    width: 66px; height: 66px; border-radius: 50%;
-    background: rgba(255, 255, 255, 0.96);
-    color: var(--ink);
+  .ad-card.fmt-video .vid-player .play {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px; height: 54px; border-radius: 50%;
+    background: rgba(255,255,255,0.95); color: #0A0A14;
     display: flex; align-items: center; justify-content: center;
-    font-size: 22px; padding-left: 4px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 0 8px rgba(255, 255, 255, 0.08);
-    position: relative; z-index: 2;
-    animation: pulseRing 2s ease-out infinite;
+    font-size: 16px; padding-left: 3px;
+    box-shadow: 0 6px 24px rgba(0,0,0,0.5), 0 0 0 6px rgba(255,255,255,0.1);
   }
-  @keyframes pulseRing {
-    0%, 100% { box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 8px rgba(255,255,255,0.08); }
-    50%      { box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 0 14px rgba(255,255,255,0.04); }
-  }
-  .fmt-video .skip-btn {
-    position: absolute; top: 12px; right: 12px;
-    background: rgba(0,0,0,0.55); color: #fff;
-    font-size: 11px; font-weight: 700;
-    padding: 5px 10px; border-radius: 100px;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    z-index: 3;
-  }
-  .fmt-video .vid-caption {
-    padding: 14px 16px;
-    background: linear-gradient(180deg, rgba(10,10,20,0.85), #0A0A14);
-    color: #fff;
-  }
-  .fmt-video .vid-caption .vlbl {
-    font-size: 10px; font-weight: 800; color: var(--pink);
-    letter-spacing: 0.5px; text-transform: uppercase;
-    margin-bottom: 5px;
-  }
-  .fmt-video .vid-caption .vt { font-size: 15px; font-weight: 700; line-height: 1.25; }
-  .fmt-video .vid-caption .vs {
-    font-size: 12.5px; color: rgba(255,255,255,0.7);
-    margin-top: 3px;
+  .ad-card.fmt-video .vid-player .skip {
+    position: absolute; top: 8px; right: 8px;
+    padding: 4px 10px; border-radius: 6px;
+    background: rgba(0,0,0,0.7); color: #fff;
+    font-size: 10px; font-weight: 700;
+    backdrop-filter: blur(4px);
   }
 
-  /* ── FORMAT 3: PICTURE POP-UP — image-based overlay with CTA ── */
-  .fmt-picture {
-    position: absolute; inset: 58px 16px 16px;
-    background: #fff;
-    border-radius: 14px;
-    border: 1px solid var(--line);
-    overflow: hidden;
-    display: flex; flex-direction: column;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+  /* ── FORMAT: PICTURE POP-UP (hero image ad) ── */
+  .ad-card.fmt-picture .pic-hero {
+    aspect-ratio: 16 / 10;
+    position: relative;
+    background: linear-gradient(180deg, #FFA77E 0%, #FF6EA3 28%, #8E54C8 60%, #2A1B54 85%, #0B0E2A 100%);
   }
-  .fmt-picture .pic-hero {
-    height: 56%; position: relative;
-    background:
-      radial-gradient(ellipse 40% 60% at 60% 40%, #FFE4A3 0%, #FF8A6B 50%, #8E54C8 100%);
-  }
-  .fmt-picture .pic-hero::before {
+  .ad-card.fmt-picture .pic-hero::after {
     content: '';
     position: absolute; left: 0; right: 0; bottom: 28%; height: 42%;
     background:
-      linear-gradient(180deg, transparent, rgba(10,10,30,0.5) 80%, rgba(10,10,30,0.85)),
-      radial-gradient(ellipse 25% 100% at 18% 100%, #1a0f3a 0%, transparent 65%),
+      linear-gradient(180deg, transparent 0%, rgba(10,10,30,0.4) 80%, rgba(10,10,30,0.85) 100%),
+      radial-gradient(ellipse 30% 100% at 18% 100%, #1a0f3a 0%, transparent 65%),
       radial-gradient(ellipse 40% 100% at 55% 100%, #2a1454 0%, transparent 60%);
   }
-  .fmt-picture .pic-hero .sp-tag {
-    position: absolute; top: 12px; left: 12px;
-    background: rgba(0,0,0,0.45); color: #fff;
-    font-size: 10px; font-weight: 800;
-    padding: 4px 10px; border-radius: 100px;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    letter-spacing: 0.5px;
-  }
-  .fmt-picture .pic-hero .close-btn {
-    position: absolute; top: 12px; right: 12px;
-    width: 26px; height: 26px; border-radius: 50%;
-    background: rgba(0,0,0,0.45); color: #fff;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; backdrop-filter: blur(6px);
-  }
-  .fmt-picture .pic-body {
-    padding: 16px 18px 18px;
-    display: flex; flex-direction: column; gap: 6px;
-  }
-  .fmt-picture .pic-body h5 { font-size: 16px; font-weight: 700; color: var(--ink); }
-  .fmt-picture .pic-body p  { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
-  .fmt-picture .pic-body .c {
-    align-self: stretch; text-align: center;
-    background: var(--pink); color: #fff;
-    padding: 10px 14px; border-radius: 10px;
-    font-size: 13.5px; font-weight: 700;
-    margin-top: 4px;
+  .ad-card.fmt-picture .pic-hero .sun {
+    position: absolute; top: 22%; left: 60%;
+    width: 38px; height: 38px;
+    background: radial-gradient(circle, #FFE7B3 0%, #FFCE6E 40%, rgba(255, 166, 84, 0) 75%);
+    border-radius: 50%;
   }
 
-  /* ── FORMAT 4: LARGE BANNER CARD — big sponsored card below chat ── */
-  .fmt-banner {
-    display: flex; gap: 14px;
-    background: linear-gradient(135deg, #F5F7FF 0%, #DFEEFF 100%);
-    border: 1px solid #C8DBF5;
-    border-radius: 14px;
-    padding: 14px;
-    margin-top: 4px;
+  /* ── FORMAT: FULL-SCREEN POP-UP (overlays the whole card) ── */
+  .ad-card.fmt-popup { overflow: hidden; }
+  .ad-card.fmt-popup .ac-body { position: relative; }
+  .ad-card.fmt-popup .overlay {
+    position: absolute;
+    left: 14px; right: 14px; top: 14px; bottom: 14px;
+    z-index: 5;
+    background: linear-gradient(170deg, color-mix(in srgb, var(--ct-accent) 18%, #1A1A2E), color-mix(in srgb, var(--ct-accent) 6%, #12121F));
+    border: 1px solid color-mix(in srgb, var(--ct-accent) 55%, transparent);
+    border-radius: 16px;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, 0.6);
+    padding: 0;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .ad-card.fmt-popup .overlay .close {
+    position: absolute; top: 8px; right: 8px;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(255,255,255,0.15); color: #fff;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 3;
+  }
+  .ad-card.fmt-popup .overlay .pop-hero {
+    aspect-ratio: 16 / 8;
     position: relative;
-    box-shadow: 0 10px 24px rgba(4, 190, 254, 0.18);
-  }
-  .fmt-banner::before {
-    content: 'Sponsored';
-    position: absolute; top: -9px; left: 12px;
-    background: var(--cyan); color: var(--ink);
-    font-size: 10px; font-weight: 800;
-    padding: 3px 9px; border-radius: 100px;
-    letter-spacing: 0.4px;
-  }
-  .fmt-banner .bn-art {
-    width: 84px; height: 84px; flex-shrink: 0;
-    border-radius: 10px;
     background:
-      radial-gradient(circle at 30% 30%, #fff 0%, rgba(255,255,255,0.4) 20%, transparent 45%),
-      linear-gradient(135deg, var(--cyan) 0%, #0077B6 100%);
-    position: relative;
-    box-shadow: 0 6px 14px rgba(4, 190, 254, 0.3);
+      radial-gradient(ellipse at center, color-mix(in srgb, var(--ct-accent) 40%, transparent) 0%, transparent 60%),
+      linear-gradient(135deg, color-mix(in srgb, var(--ct-accent) 35%, #000) 0%, color-mix(in srgb, var(--ct-accent) 15%, #000) 100%);
   }
-  .fmt-banner .bn-art::before {
-    content: '📊';
-    position: absolute; inset: 0;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 34px;
+  .ad-card.fmt-popup .overlay .pop-hero::before {
+    content: '';
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px; height: 64px;
+    background:
+      linear-gradient(to bottom, rgba(255,255,255,0.12) 0 8px, transparent 8px),
+      linear-gradient(to top, rgba(255,255,255,0.12) 0 8px, transparent 8px),
+      radial-gradient(ellipse at 50% 50%, #111 0%, #222 50%, transparent 70%),
+      #0a0a14;
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.6);
   }
-  .fmt-banner .bn-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-  .fmt-banner .bn-body h5 { font-size: 15px; font-weight: 700; color: var(--ink); }
-  .fmt-banner .bn-body p  { font-size: 12.5px; color: var(--ink-soft); line-height: 1.45; }
-  .fmt-banner .bn-body .c {
-    align-self: flex-start; margin-top: 5px;
-    background: var(--ink); color: #fff;
-    padding: 6px 12px; border-radius: 7px;
-    font-size: 12px; font-weight: 700;
+  .ad-card.fmt-popup .overlay .pop-hero::after {
+    content: '62 BPM';
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 800;
+    color: var(--ct-accent);
+    text-shadow: 0 0 10px color-mix(in srgb, var(--ct-accent) 70%, transparent);
+  }
+  .ad-card.fmt-popup .overlay .pop-body {
+    padding: 14px 16px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    color: #fff;
   }
 
-  /* ── FORMAT 5: CORNER POP-UP — floating toast in bottom-right ── */
-  .fmt-corner-parent { flex: 1; position: relative; }
-  .fmt-corner {
-    position: absolute; bottom: 14px; right: 14px;
-    background: #fff;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 14px 12px 12px;
-    display: flex; gap: 10px;
-    max-width: 260px;
-    box-shadow: 0 16px 40px rgba(15, 15, 26, 0.18);
-    animation: cornerBob 3s ease-in-out infinite;
+  /* ── FORMAT: CORNER NOTIF (small toast) ── */
+  .ad-card.fmt-corner { position: relative; }
+  .ad-card.fmt-corner .ac-body {
+    /* mock app content in background so the toast sits over chat */
+    opacity: 0.6;
   }
-  @keyframes cornerBob {
+  .ad-card.fmt-corner .corner-toast {
+    position: absolute; bottom: 18px; right: 14px; left: 14px;
+    background: color-mix(in srgb, var(--ct-accent) 18%, #12121F);
+    border: 1px solid color-mix(in srgb, var(--ct-accent) 50%, transparent);
+    border-radius: 12px;
+    padding: 12px 36px 12px 12px;
+    display: flex; gap: 10px;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    z-index: 5;
+    animation: cornerFloat 3s ease-in-out infinite;
+  }
+  @keyframes cornerFloat {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-4px); }
   }
-  .fmt-corner .cn-icon {
-    width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
-    background: linear-gradient(135deg, #FFE600, #FFB800);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; color: var(--ink);
-  }
-  .fmt-corner .cn-body { flex: 1; min-width: 0; }
-  .fmt-corner .cn-body .cnl {
-    font-size: 9.5px; font-weight: 800; color: var(--pink);
-    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 2px;
-  }
-  .fmt-corner .cn-body h5 { font-size: 13px; font-weight: 700; color: var(--ink); line-height: 1.25; }
-  .fmt-corner .cn-body .c {
-    display: inline-block; margin-top: 4px;
-    font-size: 11.5px; font-weight: 700; color: var(--pink);
-  }
-  .fmt-corner .cn-close {
-    position: absolute; top: 6px; right: 6px;
+  .ad-card.fmt-corner .corner-toast .close {
+    position: absolute; top: 8px; right: 8px;
     width: 18px; height: 18px; border-radius: 50%;
-    color: var(--muted); font-size: 12px;
+    color: color-mix(in srgb, #fff 60%, transparent); font-size: 14px;
     display: flex; align-items: center; justify-content: center;
   }
+  .ad-card.fmt-corner .corner-toast .cn-i {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--ct-accent); color: #0A0A14;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .ad-card.fmt-corner .corner-toast .cn-b { flex: 1; color: #fff; }
+  .ad-card.fmt-corner .corner-toast .cn-b .l {
+    font-size: 9px; font-weight: 800; color: var(--ct-accent);
+    text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 2px;
+  }
+  .ad-card.fmt-corner .corner-toast .cn-b .t { font-size: 12.5px; font-weight: 700; line-height: 1.25; }
 
-  /* Carousel controls: dots + format labels */
-  .carousel-controls {
-    display: flex; gap: 10px; justify-content: center;
-    margin-top: 24px; flex-wrap: wrap;
-  }
-  .carousel-controls .dot {
-    background: #fff; color: var(--ink-soft);
-    border: 1px solid var(--line);
-    padding: 8px 16px; border-radius: 100px;
-    font-size: 12.5px; font-weight: 600;
-    cursor: pointer;
-    transition: all 0.18s;
-    font-family: inherit;
-  }
-  .carousel-controls .dot:hover {
-    background: var(--bg-soft);
-    border-color: var(--ink-soft);
-    color: var(--ink);
-  }
-  .carousel-controls .dot.active {
-    background: var(--ink); color: #fff; border-color: var(--ink);
-  }
+  /* ── Per-card theme palettes ── */
+  .ad-card.th-claude   { --ct-bg: #12132A; --ct-accent: #FF8A1F; }
+  .ad-card.th-fissbot  { --ct-bg: #0D0D0F; --ct-accent: #FFE600; }
+  .ad-card.th-cursor   { --ct-bg: #1A0B22; --ct-accent: #B95FFF; }
+  .ad-card.th-gymai    { --ct-bg: #081810; --ct-accent: #4DF0A1; }
+  .ad-card.th-dochq    { --ct-bg: #0B1F3A; --ct-accent: #4B9FFF; }
+  .ad-card.th-chatgpt  { --ct-bg: #0A1F1A; --ct-accent: #22D3A6; }
 
-  /* Progress bar under the carousel to show auto-advance */
-  .carousel-progress {
-    position: absolute; bottom: 0; left: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--pink), var(--cyan));
-    width: 0%;
-    transition: width 0.1s linear;
-    border-bottom-left-radius: 22px;
-    border-bottom-right-radius: 22px;
+  .ad-card.th-claude .ac-head .ic  { background: #FF8A1F; color: #12132A; }
+  .ad-card.th-fissbot .ac-head .ic { background: #FFE600; color: #0A0A0A; }
+  .ad-card.th-cursor .ac-head .ic  { background: #B95FFF; color: #0A0A0A; }
+  .ad-card.th-gymai .ac-head .ic   { background: #4DF0A1; color: #081810; }
+  .ad-card.th-dochq .ac-head .ic   { background: #4B9FFF; color: #fff; }
+  .ad-card.th-chatgpt .ac-head .ic { background: #22D3A6; color: #0A1F1A; }
+
+  /* Small "format" tag badge on each card */
+  .ad-card .fmt-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: var(--ct-accent); color: #0A0A14;
+    font-size: 9.5px; font-weight: 800;
+    padding: 3px 9px; border-radius: 100px;
+    letter-spacing: 0.5px; text-transform: uppercase;
+    z-index: 4;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.35);
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .fmt-video .play-btn, .fmt-corner { animation: none !important; }
-    .carousel-progress { display: none; }
+    .ad-marquee { animation: none !important; }
+    .ad-card.fmt-corner .corner-toast { animation: none !important; }
   }
 
 </style>
@@ -1037,128 +1019,258 @@
     </div>
     <div class="hero-micro" data-reveal style="--reveal-delay:320ms">No setup fees · $100 starter credit · Live in under 10 minutes</div>
 
-    <!-- Ad-format carousel: 5 slides showing different ad placements
-         (native / video pop-up / picture pop-up / banner / corner notif)
-         each in a different AI host app. Auto-advances every 5s. -->
-    <div class="hero-visual ad-carousel" id="adCarousel" data-reveal>
-      <div class="ad-frame">
-        <!-- Slide 1: NATIVE inline card — Claude -->
-        <div class="ad-slide active" data-format="native">
-          <div class="ad-head">
-            <div class="icon" style="background: linear-gradient(135deg, #FF8A1F, #FF5E3A);">C</div>
-            <div class="name">Claude<small>AI assistant · via MCP</small></div>
-            <span class="fmt-tag">Native</span>
-          </div>
-          <div class="ad-body">
-            <div class="mini-user">Best CRM for a 10-person sales team?</div>
-            <div class="mini-ai">HubSpot and Pipedrive both fit — HubSpot has strong automation; Pipedrive shines on pipeline visualization.</div>
-            <div class="fmt-native">
-              <span class="t">HubSpot Starter — built for growing teams</span>
-              <span class="s">CRM + marketing + sales in one. From $45/mo.</span>
-              <span class="c">Try free →</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 2: VIDEO POP-UP — ChatGPT -->
-        <div class="ad-slide" data-format="video">
-          <div class="ad-head">
-            <div class="icon" style="background: linear-gradient(135deg, #25D366, #128C7E);">💬</div>
-            <div class="name">ChatGPT<small>OpenAI · via MCP</small></div>
-            <span class="fmt-tag" style="background: #8B5CF6">Video pop-up</span>
-          </div>
-          <div class="ad-body" style="padding: 0;">
-            <div class="fmt-video">
-              <div class="vid-thumb">
-                <div class="skip-btn">Skip in 5s</div>
-                <div class="play-btn">▶</div>
-              </div>
-              <div class="vid-caption">
-                <div class="vlbl">◆ Sponsored · 15s</div>
-                <div class="vt">Notion AI — your workspace, supercharged</div>
-                <div class="vs">All your docs, projects, and notes, answered instantly.</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 3: PICTURE POP-UP — Cursor -->
-        <div class="ad-slide" data-format="picture">
-          <div class="ad-head">
-            <div class="icon" style="background: linear-gradient(135deg, #000, #333);">c</div>
-            <div class="name">Cursor<small>AI code editor · via MCP</small></div>
-            <span class="fmt-tag" style="background: #FF8A1F">Picture pop-up</span>
-          </div>
-          <div class="ad-body" style="padding: 0;">
-            <div class="fmt-picture">
-              <div class="pic-hero">
-                <span class="sp-tag">✨ Sponsored</span>
-                <span class="close-btn">×</span>
-              </div>
-              <div class="pic-body">
-                <h5>Sentry — catch CI failures before your users do</h5>
-                <p>Debug any production error with full trace + env diff. Free for 500K events/mo.</p>
-                <span class="c">Start free trial →</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 4: RICH BANNER CARD — Perplexity -->
-        <div class="ad-slide" data-format="banner">
-          <div class="ad-head">
-            <div class="icon" style="background: linear-gradient(135deg, #20808D, #0EA5E9);">P</div>
-            <div class="name">Perplexity<small>AI answer engine · via MCP</small></div>
-            <span class="fmt-tag" style="background: var(--cyan); color: var(--ink)">Rich banner</span>
-          </div>
-          <div class="ad-body">
-            <div class="mini-user">What analytics platform should I pick for a 20-person startup?</div>
-            <div class="mini-ai">Mixpanel and Amplitude are the top two — Mixpanel for event funnels, Amplitude for richer retention views.</div>
-            <div class="fmt-banner">
-              <div class="bn-art"></div>
-              <div class="bn-body">
-                <h5>Amplitude — product analytics for AI-era apps</h5>
-                <p>Ship insights 10× faster with AI-assisted cohort building. Free up to 10M events.</p>
-                <span class="c">See live demo →</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Slide 5: CORNER POP-UP — Replit -->
-        <div class="ad-slide" data-format="corner">
-          <div class="ad-head">
-            <div class="icon" style="background: linear-gradient(135deg, #F26207, #FFE600);">R</div>
-            <div class="name">Replit<small>AI dev environment · via MCP</small></div>
-            <span class="fmt-tag" style="background: #FFE600; color: var(--ink)">Corner notif</span>
-          </div>
-          <div class="ad-body fmt-corner-parent">
-            <div class="mini-user">Show me a starter template for a FastAPI + Postgres project.</div>
-            <div class="mini-ai">Here's a minimal FastAPI + SQLAlchemy + asyncpg skeleton with migrations preconfigured.</div>
-            <div class="mini-ai" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; background: #0F0F1A; color: #E5E7EB; border-color: #0F0F1A;"><span style="color: #FF6B9D">from</span> fastapi <span style="color: #FF6B9D">import</span> FastAPI<br>app = FastAPI()</div>
-            <div class="fmt-corner">
-              <div class="cn-close">×</div>
-              <div class="cn-icon">🚀</div>
-              <div class="cn-body">
-                <div class="cnl">◆ Sponsored</div>
-                <h5>Railway — deploy FastAPI in 30 seconds</h5>
-                <span class="c">One-click deploy →</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Auto-advance progress bar -->
-        <div class="carousel-progress" id="carouselProgress"></div>
+    <!-- Ad-format marquee: horizontal scrolling row of format cards,
+         all visible at once. 6 unique cards + duplicate row for seamless
+         infinite scroll. Pauses on hover. -->
+  </div>
+</section>
+<section class="ad-marquee-wrap" data-reveal>
+  <div class="ad-marquee">
+    <!-- ═══════ FIRST ROW ═══════ -->
+    <!-- NATIVE — Claude -->
+    <div class="ad-card th-claude">
+      <span class="fmt-badge">Native</span>
+      <div class="ac-head">
+        <div class="ic">C</div>
+        <div class="nm">Claude · AI assistant</div>
+        <div class="dt"></div>
       </div>
+      <div class="ac-body">
+        <div class="cb-user">Best CRM for a 10-person sales team?</div>
+        <div class="cb-ai">HubSpot and Pipedrive both fit that size well — HubSpot has strong automation.</div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-tag">Sponsored</span>
+        <span class="sp-l">Native placement</span>
+        <span class="sp-t">HubSpot Starter — growing teams</span>
+        <span class="sp-s">CRM + marketing + sales in one. From $45/mo.</span>
+        <span class="sp-c">Try free →</span>
+      </div>
+    </div>
 
-      <!-- Format navigation pills -->
-      <div class="carousel-controls" id="carouselControls">
-        <button class="dot active" data-slide="0" type="button">Native</button>
-        <button class="dot" data-slide="1" type="button">Video</button>
-        <button class="dot" data-slide="2" type="button">Picture</button>
-        <button class="dot" data-slide="3" type="button">Banner</button>
-        <button class="dot" data-slide="4" type="button">Corner</button>
+    <!-- VIDEO — ChatGPT -->
+    <div class="ad-card fmt-video th-chatgpt">
+      <span class="fmt-badge">Video · 15s</span>
+      <div class="ac-head">
+        <div class="ic">💬</div>
+        <div class="nm">ChatGPT · OpenAI</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">How should I organize my team's docs?</div>
+        <div class="cb-ai">Notion and Coda both shine at this scale — Notion for structured docs, Coda for data-backed workflows.</div>
+      </div>
+      <div class="vid-player" style="margin: 0 18px;">
+        <div class="skip">Skip in 5s</div>
+        <div class="play">▶</div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-l">Sponsored · Video</span>
+        <span class="sp-t">Notion AI — your workspace, supercharged</span>
+        <span class="sp-c">Watch 15s →</span>
+      </div>
+    </div>
+
+    <!-- PICTURE — Cursor -->
+    <div class="ad-card fmt-picture th-cursor">
+      <span class="fmt-badge">Picture</span>
+      <div class="ac-head">
+        <div class="ic">c</div>
+        <div class="nm">Cursor · AI editor</div>
+        <div class="dt"></div>
+      </div>
+      <div class="pic-hero">
+        <div class="sun"></div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-l">Sponsored · Image</span>
+        <span class="sp-t">Kimpton Palm Springs — 30% off</span>
+        <span class="sp-s">Rooftop pool. Pet-friendly. Mid-century design.</span>
+        <span class="sp-c">Book now →</span>
+      </div>
+    </div>
+
+    <!-- FULL-SCREEN POP-UP — GymAI -->
+    <div class="ad-card fmt-popup th-gymai">
+      <span class="fmt-badge">Pop-up · Full</span>
+      <div class="ac-head">
+        <div class="ic">G</div>
+        <div class="nm">GymAI · coach</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="overlay">
+          <div class="close">×</div>
+          <div class="pop-hero"></div>
+          <div class="pop-body">
+            <span class="sp-l">Sponsored · Pop-up</span>
+            <span class="sp-t">Whoop — train with your recovery</span>
+            <span class="sp-s">Match intensity to HRV & sleep.</span>
+            <span class="sp-c" style="background: #4DF0A1; color: #081810;">Try 30 days →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BANNER — Fissbot -->
+    <div class="ad-card th-fissbot">
+      <span class="fmt-badge">Banner</span>
+      <div class="ac-head">
+        <div class="ic">F</div>
+        <div class="nm">Fissbot · chat</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">Pick a vector DB for 10M vectors.</div>
+        <div class="cb-ai">Pinecone is the smoothest serverless option at that scale.</div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-l">Sponsored banner</span>
+        <span class="sp-t">Pinecone — 10M vectors, $0 to start</span>
+        <span class="sp-s">Serverless vector DB. Free tier for prototyping.</span>
+        <span class="sp-c">Try free →</span>
+      </div>
+    </div>
+
+    <!-- CORNER NOTIF — DocHQ -->
+    <div class="ad-card fmt-corner th-dochq">
+      <span class="fmt-badge">Corner</span>
+      <div class="ac-head">
+        <div class="ic">D</div>
+        <div class="nm">DocHQ · writer</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">How do I set up SSO for 200 users?</div>
+        <div class="cb-ai">SAML + SCIM through Auth0 or Okta is standard — both have pre-built IdP connectors.</div>
+      </div>
+      <div class="corner-toast">
+        <span class="close">×</span>
+        <div class="cn-i">🚀</div>
+        <div class="cn-b">
+          <div class="l">◆ Sponsored</div>
+          <div class="t">Auth0 — SSO in 10 min</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ DUPLICATE ROW for seamless loop ═══════ -->
+    <div class="ad-card th-claude" aria-hidden="true">
+      <span class="fmt-badge">Native</span>
+      <div class="ac-head">
+        <div class="ic">C</div>
+        <div class="nm">Claude · AI assistant</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">Best CRM for a 10-person sales team?</div>
+        <div class="cb-ai">HubSpot and Pipedrive both fit that size well — HubSpot has strong automation.</div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-tag">Sponsored</span>
+        <span class="sp-l">Native placement</span>
+        <span class="sp-t">HubSpot Starter — growing teams</span>
+        <span class="sp-s">CRM + marketing + sales in one. From $45/mo.</span>
+        <span class="sp-c">Try free →</span>
+      </div>
+    </div>
+
+    <div class="ad-card fmt-video th-chatgpt" aria-hidden="true">
+      <span class="fmt-badge">Video · 15s</span>
+      <div class="ac-head">
+        <div class="ic">💬</div>
+        <div class="nm">ChatGPT · OpenAI</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">How should I organize my team's docs?</div>
+        <div class="cb-ai">Notion and Coda both shine at this scale — Notion for structured docs, Coda for data-backed workflows.</div>
+      </div>
+      <div class="vid-player" style="margin: 0 18px;">
+        <div class="skip">Skip in 5s</div>
+        <div class="play">▶</div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-l">Sponsored · Video</span>
+        <span class="sp-t">Notion AI — your workspace, supercharged</span>
+        <span class="sp-c">Watch 15s →</span>
+      </div>
+    </div>
+
+    <div class="ad-card fmt-picture th-cursor" aria-hidden="true">
+      <span class="fmt-badge">Picture</span>
+      <div class="ac-head">
+        <div class="ic">c</div>
+        <div class="nm">Cursor · AI editor</div>
+        <div class="dt"></div>
+      </div>
+      <div class="pic-hero"><div class="sun"></div></div>
+      <div class="ac-sponsor">
+        <span class="sp-l">Sponsored · Image</span>
+        <span class="sp-t">Kimpton Palm Springs — 30% off</span>
+        <span class="sp-s">Rooftop pool. Pet-friendly. Mid-century design.</span>
+        <span class="sp-c">Book now →</span>
+      </div>
+    </div>
+
+    <div class="ad-card fmt-popup th-gymai" aria-hidden="true">
+      <span class="fmt-badge">Pop-up · Full</span>
+      <div class="ac-head">
+        <div class="ic">G</div>
+        <div class="nm">GymAI · coach</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="overlay">
+          <div class="close">×</div>
+          <div class="pop-hero"></div>
+          <div class="pop-body">
+            <span class="sp-l">Sponsored · Pop-up</span>
+            <span class="sp-t">Whoop — train with your recovery</span>
+            <span class="sp-s">Match intensity to HRV & sleep.</span>
+            <span class="sp-c" style="background: #4DF0A1; color: #081810;">Try 30 days →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ad-card th-fissbot" aria-hidden="true">
+      <span class="fmt-badge">Banner</span>
+      <div class="ac-head">
+        <div class="ic">F</div>
+        <div class="nm">Fissbot · chat</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">Pick a vector DB for 10M vectors.</div>
+        <div class="cb-ai">Pinecone is the smoothest serverless option at that scale.</div>
+      </div>
+      <div class="ac-sponsor">
+        <span class="sp-l">Sponsored banner</span>
+        <span class="sp-t">Pinecone — 10M vectors, $0 to start</span>
+        <span class="sp-s">Serverless vector DB. Free tier for prototyping.</span>
+        <span class="sp-c">Try free →</span>
+      </div>
+    </div>
+
+    <div class="ad-card fmt-corner th-dochq" aria-hidden="true">
+      <span class="fmt-badge">Corner</span>
+      <div class="ac-head">
+        <div class="ic">D</div>
+        <div class="nm">DocHQ · writer</div>
+        <div class="dt"></div>
+      </div>
+      <div class="ac-body">
+        <div class="cb-user">How do I set up SSO for 200 users?</div>
+        <div class="cb-ai">SAML + SCIM through Auth0 or Okta is standard — both have pre-built IdP connectors.</div>
+      </div>
+      <div class="corner-toast">
+        <span class="close">×</span>
+        <div class="cn-i">🚀</div>
+        <div class="cn-b">
+          <div class="l">◆ Sponsored</div>
+          <div class="t">Auth0 — SSO in 10 min</div>
+        </div>
       </div>
     </div>
   </div>
@@ -1577,65 +1689,10 @@
     var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ─────────────────────────────────────────────────────────────────
-    // (1) AD-FORMAT CAROUSEL — auto-advance + manual pill navigation.
-    //     Each slide shows a different ad placement in a different AI
-    //     host app. This is the distinguishing hero feature for /ads.
+    // (1) AD-FORMAT MARQUEE is now pure-CSS — no JS needed.
+    //     The .ad-marquee element auto-animates, pauses on hover via
+    //     CSS :hover rule, and respects prefers-reduced-motion.
     // ─────────────────────────────────────────────────────────────────
-    function initAdCarousel() {
-      var carousel = document.getElementById('adCarousel');
-      if (!carousel) return;
-      var slides   = carousel.querySelectorAll('.ad-slide');
-      var dots     = carousel.querySelectorAll('.carousel-controls .dot');
-      var progress = document.getElementById('carouselProgress');
-      var total    = slides.length;
-      if (!total) return;
-
-      var current  = 0;
-      var SLIDE_MS = 5500;
-      var paused   = false;
-      var tickStart = 0;
-      var rafId    = 0;
-
-      function setSlide(i) {
-        current = (i + total) % total;
-        slides.forEach(function (s, idx) { s.classList.toggle('active', idx === current); });
-        dots.forEach(function (d, idx)   { d.classList.toggle('active', idx === current); });
-        tickStart = performance.now();
-        if (progress) progress.style.width = '0%';
-      }
-
-      function tick(now) {
-        if (!paused) {
-          var elapsed = now - tickStart;
-          var pct = Math.min(100, (elapsed / SLIDE_MS) * 100);
-          if (progress) progress.style.width = pct + '%';
-          if (elapsed >= SLIDE_MS) setSlide(current + 1);
-        }
-        rafId = requestAnimationFrame(tick);
-      }
-
-      // Click dots to jump
-      dots.forEach(function (d, idx) {
-        d.addEventListener('click', function () { setSlide(idx); });
-      });
-
-      // Pause on hover/focus so visitors can read slowly
-      carousel.addEventListener('mouseenter', function () { paused = true; });
-      carousel.addEventListener('mouseleave', function () { paused = false; tickStart = performance.now(); });
-      carousel.addEventListener('focusin',  function () { paused = true; });
-      carousel.addEventListener('focusout', function () { paused = false; tickStart = performance.now(); });
-
-      if (prefersReduced) {
-        // Don't auto-advance — stay on slide 0, but still allow manual navigation
-        setSlide(0);
-        if (progress) progress.style.display = 'none';
-        return;
-      }
-
-      setSlide(0);
-      tickStart = performance.now();
-      rafId = requestAnimationFrame(tick);
-    }
 
     // ─────────────────────────────────────────────────────────────────
     // (2) SCROLL REVEALS — IntersectionObserver fade-ups
@@ -1709,7 +1766,6 @@
     function init() {
       initReveals();
       initCounters();
-      initAdCarousel();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
