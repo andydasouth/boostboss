@@ -54,10 +54,11 @@
   .wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
   h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; color: var(--ink); }
 
-  /* NAV — transparent on top of the body canvas. Subtle frosted tint
-     when scrolled so the nav separates cleanly from the content below. */
+  /* NAV — floating (position: fixed) so the body canvas + hero gradient
+     sit behind it as one continuous background. Transparent on top of
+     the page; subtle frosted tint when scrolled. Matches /publish. */
   nav {
-    position: sticky; top: 0; z-index: 100;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
     background: transparent;
     transition: background 0.3s, backdrop-filter 0.3s, border 0.3s;
   }
@@ -105,9 +106,9 @@
   .btn-outline:hover { background: var(--ink); color: #fff; }
   .btn-lg { padding: 13px 24px; font-size: 15.5px; border-radius: 10px; }
 
-  /* HERO */
+  /* HERO — top padding clears the fixed nav (64px) + breathing room */
   .hero {
-    padding: 96px 0 64px;
+    padding: 128px 0 88px;
     text-align: center;
     background:
       radial-gradient(circle at 15% 20%, rgba(4,190,254,0.08), transparent 40%),
@@ -431,7 +432,7 @@
   /* RESPONSIVE */
   @media (max-width: 900px) {
     .nav-links { display: none; }
-    .hero { padding: 72px 0 48px; }
+    .hero { padding: 104px 0 48px; }
     .mock-kpis { grid-template-columns: 1fr 1fr; }
     .feature-grid { grid-template-columns: 1fr; gap: 40px; }
     .feature-grid.reverse .feature-text { order: 0; }
