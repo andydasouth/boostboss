@@ -519,6 +519,191 @@
     .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
     .big-cta-box { padding: 56px 28px; box-shadow: 8px 8px 0 var(--ink); }
   }
+
+  /* ═══════════════════════════════════════════════════════════════════
+     ManyChat-style interactions — live chat mockup, scroll reveals,
+     counter animations. Matches the /ads + /publish treatment.
+     ═══════════════════════════════════════════════════════════════════ */
+
+  /* Keep hero-visual wrapper but flip it to relative so floating pills land on top */
+  .hero-visual.bb-chat-host { position: relative; max-width: 560px; margin: 56px auto 0; }
+
+  .chat-mock {
+    background: #fff; border-radius: 20px;
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.08),
+                0 10px 28px rgba(15, 15, 26, 0.05);
+    overflow: hidden; position: relative;
+  }
+  .chat-mock-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .chat-mock-head .app-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, #FF8A1F, #FF5E3A); color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-mock-head .app-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .chat-mock-head .app-name small {
+    display: block; font-size: 11px; color: var(--muted);
+    font-weight: 500; margin-top: 1px;
+  }
+  .chat-mock-head .live-dot {
+    margin-left: auto;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    animation: bbLivePulse 1.8s ease-out infinite;
+  }
+  @keyframes bbLivePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+  .chat-mock-body {
+    padding: 22px 20px 20px;
+    min-height: 340px;
+    display: flex; flex-direction: column; gap: 12px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 45, 120, 0.04), transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(4, 190, 254, 0.04), transparent 40%),
+      #fff;
+  }
+  .chat-bubble {
+    max-width: 88%;
+    padding: 11px 14px; border-radius: 14px;
+    font-size: 14px; line-height: 1.5;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .chat-bubble.visible { opacity: 1; transform: translateY(0); }
+  .chat-bubble.user {
+    align-self: flex-end;
+    background: var(--ink); color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-bubble.ai {
+    align-self: flex-start;
+    background: var(--bg-soft); color: var(--ink);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-typing {
+    display: inline-flex; gap: 4px; align-items: center;
+    padding: 14px 16px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .chat-typing.visible { opacity: 1; }
+  .chat-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+    animation: bbTyping 1.1s ease-in-out infinite;
+  }
+  .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes bbTyping {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30%          { transform: translateY(-3px); opacity: 1; }
+  }
+
+  .chat-sponsor {
+    margin-top: 6px; position: relative;
+    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 28px rgba(255, 45, 120, 0.18);
+  }
+  .chat-sponsor.visible { opacity: 1; transform: translateY(0); }
+  .chat-sponsor::before {
+    content: '✨ via Boost Boss';
+    position: absolute; top: -10px; left: 14px;
+    background: var(--pink); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 100px;
+    letter-spacing: 0.4px;
+  }
+  .chat-sponsor .sp-label {
+    font-size: 10px; font-weight: 700; color: var(--pink);
+    text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px;
+  }
+  .chat-sponsor .sp-title { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+  .chat-sponsor .sp-sub   { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+  .chat-sponsor .sp-cta {
+    display: inline-block; align-self: flex-start;
+    margin-top: 4px;
+    background: var(--pink); color: #fff;
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+  }
+
+  /* Floating pills for the landing page — neutral "network is alive" cues */
+  .bb-chat-host .float-pill {
+    position: absolute;
+    padding: 8px 14px; border-radius: 100px;
+    background: #fff;
+    border: 1px solid var(--line);
+    font-size: 12.5px; font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 10px 24px rgba(15, 15, 26, 0.08);
+    animation: bbFloatBob 4s ease-in-out infinite;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+    z-index: 2;
+  }
+  .bb-chat-host .float-pill .dot-color {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .bb-chat-host .float-pill.fp-1 { top: 4%; left: -16px; animation-delay: 0s; }
+  .bb-chat-host .float-pill.fp-2 { top: 38%; right: -26px; animation-delay: 0.9s; }
+  .bb-chat-host .float-pill.fp-3 { bottom: 14%; left: -32px; animation-delay: 1.8s; }
+  @keyframes bbFloatBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  /* Scroll reveals */
+  [data-reveal] {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition-delay: var(--reveal-delay, 0s);
+    will-change: opacity, transform;
+  }
+  [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+    .chat-bubble, .chat-sponsor, .chat-typing, .float-pill {
+      opacity: 1 !important; transform: none !important; animation: none !important;
+    }
+  }
+
+  /* Stats counter shimmer */
+  .stat .n[data-count].counting {
+    background: linear-gradient(90deg, var(--pink), var(--pink) 50%, var(--cyan));
+    background-size: 200% 100%;
+    background-position: 100% 50%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: bbCountShimmer 1.4s ease-out;
+  }
+  @keyframes bbCountShimmer {
+    from { background-position: 100% 50%; }
+    to   { background-position: 0% 50%; }
+  }
 </style>
 </head>
 <body>
@@ -575,51 +760,31 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div class="badge"><span class="dot"></span><span data-i18n="hero.badge">Now live on the Model Context Protocol</span></div>
-    <h1 data-i18n="hero.h1_html" data-i18n-html>The ad network<br>built for <span class="accent-pink">AI apps</span>.</h1>
-    <p class="sub" data-i18n="hero.sub">Boost Boss helps AI developers monetize their apps and advertisers reach AI-native users. One MCP-powered API. Zero ops.</p>
-    <div class="hero-ctas">
+    <div class="badge" data-reveal><span class="dot"></span><span data-i18n="hero.badge">Now live on the Model Context Protocol</span></div>
+    <h1 data-reveal style="--reveal-delay:80ms" data-i18n="hero.h1_html" data-i18n-html>The ad network<br>built for <span class="accent-pink">AI apps</span>.</h1>
+    <p class="sub" data-reveal style="--reveal-delay:160ms" data-i18n="hero.sub">Boost Boss helps AI developers monetize their apps and advertisers reach AI-native users. One MCP-powered API. Zero ops.</p>
+    <div class="hero-ctas" data-reveal style="--reveal-delay:240ms">
       <a class="btn btn-primary btn-lg" href="/signup?role=developer" data-i18n="hero.cta_monetize">Start monetizing →</a>
       <a class="btn btn-outline btn-lg" href="/signup" data-i18n="hero.cta_campaign">Run a campaign</a>
     </div>
 
-    <!-- Hero visual mockup -->
-    <div class="hero-visual">
-      <div class="hero-card">
-        <div class="hero-card-inner">
-          <div>
-            <div class="mock-stats">
-              <div class="mock-panel">
-                <div class="k" data-i18n="hero.mock_earnings">Earnings (7d)</div>
-                <div class="v">$12,480</div>
-                <div class="trend" data-i18n="hero.mock_earnings_trend">▲ 23% vs last week</div>
-              </div>
-              <div class="mock-panel">
-                <div class="k" data-i18n="hero.mock_impressions">Impressions</div>
-                <div class="v">1.2M</div>
-                <div class="trend" data-i18n="hero.mock_impressions_trend">▲ 18%</div>
-              </div>
-            </div>
-            <div class="mock-panel" style="margin-top:12px;">
-              <div class="k" data-i18n="hero.mock_daily">Daily revenue</div>
-              <div class="mock-chart">
-                <span style="height:40%"></span>
-                <span style="height:62%"></span>
-                <span style="height:55%"></span>
-                <span style="height:78%"></span>
-                <span style="height:70%"></span>
-                <span style="height:92%"></span>
-                <span style="height:85%"></span>
-              </div>
-            </div>
+    <!-- Live chat mockup — AI conversations with Boost Boss sponsored cards
+         dropping in, cycling across 3 host apps. Same treatment as /ads + /publish. -->
+    <div class="hero-visual bb-chat-host" data-reveal>
+      <div class="float-pill fp-1"><span class="dot-color" style="background: #10B981"></span>Live network</div>
+      <div class="float-pill fp-2"><span class="dot-color" style="background: var(--pink)"></span>6.2% CTR</div>
+      <div class="float-pill fp-3"><span class="dot-color" style="background: var(--yellow)"></span>⚡ 5ms bid</div>
+
+      <div class="chat-mock" id="heroChatMock">
+        <div class="chat-mock-head">
+          <div class="app-icon" id="chatAppIcon">C</div>
+          <div class="app-name">
+            <span id="chatAppName">Claude</span>
+            <small id="chatAppMeta">AI assistant · via MCP</small>
           </div>
-          <div class="mock-ad">
-            <div class="label" data-i18n="hero.mock_sponsored">◆ Sponsored · via Boost Boss</div>
-            <h5 data-i18n="hero.mock_ad_title">Ship better code 10× faster</h5>
-            <p data-i18n="hero.mock_ad_body">The AI coding assistant that actually reads your codebase. Used by 50,000+ devs.</p>
-            <span class="cta" data-i18n="hero.mock_ad_cta">Try Cursor free →</span>
-          </div>
+          <div class="live-dot" aria-label="Live"></div>
         </div>
+        <div class="chat-mock-body" id="chatBody"></div>
       </div>
     </div>
   </div>
@@ -628,7 +793,7 @@
 <!-- TRUSTED BY -->
 <section class="trusted">
   <div class="wrap">
-    <p data-i18n="trusted.label">Built for AI apps running on</p>
+    <p data-reveal data-i18n="trusted.label">Built for AI apps running on</p>
     <div class="trusted-row">
       <span>Claude MCP</span>
       <span>OpenAI</span>
@@ -645,8 +810,8 @@
   <div class="wrap">
     <div class="feature-grid">
       <div class="feature-text">
-        <span class="eyebrow pink" data-i18n="dev.eyebrow">For developers</span>
-        <h2 data-i18n="dev.h2">Monetize your AI app in one line of code.</h2>
+        <span class="eyebrow pink" data-reveal data-i18n="dev.eyebrow">For developers</span>
+        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="dev.h2">Monetize your AI app in one line of code.</h2>
         <p data-i18n="dev.p">Drop in the Boost Boss SDK and turn free users into revenue without ruining UX. Native, contextual placements that fit naturally into AI chats, agents, and assistants.</p>
         <ul class="bullet-list">
           <li><span class="check">✓</span><span data-i18n="dev.b1_html" data-i18n-html><strong>Native ad formats</strong> — built for conversations, not banners.</span></li>
@@ -680,8 +845,8 @@
   <div class="wrap">
     <div class="feature-grid reverse">
       <div class="feature-text">
-        <span class="eyebrow cyan" data-i18n="adv.eyebrow">For advertisers</span>
-        <h2 data-i18n="adv.h2">Reach the people building the future with AI.</h2>
+        <span class="eyebrow cyan" data-reveal data-i18n="adv.eyebrow">For advertisers</span>
+        <h2 data-reveal style="--reveal-delay:80ms" data-i18n="adv.h2">Reach the people building the future with AI.</h2>
         <p data-i18n="adv.p">Our network delivers your ads directly inside AI applications — where the highest-intent, highest-value audience spends their time. Launch a campaign in minutes.</p>
         <ul class="bullet-list">
           <li><span class="check cyan">✓</span><span data-i18n="adv.b1_html" data-i18n-html><strong>Precise targeting</strong> — by app category, user intent, and context.</span></li>
@@ -733,8 +898,8 @@
 <section class="feature" style="background: var(--bg-soft);">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow yellow" data-i18n="mcp.eyebrow">Built on MCP</span>
-      <h2 data-i18n="mcp.h2">A new protocol for a new era of ads.</h2>
+      <span class="eyebrow yellow" data-reveal data-i18n="mcp.eyebrow">Built on MCP</span>
+      <h2 data-reveal style="--reveal-delay:80ms" data-i18n="mcp.h2">A new protocol for a new era of ads.</h2>
       <p data-i18n="mcp.p_html" data-i18n-html>The Model Context Protocol lets any AI agent call into Boost Boss to fetch, render, and measure ads — with consent, transparency, and attribution baked in.</p>
     </div>
     <div class="three-cards">
@@ -782,11 +947,23 @@
 <!-- STATS -->
 <section class="stats-bar">
   <div class="wrap">
-    <div class="stats-row">
-      <div class="stat"><div class="n pink">2.4B</div><div class="l" data-i18n="stats.label_calls">Monthly ad calls</div></div>
-      <div class="stat"><div class="n cyan">380+</div><div class="l" data-i18n="stats.label_apps">AI apps on network</div></div>
-      <div class="stat"><div class="n yellow">6.1%</div><div class="l" data-i18n="stats.label_ctr">Avg. CTR</div></div>
-      <div class="stat"><div class="n">$12M</div><div class="l" data-i18n="stats.label_paid">Paid to publishers</div></div>
+    <div class="stats-row" data-reveal>
+      <div class="stat" data-reveal style="--reveal-delay:0ms">
+        <div class="n pink" data-count="2.4" data-decimals="1" data-suffix="B">0</div>
+        <div class="l" data-i18n="stats.label_calls">Monthly ad calls</div>
+      </div>
+      <div class="stat" data-reveal style="--reveal-delay:80ms">
+        <div class="n cyan" data-count="380" data-decimals="0" data-suffix="+">0</div>
+        <div class="l" data-i18n="stats.label_apps">AI apps on network</div>
+      </div>
+      <div class="stat" data-reveal style="--reveal-delay:160ms">
+        <div class="n yellow" data-count="6.1" data-decimals="1" data-suffix="%">0</div>
+        <div class="l" data-i18n="stats.label_ctr">Avg. CTR</div>
+      </div>
+      <div class="stat" data-reveal style="--reveal-delay:240ms">
+        <div class="n" data-count="12" data-decimals="0" data-prefix="$" data-suffix="M">$0</div>
+        <div class="l" data-i18n="stats.label_paid">Paid to publishers</div>
+      </div>
     </div>
   </div>
 </section>
@@ -795,7 +972,7 @@
 <section class="how" id="how">
   <div class="wrap">
     <div class="section-header">
-      <h2 data-i18n="how.h2">Zero to revenue in under 10 minutes.</h2>
+      <h2 data-reveal data-i18n="how.h2">Zero to revenue in under 10 minutes.</h2>
       <p data-i18n="how.p">Whether you're an AI app developer or a brand trying to reach them, getting set up is fast.</p>
     </div>
     <div class="steps">
@@ -826,7 +1003,7 @@
   <div class="big-cta-box">
     <div class="deco-sparkle s1">✦</div>
     <div class="deco-sparkle s2">✦</div>
-    <h2 data-i18n="cta_big.h2_html" data-i18n-html>Open the box.<br>Start earning.</h2>
+    <h2 data-reveal data-i18n="cta_big.h2_html" data-i18n-html>Open the box.<br>Start earning.</h2>
     <p data-i18n="cta_big.p">Join the AI apps already monetizing with Boost Boss — and the brands reaching them.</p>
     <div class="hero-ctas">
       <a class="btn btn-lg" href="/signup?role=developer" data-i18n="cta_big.cta_dev">Start as a developer</a>
@@ -914,6 +1091,195 @@
   });
 </script>
 <script src="/i18n.js?v=bb-20260421"></script>
+<script>
+  /* ═══════════════════════════════════════════════════════════════════
+     Landing page ManyChat-style interactions
+       (a) Live hero chat mockup — AI conversations with Boost Boss sponsored
+           cards dropping in, cycling across 3 host apps
+       (b) Scroll-triggered fade-ups via IntersectionObserver
+       (c) Counter animations on stats bar
+     Pure vanilla JS, respects prefers-reduced-motion.
+     ═══════════════════════════════════════════════════════════════════ */
+  (function () {
+    'use strict';
+    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ─────────────────────────────────────────────────────────────────
+    // (a) HERO CHAT LOOP — 3 cycling scenarios
+    // ─────────────────────────────────────────────────────────────────
+    var chatScenarios = [
+      {
+        appIcon: 'C', appIconBg: 'linear-gradient(135deg, #FF8A1F, #FF5E3A)',
+        appName: 'Claude', appMeta: 'AI assistant · via MCP',
+        user: "What's the best vector DB for 10M embeddings?",
+        ai:   "Pinecone, Qdrant, and Weaviate all scale well. Pinecone has the smoothest serverless tier — you can skip the infra.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Pinecone — 10M vectors, $0 to start',
+          sub: 'Serverless vector DB. Free tier for prototyping.',
+          cta: 'Try free →'
+        }
+      },
+      {
+        appIcon: 'c', appIconBg: 'linear-gradient(135deg, #000, #333)',
+        appName: 'Cursor', appMeta: 'AI code editor · via MCP',
+        user: "Why is my Python test failing on CI but passing locally?",
+        ai:   "Three usual suspects: env vars, timezone, and caching. A CI replay tool surfaces all three automatically.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Sentry — debug CI failures in seconds',
+          sub: 'Replay any test run with full trace + env diff.',
+          cta: 'Start free →'
+        }
+      },
+      {
+        appIcon: '💬', appIconBg: 'linear-gradient(135deg, #25D366, #128C7E)',
+        appName: 'ChatGPT', appMeta: 'OpenAI · via MCP',
+        user: "Find me a quiet 3-night stay near San Francisco.",
+        ai:   "Half Moon Bay is the popular pick — ocean cliffs, easy drive, under $280/night off-peak. Mid-week is quietest.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Mission Ranch — Half Moon Bay',
+          sub: 'Cliffside rooms. Pet-friendly. Book direct for 15% off.',
+          cta: 'Book now →'
+        }
+      }
+    ];
+
+    var chatBody = document.getElementById('chatBody');
+    var chatIcon = document.getElementById('chatAppIcon');
+    var chatName = document.getElementById('chatAppName');
+    var chatMeta = document.getElementById('chatAppMeta');
+    var idx = 0;
+
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function mk(cls, html) {
+      var el = document.createElement('div');
+      el.className = cls; el.innerHTML = html; return el;
+    }
+    function makeSponsor(s) {
+      return mk('chat-sponsor',
+        '<span class="sp-label">' + s.label + '</span>' +
+        '<span class="sp-title">' + s.title + '</span>' +
+        '<span class="sp-sub">'   + s.sub   + '</span>' +
+        '<a class="sp-cta" href="/signup">' + s.cta + '</a>');
+    }
+
+    async function play(s) {
+      if (!chatBody) return;
+      if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+      if (chatName) chatName.textContent = s.appName;
+      if (chatMeta) chatMeta.textContent = s.appMeta;
+      chatBody.innerHTML = '';
+
+      var u = mk('chat-bubble user', s.user);
+      chatBody.appendChild(u);
+      await sleep(80); requestAnimationFrame(function () { u.classList.add('visible'); });
+      await sleep(900);
+
+      var t = mk('chat-typing', '<span></span><span></span><span></span>');
+      chatBody.appendChild(t);
+      requestAnimationFrame(function () { t.classList.add('visible'); });
+      await sleep(1400);
+      t.remove();
+
+      var a = mk('chat-bubble ai', s.ai);
+      chatBody.appendChild(a);
+      requestAnimationFrame(function () { a.classList.add('visible'); });
+      await sleep(1100);
+
+      var sp = makeSponsor(s.sponsor);
+      chatBody.appendChild(sp);
+      requestAnimationFrame(function () { sp.classList.add('visible'); });
+      await sleep(3800);
+    }
+
+    async function chatLoop() {
+      if (!chatBody) return;
+      if (prefersReduced) {
+        var s = chatScenarios[0];
+        if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+        if (chatName) chatName.textContent = s.appName;
+        if (chatMeta) chatMeta.textContent = s.appMeta;
+        chatBody.innerHTML = '';
+        [mk('chat-bubble user', s.user), mk('chat-bubble ai', s.ai), makeSponsor(s.sponsor)]
+          .forEach(function (n) { n.classList.add('visible'); chatBody.appendChild(n); });
+        return;
+      }
+      while (true) {
+        await play(chatScenarios[idx]);
+        idx = (idx + 1) % chatScenarios.length;
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // (b) SCROLL REVEALS
+    // ─────────────────────────────────────────────────────────────────
+    function initReveals() {
+      var nodes = document.querySelectorAll('[data-reveal]');
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        nodes.forEach(function (n) { n.classList.add('is-visible'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+      nodes.forEach(function (n) { io.observe(n); });
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // (c) COUNTER ANIMATIONS
+    // ─────────────────────────────────────────────────────────────────
+    function animateCounter(el) {
+      var target = parseFloat(el.getAttribute('data-count') || '0');
+      var dec    = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var pre    = el.getAttribute('data-prefix') || '';
+      var suf    = el.getAttribute('data-suffix') || '';
+      var dur    = 1400;
+      var start  = performance.now();
+      el.classList.add('counting');
+      function step(now) {
+        var t = Math.min(1, (now - start) / dur);
+        var eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = pre + (target * eased).toFixed(dec) + suf;
+        if (t < 1) requestAnimationFrame(step);
+        else {
+          el.textContent = pre + target.toFixed(dec) + suf;
+          setTimeout(function () { el.classList.remove('counting'); }, 200);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+    function initCounters() {
+      var counters = document.querySelectorAll('[data-count]');
+      if (prefersReduced) {
+        counters.forEach(function (el) {
+          var pre = el.getAttribute('data-prefix') || '';
+          var suf = el.getAttribute('data-suffix') || '';
+          var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+          el.textContent = pre + parseFloat(el.getAttribute('data-count') || '0').toFixed(dec) + suf;
+        });
+        return;
+      }
+      if (!('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { animateCounter(entry.target); io.unobserve(entry.target); }
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(function (el) { io.observe(el); });
+    }
+
+    function init() { initReveals(); initCounters(); chatLoop(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
+</script>
 
 </body>
 </html>
