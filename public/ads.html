@@ -419,6 +419,218 @@
     .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
     .big-cta-box { padding: 56px 28px; box-shadow: 8px 8px 0 var(--ink); }
   }
+
+  /* ═════════════════════════════════════════════════════════════════
+     ManyChat-style interactions — live chat mockup, scroll reveals,
+     counter animations. All pure CSS + vanilla JS, zero dependencies.
+     ═════════════════════════════════════════════════════════════════ */
+
+  /* ── LIVE CHAT MOCKUP (replaces the static dashboard in hero) ───── */
+  .chat-mock {
+    max-width: 560px; margin: 64px auto 0;
+    background: #fff; border-radius: 20px;
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.08),
+                0 10px 28px rgba(15, 15, 26, 0.05);
+    overflow: hidden;
+    position: relative;
+  }
+  .chat-mock-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .chat-mock-head .app-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, #FF8A1F, #FF5E3A);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-mock-head .app-name {
+    font-size: 14px; font-weight: 700; color: var(--ink);
+  }
+  .chat-mock-head .app-name small {
+    display: block; font-size: 11px; color: var(--muted);
+    font-weight: 500; margin-top: 1px;
+  }
+  .chat-mock-head .live-dot {
+    margin-left: auto;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    animation: livePulse 1.8s ease-out infinite;
+  }
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+  .chat-mock-body {
+    padding: 22px 20px 20px;
+    min-height: 360px;
+    display: flex; flex-direction: column; gap: 12px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 45, 120, 0.04), transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(4, 190, 254, 0.04), transparent 40%),
+      #fff;
+  }
+  .chat-bubble {
+    max-width: 88%;
+    padding: 11px 14px;
+    border-radius: 14px;
+    font-size: 14px; line-height: 1.5;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .chat-bubble.visible { opacity: 1; transform: translateY(0); }
+  .chat-bubble.user {
+    align-self: flex-end;
+    background: var(--ink);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-bubble.ai {
+    align-self: flex-start;
+    background: var(--bg-soft);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-typing {
+    display: inline-flex; gap: 4px; align-items: center;
+    padding: 14px 16px;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    align-self: flex-start;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  .chat-typing.visible { opacity: 1; }
+  .chat-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+    animation: typingBounce 1.1s ease-in-out infinite;
+  }
+  .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30%          { transform: translateY(-3px); opacity: 1; }
+  }
+
+  /* Sponsored SuperBoost card — slides up from bottom with emphasis */
+  .chat-sponsor {
+    margin-top: 6px;
+    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    box-shadow: 0 10px 28px rgba(255, 45, 120, 0.18);
+  }
+  .chat-sponsor.visible { opacity: 1; transform: translateY(0); }
+  .chat-sponsor::before {
+    content: '✨ via SuperBoost';
+    position: absolute; top: -10px; left: 14px;
+    background: var(--pink); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 100px;
+    letter-spacing: 0.4px;
+  }
+  .chat-sponsor .sp-label {
+    font-size: 10px; font-weight: 700; color: var(--pink);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-top: 4px;
+  }
+  .chat-sponsor .sp-title {
+    font-size: 15px; font-weight: 700; color: var(--ink);
+    line-height: 1.3;
+  }
+  .chat-sponsor .sp-sub {
+    font-size: 13px; color: var(--ink-soft); line-height: 1.45;
+  }
+  .chat-sponsor .sp-cta {
+    display: inline-block; align-self: flex-start;
+    margin-top: 4px;
+    background: var(--pink); color: #fff;
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    transition: background 0.15s;
+  }
+  .chat-sponsor .sp-cta:hover { background: var(--pink-dark); }
+
+  /* Floating ambient pills around the chat (ManyChat-style playful touch) */
+  .hero-visual { position: relative; }
+  .float-pill {
+    position: absolute;
+    padding: 8px 14px; border-radius: 100px;
+    background: #fff;
+    border: 1px solid var(--line);
+    font-size: 12.5px; font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 8px 24px rgba(15, 15, 26, 0.08);
+    animation: floatBob 4s ease-in-out infinite;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+    z-index: 2;
+  }
+  .float-pill .dot-color {
+    width: 8px; height: 8px; border-radius: 50%;
+  }
+  .float-pill.fp-1 { top: 10%; left: -12px; animation-delay: 0s; }
+  .float-pill.fp-2 { top: 40%; right: -20px; animation-delay: 0.8s; }
+  .float-pill.fp-3 { bottom: 14%; left: -30px; animation-delay: 1.6s; }
+  @keyframes floatBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  /* ── SCROLL-TRIGGERED FADE-UP ──────────────────────────────────── */
+  /* Any element with [data-reveal] starts hidden. IntersectionObserver
+     toggles .is-visible to play the animation when it enters viewport. */
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition-delay: var(--reveal-delay, 0s);
+    will-change: opacity, transform;
+  }
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+    .chat-bubble, .chat-sponsor, .float-pill { opacity: 1 !important; transform: none !important; animation: none !important; }
+    .live-dot { animation: none !important; }
+  }
+
+  /* ── STATS COUNTER — shimmer when animating ───────────────────── */
+  .stat .n[data-count].counting {
+    background: linear-gradient(90deg, var(--pink), var(--pink) 50%, var(--cyan));
+    background-size: 200% 100%;
+    background-position: 100% 50%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: countShimmer 1.4s ease-out;
+  }
+  @keyframes countShimmer {
+    from { background-position: 100% 50%; }
+    to   { background-position: 0% 50%; }
+  }
+
 </style>
 </head>
 <body>
@@ -459,80 +671,45 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div class="badge"><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · AI-native targeting on MCP signals</div>
-    <h1>
+    <div class="badge" data-reveal><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · AI-native targeting on MCP signals</div>
+    <h1 data-reveal style="--reveal-delay:80ms">
       Reach the <span class="accent-pink">1B+ users</span><br>
       inside every AI app.
     </h1>
-    <p class="sub">
+    <p class="sub" data-reveal style="--reveal-delay:160ms">
       SuperBoost Ads puts your brand directly in the context of Claude, ChatGPT, Cursor, Perplexity and every MCP-powered agent. Bid in real time. Target by intent, not cookies. Pay only for real outcomes.
     </p>
-    <div class="hero-ctas">
+    <div class="hero-ctas" data-reveal style="--reveal-delay:240ms">
       <a class="btn btn-primary btn-lg" href="/advertiser">Launch your first campaign →</a>
       <a class="btn btn-outline btn-lg" href="#bidding">See how bidding works</a>
     </div>
-    <div class="hero-micro">No setup fees · $100 starter credit · Live in under 10 minutes</div>
+    <div class="hero-micro" data-reveal style="--reveal-delay:320ms">No setup fees · $100 starter credit · Live in under 10 minutes</div>
 
-    <!-- Campaign dashboard mock -->
-    <div class="hero-visual">
-      <div class="hero-card">
-        <div class="hero-card-inner">
-          <div class="mock-topbar">
-            <div class="title">
-              Cursor — Dev Tools Q2
-              <small>Campaign · Performance · $2,500/day</small>
-            </div>
-            <span class="pill-live">● Live</span>
+    <!-- Live AI chat mockup — SuperBoost Ads dropping into a real conversation.
+         Messages type out, AI "thinks", then a sponsored card slides in.
+         Loops across 3 conversation examples. -->
+    <div class="hero-visual" data-reveal>
+      <div class="float-pill fp-1"><span class="dot-color" style="background: #10B981"></span>+$47 CPA</div>
+      <div class="float-pill fp-2"><span class="dot-color" style="background: #FFE600"></span>⚡ 5ms bid</div>
+      <div class="float-pill fp-3"><span class="dot-color" style="background: var(--pink)"></span>6.2% CTR</div>
+
+      <div class="chat-mock" id="heroChatMock">
+        <div class="chat-mock-head">
+          <div class="app-icon" id="chatAppIcon">C</div>
+          <div class="app-name">
+            <span id="chatAppName">Claude</span>
+            <small id="chatAppMeta">AI assistant · via MCP</small>
           </div>
-          <div class="mock-kpis">
-            <div class="mock-kpi">
-              <div class="k">Spend (24h)</div>
-              <div class="v">$2,483</div>
-              <div class="t">▲ 8%</div>
-            </div>
-            <div class="mock-kpi">
-              <div class="k">Impressions</div>
-              <div class="v">412K</div>
-              <div class="t">▲ 14%</div>
-            </div>
-            <div class="mock-kpi">
-              <div class="k">Conversions</div>
-              <div class="v">1,284</div>
-              <div class="t">▲ 22%</div>
-            </div>
-            <div class="mock-kpi">
-              <div class="k">eCPA</div>
-              <div class="v">$1.93</div>
-              <div class="t red">▼ 11%</div>
-            </div>
-          </div>
-          <div class="mock-chart-wrap">
-            <div class="k">Performance · last 14 days</div>
-            <div class="mock-chart">
-              <span style="height:32%"></span>
-              <span style="height:48%"></span>
-              <span style="height:40%"></span>
-              <span style="height:58%"></span>
-              <span style="height:52%"></span>
-              <span style="height:70%"></span>
-              <span style="height:64%"></span>
-              <span style="height:76%"></span>
-              <span style="height:68%"></span>
-              <span style="height:82%"></span>
-              <span style="height:74%"></span>
-              <span style="height:88%"></span>
-              <span style="height:80%"></span>
-              <span style="height:95%"></span>
-            </div>
-          </div>
+          <div class="live-dot" aria-label="Live"></div>
         </div>
+        <div class="chat-mock-body" id="chatBody"></div>
       </div>
     </div>
   </div>
 </section>
 
 <!-- TRUSTED BY -->
-<section class="trusted">
+<section class="trusted" data-reveal>
   <div class="wrap">
     <p>Your ads shown inside</p>
     <div class="trusted-row">
@@ -551,8 +728,8 @@
   <div class="wrap">
     <div class="feature-grid">
       <div class="feature-text">
-        <span class="eyebrow pink">AI-native targeting · powered by Benna AI</span>
-        <h2>Target by what users are <em>trying to do</em> — not who they are.</h2>
+        <span class="eyebrow pink" data-reveal>AI-native targeting · powered by Benna AI</span>
+        <h2 data-reveal style="--reveal-delay:80ms">Target by what users are <em>trying to do</em> — not who they are.</h2>
         <p>Cookies are dead. Demographics are lazy. SuperBoost bids on real-time MCP signals — the intent, tools, and context of every AI session — so your ad lands the moment it's actually useful. Every bid is scored by <a href="https://benna.ai" target="_blank" style="color: var(--pink); font-weight: 700; text-decoration: underline; text-underline-offset: 3px;">Benna AI</a>, our AI optimization engine — so you only pay when the signal actually predicts conversion.</p>
         <ul class="bullet-list">
           <li><span class="check">✓</span><span><strong>Intent signals</strong> — bid on "writing a pitch deck" or "debugging Python," not "males 25–34."</span></li>
@@ -595,8 +772,8 @@
   <div class="wrap">
     <div class="feature-grid reverse">
       <div class="feature-text">
-        <span class="eyebrow cyan">Performance dashboard</span>
-        <h2>Every campaign. Every signal. One pane of glass.</h2>
+        <span class="eyebrow cyan" data-reveal>Performance dashboard</span>
+        <h2 data-reveal style="--reveal-delay:80ms">Every campaign. Every signal. One pane of glass.</h2>
         <p>Launch, pause, clone, and optimize campaigns in seconds. Live spend, conversion, and eCPA data — no 24-hour attribution lag. Automated rules pause underperformers for you.</p>
         <ul class="bullet-list">
           <li><span class="check cyan">✓</span><span><strong>Sub-second reporting</strong> — every bid, impression, and conversion streams live.</span></li>
@@ -648,8 +825,8 @@
 <section class="feature">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow yellow">Why SuperBoost Ads</span>
-      <h2>Ad tech rebuilt for the agent era.</h2>
+      <span class="eyebrow yellow" data-reveal>Why SuperBoost Ads</span>
+      <h2 data-reveal style="--reveal-delay:80ms">Ad tech rebuilt for the agent era.</h2>
       <p>Google's stack was built for web pages. Facebook's was built for feeds. We built ours for AI sessions — the new primary surface.</p>
     </div>
     <div class="three-cards">
@@ -675,11 +852,11 @@
 <!-- STATS -->
 <section class="stats-bar">
   <div class="wrap">
-    <div class="stats-row">
-      <div class="stat"><div class="n pink">1.2B</div><div class="l">Monthly AI sessions</div></div>
-      <div class="stat"><div class="n cyan">3.8×</div><div class="l">vs. traditional display CTR</div></div>
-      <div class="stat"><div class="n yellow">$1.93</div><div class="l">Average eCPA</div></div>
-      <div class="stat"><div class="n">47ms</div><div class="l">Median bid latency</div></div>
+    <div class="stats-row" data-reveal>
+      <div class="stat" data-reveal style="--reveal-delay:0ms"><div class="n pink" data-count="1.2" data-decimals="1" data-suffix="B">0</div><div class="l">Monthly AI sessions</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:80ms"><div class="n cyan" data-count="3.8" data-decimals="1" data-suffix="×">0</div><div class="l">vs. traditional display CTR</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:160ms"><div class="n yellow" data-count="1.93" data-decimals="2" data-prefix="$">$0</div><div class="l">Average eCPA</div></div>
+      <div class="stat" data-reveal style="--reveal-delay:240ms"><div class="n" data-count="47" data-decimals="0" data-suffix="ms">0</div><div class="l">Median bid latency</div></div>
     </div>
   </div>
 </section>
@@ -688,8 +865,8 @@
 <section class="placements-section" id="placements">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow pink">Placements</span>
-      <h2>Native by default. Never interruptive.</h2>
+      <span class="eyebrow pink" data-reveal>Placements</span>
+      <h2 data-reveal style="--reveal-delay:80ms">Native by default. Never interruptive.</h2>
       <p>Every format is designed to feel like part of the AI app — so users engage instead of ignore.</p>
     </div>
     <div class="placements-grid">
@@ -725,7 +902,7 @@
 <section class="how" id="bidding">
   <div class="wrap">
     <div class="section-header">
-      <h2>From brief to bid in under 10 minutes.</h2>
+      <h2 data-reveal>From brief to bid in under 10 minutes.</h2>
       <p>No account managers. No minimum spend. No waitlist. Log in, set a goal, let the auction do the rest.</p>
     </div>
     <div class="steps">
@@ -755,8 +932,8 @@
 <section class="pricing" id="pricing">
   <div class="wrap">
     <div class="section-header">
-      <span class="eyebrow cyan">Pricing</span>
-      <h2>Pay for outcomes. No agency tax.</h2>
+      <span class="eyebrow cyan" data-reveal>Pricing</span>
+      <h2 data-reveal style="--reveal-delay:80ms">Pay for outcomes. No agency tax.</h2>
       <p>Three ways to buy. All self-serve. All transparent. Your take rate is always posted on your dashboard.</p>
     </div>
     <div class="price-grid">
@@ -805,7 +982,7 @@
 <section class="feature" id="brand-deals" style="background: var(--ink); color: #fff; padding: 96px 0;">
   <div class="wrap">
     <div class="section-header" style="text-align: center; margin-bottom: 56px;">
-      <span class="eyebrow" style="background: var(--yellow); color: var(--ink); padding: 6px 12px; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em; font-size: 12px;">PREMIUM · DIRECT</span>
+      <span class="eyebrow" data-reveal style="background: var(--yellow); color: var(--ink); padding: 6px 12px; border-radius: 4px; font-weight: 700; letter-spacing: 0.08em; font-size: 12px;">PREMIUM · DIRECT</span>
       <h2 style="color: #fff; margin-top: 18px;">Brand Deals — guaranteed AI-native placements.</h2>
       <p style="color: #B0B0C0; max-width: 720px; margin: 16px auto 0;">For non-tech brands that want to be seen by AI-native users with purchasing power — developers, researchers, early adopters, knowledge workers. Negotiated directly. Priced on reach, not auction.</p>
     </div>
@@ -850,7 +1027,7 @@
   <div class="big-cta-box">
     <div class="deco-sparkle s1">✦</div>
     <div class="deco-sparkle s2">✦</div>
-    <h2>Your next customer<br>is using an AI app right now.</h2>
+    <h2 data-reveal>Your next customer<br>is using an AI app right now.</h2>
     <p>Launch your first SuperBoost Ads campaign in 10 minutes. $100 in starter credit when you sign up today.</p>
     <div class="hero-ctas">
       <a class="btn btn-lg" href="/advertiser">Claim $100 credit →</a>
@@ -929,6 +1106,225 @@
     </div>
   </div>
 </footer>
+
+<script>
+  /* ═══════════════════════════════════════════════════════════════════
+     ManyChat-style interactions for /ads
+       (1) Animated hero chat mockup — messages type out, sponsored
+           SuperBoost card drops in. Loops across 3 example scenarios.
+       (2) Scroll-triggered fade-ups via IntersectionObserver.
+       (3) Counter animations on stats numbers when stats bar enters view.
+     All vanilla JS, no deps. Respects prefers-reduced-motion.
+     ═══════════════════════════════════════════════════════════════════ */
+  (function () {
+    'use strict';
+    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // ─────────────────────────────────────────────────────────────────
+    // (1) HERO CHAT MOCKUP — 3 cycling scenarios
+    // ─────────────────────────────────────────────────────────────────
+    var chatScenarios = [
+      {
+        appIcon: 'C',
+        appIconBg: 'linear-gradient(135deg, #FF8A1F, #FF5E3A)',
+        appName: 'Claude',
+        appMeta: 'AI assistant · via MCP',
+        user: "What's the best CRM for a 10-person sales team?",
+        ai: "HubSpot and Pipedrive both fit that size well. HubSpot has a generous free tier with strong automation; Pipedrive shines on pipeline visualization.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'HubSpot Starter — built for growing teams',
+          sub: 'CRM + marketing + sales in one. From $45/mo.',
+          cta: 'Try free →'
+        }
+      },
+      {
+        appIcon: 'c',
+        appIconBg: 'linear-gradient(135deg, #000, #333)',
+        appName: 'Cursor',
+        appMeta: 'AI code editor · via MCP',
+        user: "My Python tests pass locally but fail on CI. Fastest way to debug?",
+        ai: "Check env vars first, then timezone differences, then caching. A test-run replay tool can surface all three at once.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Sentry — debug CI failures in seconds',
+          sub: 'Replay any test run with full trace + env diff.',
+          cta: 'Start free →'
+        }
+      },
+      {
+        appIcon: '💬',
+        appIconBg: 'linear-gradient(135deg, #25D366, #128C7E)',
+        appName: 'ChatGPT',
+        appMeta: 'OpenAI · via MCP',
+        user: "Planning 5 days in Tokyo — best way to get around?",
+        ai: "Tokyo's subway and JR lines are dense and efficient. A Suica IC card is the easiest way to pay across everything.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Klook — Tokyo Subway 72h Pass',
+          sub: 'Unlimited rides · Instant mobile ticket · from $11',
+          cta: 'Book now →'
+        }
+      }
+    ];
+
+    var chatBody = document.getElementById('chatBody');
+    var chatIcon = document.getElementById('chatAppIcon');
+    var chatName = document.getElementById('chatAppName');
+    var chatMeta = document.getElementById('chatAppMeta');
+    var scenarioIdx = 0;
+
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function makeBubble(cls, html) {
+      var el = document.createElement('div');
+      el.className = 'chat-bubble ' + cls; el.innerHTML = html; return el;
+    }
+    function makeTyping() {
+      var el = document.createElement('div');
+      el.className = 'chat-typing';
+      el.innerHTML = '<span></span><span></span><span></span>'; return el;
+    }
+    function makeSponsor(s) {
+      var el = document.createElement('div');
+      el.className = 'chat-sponsor';
+      el.innerHTML =
+        '<span class="sp-label">' + s.label + '</span>' +
+        '<span class="sp-title">' + s.title + '</span>' +
+        '<span class="sp-sub">' + s.sub + '</span>' +
+        '<a class="sp-cta" href="/advertiser">' + s.cta + '</a>';
+      return el;
+    }
+
+    async function playScenario(s) {
+      if (!chatBody) return;
+      if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+      if (chatName) chatName.textContent = s.appName;
+      if (chatMeta) chatMeta.textContent = s.appMeta;
+      chatBody.innerHTML = '';
+
+      var userB = makeBubble('user', s.user);
+      chatBody.appendChild(userB);
+      await sleep(80);
+      requestAnimationFrame(function () { userB.classList.add('visible'); });
+      await sleep(900);
+
+      var typing = makeTyping();
+      chatBody.appendChild(typing);
+      requestAnimationFrame(function () { typing.classList.add('visible'); });
+      await sleep(1400);
+
+      typing.remove();
+      var aiB = makeBubble('ai', s.ai);
+      chatBody.appendChild(aiB);
+      requestAnimationFrame(function () { aiB.classList.add('visible'); });
+      await sleep(1100);
+
+      var sp = makeSponsor(s.sponsor);
+      chatBody.appendChild(sp);
+      requestAnimationFrame(function () { sp.classList.add('visible'); });
+      await sleep(3800);
+    }
+
+    async function chatLoop() {
+      if (!chatBody) return;
+      if (prefersReduced) {
+        var s = chatScenarios[0];
+        if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+        if (chatName) chatName.textContent = s.appName;
+        if (chatMeta) chatMeta.textContent = s.appMeta;
+        chatBody.innerHTML = '';
+        var u  = makeBubble('user', s.user); u.classList.add('visible');  chatBody.appendChild(u);
+        var a  = makeBubble('ai',   s.ai);   a.classList.add('visible');  chatBody.appendChild(a);
+        var sp = makeSponsor(s.sponsor);     sp.classList.add('visible'); chatBody.appendChild(sp);
+        return;
+      }
+      while (true) {
+        await playScenario(chatScenarios[scenarioIdx]);
+        scenarioIdx = (scenarioIdx + 1) % chatScenarios.length;
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // (2) SCROLL REVEALS — IntersectionObserver fade-ups
+    // ─────────────────────────────────────────────────────────────────
+    function initReveals() {
+      var nodes = document.querySelectorAll('[data-reveal]');
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        nodes.forEach(function (n) { n.classList.add('is-visible'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+      nodes.forEach(function (n) { io.observe(n); });
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // (3) COUNTER ANIMATIONS on [data-count] when in view
+    // ─────────────────────────────────────────────────────────────────
+    function animateCounter(el) {
+      var target = parseFloat(el.getAttribute('data-count') || '0');
+      var dec    = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var pre    = el.getAttribute('data-prefix') || '';
+      var suf    = el.getAttribute('data-suffix') || '';
+      var dur    = 1400;
+      var start  = performance.now();
+      el.classList.add('counting');
+      function step(now) {
+        var t = Math.min(1, (now - start) / dur);
+        var eased = 1 - Math.pow(1 - t, 3);  // ease-out cubic
+        var val = target * eased;
+        el.textContent = pre + val.toFixed(dec) + suf;
+        if (t < 1) requestAnimationFrame(step);
+        else {
+          el.textContent = pre + target.toFixed(dec) + suf;
+          setTimeout(function () { el.classList.remove('counting'); }, 200);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+
+    function initCounters() {
+      var counters = document.querySelectorAll('[data-count]');
+      if (prefersReduced) {
+        counters.forEach(function (el) {
+          var pre = el.getAttribute('data-prefix') || '';
+          var suf = el.getAttribute('data-suffix') || '';
+          var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+          var val = parseFloat(el.getAttribute('data-count') || '0');
+          el.textContent = pre + val.toFixed(dec) + suf;
+        });
+        return;
+      }
+      if (!('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target);
+            io.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(function (el) { io.observe(el); });
+    }
+
+    function init() {
+      initReveals();
+      initCounters();
+      chatLoop();
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+  })();
+</script>
 
 </body>
 </html>
