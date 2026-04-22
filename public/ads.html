@@ -645,10 +645,11 @@
   }
   .ad-carousel .ad-frame {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
-    gap: 0;
-    max-width: 1720px;
+    gap: 32px 28px;                    /* row gap 32 · col gap 28 */
+    max-width: 1440px;
     margin: 0 auto;
     /* frame itself is transparent — each slide is its own card now */
     background: none;
@@ -662,7 +663,6 @@
     width: 440px;                      /* wider, desktop-browser proportions */
     min-height: 460px;
     flex-shrink: 0;
-    margin-left: -120px;               /* bigger overlap to fit 5 wide cards */
     background: #fff;
     border: 1px solid var(--line);
     border-radius: 18px;
@@ -672,39 +672,31 @@
     opacity: 1;
     pointer-events: auto;
     transform-origin: center bottom;
-    transform: translateY(0) rotate(var(--card-rot, 0deg)) scale(1);
+    transform: translateY(0);
     transition:
-      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      z-index 0s 0.35s;
+      transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
     display: flex; flex-direction: column;
-    z-index: 1;
   }
-  .ad-slide:first-child { margin-left: 0; }
-  /* Fan rotation across the 5 cards */
-  .ad-slide:nth-child(1) { --card-rot: -4deg; z-index: 1; }
-  .ad-slide:nth-child(2) { --card-rot: -2deg; z-index: 2; }
-  .ad-slide:nth-child(3) { --card-rot:  0deg; z-index: 3; }
-  .ad-slide:nth-child(4) { --card-rot:  2deg; z-index: 2; }
-  .ad-slide:nth-child(5) { --card-rot:  4deg; z-index: 1; }
-  /* Hover: lift, unrotate, scale up, jump above others */
+  /* Natural vertical stagger — alternating slight offset, no rotation */
+  .ad-slide:nth-child(2) { margin-top: 22px; }
+  .ad-slide:nth-child(4) { margin-top: 22px; }
+  /* Hover: subtle lift only, no rotation/scale */
   .ad-slide:hover {
-    transform: translateY(-18px) rotate(0deg) scale(1.06);
-    z-index: 20;
-    transition:
-      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-      z-index 0s;
-    box-shadow: 0 40px 80px rgba(15, 15, 26, 0.22),
+    transform: translateY(-10px);
+    box-shadow: 0 32px 70px rgba(15, 15, 26, 0.18),
                 0 0 0 1.5px var(--pink);
   }
-  /* Kill the old .active opacity rules — all cards are always visible now */
-  .ad-slide.active { opacity: 1; transform: translateY(0) rotate(var(--card-rot, 0deg)) scale(1); pointer-events: auto; }
+  /* Kill any old .active rules — all cards are always visible now */
+  .ad-slide.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-  /* Narrow-screen fallback: horizontal scroll so cards never clip */
+  /* Below 3-per-row threshold: drop the stagger so pairs align cleanly */
   @media (max-width: 1400px) {
-    .ad-carousel { padding: 24px 0 48px; overflow-x: auto; }
-    .ad-carousel .ad-frame { justify-content: flex-start; padding: 0 20px; }
+    .ad-slide:nth-child(2), .ad-slide:nth-child(4) { margin-top: 0; }
+  }
+  @media (max-width: 960px) {
+    .ad-carousel { padding: 24px 0 48px; }
+    .ad-carousel .ad-frame { padding: 0 20px; gap: 24px; }
   }
 
   .ad-slide .ad-head {
@@ -986,8 +978,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .fmt-video .play-btn, .fmt-corner { animation: none !important; }
-    .ad-slide { transform: rotate(var(--card-rot, 0deg)) !important; }
-    .ad-slide:hover { transform: rotate(var(--card-rot, 0deg)) !important; }
+    .ad-slide:hover { transform: none !important; }
   }
 
 
