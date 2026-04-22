@@ -57,14 +57,14 @@
     "card1_h": "밀리초 단위 배송",
     "card1_p": "80ms 이내에 광고를 가져와 렌더링 — 로딩 지연도 UX 손상도 없음.",
     "card2_h": "맥락 인식",
-    "card2_p_html": "모든 노출은 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a>(당사 AI 최적화 엔진)가 점수화합니다 — 사용자가 실제로 하려는 일에 광고를 맞춥니다.",
+    "card2_p_html": "모든 노출은 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna</a>(당사 AI 최적화 엔진)가 점수화합니다 — 사용자가 실제로 하려는 일에 광고를 맞춥니다.",
     "card3_h": "프라이버시 우선",
     "card3_p": "서드파티 쿠키도 지문 인식도 없음. 타겟팅은 앱 외부가 아닌 내부에서 이뤄집니다."
   },
   "benna": {
     "eyebrow": "네트워크를 움직이는 엔진",
-    "title": "Benna AI — 내장된 AI 최적화.",
-    "p": "Benna AI는 Boost Boss 네트워크의 모든 결정을 움직이는 최적화 레이어입니다 — 모든 노출에서 전환 확률을 예측하고, 승리 광고를 선택하고, 5ms 이내에 입찰을 자동 조정합니다. 광고주는 목표만 설정하세요, 나머지는 Benna AI가 처리합니다.",
+    "title": "Benna — 내장된 AI 최적화.",
+    "p": "Benna는 Boost Boss 네트워크의 모든 결정을 움직이는 최적화 레이어입니다 — 모든 노출에서 전환 확률을 예측하고, 승리 광고를 선택하고, 5ms 이내에 입찰을 자동 조정합니다. 광고주는 목표만 설정하세요, 나머지는 Benna가 처리합니다.",
     "cta": "benna.ai에서 자세히 보기 →"
   },
   "stats": {

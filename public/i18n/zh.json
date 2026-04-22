@@ -57,14 +57,14 @@
     "card1_h": "毫秒级投放",
     "card1_p": "80ms 内获取并渲染广告 — 不卡顿、不破坏体验。",
     "card2_h": "上下文感知",
-    "card2_p_html": "每次展示都由 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a> 评分 — 我们的 AI 优化引擎 — 让广告契合用户正在做的事。",
+    "card2_p_html": "每次展示都由 <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna</a> 评分 — 我们的 AI 优化引擎 — 让广告契合用户正在做的事。",
     "card3_h": "隐私优先",
     "card3_p": "不用第三方 Cookie,不做指纹识别。定向发生在你的应用内,而不是外部。"
   },
   "benna": {
     "eyebrow": "网络背后的引擎",
-    "title": "Benna AI — 内置的 AI 优化。",
-    "p": "Benna AI 是 Boost Boss 网络上每个决策背后的优化层 — 实时预测每次展示的转化概率、选出胜出的广告,并在 5ms 内自动调价。广告主设定目标,其余交给 Benna AI。",
+    "title": "Benna — 内置的 AI 优化。",
+    "p": "Benna 是 Boost Boss 网络上每个决策背后的优化层 — 实时预测每次展示的转化概率、选出胜出的广告,并在 5ms 内自动调价。广告主设定目标,其余交给 Benna。",
     "cta": "前往 benna.ai 了解更多 →"
   },
   "stats": {

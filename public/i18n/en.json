@@ -57,14 +57,14 @@
     "card1_h": "Millisecond delivery",
     "card1_p": "Ads fetched and rendered in under 80ms — no jarring load states, no UX hit.",
     "card2_h": "Context-aware",
-    "card2_p_html": "Every impression is scored by <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a> — our AI optimization engine — so ads match what the user is actually trying to do.",
+    "card2_p_html": "Every impression is scored by <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna</a> — our AI optimization engine — so ads match what the user is actually trying to do.",
     "card3_h": "Privacy-first",
     "card3_p": "No third-party cookies. No fingerprints. Targeting lives inside your app, not outside."
   },
   "benna": {
     "eyebrow": "The engine under the network",
-    "title": "Benna AI — AI optimization, built in.",
-    "p": "Benna AI is the optimization layer that powers every decision on the Boost Boss network — predicting conversion probability on every impression, selecting the winning ad, and auto-tuning bids in under 5ms. Advertisers set targets, Benna AI does the rest.",
+    "title": "Benna — AI optimization, built in.",
+    "p": "Benna is the optimization layer that powers every decision on the Boost Boss network — predicting conversion probability on every impression, selecting the winning ad, and auto-tuning bids in under 5ms. Advertisers set targets, Benna does the rest.",
     "cta": "Learn more at benna.ai →"
   },
   "stats": {

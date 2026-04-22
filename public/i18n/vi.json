@@ -57,14 +57,14 @@
     "card1_h": "Giao hàng theo mili-giây",
     "card1_p": "Quảng cáo được lấy và render trong dưới 80ms — không khựng, không ảnh hưởng UX.",
     "card2_h": "Hiểu ngữ cảnh",
-    "card2_p_html": "Mỗi impression đều được <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna AI</a> chấm điểm — bộ máy tối ưu AI của chúng tôi — để quảng cáo khớp với điều người dùng đang thực sự làm.",
+    "card2_p_html": "Mỗi impression đều được <a href=\"https://benna.ai\" target=\"_blank\" style=\"color: var(--pink); font-weight: 700;\">Benna</a> chấm điểm — bộ máy tối ưu AI của chúng tôi — để quảng cáo khớp với điều người dùng đang thực sự làm.",
     "card3_h": "Ưu tiên quyền riêng tư",
     "card3_p": "Không cookie bên thứ ba. Không fingerprint. Targeting sống bên trong app của bạn, không phải bên ngoài."
   },
   "benna": {
     "eyebrow": "Bộ máy đằng sau mạng",
-    "title": "Benna AI — Tối ưu AI, được xây sẵn.",
-    "p": "Benna AI là lớp tối ưu vận hành mọi quyết định trên mạng Boost Boss — dự đoán xác suất chuyển đổi trên mỗi impression, chọn quảng cáo thắng và tự điều chỉnh giá đấu trong dưới 5ms. Nhà quảng cáo đặt mục tiêu, Benna AI lo phần còn lại.",
+    "title": "Benna — Tối ưu AI, được xây sẵn.",
+    "p": "Benna là lớp tối ưu vận hành mọi quyết định trên mạng Boost Boss — dự đoán xác suất chuyển đổi trên mỗi impression, chọn quảng cáo thắng và tự điều chỉnh giá đấu trong dưới 5ms. Nhà quảng cáo đặt mục tiêu, Benna lo phần còn lại.",
     "cta": "Tìm hiểu thêm tại benna.ai →"
   },
   "stats": {
