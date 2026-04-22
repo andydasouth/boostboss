@@ -20,10 +20,13 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    --pink: #FF2D78;
-    --pink-dark: #E01E65;
-    --cyan: #04BEFE;
-    --yellow: #FFE600;
+    /* Publisher-friendly palette — emerald (money/growth) + amber (payouts)
+       replaces the loud pink/cyan/yellow that lives on the advertiser page.
+       Variable names kept for code compatibility — only values swapped. */
+    --pink: #10B981;        /* emerald — primary CTA, money accent */
+    --pink-dark: #059669;   /* deeper emerald for hover/active states */
+    --cyan: #0EA5E9;        /* calmer sky blue for info accents */
+    --yellow: #F59E0B;      /* warm amber for emphasis (was neon yellow) */
     --ink: #0F0F1A;
     --ink-soft: #4B4B5E;
     --muted: #6B7280;
@@ -106,7 +109,7 @@
     background: linear-gradient(135deg, #0F0F1A 0%, #1A1A3E 50%, #0F0F1A 100%);
     padding: 140px 0 100px; text-align: center; position: relative; overflow: hidden;
   }
-  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 25% 40%, rgba(4,190,254,0.12), transparent 50%), radial-gradient(circle at 75% 60%, rgba(255,45,120,0.10), transparent 50%); pointer-events: none; }
+  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 25% 40%, rgba(16,185,129,0.16), transparent 50%), radial-gradient(circle at 75% 60%, rgba(245,158,11,0.10), transparent 50%); pointer-events: none; }
   .hero .wrap { position: relative; z-index: 1; }
   .hero h1 { font-size: clamp(42px, 6vw, 72px); font-weight: 700; line-height: 1.05; letter-spacing: -0.04em; color: #fff; margin-bottom: 20px; }
   .hero h1 .grad { background: linear-gradient(90deg, var(--cyan), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
@@ -228,7 +231,7 @@
   /* FINAL CTA */
   .final-cta { padding: 96px 0; text-align: center; }
   .cta-box { background: var(--ink); border-radius: 20px; padding: 72px 48px; max-width: 900px; margin: 0 auto; position: relative; overflow: hidden; }
-  .cta-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, rgba(4,190,254,0.15), transparent 60%), radial-gradient(circle at 70% 50%, rgba(255,45,120,0.12), transparent 60%); }
+  .cta-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, rgba(16,185,129,0.18), transparent 60%), radial-gradient(circle at 70% 50%, rgba(245,158,11,0.14), transparent 60%); }
   .cta-box .inner { position: relative; z-index: 1; }
   .cta-box h2 { font-size: clamp(30px, 4vw, 48px); color: #fff; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1.1; }
   .cta-box p { font-size: 17px; color: rgba(255,255,255,0.7); max-width: 520px; margin: 0 auto 32px; }
@@ -313,7 +316,6 @@
     <div class="nav-links">
       <a href="#how">How it works</a>
       <a href="#formats">Ad formats</a>
-      <a href="#calc">Revenue</a>
       <a href="#sdk" class="nav-link-sparkle">Lumi SDK <span class="spark">✦</span></a>
     </div>
     <div class="nav-ctas">
@@ -491,107 +493,8 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 </section>
 
 <!-- REVENUE CALCULATOR -->
-<section class="calc-section" id="calc">
-  <div class="wrap">
-    <div class="calc-grid">
-      <div class="calc-text">
-        <div class="eyebrow">Revenue calculator</div>
-        <h2>See what you could earn</h2>
-        <p>Slide the inputs. Estimates reflect current network fill rates, eCPMs by audience quality, and typical engagement for AI-native placements.</p>
-        <ul class="check-list">
-          <li><span class="ck">✓</span><strong>85% revshare</strong> — you keep the larger slice, always.</li>
-          <li><span class="ck">✓</span><strong>Paid weekly</strong> — not Net-45. Real cash every Friday.</li>
-          <li><span class="ck">✓</span><strong>Transparent math</strong> — every impression auditable in your dashboard.</li>
-        </ul>
-      </div>
-      <div class="calc-card">
-        <div class="calc-heading">Estimate your monthly revenue</div>
-        <div class="calc-row">
-          <div class="calc-label"><span>Monthly active users</span><span class="val" id="mauVal">100K</span></div>
-          <input type="range" id="mauSlider" min="1" max="200" value="100" step="1">
-        </div>
-        <div class="calc-row">
-          <div class="calc-label"><span>Ad impressions per user / day</span><span class="val" id="impVal">3</span></div>
-          <input type="range" id="impSlider" min="1" max="20" value="3" step="1">
-        </div>
-        <div class="calc-row">
-          <div class="calc-label"><span>Audience quality</span><span class="val" id="audVal">AI-native (high)</span></div>
-          <input type="range" id="audSlider" min="1" max="3" value="3" step="1">
-        </div>
-        <div class="calc-result">
-          <div class="label">Estimated monthly payout</div>
-          <div class="big" id="calcPayout">$20,108</div>
-          <div class="sub" id="calcSub">Based on ~$2.10 eCPM · 85% revshare to you</div>
-        </div>
-        <div class="calc-split">
-          <div class="kv"><div class="label">Your share (85%)</div><div class="v" id="calcYou">$20,108</div></div>
-          <div class="kv"><div class="label">Boost Boss (15%)</div><div class="v" style="color:var(--cyan);" id="calcFee">$3,549</div></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- REVSHARE BREAKDOWN -->
-<section class="revshare" id="revshare">
-  <div class="wrap">
-    <div class="rev-grid">
-      <div>
-        <div class="section-header" style="text-align:left;margin:0 0 28px;">
-          <div class="eyebrow">Honest economics</div>
-          <h2>Where every dollar goes</h2>
-        </div>
-        <p style="font-size:17px;color:var(--ink-soft);margin-bottom:24px;">No hidden arbitrage. No opaque exchange fees. For every <strong>$1.00</strong> an advertiser spends on your inventory, here's the exact split.</p>
-        <ul class="check-list">
-          <li><span class="ck">✓</span><strong>Paid via Stripe Connect</strong> — direct to your bank account.</li>
-          <li><span class="ck">✓</span><strong>Self-serve withdrawals</strong> — no approval wait.</li>
-          <li><span class="ck">✓</span><strong>1099 / W-8BEN</strong> generated automatically at year end.</li>
-        </ul>
-      </div>
-      <div class="rev-breakdown">
-        <div class="rev-row">
-          <div class="rev-label">You earn</div>
-          <div class="rev-bar-wrap"><div class="rev-bar pink" style="width:85%;"></div></div>
-          <div class="rev-percent pink">85¢</div>
-        </div>
-        <div class="rev-row">
-          <div class="rev-label">Boost Boss</div>
-          <div class="rev-bar-wrap"><div class="rev-bar ink" style="width:15%;"></div></div>
-          <div class="rev-percent" style="color:var(--ink);">15¢</div>
-        </div>
-        <div class="rev-note">Our 15¢ covers the auction engine, Benna AI optimization, payment processing, fraud prevention, and compliance. No extra platform fees.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- WHY PUBLISHERS -->
-<section class="why">
-  <div class="wrap">
-    <div class="section-header">
-      <div class="eyebrow">Why publishers choose Boost Boss</div>
-      <h2>Built for AI-app developers</h2>
-    </div>
-    <div class="cards-3">
-      <div class="card">
-        <div class="icon c1">⚡</div>
-        <h3>Sub-100ms ad fill</h3>
-        <p>Ads served from the edge with median 47ms latency. Your users never wait for monetization.</p>
-      </div>
-      <div class="card">
-        <div class="icon c2">🛡</div>
-        <h3>Full brand safety</h3>
-        <p>Blocklists at advertiser, category, and URL level. Default fraud filtering. Only real users monetize.</p>
-      </div>
-      <div class="card">
-        <div class="icon c3">📊</div>
-        <h3>Real-time dashboard</h3>
-        <p>Every impression, click, and cent — streamed live, not batched overnight. Full transparency.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
 <!-- FINAL CTA -->
 <section class="final-cta">
   <div class="wrap">
