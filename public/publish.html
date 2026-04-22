@@ -35,21 +35,47 @@
     --bg-soft: #FAFAF7;
   }
   html { scroll-behavior: smooth; }
-  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px; }
+  /* ─────────────────────────────────────────────────────────────────
+     Unified Mintegral-style page tone: ONE cohesive emerald background
+     that shifts very gently top→bottom so the whole scroll feels like
+     one continuous surface, not a stack of colored sections.
+     Fixed-attachment keeps the gradient steady while content scrolls
+     over it — the sense of depth comes from the position, not from
+     per-section hard color changes.
+     ───────────────────────────────────────────────────────────────── */
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-size: 16px;
+    background:
+      linear-gradient(180deg,
+        #FAFAF7 0%,              /* warm cream at the top */
+        #F0FAF5 28%,              /* soft mint around the hero */
+        #F6FBF4 55%,              /* pale leaf mid-page */
+        #F1F7F2 78%,              /* slightly deeper mint near CTA */
+        #FAFAF7 100%              /* cream again at the footer */
+      ),
+      #FAFAF7;
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
   a { color: inherit; text-decoration: none; }
   .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
   h1,h2,h3,h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 
-  /* NAV */
+  /* NAV — transparent on top of the body gradient. Subtle frosted tint
+     when scrolled so it separates from the content cleanly. */
   nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; transition: background 0.3s, border 0.3s; }
-  nav.scrolled { background: rgba(15,15,26,0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,0.08); }
+  nav.scrolled { background: rgba(250, 250, 247, 0.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(15, 15, 26, 0.06); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 36px; height: 36px; }
-  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+  .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
   .nav-links { display: flex; gap: 28px; align-items: center; }
-  .nav-links a { font-size: 14.5px; font-weight: 500; color: rgba(255,255,255,0.7); transition: color 0.15s; }
-  .nav-links a:hover { color: #fff; }
+  .nav-links a { font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; }
+  .nav-links a:hover { color: var(--ink); }
 
   /* ── Sparkling gradient link (Lumi SDK) ───────────────────────────── */
   .nav-links a.nav-link-sparkle {
@@ -94,8 +120,8 @@
   .nav-ctas { display: flex; gap: 10px; }
 
   .btn { display: inline-flex; align-items: center; justify-content: center; font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14px; padding: 9px 20px; border-radius: 8px; border: 1.5px solid transparent; cursor: pointer; transition: all 0.15s; white-space: nowrap; text-decoration: none; }
-  .btn-ghost { color: rgba(255,255,255,0.85); background: transparent; border-color: rgba(255,255,255,0.25); }
-  .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+  .btn-ghost { color: var(--ink); background: transparent; border-color: rgba(15,15,26,0.18); }
+  .btn-ghost:hover { background: rgba(15,15,26,0.04); border-color: rgba(15,15,26,0.32); }
   .btn-primary { background: var(--pink); color: #fff; border-color: var(--pink); }
   .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
   .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 10px; }
@@ -104,58 +130,107 @@
   .btn-outline-dark { background: transparent; color: var(--ink); border-color: var(--ink); }
   .btn-outline-dark:hover { background: var(--ink); color: #fff; }
 
-  /* HERO */
+  /* HERO — light, Mintegral-style, sits on the body gradient */
   .hero {
-    background: linear-gradient(135deg, #0F0F1A 0%, #1A1A3E 50%, #0F0F1A 100%);
-    padding: 140px 0 100px; text-align: center; position: relative; overflow: hidden;
+    padding: 128px 0 88px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
   }
-  .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 25% 40%, rgba(16,185,129,0.16), transparent 50%), radial-gradient(circle at 75% 60%, rgba(245,158,11,0.10), transparent 50%); pointer-events: none; }
+  .hero::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(16,185,129,0.12), transparent 55%),
+      radial-gradient(circle at 82% 62%, rgba(245,158,11,0.08), transparent 60%);
+  }
   .hero .wrap { position: relative; z-index: 1; }
-  .hero h1 { font-size: clamp(42px, 6vw, 72px); font-weight: 700; line-height: 1.05; letter-spacing: -0.04em; color: #fff; margin-bottom: 20px; }
-  .hero h1 .grad { background: linear-gradient(90deg, var(--cyan), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-  .hero .sub { font-size: clamp(17px, 1.5vw, 20px); color: rgba(255,255,255,0.7); max-width: 620px; margin: 0 auto 36px; line-height: 1.55; }
+  .hero h1 {
+    font-size: clamp(44px, 6.4vw, 76px);
+    font-weight: 700; line-height: 1.04;
+    letter-spacing: -0.035em;
+    color: var(--ink);
+    margin-bottom: 22px;
+    max-width: 920px;
+    margin-left: auto; margin-right: auto;
+  }
+  .hero h1 .grad {
+    background: linear-gradient(90deg, var(--pink-dark) 0%, var(--pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero .sub {
+    font-size: clamp(17px, 1.5vw, 21px);
+    color: var(--ink-soft);
+    max-width: 640px; margin: 0 auto 40px;
+    line-height: 1.55;
+  }
   .hero-ctas { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
   .hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 56px; }
   .hero-stat { text-align: center; }
-  .hero-stat .n { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: #fff; line-height: 1; }
-  .hero-stat .n.cyan { color: var(--cyan); }
-  .hero-stat .n.pink { color: var(--pink); }
-  .hero-stat .n.yellow { color: var(--yellow); }
-  .hero-stat .l { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 6px; font-weight: 500; }
+  .hero-stat .n { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: var(--ink); line-height: 1; }
+  .hero-stat .n.cyan  { color: var(--pink); }       /* unify to single theme tone */
+  .hero-stat .n.pink  { color: var(--pink); }
+  .hero-stat .n.yellow{ color: var(--pink); }
+  .hero-stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; font-weight: 500; }
 
   /* HOW IT WORKS */
-  .how { padding: 96px 0; border-bottom: 1px solid var(--line); }
+  /* Sections intentionally have NO backgrounds or borders — the body
+     gradient is the single visual surface. Breathing room is created
+     by padding + whitespace, not by color blocks. */
+  .how { padding: 96px 0; }
   .section-header { text-align: center; max-width: 640px; margin: 0 auto 56px; }
   .section-header .eyebrow { display: inline-block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--pink); margin-bottom: 12px; }
   .section-header h2 { font-size: clamp(30px, 4vw, 44px); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.1; }
   .section-header p { font-size: 17px; color: var(--ink-soft); line-height: 1.55; }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  .step { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 16px; padding: 32px 28px; position: relative; transition: transform 0.15s, box-shadow 0.15s; }
-  .step:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
-  .step-num { position: absolute; top: 24px; right: 24px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; }
-  .step-num.c1 { background: var(--cyan); color: var(--ink); }
-  .step-num.c2 { background: var(--pink); color: #fff; }
-  .step-num.c3 { background: var(--yellow); color: var(--ink); }
+  /* Cards float on the body gradient — soft white with emerald hint on hover */
+  .step {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(16, 185, 129, 0.12);
+    border-radius: 16px;
+    padding: 32px 28px;
+    position: relative;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+  }
+  .step:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 40px rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.3);
+  }
+  .step-num {
+    position: absolute; top: 24px; right: 24px;
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700; font-size: 14px;
+    background: var(--pink); color: #fff;   /* unified theme color */
+  }
+  .step-num.c1, .step-num.c2, .step-num.c3 { background: var(--pink); color: #fff; }
   .step h3 { font-size: 18px; font-weight: 700; margin: 24px 0 8px; }
   .step p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
   .step .mini-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; margin-top: 12px; display: inline-block; }
   .step-icon { font-size: 28px; }
 
   /* CODE SHOWCASE */
-  .code-section { padding: 96px 0; background: var(--ink); }
-  .code-section .section-header h2 { color: #fff; }
-  .code-section .section-header p { color: rgba(255,255,255,0.6); }
-  .code-section .section-header .eyebrow { color: var(--cyan); }
+  .code-section { padding: 96px 0; }
+  /* Section text sits on light body now; use ink + muted like the rest */
+  .code-section .section-header h2 { color: var(--ink); }
+  .code-section .section-header p { color: var(--ink-soft); }
+  .code-section .section-header .eyebrow { color: var(--pink); }
   .code-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
   .code-features { display: flex; flex-direction: column; gap: 24px; }
   .code-feat { display: flex; gap: 14px; align-items: flex-start; }
   .code-feat .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
-  .code-feat h4 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .code-feat p { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.5; }
+  .code-feat h4 { font-size: 16px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+  .code-feat p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; }
   .code-shell { background: #1A1A2E; border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; overflow: hidden; }
   .code-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
   .code-tab { padding: 10px 18px; font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.4); cursor: pointer; border: none; background: transparent; transition: all 0.15s; border-bottom: 2px solid transparent; }
-  .code-tab.active { color: var(--cyan); border-bottom-color: var(--cyan); }
+  .code-tab.active { color: var(--pink); border-bottom-color: var(--pink); }
   .code-box { padding: 24px; font-family: 'JetBrains Mono', monospace; font-size: 13px; line-height: 1.75; color: #E5E7EB; min-height: 220px; }
   .code-box .k { color: var(--pink); }
   .code-box .s { color: var(--yellow); }
@@ -164,7 +239,7 @@
   .code-box[data-lang]:not([data-active='1']) { display: none; }
 
   /* AD FORMATS */
-  .formats { padding: 96px 0; border-bottom: 1px solid var(--line); }
+  .formats { padding: 96px 0; }
   .formats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 48px; }
   .format-card { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: #fff; transition: transform 0.15s, box-shadow 0.15s; }
   .format-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.08); }
@@ -230,11 +305,30 @@
 
   /* FINAL CTA */
   .final-cta { padding: 96px 0; text-align: center; }
-  .cta-box { background: var(--ink); border-radius: 20px; padding: 72px 48px; max-width: 900px; margin: 0 auto; position: relative; overflow: hidden; }
-  .cta-box::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 30% 50%, rgba(16,185,129,0.18), transparent 60%), radial-gradient(circle at 70% 50%, rgba(245,158,11,0.14), transparent 60%); }
+  /* CTA wedge — a richer emerald "deep pool" on the same family palette
+     so it deepens the body gradient rather than punching through it */
+  .cta-box {
+    background: linear-gradient(135deg, #059669 0%, #047857 55%, #065F46 100%);
+    border-radius: 20px;
+    padding: 72px 48px;
+    max-width: 900px;
+    margin: 0 auto;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(6, 95, 70, 0.25);
+  }
+  .cta-box::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(circle at 30% 50%, rgba(167,243,208,0.22), transparent 55%),
+      radial-gradient(circle at 75% 45%, rgba(255,255,255,0.08), transparent 55%);
+  }
   .cta-box .inner { position: relative; z-index: 1; }
   .cta-box h2 { font-size: clamp(30px, 4vw, 48px); color: #fff; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1.1; }
-  .cta-box p { font-size: 17px; color: rgba(255,255,255,0.7); max-width: 520px; margin: 0 auto 32px; }
+  .cta-box p { font-size: 17px; color: rgba(255,255,255,0.78); max-width: 520px; margin: 0 auto 32px; }
+  /* Button contrast inside the emerald CTA: ghost button reads as white outline */
+  .cta-box .btn-ghost { color: rgba(255,255,255,0.92); border-color: rgba(255,255,255,0.38); background: transparent; }
+  .cta-box .btn-ghost:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.6); }
 
   /* FOOTER */
   footer { padding: 48px 0 24px; border-top: 1px solid var(--line); }
