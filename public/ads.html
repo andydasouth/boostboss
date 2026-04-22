@@ -632,11 +632,11 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     AD-FORMAT SPREAD — 6 browser-screenshot cards in a 3×2 scatter
-     across the full viewport width. Each card has its own slight tilt
-     and offset so the layout feels organic (not grid-aligned). Cards
-     kiss/overlap at edges and the section bleeds past the .wrap.
-     Hovering a card un-rotates + lifts + scales it above neighbors.
+     AD-FORMAT BELT — 6 browser-screenshot cards on a single horizontal
+     conveyor that scrolls edge-to-edge in an infinite loop. JS clones
+     the card set once on init, and CSS animates the track by
+     translateX(-50%) = one full cycle. Hover pauses the belt so
+     visitors can read a specific card.
      ═══════════════════════════════════════════════════════════════════ */
   .ad-carousel {
     position: relative;
@@ -646,29 +646,41 @@
     margin-right: calc(50% - 50vw);
     max-width: none;
     padding: 48px 0 72px;
-    overflow: hidden;                  /* hide any bleed past viewport edges */
+    overflow: hidden;                  /* clip the belt at viewport edges */
   }
+  /* Infinite horizontal belt — all 6 cards scroll in a single continuous row.
+     JS clones the card set once on init so translateX(-50%) = one full cycle.
+     NOTE: using per-card margin-right (not `gap`) so the total track width is
+     a clean multiple of (card + margin) and the loop is perfectly seamless. */
   .ad-carousel .ad-frame {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 24px 14px;                    /* row gap · col gap — cards kiss/overlap */
-    max-width: none;
-    margin: 0 auto;
-    padding: 0 20px;                   /* breathing room from viewport edges */
+    flex-wrap: nowrap;                 /* ONE row, no wrapping */
+    width: max-content;                /* expand to fit both card sets */
+    padding: 12px 0;
+    margin: 0;
     background: none;
     border: none;
     box-shadow: none;
     overflow: visible;
     min-height: 0;
+    animation: beltScroll 55s linear infinite;
+    will-change: transform;
   }
+  .ad-carousel:hover .ad-frame,
+  .ad-carousel:focus-within .ad-frame {
+    animation-play-state: paused;      /* pause so viewers can read on hover */
+  }
+  @keyframes beltScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
   .ad-slide {
     position: relative;
-    /* Each card takes exactly 1/3 of the row — guarantees 3 per row, 2 rows */
-    flex: 0 0 calc((100% - 28px) / 3);
-    max-width: 580px;
+    flex: 0 0 540px;                   /* fixed card width — belt is uniform */
+    width: 540px;
     min-height: 420px;
+    margin-right: 24px;                /* belt spacing — applied to every card incl. last */
     background: #fff;
     border: 1px solid #E4E6EB;
     border-radius: 14px;
@@ -686,16 +698,6 @@
     display: flex; flex-direction: column;
     z-index: 1;
   }
-
-  /* Natural scatter — 3 cards × 2 rows, each with its own tilt + offset */
-  /* Row 1 */
-  .ad-slide:nth-child(1) { transform: rotate(-2.4deg) translate(-8px,  6px);  z-index: 2; }
-  .ad-slide:nth-child(2) { transform: rotate( 1.6deg) translate( 0,   -5px);  z-index: 3; margin-left: -14px; }
-  .ad-slide:nth-child(3) { transform: rotate(-1.8deg) translate(10px,  9px);  z-index: 2; margin-left: -14px; }
-  /* Row 2 (pulled up to nest into row 1) */
-  .ad-slide:nth-child(4) { transform: rotate( 2.2deg) translate(-10px,-8px);  z-index: 4; margin-top: -16px; }
-  .ad-slide:nth-child(5) { transform: rotate(-1.4deg) translate( 0,   -3px);  z-index: 3; margin-top: -16px; margin-left: -14px; }
-  .ad-slide:nth-child(6) { transform: rotate( 2.0deg) translate(12px, -6px);  z-index: 4; margin-top: -16px; margin-left: -14px; }
 
   /* ── Browser chrome (macOS-style traffic lights + URL pill) ── */
   .browser-bar {
@@ -737,34 +739,29 @@
 
   /* Hover: un-rotate, lift, jump above neighbors */
   .ad-slide:hover {
-    transform: rotate(0deg) translateY(-14px) scale(1.02) !important;
-    z-index: 10 !important;
+    transform: translateY(-10px) scale(1.015);
+    z-index: 10;
     box-shadow: 0 40px 80px rgba(15, 15, 26, 0.22),
                 0 0 0 1.5px var(--pink);
   }
   .ad-slide.active { opacity: 1; pointer-events: auto; }
 
-  /* Narrow screens: dial back min-height & min-height so the 3-per-row layout
-     still breathes when the card basis shrinks below ~420px. */
+  /* Mid screens: shrink card width so the belt doesn't feel too long per cycle */
   @media (max-width: 1280px) {
-    .ad-slide { min-height: 380px; }
+    .ad-slide { flex-basis: 480px; width: 480px; min-height: 380px; }
   }
-  @media (max-width: 960px) {
-    .ad-slide { min-height: 340px; }
-    .ad-slide:nth-child(n) { margin-left: 0; margin-top: 0; }
-    .ad-slide:nth-child(1) { transform: rotate(-1.6deg); }
-    .ad-slide:nth-child(2) { transform: rotate( 1.2deg); }
-    .ad-slide:nth-child(3) { transform: rotate(-1.4deg); }
-    .ad-slide:nth-child(4) { transform: rotate( 1.6deg); }
-    .ad-slide:nth-child(5) { transform: rotate(-1.2deg); }
-    .ad-slide:nth-child(6) { transform: rotate( 1.8deg); }
+  @media (max-width: 900px) {
+    .ad-slide { flex-basis: 420px; width: 420px; min-height: 360px; }
+    .ad-carousel .ad-frame { animation-duration: 45s; }
   }
-  /* Mobile: stack cleanly, no rotation */
+  /* Tablet/mobile: speed belt up slightly so users see variety quickly */
   @media (max-width: 640px) {
-    .ad-carousel { padding: 24px 0 48px; }
-    .ad-carousel .ad-frame { padding: 0 16px; gap: 20px; }
-    .ad-slide { flex: 0 0 100%; max-width: 420px; margin: 0 !important; }
-    .ad-slide[class] { transform: none !important; }
+    .ad-slide { flex-basis: 340px; width: 340px; min-height: 320px; margin-right: 18px; }
+    .ad-carousel .ad-frame { animation-duration: 38s; }
+  }
+  /* Reduce-motion: stop the belt completely */
+  @media (prefers-reduced-motion: reduce) {
+    .ad-carousel .ad-frame { animation: none !important; }
   }
 
   .ad-slide .ad-head {
@@ -1290,7 +1287,7 @@
   </div>
 </section>
 
-<!-- AD-FORMAT SPREAD — 6 browser-screenshot cards scattered edge-to-edge in 3×2 -->
+<!-- AD-FORMAT BELT — 6 browser-screenshot cards on an infinite horizontal carousel -->
 <section style="padding: 0 0 72px;" data-reveal>
   <div class="wrap">
     <div class="ad-carousel" id="adCarousel">
@@ -1966,9 +1963,28 @@
       counters.forEach(function (el) { io.observe(el); });
     }
 
+    // ─────────────────────────────────────────────────────────────────
+    // (3) BELT CAROUSEL — clone the 6 ad-slide cards once so the
+    //     infinite translateX(-50%) loop appears seamless.
+    // ─────────────────────────────────────────────────────────────────
+    function initBelt() {
+      var frame = document.querySelector('.ad-carousel .ad-frame');
+      if (!frame) return;
+      var originals = frame.querySelectorAll(':scope > .ad-slide');
+      if (!originals.length || frame.dataset.cloned === '1') return;
+      originals.forEach(function (node) {
+        var copy = node.cloneNode(true);
+        copy.setAttribute('aria-hidden', 'true');
+        copy.setAttribute('tabindex', '-1');
+        frame.appendChild(copy);
+      });
+      frame.dataset.cloned = '1';
+    }
+
     function init() {
       initReveals();
       initCounters();
+      initBelt();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
