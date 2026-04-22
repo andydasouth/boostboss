@@ -4,7 +4,15 @@
   "framework": null,
   "buildCommand": null,
   "outputDirectory": "public",
+  "redirects": [
+    { "source": "/", "destination": "/en", "permanent": false }
+  ],
   "rewrites": [
+    { "source": "/en", "destination": "/index.html" },
+    { "source": "/zh", "destination": "/index.html" },
+    { "source": "/ja", "destination": "/index.html" },
+    { "source": "/ko", "destination": "/index.html" },
+    { "source": "/vi", "destination": "/index.html" },
     { "source": "/ads", "destination": "/ads.html" },
     { "source": "/advertiser", "destination": "/advertiser.html" },
     { "source": "/developer", "destination": "/developer.html" },

@@ -1,19 +1,21 @@
-// Boost Boss i18n — simple client-side translator
-// Reads lang from localStorage, loads /i18n/<lang>.json, walks the DOM
-// replacing text of [data-i18n="key.path"] elements. Exposes window.setBBLang.
+// Boost Boss i18n — URL-based language routing (/en, /zh, /ja, /ko, /vi)
+// Reads lang from window.location.pathname's first segment.
+// When user picks a language, navigates to /<lang> so the URL reflects state.
 (function () {
   'use strict';
 
   var DICT_VERSION = 'bb-20260421';
   var SUPPORTED   = ['en', 'zh', 'ja', 'ko', 'vi'];
   var DEFAULT     = 'en';
-  var STORAGE_KEY = 'bb_lang';
+
+  // Parse first path segment, e.g. "/en/foo" -> "en"
+  function pathLang() {
+    var seg = (window.location.pathname || '/').split('/')[1] || '';
+    return SUPPORTED.indexOf(seg) !== -1 ? seg : null;
+  }
 
   function getLang() {
-    var stored = null;
-    try { stored = localStorage.getItem(STORAGE_KEY); } catch (e) {}
-    if (SUPPORTED.indexOf(stored) !== -1) return stored;
-    return DEFAULT;
+    return pathLang() || DEFAULT;
   }
 
   function getText(dict, keyPath) {
@@ -32,7 +34,6 @@
   }
 
   function apply(dict) {
-    // Swap text content
     var nodes = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) {
       var el = nodes[i];
@@ -45,11 +46,9 @@
         el.textContent = val;
       }
     }
-    // Swap attribute (e.g. placeholder / aria-label)
     var attrNodes = document.querySelectorAll('[data-i18n-attr]');
     for (var j = 0; j < attrNodes.length; j++) {
       var n = attrNodes[j];
-      // data-i18n-attr="placeholder:hero.input_placeholder,aria-label:hero.cta"
       var pairs = n.getAttribute('data-i18n-attr').split(',');
       for (var k = 0; k < pairs.length; k++) {
         var bits = pairs[k].trim().split(':');
@@ -59,33 +58,34 @@
       }
     }
 
-    // Reflect active lang in dropdown + button label
+    // Dropdown active state + button label
     var active = getLang();
     var menuLinks = document.querySelectorAll('.nav-lang-menu a[data-lang]');
     for (var m = 0; m < menuLinks.length; m++) {
-      menuLinks[m].classList.toggle('active', menuLinks[m].getAttribute('data-lang') === active);
+      var lang = menuLinks[m].getAttribute('data-lang');
+      menuLinks[m].classList.toggle('active', lang === active);
+      // Point each menu link at /<lang> so right-click/"open in new tab" works too
+      menuLinks[m].setAttribute('href', '/' + lang);
     }
     var btnLabel = document.querySelector('.nav-lang span');
     if (btnLabel) btnLabel.textContent = active.toUpperCase();
     document.documentElement.lang = active;
   }
 
+  // Public API — navigate to /<lang>
   window.setBBLang = function (lang) {
     if (SUPPORTED.indexOf(lang) === -1) return;
-    try { localStorage.setItem(STORAGE_KEY, lang); } catch (e) {}
-    loadDict(lang).then(apply).catch(function (err) {
-      console.error('[i18n]', err);
-    });
+    if (lang === getLang()) return;
+    window.location.href = '/' + lang;
   };
 
-  // Init on DOM ready
   function init() {
     var lang = getLang();
     loadDict(lang).then(apply).catch(function (err) {
       console.error('[i18n init]', err);
     });
 
-    // Wire dropdown item clicks
+    // Intercept dropdown clicks so we route cleanly (history push + reload)
     document.addEventListener('click', function (e) {
       var a = e.target.closest && e.target.closest('.nav-lang-menu a[data-lang]');
       if (!a) return;
