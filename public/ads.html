@@ -828,6 +828,11 @@
     padding: 14px 16px;
     display: flex; flex-direction: column; gap: 5px;
     box-shadow: 0 10px 24px rgba(255, 45, 120, 0.16);
+    animation: nativeGlow 3.2s ease-in-out infinite;
+  }
+  @keyframes nativeGlow {
+    0%, 100% { box-shadow: 0 10px 24px rgba(255, 45, 120, 0.16); }
+    50%      { box-shadow: 0 14px 34px rgba(255, 45, 120, 0.30); }
   }
   .fmt-native::before {
     content: '✨ Sponsored';
@@ -836,6 +841,12 @@
     font-size: 10px; font-weight: 700;
     padding: 3px 9px; border-radius: 100px;
     letter-spacing: 0.4px;
+    animation: badgePulse 2.4s ease-in-out infinite;
+    transform-origin: center center;
+  }
+  @keyframes badgePulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.08); }
   }
   .fmt-native .t { font-size: 14.5px; font-weight: 700; color: var(--ink); }
   .fmt-native .s { font-size: 12.5px; color: var(--ink-soft); line-height: 1.4; }
@@ -869,6 +880,12 @@
         transparent 0 8%,
         rgba(255, 255, 255, 0.06) 8% 10%,
         transparent 10% 16%);
+    background-size: 80px 100%;
+    animation: scanDrift 6s linear infinite;
+  }
+  @keyframes scanDrift {
+    from { background-position: 0 0; }
+    to   { background-position: 80px 0; }
   }
   .fmt-video .play-btn {
     width: 66px; height: 66px; border-radius: 50%;
@@ -892,6 +909,17 @@
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     z-index: 3;
+    display: inline-flex; align-items: center; gap: 1px;
+  }
+  .fmt-video .skip-btn b {
+    display: inline-block; font-size: 0;
+    min-width: 8px; text-align: center;
+  }
+  .fmt-video .skip-btn b::before {
+    content: "5";
+    display: inline-block;
+    color: #FFE600; font-size: 12px; font-weight: 800;
+    animation: vcDigit 5s steps(1, end) infinite;
   }
   .fmt-video .vid-caption {
     padding: 14px 16px;
@@ -923,6 +951,7 @@
     height: 56%; position: relative;
     background:
       radial-gradient(ellipse 40% 60% at 60% 40%, #FFE4A3 0%, #FF8A6B 50%, #8E54C8 100%);
+    overflow: hidden;
   }
   .fmt-picture .pic-hero::before {
     content: '';
@@ -932,6 +961,25 @@
       radial-gradient(ellipse 25% 100% at 18% 100%, #1a0f3a 0%, transparent 65%),
       radial-gradient(ellipse 40% 100% at 55% 100%, #2a1454 0%, transparent 60%);
   }
+  .fmt-picture .pic-hero::after {
+    content: '';
+    position: absolute; top: 0; bottom: 0;
+    width: 60%;
+    background: linear-gradient(115deg,
+      transparent 35%,
+      rgba(255,255,255,0.12) 48%,
+      rgba(255,255,255,0.28) 50%,
+      rgba(255,255,255,0.12) 52%,
+      transparent 65%);
+    transform: translateX(-150%);
+    animation: picShimmer 4.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes picShimmer {
+    0%   { transform: translateX(-150%); }
+    60%  { transform: translateX(250%); }
+    100% { transform: translateX(250%); }
+  }
   .fmt-picture .pic-hero .sp-tag {
     position: absolute; top: 12px; left: 12px;
     background: rgba(0,0,0,0.45); color: #fff;
@@ -940,6 +988,8 @@
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
     letter-spacing: 0.5px;
+    animation: badgePulse 2.6s ease-in-out infinite;
+    transform-origin: center center;
   }
   .fmt-picture .pic-hero .close-btn {
     position: absolute; top: 12px; right: 12px;
@@ -980,6 +1030,8 @@
     font-size: 10px; font-weight: 800;
     padding: 3px 9px; border-radius: 100px;
     letter-spacing: 0.4px;
+    animation: badgePulse 2.8s ease-in-out infinite;
+    transform-origin: center center;
   }
   .fmt-banner .bn-art {
     width: 100px; height: 100px; flex-shrink: 0;
@@ -989,6 +1041,11 @@
       linear-gradient(135deg, var(--cyan) 0%, #0077B6 100%);
     position: relative;
     box-shadow: 0 6px 14px rgba(4, 190, 254, 0.3);
+    animation: bannerBob 3.2s ease-in-out infinite;
+  }
+  @keyframes bannerBob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50%      { transform: translateY(-4px) rotate(-3deg); }
   }
   .fmt-banner .bn-art::before {
     content: '📊';
@@ -1028,6 +1085,18 @@
     background: linear-gradient(135deg, #FFE600, #FFB800);
     display: flex; align-items: center; justify-content: center;
     font-size: 18px; color: var(--ink);
+    animation: iconPulse 2.2s ease-in-out infinite;
+  }
+  @keyframes iconPulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.1); }
+  }
+  .fmt-corner .cn-body .cnl {
+    animation: cnlBlink 2.4s ease-in-out infinite;
+  }
+  @keyframes cnlBlink {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.55; }
   }
   .fmt-corner .cn-body { flex: 1; min-width: 0; }
   .fmt-corner .cn-body .cnl {
@@ -1145,8 +1214,18 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .fmt-native,
+    .fmt-native::before,
     .fmt-video .play-btn,
+    .fmt-video .vid-thumb::before,
+    .fmt-video .skip-btn b::before,
+    .fmt-picture .pic-hero::after,
+    .fmt-picture .pic-hero .sp-tag,
+    .fmt-banner::before,
+    .fmt-banner .bn-art,
     .fmt-corner,
+    .fmt-corner .cn-icon,
+    .fmt-corner .cn-body .cnl,
     .fmt-video-corner,
     .fmt-video-corner .vc-play,
     .fmt-video-corner .vc-progress,
@@ -1263,7 +1342,7 @@
           <div class="ad-body" style="padding: 0;">
             <div class="fmt-video">
               <div class="vid-thumb">
-                <div class="skip-btn">Skip in 5s</div>
+                <div class="skip-btn">Skip in <b>5</b>s</div>
                 <div class="play-btn">▶</div>
               </div>
               <div class="vid-caption">
