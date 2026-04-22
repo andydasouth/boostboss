@@ -632,37 +632,82 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     AD-FORMAT CAROUSEL — single light-themed card that swaps content
-     when clicking one of the 5 format pills beneath (Native / Video /
-     Picture / Banner / Corner). Auto-advances every 5.5s with progress
-     bar, pauses on hover.
+     AD-FORMAT SPREAD — all 5 light-themed cards visible side-by-side
+     with a slight fan (alternating rotation + edge overlap). Hovering
+     a card lifts + unrotates + scales it above its neighbors.
+     No toggle, no auto-advance — just the static spread.
      ═══════════════════════════════════════════════════════════════════ */
   .ad-carousel {
     position: relative;
-    max-width: 620px;
+    max-width: none;
     margin: 56px auto 0;
+    padding: 24px 20px 48px;
+    /* Soft edge fade so cards dissolve at left/right */
+    mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
   }
   .ad-carousel .ad-frame {
-    position: relative;
-    background: #fff;
-    border-radius: 22px;
-    border: 1px solid var(--line);
-    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.10),
-                0 10px 28px rgba(15, 15, 26, 0.06);
-    overflow: hidden;
-    min-height: 440px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 0;
+    max-width: 1600px;
+    margin: 0 auto;
+    /* frame itself is transparent — each slide is its own card now */
+    background: none;
+    border: none;
+    box-shadow: none;
+    overflow: visible;
+    min-height: 0;
   }
   .ad-slide {
-    position: absolute; inset: 0;
-    opacity: 0;
-    transform: translateY(16px);
-    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
-    pointer-events: none;
-    display: flex; flex-direction: column;
-  }
-  .ad-slide.active {
-    opacity: 1; transform: translateY(0);
+    position: relative;
+    width: 300px;
+    min-height: 480px;
+    flex-shrink: 0;
+    margin-left: -28px;                /* overlap adjacent card a little */
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(15, 15, 26, 0.10),
+                0 6px 18px rgba(15, 15, 26, 0.06);
+    opacity: 1;
     pointer-events: auto;
+    transform-origin: center bottom;
+    transform: translateY(0) rotate(var(--card-rot, 0deg)) scale(1);
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      z-index 0s 0.35s;
+    display: flex; flex-direction: column;
+    z-index: 1;
+  }
+  .ad-slide:first-child { margin-left: 0; }
+  /* Fan rotation across the 5 cards */
+  .ad-slide:nth-child(1) { --card-rot: -4deg; z-index: 1; }
+  .ad-slide:nth-child(2) { --card-rot: -2deg; z-index: 2; }
+  .ad-slide:nth-child(3) { --card-rot:  0deg; z-index: 3; }
+  .ad-slide:nth-child(4) { --card-rot:  2deg; z-index: 2; }
+  .ad-slide:nth-child(5) { --card-rot:  4deg; z-index: 1; }
+  /* Hover: lift, unrotate, scale up, jump above others */
+  .ad-slide:hover {
+    transform: translateY(-18px) rotate(0deg) scale(1.06);
+    z-index: 20;
+    transition:
+      transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+      z-index 0s;
+    box-shadow: 0 40px 80px rgba(15, 15, 26, 0.22),
+                0 0 0 1.5px var(--pink);
+  }
+  /* Kill the old .active opacity rules — all cards are always visible now */
+  .ad-slide.active { opacity: 1; transform: translateY(0) rotate(var(--card-rot, 0deg)) scale(1); pointer-events: auto; }
+
+  /* Narrow-screen fallback: horizontal scroll so cards never clip */
+  @media (max-width: 1240px) {
+    .ad-carousel { padding: 24px 0 48px; overflow-x: auto; mask-image: none; -webkit-mask-image: none; }
+    .ad-carousel .ad-frame { justify-content: flex-start; padding: 0 20px; }
   }
 
   .ad-slide .ad-head {
@@ -942,42 +987,10 @@
     display: flex; align-items: center; justify-content: center;
   }
 
-  /* Carousel tab pills */
-  .carousel-controls {
-    display: flex; gap: 10px; justify-content: center;
-    margin-top: 24px; flex-wrap: wrap;
-  }
-  .carousel-controls .dot {
-    background: #fff; color: var(--ink-soft);
-    border: 1px solid var(--line);
-    padding: 8px 16px; border-radius: 100px;
-    font-size: 12.5px; font-weight: 600;
-    cursor: pointer;
-    transition: all 0.18s;
-    font-family: inherit;
-  }
-  .carousel-controls .dot:hover {
-    background: var(--bg-soft);
-    border-color: var(--ink-soft);
-    color: var(--ink);
-  }
-  .carousel-controls .dot.active {
-    background: var(--ink); color: #fff; border-color: var(--ink);
-  }
-
-  .carousel-progress {
-    position: absolute; bottom: 0; left: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--pink), var(--cyan));
-    width: 0%;
-    transition: width 0.1s linear;
-    border-bottom-left-radius: 22px;
-    border-bottom-right-radius: 22px;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .fmt-video .play-btn, .fmt-corner { animation: none !important; }
-    .carousel-progress { display: none; }
+    .ad-slide { transform: rotate(var(--card-rot, 0deg)) !important; }
+    .ad-slide:hover { transform: rotate(var(--card-rot, 0deg)) !important; }
   }
 
 
@@ -1037,14 +1050,14 @@
   </div>
 </section>
 
-<!-- AD-FORMAT CAROUSEL — single light card, 5 format pills beneath -->
+<!-- AD-FORMAT SPREAD — 5 light cards fanned across, hover to pop forward -->
 <section style="padding: 0 0 72px;" data-reveal>
   <div class="wrap">
     <div class="ad-carousel" id="adCarousel">
       <div class="ad-frame">
 
         <!-- ① NATIVE · Claude · HubSpot -->
-        <div class="ad-slide active" data-format="native">
+        <div class="ad-slide" data-format="native">
           <div class="ad-head">
             <div class="icon" style="background: linear-gradient(135deg, #FF8A1F, #FF5E3A);">C</div>
             <div class="name">Claude<small>AI assistant · via MCP</small></div>
@@ -1149,17 +1162,6 @@
           </div>
         </div>
 
-        <!-- Auto-advance progress bar -->
-        <div class="carousel-progress" id="carouselProgress"></div>
-      </div>
-
-      <!-- Format pills (tabs) -->
-      <div class="carousel-controls" id="carouselControls">
-        <button class="dot active" data-slide="0" type="button">Native</button>
-        <button class="dot" data-slide="1" type="button">Video</button>
-        <button class="dot" data-slide="2" type="button">Picture</button>
-        <button class="dot" data-slide="3" type="button">Banner</button>
-        <button class="dot" data-slide="4" type="button">Corner</button>
       </div>
     </div>
   </div>
@@ -1578,64 +1580,7 @@
     var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // ─────────────────────────────────────────────────────────────────
-    // (1) AD-FORMAT CAROUSEL — auto-advance + manual pill navigation.
-    //     5 slides (Native / Video / Picture / Banner / Corner) with
-    //     a progress bar. Pauses on hover/focus so visitors can read.
-    // ─────────────────────────────────────────────────────────────────
-    function initAdCarousel() {
-      var carousel = document.getElementById('adCarousel');
-      if (!carousel) return;
-      var slides   = carousel.querySelectorAll('.ad-slide');
-      var dots     = carousel.querySelectorAll('.carousel-controls .dot');
-      var progress = document.getElementById('carouselProgress');
-      var total    = slides.length;
-      if (!total) return;
-
-      var current   = 0;
-      var SLIDE_MS  = 5500;
-      var paused    = false;
-      var tickStart = 0;
-
-      function setSlide(i) {
-        current = (i + total) % total;
-        slides.forEach(function (s, idx) { s.classList.toggle('active', idx === current); });
-        dots.forEach(function   (d, idx) { d.classList.toggle('active', idx === current); });
-        tickStart = performance.now();
-        if (progress) progress.style.width = '0%';
-      }
-
-      function tick(now) {
-        if (!paused) {
-          var elapsed = now - tickStart;
-          var pct = Math.min(100, (elapsed / SLIDE_MS) * 100);
-          if (progress) progress.style.width = pct + '%';
-          if (elapsed >= SLIDE_MS) setSlide(current + 1);
-        }
-        requestAnimationFrame(tick);
-      }
-
-      dots.forEach(function (d, idx) {
-        d.addEventListener('click', function () { setSlide(idx); });
-      });
-
-      carousel.addEventListener('mouseenter', function () { paused = true; });
-      carousel.addEventListener('mouseleave', function () { paused = false; tickStart = performance.now(); });
-      carousel.addEventListener('focusin',    function () { paused = true; });
-      carousel.addEventListener('focusout',   function () { paused = false; tickStart = performance.now(); });
-
-      if (prefersReduced) {
-        setSlide(0);
-        if (progress) progress.style.display = 'none';
-        return;
-      }
-
-      setSlide(0);
-      tickStart = performance.now();
-      requestAnimationFrame(tick);
-    }
-
-    // ─────────────────────────────────────────────────────────────────
-    // (2) SCROLL REVEALS — IntersectionObserver fade-ups
+    // (1) SCROLL REVEALS — IntersectionObserver fade-ups
     // ─────────────────────────────────────────────────────────────────
     function initReveals() {
       var nodes = document.querySelectorAll('[data-reveal]');
@@ -1655,7 +1600,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────────
-    // (3) COUNTER ANIMATIONS on [data-count] when in view
+    // (2) COUNTER ANIMATIONS on [data-count] when in view
     // ─────────────────────────────────────────────────────────────────
     function animateCounter(el) {
       var target = parseFloat(el.getAttribute('data-count') || '0');
@@ -1706,7 +1651,6 @@
     function init() {
       initReveals();
       initCounters();
-      initAdCarousel();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
