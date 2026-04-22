@@ -632,7 +632,7 @@
   }
 
   /* ═══════════════════════════════════════════════════════════════════
-     AD-FORMAT SPREAD — 5 browser-screenshot cards scattered naturally
+     AD-FORMAT SPREAD — 6 browser-screenshot cards in a 3×2 scatter
      across the full viewport width. Each card has its own slight tilt
      and offset so the layout feels organic (not grid-aligned). Cards
      kiss/overlap at edges and the section bleeds past the .wrap.
@@ -686,12 +686,15 @@
     z-index: 1;
   }
 
-  /* Natural scatter — each card gets its own tilt + offset */
-  .ad-slide:nth-child(1) { transform: rotate(-2.4deg) translate(-10px, 6px);  z-index: 2; }
-  .ad-slide:nth-child(2) { transform: rotate( 1.6deg) translate(  0, -4px);   z-index: 3; margin-left: -14px; }
-  .ad-slide:nth-child(3) { transform: rotate(-1.8deg) translate( 12px, 10px); z-index: 2; margin-left: -14px; }
-  .ad-slide:nth-child(4) { transform: rotate( 2.2deg) translate(-24px, -10px); z-index: 4; margin-top: -18px; }
-  .ad-slide:nth-child(5) { transform: rotate(-2.0deg) translate( 24px, 4px);  z-index: 3; margin-top: -18px; margin-left: -10px; }
+  /* Natural scatter — 3 cards × 2 rows, each with its own tilt + offset */
+  /* Row 1 */
+  .ad-slide:nth-child(1) { transform: rotate(-2.4deg) translate(-8px,  6px);  z-index: 2; }
+  .ad-slide:nth-child(2) { transform: rotate( 1.6deg) translate( 0,   -5px);  z-index: 3; margin-left: -14px; }
+  .ad-slide:nth-child(3) { transform: rotate(-1.8deg) translate(10px,  9px);  z-index: 2; margin-left: -14px; }
+  /* Row 2 (pulled up to nest into row 1) */
+  .ad-slide:nth-child(4) { transform: rotate( 2.2deg) translate(-10px,-8px);  z-index: 4; margin-top: -16px; }
+  .ad-slide:nth-child(5) { transform: rotate(-1.4deg) translate( 0,   -3px);  z-index: 3; margin-top: -16px; margin-left: -14px; }
+  .ad-slide:nth-child(6) { transform: rotate( 2.0deg) translate(12px, -6px);  z-index: 4; margin-top: -16px; margin-left: -14px; }
 
   /* ── Browser chrome (macOS-style traffic lights + URL pill) ── */
   .browser-bar {
@@ -740,20 +743,24 @@
   }
   .ad-slide.active { opacity: 1; pointer-events: auto; }
 
-  /* Mid screens: keep scatter but reduce card width so 3 still fit across */
-  @media (max-width: 1780px) {
-    .ad-slide { width: 520px; }
-  }
-  @media (max-width: 1480px) {
-    .ad-slide { width: 460px; min-height: 380px; }
-  }
-  /* Below ~1240: 2 per row, tame the rotations a little */
-  @media (max-width: 1240px) {
-    .ad-slide:nth-child(1) { transform: rotate(-1.8deg); margin-left: 0; }
-    .ad-slide:nth-child(2) { transform: rotate( 1.2deg); margin-left: 0; }
-    .ad-slide:nth-child(3) { transform: rotate(-1.4deg); margin-left: 0; margin-top: -12px; }
-    .ad-slide:nth-child(4) { transform: rotate( 1.6deg); margin-left: 0; margin-top: -12px; }
-    .ad-slide:nth-child(5) { transform: rotate(-1.4deg); margin-left: 0; margin-top: -12px; }
+  /* Mid screens: scale card width down so 3 still fit across */
+  @media (max-width: 1780px) { .ad-slide { width: 520px; } }
+  @media (max-width: 1480px) { .ad-slide { width: 460px; min-height: 380px; } }
+  @media (max-width: 1280px) { .ad-slide { width: 400px; min-height: 360px; } }
+  /* Tablet: 2 per row — reduce rotations, even out offsets */
+  @media (max-width: 1080px) {
+    .ad-slide { width: 440px; }
+    .ad-slide:nth-child(n) {
+      transform: rotate(var(--r, -1.5deg));
+      margin-left: 0;
+      margin-top: 0;
+    }
+    .ad-slide:nth-child(1) { --r: -1.8deg; }
+    .ad-slide:nth-child(2) { --r:  1.2deg; }
+    .ad-slide:nth-child(3) { --r: -1.4deg; }
+    .ad-slide:nth-child(4) { --r:  1.6deg; }
+    .ad-slide:nth-child(5) { --r: -1.2deg; }
+    .ad-slide:nth-child(6) { --r:  1.8deg; }
   }
   /* Mobile: stack cleanly, no rotation */
   @media (max-width: 720px) {
@@ -1040,6 +1047,37 @@
     display: flex; align-items: center; justify-content: center;
   }
 
+  /* ── FORMAT 6: SUGGESTED CHIPS — pill row under AI reply, one sponsored ── */
+  .fmt-chips {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 6px;
+  }
+  .fmt-chips .chip {
+    display: inline-flex; align-items: center;
+    background: var(--bg-soft);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 8px 14px;
+    border-radius: 100px;
+    font-size: 12.5px;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all 0.18s;
+  }
+  .fmt-chips .chip:hover {
+    background: #fff; border-color: var(--ink-soft);
+  }
+  .fmt-chips .chip.sponsored {
+    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
+    border-color: var(--pink);
+    color: var(--ink);
+    box-shadow: 0 6px 16px rgba(255, 45, 120, 0.18);
+    font-weight: 700;
+  }
+  .fmt-chips .chip.sponsored:hover {
+    background: var(--pink); color: #fff;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .fmt-video .play-btn, .fmt-corner { animation: none !important; }
     .ad-slide:hover { transform: none !important; }
@@ -1102,7 +1140,7 @@
   </div>
 </section>
 
-<!-- AD-FORMAT SPREAD — 5 browser-screenshot cards scattered edge-to-edge -->
+<!-- AD-FORMAT SPREAD — 6 browser-screenshot cards scattered edge-to-edge in 3×2 -->
 <section style="padding: 0 0 72px;" data-reveal>
   <div class="wrap">
     <div class="ad-carousel" id="adCarousel">
@@ -1203,6 +1241,28 @@
                 <p>Ship insights 10× faster with AI-assisted cohort building. Free up to 10M events.</p>
                 <span class="c">See live demo →</span>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ⑥ SUGGESTED CHIP · Gemini · Figma -->
+        <div class="ad-slide" data-format="chip">
+          <div class="browser-bar">
+            <span class="bb-dots"><i></i><i></i><i></i></span>
+            <span class="bb-url"><svg class="bb-lock" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg>gemini.google.com</span>
+          </div>
+          <div class="ad-head">
+            <div class="icon" style="background: linear-gradient(135deg, #4285F4 0%, #9B72CB 50%, #D96570 100%);">G</div>
+            <div class="name">Gemini<small>Google AI · via MCP</small></div>
+            <span class="fmt-tag" style="background: #4285F4">Suggested chip</span>
+          </div>
+          <div class="ad-body">
+            <div class="mini-user">What's the best tool for UI wireframing?</div>
+            <div class="mini-ai">Popular picks are Figma, Balsamiq, and Whimsical — Figma is the industry standard, with real-time collaboration built in.</div>
+            <div class="fmt-chips">
+              <span class="chip">Compare tools</span>
+              <span class="chip sponsored">✨ Try Figma free →</span>
+              <span class="chip">Wireframing 101</span>
             </div>
           </div>
         </div>
