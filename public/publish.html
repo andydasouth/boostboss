@@ -20,13 +20,13 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
-    /* Publisher-friendly palette — emerald (money/growth) + amber (payouts)
-       replaces the loud pink/cyan/yellow that lives on the advertiser page.
-       Variable names kept for code compatibility — only values swapped. */
-    --pink: #10B981;        /* emerald — primary CTA, money accent */
-    --pink-dark: #059669;   /* deeper emerald for hover/active states */
-    --cyan: #0EA5E9;        /* calmer sky blue for info accents */
-    --yellow: #F59E0B;      /* warm amber for emphasis (was neon yellow) */
+    /* Boost Boss brand palette — restored. ManyChat-style pages work best
+       with vibrant, energetic colors — the green felt flat for a page that
+       should make publishers feel excited about earning money. */
+    --pink: #FF2D78;
+    --pink-dark: #E01E65;
+    --cyan: #04BEFE;
+    --yellow: #FFE600;
     --ink: #0F0F1A;
     --ink-soft: #4B4B5E;
     --muted: #6B7280;
@@ -35,14 +35,8 @@
     --bg-soft: #FAFAF7;
   }
   html { scroll-behavior: smooth; }
-  /* ─────────────────────────────────────────────────────────────────
-     Unified Mintegral-style page tone: ONE cohesive emerald background
-     that shifts very gently top→bottom so the whole scroll feels like
-     one continuous surface, not a stack of colored sections.
-     Fixed-attachment keeps the gradient steady while content scrolls
-     over it — the sense of depth comes from the position, not from
-     per-section hard color changes.
-     ───────────────────────────────────────────────────────────────── */
+  /* Page background: subtle warm cream with pink/cyan glow spots —
+     brighter, more playful (ManyChat vibe) than the flat green. */
   body {
     font-family: 'Inter', -apple-system, sans-serif;
     color: var(--ink);
@@ -50,13 +44,9 @@
     -webkit-font-smoothing: antialiased;
     font-size: 16px;
     background:
-      linear-gradient(180deg,
-        #FAFAF7 0%,              /* warm cream at the top */
-        #F0FAF5 28%,              /* soft mint around the hero */
-        #F6FBF4 55%,              /* pale leaf mid-page */
-        #F1F7F2 78%,              /* slightly deeper mint near CTA */
-        #FAFAF7 100%              /* cream again at the footer */
-      ),
+      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%),
+      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%),
+      radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%),
       #FAFAF7;
     background-attachment: fixed;
     min-height: 100vh;
@@ -141,8 +131,8 @@
     content: '';
     position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(circle at 20% 30%, rgba(16,185,129,0.12), transparent 55%),
-      radial-gradient(circle at 82% 62%, rgba(245,158,11,0.08), transparent 60%);
+      radial-gradient(circle at 20% 30%, rgba(255, 45, 120, 0.10), transparent 55%),
+      radial-gradient(circle at 82% 62%, rgba(4, 190, 254, 0.10), transparent 60%);
   }
   .hero .wrap { position: relative; z-index: 1; }
   .hero h1 {
@@ -170,9 +160,9 @@
   .hero-stats { display: flex; gap: 48px; justify-content: center; margin-top: 56px; }
   .hero-stat { text-align: center; }
   .hero-stat .n { font-family: 'Space Grotesk', sans-serif; font-size: 36px; font-weight: 700; color: var(--ink); line-height: 1; }
-  .hero-stat .n.cyan  { color: var(--pink); }       /* unify to single theme tone */
+  .hero-stat .n.cyan  { color: var(--cyan); }
   .hero-stat .n.pink  { color: var(--pink); }
-  .hero-stat .n.yellow{ color: var(--pink); }
+  .hero-stat .n.yellow{ color: var(--yellow); text-shadow: 0 1px 0 rgba(0,0,0,0.12); }
   .hero-stat .l { font-size: 13px; color: var(--muted); margin-top: 6px; font-weight: 500; }
 
   /* HOW IT WORKS */
@@ -185,10 +175,10 @@
   .section-header h2 { font-size: clamp(30px, 4vw, 44px); font-weight: 700; letter-spacing: -0.03em; margin-bottom: 14px; line-height: 1.1; }
   .section-header p { font-size: 17px; color: var(--ink-soft); line-height: 1.55; }
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-  /* Cards float on the body gradient — soft white with emerald hint on hover */
+  /* Cards float on the body gradient — soft white with pink hint on hover */
   .step {
-    background: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(16, 185, 129, 0.12);
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 45, 120, 0.12);
     border-radius: 16px;
     padding: 32px 28px;
     position: relative;
@@ -198,8 +188,8 @@
   }
   .step:hover {
     transform: translateY(-4px);
-    box-shadow: 0 14px 40px rgba(16, 185, 129, 0.12);
-    border-color: rgba(16, 185, 129, 0.3);
+    box-shadow: 0 14px 40px rgba(255, 45, 120, 0.15);
+    border-color: rgba(255, 45, 120, 0.3);
   }
   .step-num {
     position: absolute; top: 24px; right: 24px;
@@ -207,9 +197,10 @@
     display: flex; align-items: center; justify-content: center;
     font-family: 'Space Grotesk', sans-serif;
     font-weight: 700; font-size: 14px;
-    background: var(--pink); color: #fff;   /* unified theme color */
   }
-  .step-num.c1, .step-num.c2, .step-num.c3 { background: var(--pink); color: #fff; }
+  .step-num.c1 { background: var(--cyan); color: var(--ink); }
+  .step-num.c2 { background: var(--pink); color: #fff; }
+  .step-num.c3 { background: var(--yellow); color: var(--ink); }
   .step h3 { font-size: 18px; font-weight: 700; margin: 24px 0 8px; }
   .step p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; }
   .step .mini-code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); background: #fff; border: 1px solid var(--line); padding: 6px 10px; border-radius: 6px; margin-top: 12px; display: inline-block; }
@@ -305,23 +296,23 @@
 
   /* FINAL CTA */
   .final-cta { padding: 96px 0; text-align: center; }
-  /* CTA wedge — a richer emerald "deep pool" on the same family palette
-     so it deepens the body gradient rather than punching through it */
+  /* CTA wedge — playful pink gradient card so it deepens the body tone
+     rather than punching through it with a dark block */
   .cta-box {
-    background: linear-gradient(135deg, #059669 0%, #047857 55%, #065F46 100%);
+    background: linear-gradient(135deg, #FF2D78 0%, #E01E65 55%, #B81654 100%);
     border-radius: 20px;
     padding: 72px 48px;
     max-width: 900px;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 30px 80px rgba(6, 95, 70, 0.25);
+    box-shadow: 0 30px 80px rgba(255, 45, 120, 0.32);
   }
   .cta-box::before {
     content: ''; position: absolute; inset: 0;
     background:
-      radial-gradient(circle at 30% 50%, rgba(167,243,208,0.22), transparent 55%),
-      radial-gradient(circle at 75% 45%, rgba(255,255,255,0.08), transparent 55%);
+      radial-gradient(circle at 30% 50%, rgba(255, 230, 0, 0.22), transparent 55%),
+      radial-gradient(circle at 75% 45%, rgba(4, 190, 254, 0.18), transparent 55%);
   }
   .cta-box .inner { position: relative; z-index: 1; }
   .cta-box h2 { font-size: clamp(30px, 4vw, 48px); color: #fff; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 16px; line-height: 1.1; }
@@ -384,6 +375,207 @@
     .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
   }
 
+  /* ═════════════════════════════════════════════════════════════════
+     ManyChat-style interactions (live chat mockup, fade-ups, counters)
+     ═════════════════════════════════════════════════════════════════ */
+
+  /* Hero visual wrap — positions the chat card with floating earning pills */
+  .pub-hero-visual {
+    max-width: 600px; margin: 56px auto 0;
+    position: relative;
+  }
+  .pub-hero-visual .float-pill {
+    position: absolute;
+    padding: 10px 16px; border-radius: 100px;
+    background: #fff;
+    border: 1px solid var(--line);
+    font-size: 13px; font-weight: 700;
+    color: var(--ink);
+    box-shadow: 0 12px 28px rgba(15, 15, 26, 0.08);
+    animation: pubFloat 4s ease-in-out infinite;
+    white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px;
+    z-index: 3;
+  }
+  .pub-hero-visual .float-pill .emoji { font-size: 14px; }
+  .pub-hero-visual .float-pill strong { color: var(--pink); }
+  .pub-hero-visual .float-pill.fp-1 { top: -8px; left: -16px; animation-delay: 0s; }
+  .pub-hero-visual .float-pill.fp-2 { top: 30%; right: -28px; animation-delay: 0.9s; }
+  .pub-hero-visual .float-pill.fp-3 { bottom: 16%; left: -36px; animation-delay: 1.8s; }
+  @keyframes pubFloat {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+
+  /* The chat card */
+  .chat-mock {
+    background: #fff; border-radius: 20px;
+    border: 1px solid var(--line);
+    box-shadow: 0 30px 80px rgba(15, 15, 26, 0.08),
+                0 10px 28px rgba(15, 15, 26, 0.05);
+    overflow: hidden;
+    position: relative;
+  }
+  .chat-mock-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 18px;
+    background: linear-gradient(180deg, #FAFAF7 0%, #fff 100%);
+    border-bottom: 1px solid var(--line);
+  }
+  .chat-mock-head .app-icon {
+    width: 30px; height: 30px; border-radius: 8px;
+    background: linear-gradient(135deg, #FF8A1F, #FF5E3A);
+    color: #fff;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 800; font-size: 15px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-mock-head .app-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .chat-mock-head .app-name small {
+    display: block; font-size: 11px; color: var(--muted);
+    font-weight: 500; margin-top: 1px;
+  }
+  .chat-mock-head .live-dot {
+    margin-left: auto;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+    animation: livePulse 1.8s ease-out infinite;
+  }
+  @keyframes livePulse {
+    0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+  }
+  .chat-mock-body {
+    padding: 22px 20px 20px;
+    min-height: 340px;
+    display: flex; flex-direction: column; gap: 12px;
+    background:
+      radial-gradient(circle at 10% 0%, rgba(255, 45, 120, 0.04), transparent 40%),
+      radial-gradient(circle at 90% 100%, rgba(4, 190, 254, 0.04), transparent 40%),
+      #fff;
+  }
+  .chat-bubble {
+    max-width: 88%;
+    padding: 11px 14px; border-radius: 14px;
+    font-size: 14px; line-height: 1.5;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .chat-bubble.visible { opacity: 1; transform: translateY(0); }
+  .chat-bubble.user {
+    align-self: flex-end;
+    background: var(--ink); color: #fff;
+    border-bottom-right-radius: 4px;
+  }
+  .chat-bubble.ai {
+    align-self: flex-start;
+    background: var(--bg-soft); color: var(--ink);
+    border: 1px solid var(--line);
+    border-bottom-left-radius: 4px;
+  }
+  .chat-typing {
+    display: inline-flex; gap: 4px; align-items: center;
+    padding: 14px 16px; background: var(--bg-soft);
+    border: 1px solid var(--line); border-radius: 14px;
+    border-bottom-left-radius: 4px; align-self: flex-start;
+    opacity: 0; transition: opacity 0.25s ease;
+  }
+  .chat-typing.visible { opacity: 1; }
+  .chat-typing span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+    animation: typingBounce 1.1s ease-in-out infinite;
+  }
+  .chat-typing span:nth-child(2) { animation-delay: 0.15s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.30s; }
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+    30%          { transform: translateY(-3px); opacity: 1; }
+  }
+
+  /* Sponsored card with earnings tag — publisher-POV emphasizes the payout */
+  .chat-sponsor {
+    margin-top: 6px; position: relative;
+    background: linear-gradient(135deg, #FFF5F9 0%, #FFE6EE 100%);
+    border: 1.5px solid var(--pink);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 6px;
+    opacity: 0; transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 10px 28px rgba(255, 45, 120, 0.18);
+  }
+  .chat-sponsor.visible { opacity: 1; transform: translateY(0); }
+  .chat-sponsor::before {
+    content: '✨ via Boost Boss';
+    position: absolute; top: -10px; left: 14px;
+    background: var(--pink); color: #fff;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px; border-radius: 100px;
+    letter-spacing: 0.4px;
+  }
+  .chat-sponsor .sp-label {
+    font-size: 10px; font-weight: 700; color: var(--pink);
+    text-transform: uppercase; letter-spacing: 0.6px;
+    margin-top: 4px;
+  }
+  .chat-sponsor .sp-title { font-size: 15px; font-weight: 700; color: var(--ink); line-height: 1.3; }
+  .chat-sponsor .sp-sub { font-size: 13px; color: var(--ink-soft); line-height: 1.45; }
+  .chat-sponsor .sp-cta {
+    display: inline-block; align-self: flex-start;
+    margin-top: 4px;
+    background: var(--pink); color: #fff;
+    padding: 8px 14px; border-radius: 8px;
+    font-size: 13px; font-weight: 700;
+    transition: background 0.15s;
+  }
+
+  /* Publisher-specific earnings pop that lands right after the sponsor card */
+  .chat-earned {
+    align-self: flex-end;
+    background: #10B981; color: #fff;
+    font-size: 12px; font-weight: 700;
+    padding: 7px 12px; border-radius: 100px;
+    box-shadow: 0 8px 20px rgba(16, 185, 129, 0.28);
+    opacity: 0; transform: translate(12px, 4px) scale(0.8);
+    transition: opacity 0.3s ease, transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-flex; align-items: center; gap: 5px;
+  }
+  .chat-earned.visible { opacity: 1; transform: translate(0, 0) scale(1); }
+  .chat-earned::before { content: '💸'; }
+
+  /* ── SCROLL FADE-UPS ─────────────────────────────────────────────── */
+  [data-reveal] {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(0.25, 0.1, 0.25, 1),
+                transform 0.6s cubic-bezier(0.25, 0.1, 0.25, 1);
+    transition-delay: var(--reveal-delay, 0s);
+    will-change: opacity, transform;
+  }
+  [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    [data-reveal] { opacity: 1; transform: none; transition: none; }
+    .chat-bubble, .chat-sponsor, .chat-earned, .float-pill, .chat-typing {
+      opacity: 1 !important; transform: none !important; animation: none !important;
+    }
+  }
+
+  /* ── STATS COUNTER shimmer while animating ──────────────────────── */
+  .hero-stat .n.counting {
+    background: linear-gradient(90deg, var(--pink), var(--pink) 50%, var(--cyan));
+    background-size: 200% 100%;
+    background-position: 100% 50%;
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: countShimmer 1.4s ease-out;
+  }
+  @keyframes countShimmer {
+    from { background-position: 100% 50%; }
+    to   { background-position: 0% 50%; }
+  }
+
 </style>
 </head>
 <body>
@@ -422,17 +614,51 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <h1>Monetize your AI app.<br><span class="grad">Get paid weekly.</span></h1>
-    <p class="sub">Integrate the Lumi SDK in 3 minutes. Context-aware native ads that respect your UX. Keep 85% of every dollar. No minimums, no contracts.</p>
-    <div class="hero-ctas">
+    <h1 data-reveal>Monetize your AI app.<br><span class="grad">Get paid weekly.</span></h1>
+    <p class="sub" data-reveal style="--reveal-delay:80ms">Integrate the Lumi SDK in 3 minutes. Context-aware native ads that respect your UX. Keep 85% of every dollar. No minimums, no contracts.</p>
+    <div class="hero-ctas" data-reveal style="--reveal-delay:160ms">
       <a class="btn btn-white btn-lg" href="/signup">Get your API key</a>
       <a class="btn btn-ghost btn-lg" href="/docs">Read the docs</a>
     </div>
+
+    <!-- Live chat mockup: publisher-POV. Ad appears in the host app, then a
+         "+$0.47 earned" confirmation pops up showing the revenue ticking in.
+         Loops across 3 conversation scenarios. -->
+    <div class="pub-hero-visual" data-reveal style="--reveal-delay:240ms">
+      <div class="float-pill fp-1"><span class="emoji">💸</span>Today <strong>$2,483</strong></div>
+      <div class="float-pill fp-2"><span class="emoji">📈</span>eCPM <strong>$4.21</strong></div>
+      <div class="float-pill fp-3"><span class="emoji">⚡</span>85% revshare</div>
+
+      <div class="chat-mock" id="heroChatMock">
+        <div class="chat-mock-head">
+          <div class="app-icon" id="chatAppIcon">F</div>
+          <div class="app-name">
+            <span id="chatAppName">Fissbot</span>
+            <small id="chatAppMeta">Your AI app · Lumi SDK active</small>
+          </div>
+          <div class="live-dot" aria-label="Live"></div>
+        </div>
+        <div class="chat-mock-body" id="chatBody"></div>
+      </div>
+    </div>
+
     <div class="hero-stats">
-      <div class="hero-stat"><div class="n pink">85%</div><div class="l">Revenue share</div></div>
-      <div class="hero-stat"><div class="n cyan">47ms</div><div class="l">Median ad fill</div></div>
-      <div class="hero-stat"><div class="n yellow">7 day</div><div class="l">Payout cycle</div></div>
-      <div class="hero-stat"><div class="n">3 min</div><div class="l">Integration time</div></div>
+      <div class="hero-stat" data-reveal style="--reveal-delay:0ms">
+        <div class="n pink" data-count="85" data-decimals="0" data-suffix="%">0%</div>
+        <div class="l">Revenue share</div>
+      </div>
+      <div class="hero-stat" data-reveal style="--reveal-delay:80ms">
+        <div class="n cyan" data-count="47" data-decimals="0" data-suffix="ms">0ms</div>
+        <div class="l">Median ad fill</div>
+      </div>
+      <div class="hero-stat" data-reveal style="--reveal-delay:160ms">
+        <div class="n yellow" data-count="7" data-decimals="0" data-suffix=" day">0 day</div>
+        <div class="l">Payout cycle</div>
+      </div>
+      <div class="hero-stat" data-reveal style="--reveal-delay:240ms">
+        <div class="n" data-count="3" data-decimals="0" data-suffix=" min">0 min</div>
+        <div class="l">Integration time</div>
+      </div>
     </div>
   </div>
 </section>
@@ -441,8 +667,8 @@
 <section class="how" id="how">
   <div class="wrap">
     <div class="section-header">
-      <div class="eyebrow">How it works</div>
-      <h2>From zero to first ad in 3 minutes</h2>
+      <div class="eyebrow" data-reveal>How it works</div>
+      <h2 data-reveal style="--reveal-delay:80ms">From zero to first ad in 3 minutes</h2>
       <p>No sales call. No waitlist. No demo required. Just sign up, drop in the SDK, and ship.</p>
     </div>
     <div class="steps">
@@ -477,8 +703,8 @@
     <div class="code-grid">
       <div class="code-features">
         <div class="section-header" style="text-align:left;margin:0 0 32px;">
-          <div class="eyebrow">The Lumi SDK</div>
-          <h2>One SDK. Every AI platform.</h2>
+          <div class="eyebrow" data-reveal>The Lumi SDK</div>
+          <h2 data-reveal style="--reveal-delay:80ms">One SDK. Every AI platform.</h2>
         </div>
         <div class="code-feat">
           <div class="dot" style="background:var(--cyan);"></div>
@@ -552,8 +778,8 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 <section class="formats" id="formats">
   <div class="wrap">
     <div class="section-header">
-      <div class="eyebrow">Ad formats</div>
-      <h2>Native by default. Built for AI.</h2>
+      <div class="eyebrow" data-reveal>Ad formats</div>
+      <h2 data-reveal style="--reveal-delay:80ms">Native by default. Built for AI.</h2>
       <p>Every format fits naturally inside an AI session — your users engage, not rage-scroll.</p>
     </div>
     <div class="formats-grid">
@@ -594,7 +820,7 @@ ad = bb.<span class="f">get_sponsored_content</span>(
   <div class="wrap">
     <div class="cta-box">
       <div class="inner">
-        <h2>Start earning from<br>your AI app today</h2>
+        <h2 data-reveal>Start earning from<br>your AI app today</h2>
         <p>Sign up, drop in the SDK, and ship it in your next commit. First payout lands next Friday.</p>
         <div class="hero-ctas">
           <a class="btn btn-white btn-lg" href="/signup">Get your API key</a>
@@ -677,54 +903,220 @@ ad = bb.<span class="f">get_sponsored_content</span>(
 </footer>
 
 <script>
-  // Nav scroll effect
-  const nav = document.getElementById('mainNav');
-  window.addEventListener('scroll', () => { nav.classList.toggle('scrolled', window.scrollY > 40); });
+  /* ═══════════════════════════════════════════════════════════════════
+     /publish ManyChat-style interactions:
+       (a) Nav scroll effect
+       (b) Code tab switcher
+       (c) Live chat mockup — publisher-POV. AI answers inside their app,
+           a sponsored card drops in, and a "+$0.47 earned" pill pops up
+           to show the revenue ticking in. Cycles across 3 scenarios.
+       (d) Scroll-triggered fade-ups via IntersectionObserver
+       (e) Counter animations on stats (respects prefers-reduced-motion)
+     ═══════════════════════════════════════════════════════════════════ */
+  (function () {
+    'use strict';
+    var prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  // Code tab switcher
-  document.querySelectorAll('.code-tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      const lang = tab.getAttribute('data-lang');
-      document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      document.querySelectorAll('.code-box').forEach(box => {
-        box.setAttribute('data-active', box.getAttribute('data-lang') === lang ? '1' : '0');
+    // (a) Nav
+    var nav = document.getElementById('mainNav');
+    if (nav) {
+      window.addEventListener('scroll', function () {
+        nav.classList.toggle('scrolled', window.scrollY > 40);
+      });
+    }
+
+    // (b) Code tab switcher (guards against missing nodes)
+    document.querySelectorAll('.code-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        var lang = tab.getAttribute('data-lang');
+        document.querySelectorAll('.code-tab').forEach(function (t) { t.classList.remove('active'); });
+        tab.classList.add('active');
+        document.querySelectorAll('.code-box').forEach(function (box) {
+          box.setAttribute('data-active', box.getAttribute('data-lang') === lang ? '1' : '0');
+        });
       });
     });
-  });
 
-  // Revenue calculator (85% revshare)
-  const mauSlider = document.getElementById('mauSlider');
-  const impSlider = document.getElementById('impSlider');
-  const audSlider = document.getElementById('audSlider');
-  const AUD_LABELS = { 1: 'Broad consumer', 2: 'Prosumer', 3: 'AI-native (high)' };
-  const AUD_ECPM = { 1: 1.10, 2: 1.60, 3: 2.10 };
+    // ─────────────────────────────────────────────────────────────────
+    // (c) Publisher-POV live chat loop
+    // ─────────────────────────────────────────────────────────────────
+    var chatScenarios = [
+      {
+        appIcon: 'F', appIconBg: 'linear-gradient(135deg, #FFE600, #FF8A1F)',
+        appName: 'Fissbot',  appMeta: 'Your AI app · Lumi SDK active',
+        user: "I'm looking for a CRM for my sales team of 12.",
+        ai:   "HubSpot and Pipedrive are the two most popular at that size — HubSpot shines on automation; Pipedrive on pipeline views.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'HubSpot Starter — built for growing teams',
+          sub: 'CRM + marketing + sales in one. From $45/mo.',
+          cta: 'Try free →'
+        },
+        earned: '+$0.47 earned'
+      },
+      {
+        appIcon: 'G', appIconBg: 'linear-gradient(135deg, #8B5CF6, #EC4899)',
+        appName: 'GymAI', appMeta: 'Your AI app · Lumi SDK active',
+        user: "What supplement stack do you recommend for muscle recovery?",
+        ai:   "Creatine monohydrate and whey protein cover 90% of the science. A high-quality brand makes a bigger difference than most people think.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Momentous — NSF-certified recovery stack',
+          sub: 'Creatine + whey + omega-3. Ships free in the US.',
+          cta: 'Shop the stack →'
+        },
+        earned: '+$0.62 earned'
+      },
+      {
+        appIcon: 'D', appIconBg: 'linear-gradient(135deg, #4B9FFF, #0EA5E9)',
+        appName: 'DocHQ', appMeta: 'Your AI app · Lumi SDK active',
+        user: "How do I set up SSO for my 200-person team?",
+        ai:   "SAML through your identity provider is standard. Auth0 has prebuilt connectors for every major IdP and gets you SSO in ~30 minutes.",
+        sponsor: {
+          label: '◆ SPONSORED PLACEMENT',
+          title: 'Auth0 — SSO in 10 minutes',
+          sub: 'SAML + OIDC + SCIM. Ship enterprise auth this week.',
+          cta: 'Start free →'
+        },
+        earned: '+$0.91 earned'
+      }
+    ];
 
-  function fmtNum(n) {
-    if (n >= 1e6) return (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (n >= 1e3) return Math.round(n / 1e3) + 'K';
-    return n.toString();
-  }
-  function fmtMoney(n) { return '$' + Math.round(n).toLocaleString('en-US'); }
+    var chatBody = document.getElementById('chatBody');
+    var chatIcon = document.getElementById('chatAppIcon');
+    var chatName = document.getElementById('chatAppName');
+    var chatMeta = document.getElementById('chatAppMeta');
+    var idx = 0;
 
-  function recalc() {
-    const mau = parseInt(mauSlider.value, 10) * 1000;
-    const impPerDay = parseInt(impSlider.value, 10);
-    const audTier = parseInt(audSlider.value, 10);
-    const ecpm = AUD_ECPM[audTier];
-    document.getElementById('mauVal').textContent = fmtNum(mau);
-    document.getElementById('impVal').textContent = impPerDay;
-    document.getElementById('audVal').textContent = AUD_LABELS[audTier];
-    const gross = (mau * impPerDay * 30 / 1000) * ecpm;
-    const yours = gross * 0.85;
-    const fee = gross * 0.15;
-    document.getElementById('calcPayout').textContent = fmtMoney(yours);
-    document.getElementById('calcSub').textContent = `Based on ~$${ecpm.toFixed(2)} eCPM · 85% revshare to you`;
-    document.getElementById('calcYou').textContent = fmtMoney(yours);
-    document.getElementById('calcFee').textContent = fmtMoney(fee);
-  }
-  [mauSlider, impSlider, audSlider].forEach(s => s.addEventListener('input', recalc));
-  recalc();
+    function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+    function mk(cls, html) {
+      var el = document.createElement('div');
+      el.className = cls; el.innerHTML = html; return el;
+    }
+    function makeSponsor(s) {
+      return mk('chat-sponsor',
+        '<span class="sp-label">' + s.label + '</span>' +
+        '<span class="sp-title">' + s.title + '</span>' +
+        '<span class="sp-sub">'   + s.sub   + '</span>' +
+        '<a class="sp-cta" href="/signup">' + s.cta + '</a>');
+    }
+
+    async function play(s) {
+      if (!chatBody) return;
+      if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+      if (chatName) chatName.textContent = s.appName;
+      if (chatMeta) chatMeta.textContent = s.appMeta;
+      chatBody.innerHTML = '';
+
+      var u = mk('chat-bubble user', s.user); chatBody.appendChild(u);
+      await sleep(80);  requestAnimationFrame(function () { u.classList.add('visible'); });
+      await sleep(900);
+
+      var t = mk('chat-typing', '<span></span><span></span><span></span>');
+      chatBody.appendChild(t);
+      requestAnimationFrame(function () { t.classList.add('visible'); });
+      await sleep(1400);
+      t.remove();
+
+      var a = mk('chat-bubble ai', s.ai); chatBody.appendChild(a);
+      requestAnimationFrame(function () { a.classList.add('visible'); });
+      await sleep(1100);
+
+      var sp = makeSponsor(s.sponsor); chatBody.appendChild(sp);
+      requestAnimationFrame(function () { sp.classList.add('visible'); });
+      await sleep(900);
+
+      var e = mk('chat-earned', s.earned); chatBody.appendChild(e);
+      requestAnimationFrame(function () { e.classList.add('visible'); });
+      await sleep(3400);
+    }
+
+    async function chatLoop() {
+      if (!chatBody) return;
+      if (prefersReduced) {
+        // Static fallback — render the first scenario fully visible
+        var s = chatScenarios[0];
+        if (chatIcon) { chatIcon.textContent = s.appIcon; chatIcon.style.background = s.appIconBg; }
+        if (chatName) chatName.textContent = s.appName;
+        if (chatMeta) chatMeta.textContent = s.appMeta;
+        chatBody.innerHTML = '';
+        [mk('chat-bubble user', s.user), mk('chat-bubble ai', s.ai), makeSponsor(s.sponsor), mk('chat-earned', s.earned)]
+          .forEach(function (n) { n.classList.add('visible'); chatBody.appendChild(n); });
+        return;
+      }
+      while (true) {
+        await play(chatScenarios[idx]);
+        idx = (idx + 1) % chatScenarios.length;
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // (d) Scroll fade-ups
+    // ─────────────────────────────────────────────────────────────────
+    function initReveals() {
+      var nodes = document.querySelectorAll('[data-reveal]');
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        nodes.forEach(function (n) { n.classList.add('is-visible'); });
+        return;
+      }
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+      nodes.forEach(function (n) { io.observe(n); });
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // (e) Counter animations
+    // ─────────────────────────────────────────────────────────────────
+    function animateCounter(el) {
+      var target = parseFloat(el.getAttribute('data-count') || '0');
+      var dec    = parseInt(el.getAttribute('data-decimals') || '0', 10);
+      var pre    = el.getAttribute('data-prefix') || '';
+      var suf    = el.getAttribute('data-suffix') || '';
+      var dur    = 1400;
+      var start  = performance.now();
+      el.classList.add('counting');
+      function step(now) {
+        var t = Math.min(1, (now - start) / dur);
+        var eased = 1 - Math.pow(1 - t, 3);
+        el.textContent = pre + (target * eased).toFixed(dec) + suf;
+        if (t < 1) requestAnimationFrame(step);
+        else {
+          el.textContent = pre + target.toFixed(dec) + suf;
+          setTimeout(function () { el.classList.remove('counting'); }, 200);
+        }
+      }
+      requestAnimationFrame(step);
+    }
+    function initCounters() {
+      var counters = document.querySelectorAll('[data-count]');
+      if (prefersReduced) {
+        counters.forEach(function (el) {
+          var pre = el.getAttribute('data-prefix') || '';
+          var suf = el.getAttribute('data-suffix') || '';
+          var dec = parseInt(el.getAttribute('data-decimals') || '0', 10);
+          el.textContent = pre + parseFloat(el.getAttribute('data-count') || '0').toFixed(dec) + suf;
+        });
+        return;
+      }
+      if (!('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) { animateCounter(entry.target); io.unobserve(entry.target); }
+        });
+      }, { threshold: 0.5 });
+      counters.forEach(function (el) { io.observe(el); });
+    }
+
+    function init() { initReveals(); initCounters(); chatLoop(); }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+    else init();
+  })();
 </script>
 </body>
 </html>
