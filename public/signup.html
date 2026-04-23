@@ -13,6 +13,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 :root {
@@ -89,6 +90,34 @@ nav {
 }
 .btn-submit:hover { background: var(--pink-dark); }
 .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Google OAuth button — sits above the email/password form */
+.btn-google {
+  width: 100%; padding: 12px; border-radius: 10px;
+  background: #fff; border: 1.5px solid var(--line);
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  font-size: 15px; font-weight: 600; font-family: inherit;
+  color: var(--ink); cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  margin-bottom: 18px;
+}
+.btn-google:hover { border-color: #9CA3AF; background: #FAFAFA; box-shadow: 0 2px 8px rgba(15, 15, 26, 0.06); }
+.btn-google:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-google svg { width: 18px; height: 18px; flex-shrink: 0; }
+body.dark .btn-google { background: #1F2937; color: #F3F4F6; border-color: #374151; }
+body.dark .btn-google:hover { background: #2A3748; border-color: #4B5563; }
+
+.divider-small {
+  display: flex; align-items: center; gap: 12px;
+  color: var(--muted); font-size: 12.5px;
+  margin: 8px 0 18px;
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.divider-small::before, .divider-small::after {
+  content: ''; flex: 1; border-top: 1px solid var(--line);
+}
+body.dark .divider-small { color: #6B7280; }
+body.dark .divider-small::before, body.dark .divider-small::after { border-top-color: #374151; }
 
 .error-msg {
   background: #FEF2F2; border: 1px solid #FECACA; color: var(--red);
@@ -254,6 +283,13 @@ body.dark .superboost-mark { color: #F3F4F6; }
       <div id="error" class="error-msg"></div>
       <div id="success" class="success-msg"></div>
 
+      <!-- Google OAuth -->
+      <button class="btn-google" id="google-btn" type="button">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider-small">or with email</div>
+
       <!-- Role picker -->
       <div class="role-picker">
         <button class="role-btn active" data-role="advertiser">
@@ -301,6 +337,13 @@ body.dark .superboost-mark { color: #F3F4F6; }
       <p class="sub">Sign in to your Boost Boss account</p>
 
       <div id="login-error" class="error-msg"></div>
+
+      <!-- Google OAuth -->
+      <button class="btn-google" id="login-google-btn" type="button">
+        <svg viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.707A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.707V4.961H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.039l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.961L3.964 7.293C4.672 5.166 6.656 3.58 9 3.58z"/></svg>
+        Continue with Google
+      </button>
+      <div class="divider-small">or with email</div>
 
       <form id="login-form" autocomplete="off">
         <div class="form-group">
@@ -358,6 +401,16 @@ function showToast(msg, type='info', dur=2500) {
 
 const API = "/api/auth";
 let selectedRole = "advertiser";
+
+// ── Supabase client (used for Google OAuth only) ────────────────
+// Auth API-key endpoints stay on /api/auth — Supabase JS here just
+// powers the OAuth redirect dance. Google provider must be enabled
+// in the Supabase project's auth settings for this button to work.
+const SUPABASE_URL = "https://glogijhwbrdkkjdsjujc.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0";
+const sb = window.supabase && window.supabase.createClient
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
 
 // ── Role lock based on URL path ──────────────────────────────────
 // /publish/signup and /publish/signin → publisher-only flow
@@ -563,6 +616,85 @@ async function launchDemo(role) {
 }
 document.getElementById("demo-btn").addEventListener("click", () => launchDemo(selectedRole));
 document.getElementById("login-demo-btn").addEventListener("click", () => launchDemo("advertiser"));
+
+// ── Google OAuth ────────────────────────────────────────────────
+// Click "Continue with Google" → Supabase redirects to Google OAuth
+// → on return, handleOAuthReturn() calls /api/auth?action=oauth_sync
+// to provision (or fetch) the user's advertiser/developer profile
+// using the role encoded in the URL path.
+async function signInWithGoogle(buttonId) {
+  if (!sb) { showError("error", "Google sign-in unavailable — Supabase not loaded."); return; }
+  const btn = document.getElementById(buttonId);
+  if (btn) { btn.disabled = true; btn.style.opacity = "0.6"; }
+  try {
+    // Come back to the same URL so selectedRole (locked by path) is preserved
+    const redirectTo = window.location.origin + window.location.pathname;
+    const { error } = await sb.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo },
+    });
+    if (error) throw error;
+    // Browser is now redirecting to Google — nothing more to do here.
+  } catch (err) {
+    if (btn) { btn.disabled = false; btn.style.opacity = "1"; }
+    showError("error", err.message || "Google sign-in failed");
+    showToast(err.message || "Google sign-in failed", "error");
+  }
+}
+document.getElementById("google-btn").addEventListener("click", () => signInWithGoogle("google-btn"));
+document.getElementById("login-google-btn").addEventListener("click", () => signInWithGoogle("login-google-btn"));
+
+// After the Google OAuth redirect, Supabase JS processes the URL hash
+// (access_token / refresh_token) and fires a SIGNED_IN auth event. We
+// listen for that, call /api/auth?action=oauth_sync to create or fetch
+// the user's profile row for the URL-locked role, save bb_token, and
+// redirect to the role's dashboard. The `ran` guard prevents double-
+// firing if Supabase emits SIGNED_IN multiple times in one page load.
+(function handleOAuthReturn() {
+  if (!sb) return;
+  var ran = false;
+
+  async function doSync(session) {
+    if (ran) return;
+    if (!session || !session.access_token) return;
+    if (localStorage.getItem("bb_token")) return;   // already signed in via /api/auth
+    ran = true;
+    try {
+      showToast("Linking Google account…", "info");
+      const r = await fetch(API + "?action=oauth_sync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + session.access_token,
+        },
+        body: JSON.stringify({ role: selectedRole }),
+      });
+      const j = await r.json();
+      if (!r.ok || j.error) throw new Error(j.error || "OAuth sync failed");
+
+      saveSession(j);
+      showToast("Signed in with Google!", "success");
+      const dest = j.user?.role === "developer" ? "/developer" : "/advertiser";
+      setTimeout(() => window.location.href = dest, 500);
+    } catch (err) {
+      ran = false;  // allow retry if the backend call failed
+      console.error("[OAuth sync]", err);
+      showError("error", err.message || "Google sign-in sync failed");
+    }
+  }
+
+  // Subscribe for the SIGNED_IN event (fires after Supabase processes
+  // the URL hash from the OAuth redirect).
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === "SIGNED_IN") doSync(session);
+  });
+
+  // Belt-and-suspenders: if the event already fired before we subscribed
+  // (e.g. the hash was processed synchronously), grab the session now.
+  sb.auth.getSession().then(({ data }) => {
+    if (data && data.session) doSync(data.session);
+  });
+})();
 
 // ── Helpers ──
 function saveSession(j) {

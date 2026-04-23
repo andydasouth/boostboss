@@ -8,11 +8,12 @@
  *
  * Both modes expose the same interface so the front-end never has to branch.
  *
- *   POST /api/auth?action=signup    { email, password, role, company_name?, app_name? }
- *   POST /api/auth?action=login     { email, password }
- *   POST /api/auth?action=demo      { role }                  ← demo only
- *   POST /api/auth?action=me        Authorization: Bearer <token>
- *   POST /api/auth?action=logout    Authorization: Bearer <token>
+ *   POST /api/auth?action=signup      { email, password, role, company_name?, app_name? }
+ *   POST /api/auth?action=login       { email, password }
+ *   POST /api/auth?action=demo        { role }                  ← demo only
+ *   POST /api/auth?action=oauth_sync  { role }  Authorization: Bearer <supabase-oauth-token>
+ *   POST /api/auth?action=me          Authorization: Bearer <token>
+ *   POST /api/auth?action=logout      Authorization: Bearer <token>
  */
 
 const crypto = require("crypto");
@@ -233,7 +234,12 @@ function demoHandler(action, body, req, res) {
     return res.status(404).json({ error: "Developer not found" });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, me, logout, update_formats" });
+  if (action === "oauth_sync") {
+    // Demo mode has no Supabase; OAuth isn't available here.
+    return res.status(501).json({ error: "Google sign-in requires Supabase — demo mode doesn't support OAuth. Use email + password or try the demo." });
+  }
+
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats" });
 }
 
 // ─────────────────── SUPABASE IMPLEMENTATION ────────────────────────
@@ -303,6 +309,79 @@ async function supabaseHandler(action, body, req, res) {
     return res.json({ mode: "supabase", user: { id: user.id, email: user.email, role }, profile });
   }
 
+  if (action === "oauth_sync") {
+    // Called by the signup page after a successful Google OAuth return.
+    // The client sends the Supabase OAuth access_token + desired role;
+    // we verify the token, ensure an advertiser/developer row exists,
+    // and return the same shape as signup/login so the frontend can
+    // save the session and redirect to the role's dashboard.
+    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
+    if (!token) return res.status(401).json({ error: "No token" });
+    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
+    if (error || !user) return res.status(401).json({ error: "Invalid OAuth token" });
+
+    let role = user.user_metadata?.role;
+    const requested = body.role === "developer" ? "developer" : "advertiser";
+    // If the user has no role yet (first time via OAuth), adopt the one
+    // the signup page asked for. If they already have a role, keep it.
+    if (role !== "advertiser" && role !== "developer") {
+      role = requested;
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(user.id, {
+          user_metadata: { ...(user.user_metadata || {}), role },
+        });
+      } catch (e) {
+        console.warn("[Auth oauth_sync] user_metadata role update failed:", e.message);
+      }
+    }
+
+    let profile = null;
+    if (role === "advertiser") {
+      const { data: existing } = await supabaseAdmin.from("advertisers").select("*").eq("id", user.id).single();
+      if (existing) {
+        profile = existing;
+      } else {
+        const insertRow = {
+          id: user.id, email: user.email,
+          company_name: user.user_metadata?.full_name || (user.email || "").split("@")[0],
+          balance: 0,
+        };
+        const { data: inserted, error: insErr } = await supabaseAdmin
+          .from("advertisers").insert(insertRow).select("*").single();
+        if (insErr) return res.status(500).json({ error: "Profile create failed: " + insErr.message });
+        profile = inserted;
+      }
+    } else {
+      const { data: existing } = await supabaseAdmin.from("developers").select("*").eq("id", user.id).single();
+      if (existing) {
+        profile = existing;
+        if (!profile.api_key) {
+          const apiKey = makeApiKey("dev", user.id);
+          await supabaseAdmin.from("developers").update({ api_key: apiKey }).eq("id", user.id);
+          profile.api_key = apiKey;
+        }
+      } else {
+        const apiKey = makeApiKey("dev", user.id);
+        const insertRow = {
+          id: user.id, email: user.email,
+          app_name: user.user_metadata?.app_name || "My AI App",
+          api_key: apiKey, status: "active",
+        };
+        const { data: inserted, error: insErr } = await supabaseAdmin
+          .from("developers").insert(insertRow).select("*").single();
+        if (insErr) return res.status(500).json({ error: "Profile create failed: " + insErr.message });
+        profile = inserted;
+      }
+    }
+
+    return res.json({
+      success: true, mode: "supabase",
+      user: { id: user.id, email: user.email, role },
+      profile,
+      session: { access_token: token, refresh_token: null },
+    });
+  }
+
   if (action === "logout") {
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (token) await supabaseAnon.auth.signOut();
@@ -357,7 +436,7 @@ async function supabaseHandler(action, body, req, res) {
     });
   }
 
-  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, me, logout, update_formats" });
+  return res.status(400).json({ error: "Unknown action. Use: demo, signup, login, oauth_sync, me, logout, update_formats" });
 }
 
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
