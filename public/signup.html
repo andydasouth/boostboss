@@ -420,6 +420,22 @@ const sb = window.supabase && window.supabase.createClient
 
   var LUMI = '<span class="lumi-mark">Lumi SDK <span class="spark">✦</span></span>';
   var SUPERBOOST = '<span class="superboost-mark">Super<span class="bb">Boost Ads</span></span>';
+  // Primary rocket logo SVG — shared across the landing / publish / ads navs
+  var ROCKET_SVG = '<svg class="brand-mark" width="36" height="36" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">' +
+    '<path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>' +
+    '<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>' +
+    '<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>' +
+    '<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>' +
+    '<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>' +
+    '<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>' +
+    '<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>' +
+    '<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>' +
+    '<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>' +
+    '<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>' +
+    '<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>' +
+    '<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>' +
+    '<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/>' +
+  '</svg>';
 
   if (path.startsWith("/publish/")) {
     role = "developer";
@@ -428,7 +444,10 @@ const sb = window.supabase && window.supabase.createClient
       signupH: "Start earning as a Publisher",
       signupS: "Monetize your AI app with the " + LUMI,
       loginH:  "Welcome back",
-      loginS:  "Sign in to your " + LUMI + " dashboard"
+      loginS:  "Sign in to your " + LUMI + " dashboard",
+      logoSvg: ROCKET_SVG,
+      wordmark: "Boost Boss",
+      brandHref: "/publish"
     };
   } else if (path.startsWith("/ads/")) {
     role = "advertiser";
@@ -437,7 +456,10 @@ const sb = window.supabase && window.supabase.createClient
       signupH: "Launch your first ad campaign",
       signupS: "Reach AI-native users via " + SUPERBOOST,
       loginH:  "Welcome back",
-      loginS:  "Sign in to your " + SUPERBOOST + " dashboard"
+      loginS:  "Sign in to your " + SUPERBOOST + " dashboard",
+      logoSvg: ROCKET_SVG,
+      wordmark: 'Super<span style="color: var(--pink);">Boost Ads</span>',
+      brandHref: "/ads"
     };
   }
   if (!role) return;
@@ -464,6 +486,14 @@ const sb = window.supabase && window.supabase.createClient
   if (suS) suS.innerHTML   = brand.signupS;   // innerHTML — embeds wordmark markup
   if (liH) liH.textContent = brand.loginH;
   if (liS) liS.innerHTML   = brand.loginS;    // innerHTML — embeds wordmark markup
+
+  // Swap the nav brand: rocket logo + role-appropriate wordmark
+  var navBrand     = document.querySelector("nav .brand");
+  var navBrandMark = navBrand && navBrand.querySelector(".brand-mark");
+  var navBrandName = navBrand && navBrand.querySelector(".brand-name");
+  if (navBrand)     navBrand.setAttribute("href", brand.brandHref);
+  if (navBrandMark) navBrandMark.outerHTML = brand.logoSvg;
+  if (navBrandName) navBrandName.innerHTML = brand.wordmark;
 
   // Show the correct panel for this URL
   var isSignin = /\/signin$/.test(path);
