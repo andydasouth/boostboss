@@ -332,18 +332,34 @@ let selectedRole = "advertiser";
 // ── Role lock based on URL path ──────────────────────────────────
 // /publish/signup and /publish/signin → publisher-only flow
 // /ads/signup  and /ads/signin         → advertiser-only flow
-// /signup (and /login) keeps the role picker for the shared landing
+// /signup (and /login) keeps the shared flow with the role picker.
+// On role-specific URLs we remove the Create/Sign-in tab bar entirely
+// — each URL is its own dedicated page — and re-route the "switch"
+// anchors to navigate to the sibling URL.
 (function lockRoleFromPath() {
   var path = window.location.pathname;
   var role = null;
+  var base = null;  // base of the role-specific URL family
   var brand = null;
 
   if (path.startsWith("/publish/")) {
     role = "developer";
-    brand = { heading: "Start earning as a Publisher", sub: "Monetize your AI app with the Lumi SDK" };
+    base = "/publish";
+    brand = {
+      signupH: "Start earning as a Publisher",
+      signupS: "Monetize your AI app with the Lumi SDK",
+      loginH:  "Welcome back",
+      loginS:  "Sign in to your Publisher dashboard"
+    };
   } else if (path.startsWith("/ads/")) {
     role = "advertiser";
-    brand = { heading: "Launch your first ad campaign", sub: "Reach AI-native users via SuperBoost Ads" };
+    base = "/ads";
+    brand = {
+      signupH: "Launch your first ad campaign",
+      signupS: "Reach AI-native users via SuperBoost Ads",
+      loginH:  "Welcome back",
+      loginS:  "Sign in to your Advertiser dashboard"
+    };
   }
   if (!role) return;
 
@@ -351,21 +367,48 @@ let selectedRole = "advertiser";
   // Hide the role picker — this page is role-specific
   var picker = document.querySelector(".role-picker");
   if (picker) picker.style.display = "none";
+  // Remove the Create/Sign-in tab bar — dedicated URLs handle each
+  var tabRow = document.querySelector(".tab-row");
+  if (tabRow) tabRow.style.display = "none";
   // Toggle field visibility to match the locked role
   var companyG = document.getElementById("company-group");
   var appG     = document.getElementById("app-group");
   if (companyG) companyG.classList.toggle("hidden", role !== "advertiser");
   if (appG)     appG.classList.toggle("hidden", role !== "developer");
-  // Customize signup-panel heading/sub
-  var h1  = document.querySelector("#signup-panel h1");
-  var sub = document.querySelector("#signup-panel .sub");
-  if (h1)  h1.textContent  = brand.heading;
-  if (sub) sub.textContent = brand.sub;
-  // Open "Sign in" tab if the path ends in /signin
-  if (/\/signin$/.test(path)) {
-    var loginTab = document.querySelector('[data-tab="login"]');
-    if (loginTab) loginTab.click();
-  }
+
+  // Customize panel copy for the role
+  var suH  = document.querySelector("#signup-panel h1");
+  var suS  = document.querySelector("#signup-panel .sub");
+  var liH  = document.querySelector("#login-panel h1");
+  var liS  = document.querySelector("#login-panel .sub");
+  if (suH) suH.textContent = brand.signupH;
+  if (suS) suS.textContent = brand.signupS;
+  if (liH) liH.textContent = brand.loginH;
+  if (liS) liS.textContent = brand.loginS;
+
+  // Show the correct panel for this URL
+  var isSignin = /\/signin$/.test(path);
+  document.getElementById("signup-panel").classList.toggle("hidden", isSignin);
+  document.getElementById("login-panel").classList.toggle("hidden", !isSignin);
+
+  // Re-route the cross-link anchors to the sibling URL. We use a
+  // capture-phase listener with stopImmediatePropagation so the bubble
+  // handler attached later in this file (which toggles panels in place)
+  // never fires — the browser follows the new href instead.
+  var signinHref = base + "/signin";
+  var signupHref = base + "/signup";
+  var switchLogin  = document.getElementById("switch-login");
+  var switchSignup = document.getElementById("switch-signup");
+  if (switchLogin)  switchLogin.setAttribute("href", signinHref);
+  if (switchSignup) switchSignup.setAttribute("href", signupHref);
+  var redirect = function (href) {
+    return function (e) {
+      e.stopImmediatePropagation();
+      window.location.href = href;
+    };
+  };
+  if (switchLogin)  switchLogin.addEventListener("click",  redirect(signinHref), true);
+  if (switchSignup) switchSignup.addEventListener("click", redirect(signupHref), true);
 })();
 
 // ── Tab switching ──
