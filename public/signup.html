@@ -189,6 +189,36 @@ body.dark .tab-btn.active { color: var(--pink); border-bottom-color: var(--pink)
 .pw-strength { height: 4px; border-radius: 2px; background: var(--line); margin-top: 6px; overflow: hidden; }
 .pw-strength .bar { height: 100%; border-radius: 2px; transition: width 0.3s, background 0.3s; width: 0; }
 .pw-label { font-size: 11px; margin-top: 3px; font-weight: 500; }
+
+/* ── Product wordmarks (used in role-specific signup/signin sub-copy) ── */
+.superboost-mark { font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+.superboost-mark .bb { color: var(--pink); }
+body.dark .superboost-mark { color: #F3F4F6; }
+
+.lumi-mark {
+  font-weight: 700;
+  letter-spacing: -0.1px;
+  background-image: linear-gradient(90deg, #FF2D78 0%, #FFE600 25%, #04BEFE 50%, #FFE600 75%, #FF2D78 100%);
+  background-size: 220% 100%;
+  background-position: 0% 50%;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: lumiShimmer 4s linear infinite;
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.lumi-mark .spark {
+  -webkit-text-fill-color: #FFE600; color: #FFE600;
+  font-size: 10px; text-shadow: 0 0 8px rgba(255, 230, 0, 0.55);
+  animation: lumiBlink 1.8s ease-in-out infinite;
+}
+@keyframes lumiShimmer {
+  0%   { background-position:   0% 50%; }
+  100% { background-position: 220% 50%; }
+}
+@keyframes lumiBlink {
+  0%, 100% { opacity: 0.55; transform: scale(0.95); }
+  50%      { opacity: 1;    transform: scale(1.05); }
+}
 </style>
 </head>
 <body>
@@ -342,12 +372,15 @@ let selectedRole = "advertiser";
   var base = null;  // base of the role-specific URL family
   var brand = null;
 
+  var LUMI = '<span class="lumi-mark">Lumi SDK <span class="spark">✦</span></span>';
+  var SUPERBOOST = '<span class="superboost-mark">Super<span class="bb">Boost Ads</span></span>';
+
   if (path.startsWith("/publish/")) {
     role = "developer";
     base = "/publish";
     brand = {
       signupH: "Start earning as a Publisher",
-      signupS: "Monetize your AI app with the Lumi SDK",
+      signupS: "Monetize your AI app with the " + LUMI,
       loginH:  "Welcome back",
       loginS:  "Sign in to your Publisher dashboard"
     };
@@ -356,7 +389,7 @@ let selectedRole = "advertiser";
     base = "/ads";
     brand = {
       signupH: "Launch your first ad campaign",
-      signupS: "Reach AI-native users via SuperBoost Ads",
+      signupS: "Reach AI-native users via " + SUPERBOOST,
       loginH:  "Welcome back",
       loginS:  "Sign in to your Advertiser dashboard"
     };
@@ -382,7 +415,7 @@ let selectedRole = "advertiser";
   var liH  = document.querySelector("#login-panel h1");
   var liS  = document.querySelector("#login-panel .sub");
   if (suH) suH.textContent = brand.signupH;
-  if (suS) suS.textContent = brand.signupS;
+  if (suS) suS.innerHTML   = brand.signupS;   // innerHTML — embeds wordmark markup
   if (liH) liH.textContent = brand.loginH;
   if (liS) liS.textContent = brand.loginS;
 
