@@ -261,7 +261,6 @@ body.dark .superboost-mark { color: #F3F4F6; }
     </a>
     <div style="display:flex;gap:10px;align-items:center;">
       <a href="/docs" style="font-size:14px;font-weight:500;color:var(--ink-soft);">Docs</a>
-      <button class="dark-toggle" onclick="document.body.classList.toggle('dark');localStorage.setItem('bb_signup_dark',document.body.classList.contains('dark')?'1':'0')" title="Toggle dark mode">🌓</button>
     </div>
   </div>
 </nav>
@@ -385,9 +384,6 @@ body.dark .superboost-mark { color: #F3F4F6; }
 <footer>© 2026 Boost Boss, Inc.</footer>
 
 <script>
-// Dark mode
-if (['bb_signup_dark','bb_docs_dark','bb_pg_dark','bb_bbx_dark','bb_status_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
-
 // Toast
 function showToast(msg, type='info', dur=2500) {
   const c = document.getElementById('toastContainer');
@@ -435,7 +431,7 @@ const sb = window.supabase && window.supabase.createClient
       signupH: "Start earning as a Publisher",
       signupS: "Monetize your AI app with the " + LUMI,
       loginH:  "Welcome back",
-      loginS:  "Sign in to your Publisher dashboard"
+      loginS:  "Sign in to your " + LUMI + " dashboard"
     };
   } else if (path.startsWith("/ads/")) {
     role = "advertiser";
@@ -444,7 +440,7 @@ const sb = window.supabase && window.supabase.createClient
       signupH: "Launch your first ad campaign",
       signupS: "Reach AI-native users via " + SUPERBOOST,
       loginH:  "Welcome back",
-      loginS:  "Sign in to your Advertiser dashboard"
+      loginS:  "Sign in to your " + SUPERBOOST + " dashboard"
     };
   }
   if (!role) return;
@@ -470,7 +466,7 @@ const sb = window.supabase && window.supabase.createClient
   if (suH) suH.textContent = brand.signupH;
   if (suS) suS.innerHTML   = brand.signupS;   // innerHTML — embeds wordmark markup
   if (liH) liH.textContent = brand.loginH;
-  if (liS) liS.textContent = brand.loginS;
+  if (liS) liS.innerHTML   = brand.loginS;    // innerHTML — embeds wordmark markup
 
   // Show the correct panel for this URL
   var isSignin = /\/signin$/.test(path);

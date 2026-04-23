@@ -174,7 +174,6 @@
       <a href="/trust">Trust</a>
     </div>
     <div class="nav-ctas">
-      <button class="dark-toggle" onclick="document.body.classList.toggle('dark');localStorage.setItem('bb_status_dark',document.body.classList.contains('dark')?'1':'0')" title="Toggle dark mode">🌓</button>
       <a class="btn btn-ghost" href="/developer">Sign in</a>
       <a class="btn btn-primary" href="mailto:status@boostboss.ai">Subscribe</a>
     </div>
@@ -237,9 +236,6 @@
 </footer>
 
 <script>
-// Dark mode
-if (['bb_status_dark','bb_docs_dark','bb_pg_dark','bb_bbx_dark','bb_signup_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
-
 // Toast
 function showToast(msg, type='info', dur=2500) {
   const c = document.getElementById('toastContainer');

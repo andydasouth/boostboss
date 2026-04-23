@@ -633,7 +633,6 @@
     </div>
     <div style="display: flex; gap: 12px; align-items: center;">
       <div class="search" onclick="openSearch()"><span>🔍</span><span>Search docs...</span><span class="kbd">⌘K</span></div>
-      <button class="dark-toggle" onclick="toggleDark()" title="Toggle dark mode">🌓</button>
       <div class="nav-ctas">
         <a class="btn btn-primary" href="/developer">Get API key</a>
       </div>
@@ -1844,13 +1843,6 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
     if (idx < 0) return text;
     return text.substring(0, idx) + '<strong style="color:var(--pink)">' + text.substring(idx, idx + q.length) + '</strong>' + text.substring(idx + q.length);
   }
-
-  // ── Dark mode ──
-  function toggleDark() {
-    document.body.classList.toggle('dark');
-    localStorage.setItem('bb_docs_dark', document.body.classList.contains('dark') ? '1' : '0');
-  }
-  if (['bb_docs_dark','bb_pg_dark','bb_bbx_dark','bb_status_dark','bb_signup_dark'].some(k => localStorage.getItem(k) === '1')) document.body.classList.add('dark');
 
   // ── Mobile sidebar ──
   function toggleSidebar() {
