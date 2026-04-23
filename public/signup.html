@@ -329,6 +329,45 @@ function showToast(msg, type='info', dur=2500) {
 const API = "/api/auth";
 let selectedRole = "advertiser";
 
+// ── Role lock based on URL path ──────────────────────────────────
+// /publish/signup and /publish/signin → publisher-only flow
+// /ads/signup  and /ads/signin         → advertiser-only flow
+// /signup (and /login) keeps the role picker for the shared landing
+(function lockRoleFromPath() {
+  var path = window.location.pathname;
+  var role = null;
+  var brand = null;
+
+  if (path.startsWith("/publish/")) {
+    role = "developer";
+    brand = { heading: "Start earning as a Publisher", sub: "Monetize your AI app with the Lumi SDK" };
+  } else if (path.startsWith("/ads/")) {
+    role = "advertiser";
+    brand = { heading: "Launch your first ad campaign", sub: "Reach AI-native users via SuperBoost Ads" };
+  }
+  if (!role) return;
+
+  selectedRole = role;
+  // Hide the role picker — this page is role-specific
+  var picker = document.querySelector(".role-picker");
+  if (picker) picker.style.display = "none";
+  // Toggle field visibility to match the locked role
+  var companyG = document.getElementById("company-group");
+  var appG     = document.getElementById("app-group");
+  if (companyG) companyG.classList.toggle("hidden", role !== "advertiser");
+  if (appG)     appG.classList.toggle("hidden", role !== "developer");
+  // Customize signup-panel heading/sub
+  var h1  = document.querySelector("#signup-panel h1");
+  var sub = document.querySelector("#signup-panel .sub");
+  if (h1)  h1.textContent  = brand.heading;
+  if (sub) sub.textContent = brand.sub;
+  // Open "Sign in" tab if the path ends in /signin
+  if (/\/signin$/.test(path)) {
+    var loginTab = document.querySelector('[data-tab="login"]');
+    if (loginTab) loginTab.click();
+  }
+})();
+
 // ── Tab switching ──
 document.querySelectorAll(".tab-btn").forEach(btn => {
   btn.addEventListener("click", () => {
