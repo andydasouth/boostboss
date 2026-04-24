@@ -266,28 +266,45 @@ async function supabaseHandler(action, body, req, res) {
   if (action === "signup") return signupSupabase(supabaseAdmin, supabaseAnon, body, res);
 
   if (action === "login") {
-    const { email, password } = body;
+    const { email, password, role: wantedRoleRaw } = body;
     if (!email || !password) return res.status(400).json({ error: "Missing email or password" });
     const { data, error } = await supabaseAnon.auth.signInWithPassword({ email, password });
     if (error) return res.status(401).json({ error: error.message });
-    const role = data.user?.user_metadata?.role || "unknown";
+
+    // Two-product sign-in: the role is decided by the URL the user came
+    // from (e.g. /publish/signin vs /ads/signin). We only return the
+    // profile matching that role — so a publisher signing in on /ads
+    // gets a clean "no advertiser account, sign up first" error.
+    const wantedRole =
+      wantedRoleRaw === "developer" || wantedRoleRaw === "advertiser"
+        ? wantedRoleRaw
+        : (data.user?.user_metadata?.role || "advertiser");
+
     let profile = null;
-    if (role === "advertiser") {
-      const { data: adv } = await supabaseAdmin.from("advertisers").select("*").eq("id", data.user.id).single();
+    if (wantedRole === "advertiser") {
+      const { data: adv } = await supabaseAdmin.from("advertisers").select("*").eq("id", data.user.id).maybeSingle();
       profile = adv;
-    } else if (role === "developer") {
-      const { data: dev } = await supabaseAdmin.from("developers").select("*").eq("id", data.user.id).single();
+    } else if (wantedRole === "developer") {
+      const { data: dev } = await supabaseAdmin.from("developers").select("*").eq("id", data.user.id).maybeSingle();
       profile = dev;
-      // Ensure API key exists (backfill for developers created before api_key column was added)
       if (profile && !profile.api_key) {
         const apiKey = makeApiKey("dev", data.user.id);
         await supabaseAdmin.from("developers").update({ api_key: apiKey }).eq("id", data.user.id);
         profile.api_key = apiKey;
       }
     }
+
+    if (!profile) {
+      const product = wantedRole === "advertiser" ? "SuperBoost Ads" : "Lumi SDK";
+      return res.status(404).json({
+        error: "This email isn't registered for " + product + ". Please sign up first.",
+      });
+    }
+
     return res.json({
       success: true, mode: "supabase",
-      user: { id: data.user.id, email: data.user.email, role }, profile,
+      user: { id: data.user.id, email: data.user.email, role: wantedRole },
+      profile,
       session: { access_token: data.session.access_token, refresh_token: data.session.refresh_token },
     });
   }
@@ -442,21 +459,70 @@ async function supabaseHandler(action, body, req, res) {
 async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
   const { email, password, role, company_name, app_name } = body;
   if (!email || !password || !role) return res.status(400).json({ error: "Missing email, password, or role" });
+  if (role !== "advertiser" && role !== "developer") {
+    return res.status(400).json({ error: "Invalid role" });
+  }
 
-  const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
+  // Publisher (Lumi SDK) and Advertiser (SuperBoost Ads) are two separate
+  // products. One email can register for both — we create/update a
+  // profile row per role on the same Supabase auth user.
+  let userId = null;
+  let existingMeta = {};
+
+  const initialMeta = { role };
+  if (role === "advertiser" && company_name) initialMeta.company_name = company_name;
+  if (role === "developer"  && app_name)     initialMeta.app_name     = app_name;
+
+  const { data: createData, error: createErr } = await supabaseAdmin.auth.admin.createUser({
     email, password, email_confirm: true,
-    user_metadata: { role, company_name, app_name },
+    user_metadata: initialMeta,
   });
-  if (authErr) return res.status(400).json({ error: authErr.message });
 
-  const userId = authData.user?.id;
+  if (createErr) {
+    // Auth user likely already exists. Verify password, then attach the new role.
+    const { data: siData, error: siErr } = await supabaseAnon.auth.signInWithPassword({ email, password });
+    if (siErr || !siData.user) {
+      return res.status(400).json({
+        error: "This email is already registered. Please sign in or use a different email.",
+      });
+    }
+    userId = siData.user.id;
+    existingMeta = siData.user.user_metadata || {};
 
+    // Refuse if this role's profile already exists.
+    const table = role === "advertiser" ? "advertisers" : "developers";
+    const { data: existingProfile } = await supabaseAdmin
+      .from(table).select("id").eq("id", userId).maybeSingle();
+    if (existingProfile) {
+      const product = role === "advertiser" ? "SuperBoost Ads" : "Lumi SDK";
+      return res.status(400).json({
+        error: "This email is already registered for " + product + ". Please sign in instead.",
+      });
+    }
+  } else {
+    userId = createData.user?.id;
+  }
+
+  // Merge the new role into user_metadata.roles (array) so future logins can
+  // see which products this account has profiles for.
+  const existingRoles = existingMeta.roles || (existingMeta.role ? [existingMeta.role] : []);
+  const mergedRoles = Array.from(new Set([].concat(existingRoles, [role])));
+  const newMeta = Object.assign({}, existingMeta, { role, roles: mergedRoles });
+  if (role === "advertiser" && company_name) newMeta.company_name = company_name;
+  if (role === "developer"  && app_name)     newMeta.app_name     = app_name;
+  try {
+    await supabaseAdmin.auth.admin.updateUserById(userId, { user_metadata: newMeta });
+  } catch (e) {
+    console.warn("[Auth] user_metadata update failed:", e.message);
+  }
+
+  // Insert the missing profile row for this role.
   if (role === "advertiser") {
     const { error } = await supabaseAdmin.from("advertisers").insert({
       id: userId, email, company_name: company_name || email.split("@")[0], balance: 0,
     });
     if (error) console.error("[Auth] Advertiser insert error:", error.message);
-  } else if (role === "developer") {
+  } else {
     const apiKey = makeApiKey("dev", userId);
     const { error } = await supabaseAdmin.from("developers").insert({
       id: userId, email, app_name: app_name || "My AI App",
@@ -467,7 +533,6 @@ async function signupSupabase(supabaseAdmin, supabaseAnon, body, res) {
 
   const { data: signInData, error: signInErr } = await supabaseAnon.auth.signInWithPassword({ email, password });
 
-  // Build profile with API key for developers
   let profile;
   if (role === "advertiser") {
     profile = { company_name: company_name || email.split("@")[0], balance: 0 };

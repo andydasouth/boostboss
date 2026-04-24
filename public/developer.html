@@ -2841,9 +2841,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const session = localStorage.getItem('bb_dev_session');
             if (session) return; // Already authenticated
 
-            const signupToken = localStorage.getItem('bb_token');
-            const signupUser = localStorage.getItem('bb_user');
-            const signupProfile = localStorage.getItem('bb_profile');
+            // Prefer the Publisher-scoped session keys (bb_pub_*) set by the
+            // new /publish/signup + /publish/signin flow. Fall back to the
+            // legacy generic keys for older clients.
+            const signupToken   = localStorage.getItem('bb_pub_token')   || localStorage.getItem('bb_token');
+            const signupUser    = localStorage.getItem('bb_pub_user')    || localStorage.getItem('bb_user');
+            const signupProfile = localStorage.getItem('bb_pub_profile') || localStorage.getItem('bb_profile');
             if (signupToken && signupUser) {
                 try {
                     const user = JSON.parse(signupUser);
@@ -3086,6 +3089,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             if (confirm('Are you sure you want to log out?')) {
                 localStorage.removeItem('bb_dev_session');
                 localStorage.removeItem('bb_dev_data');
+                // Clear the publisher-scoped signup keys too. Advertiser
+                // (bb_adv_*) keys are left alone so a dual-role user stays
+                // signed in on /ads.
+                localStorage.removeItem('bb_pub_token');
+                localStorage.removeItem('bb_pub_user');
+                localStorage.removeItem('bb_pub_profile');
 
                 // Reset form
                 document.getElementById('email').value = '';

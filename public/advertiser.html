@@ -3005,11 +3005,13 @@
             let token = localStorage.getItem('bb_session_token');
             let userData = localStorage.getItem('bb_user_data');
 
-            // Bridge from /signup page tokens (bb_token + bb_user + bb_profile)
-            if (!token && localStorage.getItem('bb_token')) {
-                const signupToken = localStorage.getItem('bb_token');
-                const signupUser = JSON.parse(localStorage.getItem('bb_user') || '{}');
-                const signupProfile = JSON.parse(localStorage.getItem('bb_profile') || '{}');
+            // Bridge from /ads/signup page tokens. Prefer the advertiser-scoped
+            // session keys (bb_adv_*) set by the new /ads/signup + /ads/signin
+            // flow; fall back to legacy generic keys for older clients.
+            if (!token && (localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token'))) {
+                const signupToken   = localStorage.getItem('bb_adv_token')   || localStorage.getItem('bb_token');
+                const signupUser    = JSON.parse(localStorage.getItem('bb_adv_user')    || localStorage.getItem('bb_user')    || '{}');
+                const signupProfile = JSON.parse(localStorage.getItem('bb_adv_profile') || localStorage.getItem('bb_profile') || '{}');
                 if (signupToken && signupUser.id) {
                     currentUser = { token: signupToken, user_id: signupUser.id };
                     currentUserData = {
@@ -3270,6 +3272,12 @@
         function handleLogout() {
             localStorage.removeItem('bb_session_token');
             localStorage.removeItem('bb_user_data');
+            // Clear the advertiser-scoped signup keys too. Publisher
+            // (bb_pub_*) keys are left alone so a dual-role user stays
+            // signed in on /publish.
+            localStorage.removeItem('bb_adv_token');
+            localStorage.removeItem('bb_adv_user');
+            localStorage.removeItem('bb_adv_profile');
             currentUser = null;
             currentUserData = null;
             authForm.reset();

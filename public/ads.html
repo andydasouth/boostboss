@@ -2118,12 +2118,14 @@
     // nav CTAs for a single pill showing their display name → dashboard.
     function initAuthNav() {
       try {
-        var token = localStorage.getItem("bb_token");
-        var userStr = localStorage.getItem("bb_user");
+        // /ads marketing page → show the pill only if this browser has
+        // an Advertiser (SuperBoost Ads) session. Publisher sessions don't count.
+        var token = localStorage.getItem("bb_adv_token");
+        var userStr = localStorage.getItem("bb_adv_user");
         if (!token || !userStr) return;
         var user = JSON.parse(userStr);
         var profile = {};
-        try { profile = JSON.parse(localStorage.getItem("bb_profile") || "{}"); } catch (_) {}
+        try { profile = JSON.parse(localStorage.getItem("bb_adv_profile") || "{}"); } catch (_) {}
 
         var name = profile.company_name || profile.app_name;
         if (!name && user.email) name = String(user.email).split("@")[0];

@@ -600,6 +600,7 @@ document.getElementById("login-form").addEventListener("submit", async e => {
       body: JSON.stringify({
         email: document.getElementById("login-email").value.trim(),
         password: document.getElementById("login-password").value,
+        role: selectedRole,   // /publish/signin → developer · /ads/signin → advertiser
       }),
     });
     const j = await r.json();
@@ -680,7 +681,10 @@ document.getElementById("login-google-btn").addEventListener("click", () => sign
   async function doSync(session) {
     if (ran) return;
     if (!session || !session.access_token) return;
-    if (localStorage.getItem("bb_token")) return;   // already signed in via /api/auth
+    // Only short-circuit if we already have a session for THIS role
+    // (publisher sessions shouldn't block signin on /ads, and vice versa).
+    var nsToken = localStorage.getItem(roleNs(selectedRole) + "_token");
+    if (nsToken) return;
     ran = true;
     try {
       showToast("Linking Google account…", "info");
@@ -720,10 +724,20 @@ document.getElementById("login-google-btn").addEventListener("click", () => sign
 })();
 
 // ── Helpers ──
+// Each product is a separate session stream — a user registered for both
+// Lumi SDK and SuperBoost Ads has two independent sessions in this browser.
+// bb_pub_* stores the Publisher (Lumi SDK) session; bb_adv_* the Advertiser.
+function roleNs(role) { return role === "developer" ? "bb_pub" : "bb_adv"; }
 function saveSession(j) {
+  const role = j.user?.role || selectedRole;
+  const ns = roleNs(role);
+  if (j.session?.access_token) localStorage.setItem(ns + "_token", j.session.access_token);
+  if (j.user)                  localStorage.setItem(ns + "_user",  JSON.stringify(j.user));
+  if (j.profile)               localStorage.setItem(ns + "_profile", JSON.stringify(j.profile));
+  // Also set the legacy generic keys so any un-migrated consumers keep working.
   if (j.session?.access_token) localStorage.setItem("bb_token", j.session.access_token);
-  if (j.user) localStorage.setItem("bb_user", JSON.stringify(j.user));
-  if (j.profile) localStorage.setItem("bb_profile", JSON.stringify(j.profile));
+  if (j.user)                  localStorage.setItem("bb_user",  JSON.stringify(j.user));
+  if (j.profile)               localStorage.setItem("bb_profile", JSON.stringify(j.profile));
 }
 
 function showWelcome(j) {
@@ -761,30 +775,48 @@ function copyKey() {
   });
 }
 
-// ── Auto-redirect if already logged in ──
+// ── Auto-redirect if already logged in ─────────────────────────
+// Only auto-bounce to the dashboard matching the URL the user is on:
+// /publish/signin  → requires bb_pub_* session
+// /ads/signin      → requires bb_adv_* session
+// /signup          → legacy single-session fallback (bb_*)
 (function checkExistingSession() {
-  const token = localStorage.getItem("bb_token");
-  const user = localStorage.getItem("bb_user");
-  if (token && user) {
-    try {
-      const u = JSON.parse(user);
-      // Verify token is still valid
-      fetch(API + "?action=me", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
-      }).then(r => {
-        if (r.ok) {
-          const dest = u.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
-          window.location.href = dest;
+  const path = window.location.pathname;
+  let ns = null;
+  if (path.startsWith("/publish/")) ns = "bb_pub";
+  else if (path.startsWith("/ads/")) ns = "bb_adv";
+
+  const token = ns
+    ? localStorage.getItem(ns + "_token")
+    : localStorage.getItem("bb_token");
+  const userStr = ns
+    ? localStorage.getItem(ns + "_user")
+    : localStorage.getItem("bb_user");
+
+  if (!token || !userStr) return;
+  try {
+    const u = JSON.parse(userStr);
+    fetch(API + "?action=me", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+    }).then(r => {
+      if (r.ok) {
+        const dest = u.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+        window.location.href = dest;
+      } else {
+        // Token expired — clear scoped + legacy keys and show the form.
+        if (ns) {
+          localStorage.removeItem(ns + "_token");
+          localStorage.removeItem(ns + "_user");
+          localStorage.removeItem(ns + "_profile");
         } else {
-          // Token expired — clear and show form
           localStorage.removeItem("bb_token");
           localStorage.removeItem("bb_user");
           localStorage.removeItem("bb_profile");
         }
-      });
-    } catch (e) {}
-  }
+      }
+    });
+  } catch (e) {}
 })();
 
 // ── URL param: ?role=developer pre-selects publisher tab ──
