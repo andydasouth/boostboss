@@ -3272,25 +3272,30 @@
         function handleLogout() {
             localStorage.removeItem('bb_session_token');
             localStorage.removeItem('bb_user_data');
-            // Clear the advertiser-scoped signup keys too. Publisher
+            // Clear the advertiser-scoped signup keys. Publisher
             // (bb_pub_*) keys are left alone so a dual-role user stays
             // signed in on /publish.
             localStorage.removeItem('bb_adv_token');
             localStorage.removeItem('bb_adv_user');
             localStorage.removeItem('bb_adv_profile');
+            // Legacy generic keys: only clear them if they were pointing
+            // at an advertiser session (otherwise leave them alone — they
+            // may belong to the publisher side).
+            try {
+                const u = JSON.parse(localStorage.getItem('bb_user') || 'null');
+                if (u && u.role === 'advertiser') {
+                    localStorage.removeItem('bb_token');
+                    localStorage.removeItem('bb_user');
+                    localStorage.removeItem('bb_profile');
+                }
+            } catch (_) {}
             currentUser = null;
             currentUserData = null;
-            authForm.reset();
-            authEmail.value = '';
-            authPassword.value = '';
-            authCompanyName.value = '';
-            companyNameGroup.classList.add('hidden');
-            authToggleBtns[0].classList.add('active');
-            authToggleBtns[1].classList.remove('active');
-            authMode = 'login';
-            authSubmitBtn.textContent = 'Login';
-            authError.classList.remove('active');
-            showAuthForm();
+
+            // Hand the user off to the SuperBoost Ads marketing page —
+            // the nav pill there will revert to "Sign in / Launch a
+            // campaign" now that bb_adv_* is gone.
+            window.location.href = '/ads';
         }
 
         // Load stats

@@ -3170,21 +3170,28 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             if (confirm('Are you sure you want to log out?')) {
                 localStorage.removeItem('bb_dev_session');
                 localStorage.removeItem('bb_dev_data');
-                // Clear the publisher-scoped signup keys too. Advertiser
+                // Clear the publisher-scoped signup keys. Advertiser
                 // (bb_adv_*) keys are left alone so a dual-role user stays
                 // signed in on /ads.
                 localStorage.removeItem('bb_pub_token');
                 localStorage.removeItem('bb_pub_user');
                 localStorage.removeItem('bb_pub_profile');
+                // Legacy generic keys: only clear them if they were
+                // pointing at a publisher session (otherwise leave them
+                // — they may belong to the advertiser side).
+                try {
+                    const u = JSON.parse(localStorage.getItem('bb_user') || 'null');
+                    if (u && u.role === 'developer') {
+                        localStorage.removeItem('bb_token');
+                        localStorage.removeItem('bb_user');
+                        localStorage.removeItem('bb_profile');
+                    }
+                } catch (_) {}
 
-                // Reset form
-                document.getElementById('email').value = '';
-                document.getElementById('password').value = '';
-                document.getElementById('appName').value = '';
-
-                authMode = 'login';
-                showAuthView();
-                switchAuthMode('login');
+                // Hand the user off to the Lumi SDK marketing page — the
+                // nav pill there will revert to "Sign in / Start earning"
+                // now that bb_pub_* is gone.
+                window.location.href = '/publish';
             }
         }
 
