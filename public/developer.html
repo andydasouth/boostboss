@@ -2159,6 +2159,7 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${sessionData.token}`,
                     },
+                    body: JSON.stringify({ role: 'developer' }),
                 });
                 if (resp.status === 401) { clearSessionAndShowAuth(); return; }
                 if (!resp.ok) throw new Error('me call failed: ' + resp.status);
@@ -3185,6 +3186,21 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         localStorage.removeItem('bb_token');
                         localStorage.removeItem('bb_user');
                         localStorage.removeItem('bb_profile');
+                    }
+                } catch (_) {}
+                // Clear the Supabase OAuth session too (sb-<project>-auth-token),
+                // otherwise the next visit to /publish/signin would auto-sign
+                // the user back in via handleOAuthReturn's getSession() path.
+                // Only clears if no advertiser session is active — if the user
+                // still has bb_adv_* we leave Supabase's session alone so /ads
+                // stays signed in.
+                try {
+                    if (!localStorage.getItem('bb_adv_token')) {
+                        Object.keys(localStorage).forEach(function (k) {
+                            if (k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+                                localStorage.removeItem(k);
+                            }
+                        });
                     }
                 } catch (_) {}
 

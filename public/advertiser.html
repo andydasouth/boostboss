@@ -3289,6 +3289,19 @@
                     localStorage.removeItem('bb_profile');
                 }
             } catch (_) {}
+            // Clear the Supabase OAuth session (sb-<project>-auth-token)
+            // so the next visit to /ads/signin doesn't auto-sign the user
+            // back in via handleOAuthReturn. Only when the publisher side
+            // is also signed out — otherwise we'd kick Jane out of /publish.
+            try {
+                if (!localStorage.getItem('bb_pub_token')) {
+                    Object.keys(localStorage).forEach(function (k) {
+                        if (k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
+                            localStorage.removeItem(k);
+                        }
+                    });
+                }
+            } catch (_) {}
             currentUser = null;
             currentUserData = null;
 

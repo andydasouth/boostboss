@@ -314,62 +314,69 @@ async function supabaseHandler(action, body, req, res) {
     if (!token) return res.status(401).json({ error: "No token" });
     const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
     if (error || !user) return res.status(401).json({ error: "Invalid token" });
-    const role = user.user_metadata?.role || "unknown";
+    // An account can hold profiles for BOTH products (/publish dev + /ads
+    // advertiser). The caller tells us which product's dashboard it is,
+    // via { role: "developer" | "advertiser" } in the body. When the
+    // caller doesn't specify, fall back to user_metadata.role (the last
+    // role the user actively signed in with).
+    const wantedRaw = body && body.role;
+    const role = (wantedRaw === "developer" || wantedRaw === "advertiser")
+      ? wantedRaw
+      : (user.user_metadata?.role || "unknown");
     let profile = null;
     if (role === "advertiser") {
-      const { data } = await supabaseAdmin.from("advertisers").select("*").eq("id", user.id).single();
+      const { data } = await supabaseAdmin.from("advertisers").select("*").eq("id", user.id).maybeSingle();
       profile = data;
     } else if (role === "developer") {
-      const { data } = await supabaseAdmin.from("developers").select("*").eq("id", user.id).single();
+      const { data } = await supabaseAdmin.from("developers").select("*").eq("id", user.id).maybeSingle();
       profile = data;
+      if (profile && !profile.api_key) {
+        const apiKey = makeApiKey("dev", user.id);
+        await supabaseAdmin.from("developers").update({ api_key: apiKey }).eq("id", user.id);
+        profile.api_key = apiKey;
+      }
     }
     return res.json({ mode: "supabase", user: { id: user.id, email: user.email, role }, profile });
   }
 
   if (action === "oauth_sync") {
-    // Called by the signup page after a successful Google OAuth return.
-    // The client sends the Supabase OAuth access_token + desired role;
-    // we verify the token, ensure an advertiser/developer row exists,
-    // and return the same shape as signup/login so the frontend can
-    // save the session and redirect to the role's dashboard.
+    // Called after a successful Google OAuth return. The frontend sends
+    // the Supabase access_token + the role implied by the URL path. We
+    // verify the token, ensure the profile row for THAT role exists
+    // (creating it on first visit, adding it alongside any other role
+    // the user may already have), and return the same shape as
+    // signup/login so the frontend can persist the session and redirect.
     const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
     if (!token) return res.status(401).json({ error: "No token" });
     const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
     if (error || !user) return res.status(401).json({ error: "Invalid OAuth token" });
 
-    let role = user.user_metadata?.role;
-    const requested = body.role === "developer" ? "developer" : "advertiser";
-    // If the user has no role yet (first time via OAuth), adopt the one
-    // the signup page asked for. If they already have a role, keep it.
-    if (role !== "advertiser" && role !== "developer") {
-      role = requested;
-      try {
-        await supabaseAdmin.auth.admin.updateUserById(user.id, {
-          user_metadata: { ...(user.user_metadata || {}), role },
-        });
-      } catch (e) {
-        console.warn("[Auth oauth_sync] user_metadata role update failed:", e.message);
-      }
-    }
+    // Role ALWAYS comes from the URL path the user is on (passed in body),
+    // not from existing user_metadata. Publisher and Advertiser are two
+    // separate products on the same auth user.
+    const role = body.role === "developer" ? "developer" : "advertiser";
 
+    // Ensure the profile row for this role exists (create on first time).
     let profile = null;
     if (role === "advertiser") {
-      const { data: existing } = await supabaseAdmin.from("advertisers").select("*").eq("id", user.id).single();
+      const { data: existing } = await supabaseAdmin
+        .from("advertisers").select("*").eq("id", user.id).maybeSingle();
       if (existing) {
         profile = existing;
       } else {
-        const insertRow = {
-          id: user.id, email: user.email,
-          company_name: user.user_metadata?.full_name || (user.email || "").split("@")[0],
-          balance: 0,
-        };
+        const fullName = user.user_metadata?.full_name
+                      || user.user_metadata?.name
+                      || (user.email || "").split("@")[0];
         const { data: inserted, error: insErr } = await supabaseAdmin
-          .from("advertisers").insert(insertRow).select("*").single();
+          .from("advertisers")
+          .insert({ id: user.id, email: user.email, company_name: fullName, balance: 0 })
+          .select("*").single();
         if (insErr) return res.status(500).json({ error: "Profile create failed: " + insErr.message });
         profile = inserted;
       }
     } else {
-      const { data: existing } = await supabaseAdmin.from("developers").select("*").eq("id", user.id).single();
+      const { data: existing } = await supabaseAdmin
+        .from("developers").select("*").eq("id", user.id).maybeSingle();
       if (existing) {
         profile = existing;
         if (!profile.api_key) {
@@ -379,16 +386,29 @@ async function supabaseHandler(action, body, req, res) {
         }
       } else {
         const apiKey = makeApiKey("dev", user.id);
-        const insertRow = {
-          id: user.id, email: user.email,
-          app_name: user.user_metadata?.app_name || "My AI App",
-          api_key: apiKey, status: "active",
-        };
+        const fullName = user.user_metadata?.full_name
+                      || user.user_metadata?.name
+                      || "My AI App";
         const { data: inserted, error: insErr } = await supabaseAdmin
-          .from("developers").insert(insertRow).select("*").single();
+          .from("developers")
+          .insert({ id: user.id, email: user.email, app_name: fullName, api_key: apiKey, status: "active" })
+          .select("*").single();
         if (insErr) return res.status(500).json({ error: "Profile create failed: " + insErr.message });
         profile = inserted;
       }
+    }
+
+    // Merge the role into user_metadata.roles[] so future signins know
+    // which products this account has profiles for.
+    try {
+      const existingMeta = user.user_metadata || {};
+      const existingRoles = existingMeta.roles || (existingMeta.role ? [existingMeta.role] : []);
+      const mergedRoles = Array.from(new Set([].concat(existingRoles, [role])));
+      await supabaseAdmin.auth.admin.updateUserById(user.id, {
+        user_metadata: Object.assign({}, existingMeta, { role, roles: mergedRoles }),
+      });
+    } catch (e) {
+      console.warn("[Auth oauth_sync] user_metadata update failed:", e.message);
     }
 
     return res.json({
