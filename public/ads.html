@@ -2122,10 +2122,26 @@
         // an Advertiser (SuperBoost Ads) session. Publisher sessions don't count.
         var token = localStorage.getItem("bb_adv_token");
         var userStr = localStorage.getItem("bb_adv_user");
+        var profileStr = localStorage.getItem("bb_adv_profile");
+        // Legacy fallback: pre-migration users have only bb_* generic keys.
+        // Adopt them here only if the legacy session's role == advertiser.
+        if (!token) {
+          var legacyUserStr = localStorage.getItem("bb_user");
+          if (legacyUserStr) {
+            try {
+              var lu = JSON.parse(legacyUserStr);
+              if (lu && lu.role === "advertiser") {
+                token = localStorage.getItem("bb_token");
+                userStr = legacyUserStr;
+                profileStr = localStorage.getItem("bb_profile");
+              }
+            } catch (_) {}
+          }
+        }
         if (!token || !userStr) return;
         var user = JSON.parse(userStr);
         var profile = {};
-        try { profile = JSON.parse(localStorage.getItem("bb_adv_profile") || "{}"); } catch (_) {}
+        try { profile = JSON.parse(profileStr || "{}"); } catch (_) {}
 
         var name = profile.company_name || profile.app_name;
         if (!name && user.email) name = String(user.email).split("@")[0];
