@@ -395,6 +395,18 @@ function showToast(msg, type='info', dur=2500) {
 const API = "/api/auth";
 let selectedRole = "advertiser";
 
+// Capture whether this page load is actually an OAuth return BEFORE
+// Supabase.createClient() strips the URL hash. If there's no access_token
+// in the URL at initial parse time AND no ?error= from Supabase, we treat
+// it as a regular visit to the signin page — cached Supabase sessions will
+// NOT auto-sign the user in. This is what makes "click Sign in after
+// logout" actually show the form instead of bouncing to the dashboard.
+var IS_OAUTH_RETURN = (function () {
+  var h = window.location.hash || "";
+  var q = window.location.search || "";
+  return /access_token=|refresh_token=/.test(h) || /[?&]error=|[?&]error_code=/.test(q);
+})();
+
 // ── Supabase client (used for Google OAuth only) ────────────────
 // Auth API-key endpoints stay on /api/auth — Supabase JS here just
 // powers the OAuth redirect dance. Google provider must be enabled
@@ -704,10 +716,17 @@ document.getElementById("login-google-btn").addEventListener("click", () => sign
 // (access_token / refresh_token) and fires a SIGNED_IN auth event. We
 // listen for that, call /api/auth?action=oauth_sync to create or fetch
 // the user's profile row for the URL-locked role, save bb_token, and
-// redirect to the role's dashboard. The `ran` guard prevents double-
-// firing if Supabase emits SIGNED_IN multiple times in one page load.
+// redirect to the role's dashboard.
+//
+// IMPORTANT: we only run this flow when the page load is an actual OAuth
+// return (URL had #access_token= or ?error= at parse time). A cached
+// Supabase session alone is NOT enough to auto-sign-in — otherwise users
+// who've logged out would be silently signed back in when they click
+// "Sign in" again. IS_OAUTH_RETURN was captured at the very top of the
+// script, before supabase.createClient() stripped the hash.
 (function handleOAuthReturn() {
   if (!sb) return;
+  if (!IS_OAUTH_RETURN) return;
   var ran = false;
 
   async function doSync(session) {
