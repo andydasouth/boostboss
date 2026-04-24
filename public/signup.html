@@ -646,10 +646,28 @@ document.getElementById("login-demo-btn").addEventListener("click", () => launch
 // → on return, handleOAuthReturn() calls /api/auth?action=oauth_sync
 // to provision (or fetch) the user's advertiser/developer profile
 // using the role encoded in the URL path.
+// Wipe any leftover Supabase PKCE / flow state from a previous (possibly
+// abandoned) OAuth attempt so a new click always starts with a clean slate.
+// Without this, clicking back mid-OAuth and clicking Google again causes
+// the "bad_oauth_state" error (old code_verifier vs. new state mismatch).
+function clearStaleSupabaseFlowState() {
+  try {
+    Object.keys(localStorage).forEach(function (k) {
+      if (k.indexOf("sb-") !== 0) return;
+      // Keep the active session token. Wipe everything flow-related.
+      if (/code-verifier$/.test(k) || /flow-state$/.test(k) ||
+          /pkce|oauth-state/i.test(k)) {
+        localStorage.removeItem(k);
+      }
+    });
+  } catch (_) {}
+}
+
 async function signInWithGoogle(buttonId) {
   if (!sb) { showError("error", "Google sign-in unavailable — Supabase not loaded."); return; }
   const btn = document.getElementById(buttonId);
   if (btn) { btn.disabled = true; btn.style.opacity = "0.6"; }
+  clearStaleSupabaseFlowState();
   try {
     // Come back to the same URL so selectedRole (locked by path) is preserved
     const redirectTo = window.location.origin + window.location.pathname;
@@ -667,6 +685,20 @@ async function signInWithGoogle(buttonId) {
 }
 document.getElementById("google-btn").addEventListener("click", () => signInWithGoogle("google-btn"));
 document.getElementById("login-google-btn").addEventListener("click", () => signInWithGoogle("login-google-btn"));
+
+// If Supabase bounced the user back with an OAuth error (e.g. bad_oauth_state
+// after clicking back/forward mid-flow), clean the URL, wipe the stale PKCE
+// keys, and show a friendly "please try again" message.
+(function handleOAuthErrorParams() {
+  const params = new URLSearchParams(window.location.search);
+  const err = params.get("error");
+  if (!err) return;
+  const desc = decodeURIComponent(params.get("error_description") || "Sign-in was interrupted.");
+  history.replaceState(null, "", window.location.pathname);
+  clearStaleSupabaseFlowState();
+  showError("error", "Google sign-in was interrupted (" + err + "). Please click Continue with Google again.");
+  showToast(desc, "error", 4000);
+})();
 
 // After the Google OAuth redirect, Supabase JS processes the URL hash
 // (access_token / refresh_token) and fires a SIGNED_IN auth event. We

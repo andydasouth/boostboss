@@ -1493,5 +1493,41 @@
   })();
 </script>
 
+<script>
+  // If Supabase's OAuth flow errored out (e.g. stale PKCE state after a
+  // back/forward during sign-in), it falls back to Site URL — which is
+  // https://boostboss.ai, and Vercel rewrites that to /en, landing us
+  // here with ?error=…&error_code=…&error_description=… in the query.
+  // Redirect the user back to the signin page they came from (inferred
+  // from localStorage's "last OAuth attempt" marker) so they can retry
+  // without confusion — and clean the URL either way.
+  (function bounceFromOAuthError() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var err = params.get("error");
+      if (!err) return;
+      // Clean URL so a refresh doesn't re-show the error.
+      var cleaned = window.location.pathname;
+      // Wipe any lingering stale PKCE state that caused the failure.
+      Object.keys(localStorage).forEach(function (k) {
+        if (k.indexOf("sb-") !== 0) return;
+        if (/code-verifier$/.test(k) || /flow-state$/.test(k) ||
+            /pkce|oauth-state/i.test(k)) {
+          localStorage.removeItem(k);
+        }
+      });
+      // Infer where to send them: if bb_pub_* exists (previous publisher
+      // session attempt), go to /publish/signin; else /ads/signin.
+      var pub = localStorage.getItem("bb_pub_user") || localStorage.getItem("bb_pub_token");
+      var adv = localStorage.getItem("bb_adv_user") || localStorage.getItem("bb_adv_token");
+      var target = pub && !adv ? "/publish/signin"
+                  : adv && !pub ? "/ads/signin"
+                  : "/publish/signin";  // sensible default
+      // Forward the error params so the target page can show a message.
+      window.location.replace(target + "?" + params.toString());
+    } catch (_) {}
+  })();
+</script>
+
 </body>
 </html>
