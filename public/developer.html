@@ -1287,7 +1287,7 @@
                     <span class="logo-text">Lumi SDK</span>
                 </a>
                 <div class="header-title">Dashboard</div>
-                <button class="search-actions-btn" title="Search actions">
+                <button class="search-actions-btn" title="Search actions" onclick="openCmdPalette()">
                     <span>Search actions</span>
                     <kbd>⌘K</kbd>
                 </button>
@@ -1297,9 +1297,22 @@
                     <div class="account-label">Account</div>
                     <div class="account-name" id="navAppName">Loading...</div>
                 </div>
-                <button class="header-icon-btn" id="notifBtn" title="Notifications">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-                </button>
+                <div style="position: relative;">
+                    <button class="header-icon-btn" id="notifBtn" title="Notifications" style="position: relative;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                        <span id="notifBadge" style="position: absolute; top: 2px; right: 2px; width: 8px; height: 8px; background: #FF2D78; border-radius: 50%; display: none;"></span>
+                    </button>
+                    <div id="notifDropdown" style="display: none; position: absolute; top: 44px; right: 0; width: 340px; background: #fff; border-radius: 12px; box-shadow: 0 8px 40px rgba(0,0,0,0.15); z-index: 100; overflow: hidden;">
+                        <div style="padding: 14px 18px; border-bottom: 1px solid #F3F4F6; display: flex; justify-content: space-between; align-items: center;">
+                            <span style="font-size: 14px; font-weight: 700;">Notifications</span>
+                            <button id="notifMarkAll" style="font-size: 11px; color: #FF2D78; background: none; border: none; cursor: pointer; font-weight: 600;">Mark all read</button>
+                        </div>
+                        <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
+                        <div style="padding: 10px 18px; border-top: 1px solid #F3F4F6; text-align: center;">
+                            <span style="font-size: 12px; color: #9CA3AF;">Only showing last 7 days</span>
+                        </div>
+                    </div>
+                </div>
                 <button class="header-icon-btn" id="settingsBtn" title="Account Settings">⚙</button>
                 <button class="logout-btn" onclick="handleLogout()">Logout</button>
             </div>
@@ -3174,6 +3187,234 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 switchAuthMode('login');
             }
         }
+
+        // ───────────── NOTIFICATIONS (bell dropdown) ─────────────
+        (function initNotifications() {
+            const notifBtn      = document.getElementById('notifBtn');
+            const notifDropdown = document.getElementById('notifDropdown');
+            const notifList     = document.getElementById('notifList');
+            const notifBadge    = document.getElementById('notifBadge');
+            const markAllBtn    = document.getElementById('notifMarkAll');
+            if (!notifBtn || !notifDropdown) return;
+            let notifOpen = false;
+
+            function formatTimeAgo(ts) {
+                const diff = Date.now() - ts;
+                const m = Math.floor(diff / 60000);
+                if (m < 60) return m + 'm ago';
+                const h = Math.floor(m / 60);
+                if (h < 24) return h + 'h ago';
+                return Math.floor(h / 24) + 'd ago';
+            }
+            function genItems() {
+                const now = Date.now();
+                return [
+                    { icon: '💸', title: 'Payout sent',        body: 'Your weekly payout of $1,248.30 has been wired to your bank.',           time: now - 3600e3 * 3,     unread: true },
+                    { icon: '📈', title: 'RPM up 14%',         body: 'Last 24h RPM climbed to $16.76 from $14.70 — above your 14-day avg.',    time: now - 86400e3,        unread: true },
+                    { icon: '⚡', title: 'Benna optimization', body: 'Ad selection accuracy for your app improved by 6.2% after model refresh.', time: now - 86400e3 * 2,    unread: false },
+                    { icon: '🔑', title: 'New API key live',   body: 'Your Lumi SDK key is now active across all placements.',                  time: now - 86400e3 * 3,    unread: false },
+                    { icon: '🧩', title: 'Format unlocked',    body: 'Corner video ads now available in your format mix.',                     time: now - 86400e3 * 5,    unread: false },
+                ];
+            }
+            function render() {
+                const items = genItems();
+                notifBadge.style.display = items.some(n => n.unread) ? 'block' : 'none';
+                notifList.innerHTML = items.map(n => `
+                    <div style="padding: 12px 18px; border-bottom: 1px solid #F9FAFB; cursor: pointer; ${n.unread ? 'background: #FFF5F8;' : ''}">
+                        <div style="display: flex; gap: 10px; align-items: flex-start;">
+                            <span style="font-size: 18px; flex-shrink: 0; margin-top: 1px;">${n.icon}</span>
+                            <div style="flex: 1; min-width: 0;">
+                                <div style="font-size: 13px; font-weight: ${n.unread ? '700' : '600'}; color: #111; margin-bottom: 2px;">${n.title}</div>
+                                <div style="font-size: 12px; color: #6B7280; line-height: 1.4;">${n.body}</div>
+                                <div style="font-size: 11px; color: #9CA3AF; margin-top: 4px;">${formatTimeAgo(n.time)}</div>
+                            </div>
+                            ${n.unread ? '<span style="width: 6px; height: 6px; background: #FF2D78; border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></span>' : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+            notifBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                notifOpen = !notifOpen;
+                notifDropdown.style.display = notifOpen ? 'block' : 'none';
+                if (notifOpen) render();
+            });
+            document.addEventListener('click', (e) => {
+                if (notifOpen && !notifDropdown.contains(e.target) && !notifBtn.contains(e.target)) {
+                    notifOpen = false;
+                    notifDropdown.style.display = 'none';
+                }
+            });
+            markAllBtn && markAllBtn.addEventListener('click', () => {
+                notifBadge.style.display = 'none';
+                notifList.querySelectorAll('div[style*="FFF5F8"]').forEach(el => { el.style.background = '#fff'; });
+                notifList.querySelectorAll('span[style*="6px; height: 6px"]').forEach(el => el.remove());
+            });
+            // Show badge + pre-render after a brief moment so render order doesn't race
+            setTimeout(() => { notifBadge.style.display = 'block'; render(); }, 800);
+        })();
+
+        // ───────────── SETTINGS MODAL (⚙) ─────────────
+        (function initSettings() {
+            const settingsBtn = document.getElementById('settingsBtn');
+            if (!settingsBtn) return;
+            // Build the modal once, lazy
+            const modal = document.createElement('div');
+            modal.id = 'settingsModal';
+            modal.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;';
+            modal.innerHTML = `
+                <div style="background:#fff;border-radius:14px;width:480px;max-width:90vw;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+                        <h3 style="font-size:18px;font-weight:700;color:#111;margin:0;">Account Settings</h3>
+                        <button id="sSetClose" style="background:none;border:none;font-size:22px;cursor:pointer;color:#9CA3AF;">×</button>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:14px;">
+                        <div><label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">App name</label>
+                            <input id="sSetApp" type="text" style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;margin-top:6px;"></div>
+                        <div><label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Email</label>
+                            <input id="sSetEmail" type="text" disabled style="width:100%;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:14px;margin-top:6px;background:#F9FAFB;color:#6B7280;"></div>
+                        <div><label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Lumi SDK API key</label>
+                            <div style="display:flex;gap:8px;margin-top:6px;">
+                                <input id="sSetKey" type="password" value="bb_dev_••••••••••••" style="flex:1;padding:10px 12px;border:1.5px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:'JetBrains Mono',monospace;">
+                                <button id="sSetReveal" style="padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;background:#F3F4F6;cursor:pointer;font-size:13px;">Show</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:22px;">
+                        <button id="sSetCancel" style="padding:9px 16px;border:1px solid #E5E7EB;border-radius:8px;background:#fff;cursor:pointer;font-weight:600;font-size:13.5px;">Cancel</button>
+                        <button id="sSetSave"   style="padding:9px 16px;border:none;border-radius:8px;background:#FF2D78;color:#fff;cursor:pointer;font-weight:700;font-size:13.5px;">Save</button>
+                    </div>
+                </div>`;
+            document.body.appendChild(modal);
+
+            function openModal() {
+                const app   = (typeof userProfile !== 'undefined' && userProfile.app_name) || document.getElementById('navAppName').textContent || '';
+                const email = (typeof userProfile !== 'undefined' && userProfile.email)    || '';
+                const key   = (typeof userProfile !== 'undefined' && userProfile.api_key)  || '';
+                document.getElementById('sSetApp').value   = app;
+                document.getElementById('sSetEmail').value = email;
+                document.getElementById('sSetKey').value   = 'bb_dev_••••••••••••';
+                document.getElementById('sSetKey').type    = 'password';
+                document.getElementById('sSetReveal').textContent = 'Show';
+                modal.style.display = 'flex';
+            }
+            function closeModal() { modal.style.display = 'none'; }
+
+            settingsBtn.addEventListener('click', openModal);
+            modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+            document.getElementById('sSetClose').addEventListener('click', closeModal);
+            document.getElementById('sSetCancel').addEventListener('click', closeModal);
+            document.getElementById('sSetReveal').addEventListener('click', () => {
+                const inp = document.getElementById('sSetKey');
+                const btn = document.getElementById('sSetReveal');
+                const key = (typeof userProfile !== 'undefined' && userProfile.api_key) || '';
+                if (inp.type === 'password') {
+                    inp.value = key || 'bb_dev_live_' + Math.random().toString(36).slice(2, 18);
+                    inp.type  = 'text';
+                    btn.textContent = 'Hide';
+                } else {
+                    inp.value = 'bb_dev_••••••••••••';
+                    inp.type  = 'password';
+                    btn.textContent = 'Show';
+                }
+            });
+            document.getElementById('sSetSave').addEventListener('click', () => {
+                const newApp = document.getElementById('sSetApp').value.trim();
+                if (newApp && typeof userProfile !== 'undefined') {
+                    userProfile.app_name = newApp;
+                    document.getElementById('navAppName').textContent = newApp;
+                    const data = localStorage.getItem('bb_dev_data');
+                    if (data) {
+                        try { const d = JSON.parse(data); d.app_name = newApp; localStorage.setItem('bb_dev_data', JSON.stringify(d)); } catch (_) {}
+                    }
+                }
+                closeModal();
+                if (typeof showToast === 'function') showToast('Settings saved', 'success');
+            });
+        })();
+
+        // ───────────── COMMAND PALETTE (⌘K) ─────────────
+        (function initCmdPalette() {
+            const cmd = document.createElement('div');
+            cmd.id = 'cmdPalette';
+            cmd.style.cssText = 'display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.5);align-items:flex-start;justify-content:center;padding-top:15vh;';
+            cmd.innerHTML = `
+                <div style="background:#fff;border-radius:14px;width:520px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.25);overflow:hidden;">
+                    <div style="padding:4px;">
+                        <input id="cmdInput" type="text" placeholder="Search actions… (Esc to close)" style="width:100%;padding:14px 18px;border:none;outline:none;font-size:15px;font-family:inherit;">
+                    </div>
+                    <div id="cmdResults" style="max-height:320px;overflow-y:auto;border-top:1px solid #F3F4F6;"></div>
+                    <div style="padding:8px 18px;border-top:1px solid #F3F4F6;display:flex;gap:12px;">
+                        <span style="font-size:11px;color:#9CA3AF;"><kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:10px;">↑↓</kbd> Navigate</span>
+                        <span style="font-size:11px;color:#9CA3AF;"><kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:10px;">Enter</kbd> Select</span>
+                        <span style="font-size:11px;color:#9CA3AF;"><kbd style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:10px;">Esc</kbd> Close</span>
+                    </div>
+                </div>`;
+            document.body.appendChild(cmd);
+
+            // Publisher-flavored actions (swap advertiser-only items for Lumi SDK equivalents)
+            const actions = [
+                { label: 'Export Earnings CSV',   icon: '📄', keywords: 'export download csv earnings',   action: () => (typeof exportEarningsCSV === 'function' ? exportEarningsCSV() : null) },
+                { label: 'Copy API key',          icon: '🔑', keywords: 'api key copy lumi sdk',          action: () => { const k = (typeof userProfile !== 'undefined' && userProfile.api_key) || ''; if (k) { navigator.clipboard.writeText(k); if (typeof showToast === 'function') showToast('API key copied', 'success'); } } },
+                { label: 'Account Settings',      icon: '⚙️',  keywords: 'settings account profile',      action: () => document.getElementById('settingsBtn').click() },
+                { label: 'Toggle Notifications',  icon: '🔔', keywords: 'notifications alerts bell',     action: () => document.getElementById('notifBtn').click() },
+                { label: 'Refresh Data',          icon: '🔄', keywords: 'refresh reload update stats',   action: () => { if (typeof loadStats === 'function') loadStats(); if (typeof showToast === 'function') showToast('Data refreshed', 'info', 1500); } },
+                { label: 'Back to Lumi SDK',      icon: '🏠', keywords: 'home landing marketing publish', action: () => { window.location.href = '/publish'; } },
+                { label: 'Logout',                icon: '🚪', keywords: 'logout sign out',               action: () => handleLogout() },
+            ];
+            let open = false, sel = 0;
+            function render(q) {
+                const items = actions.filter(a => !q || a.label.toLowerCase().includes(q.toLowerCase()) || a.keywords.includes(q.toLowerCase()));
+                const box = document.getElementById('cmdResults');
+                box.innerHTML = items.map((a, i) => `
+                    <div class="cmd-item" data-idx="${i}" style="padding:10px 18px;cursor:pointer;display:flex;align-items:center;gap:12px;background:${i===sel?'#F3F4F6':'#fff'};">
+                        <span style="font-size:18px;">${a.icon}</span>
+                        <span style="font-size:14px;font-weight:500;">${a.label}</span>
+                    </div>`).join('');
+                box.querySelectorAll('.cmd-item').forEach(el => {
+                    el.addEventListener('click', () => { const i = parseInt(el.dataset.idx); items[i] && items[i].action(); close(); });
+                    el.addEventListener('mouseover', () => { el.style.background = '#F3F4F6'; });
+                    el.addEventListener('mouseout', () => {
+                        const i = parseInt(el.dataset.idx); el.style.background = (i === sel) ? '#F3F4F6' : '#fff';
+                    });
+                });
+                window._cmdItems = items;
+            }
+            function open_() {
+                open = true; cmd.style.display = 'flex';
+                const inp = document.getElementById('cmdInput');
+                inp.value = ''; inp.focus(); sel = 0; render('');
+            }
+            function close() { open = false; cmd.style.display = 'none'; }
+            window.openCmdPalette = open_;   // exposed for the Search actions button
+
+            document.getElementById('cmdInput').addEventListener('input', (e) => { sel = 0; render(e.target.value); });
+            cmd.addEventListener('click', (e) => { if (e.target === cmd) close(); });
+
+            document.addEventListener('keydown', (e) => {
+                if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+                    e.preventDefault();
+                    open ? close() : open_();
+                    return;
+                }
+                if (!open) return;
+                if (e.key === 'Escape') { close(); return; }
+                const nodes = cmd.querySelectorAll('.cmd-item');
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    sel = Math.min(sel + 1, nodes.length - 1);
+                    nodes.forEach((el, i) => el.style.background = i === sel ? '#F3F4F6' : '#fff');
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    sel = Math.max(sel - 1, 0);
+                    nodes.forEach((el, i) => el.style.background = i === sel ? '#F3F4F6' : '#fff');
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const items = window._cmdItems || [];
+                    items[sel] && items[sel].action(); close();
+                }
+            });
+        })();
     </script>
 </body>
 </html>
