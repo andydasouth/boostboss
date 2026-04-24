@@ -5,7 +5,9 @@
   "buildCommand": null,
   "outputDirectory": "public",
   "redirects": [
-    { "source": "/", "destination": "/en", "permanent": false }
+    { "source": "/", "destination": "/en", "permanent": false },
+    { "source": "/developer",  "destination": "/publish/dashboard", "permanent": false },
+    { "source": "/advertiser", "destination": "/ads/dashboard",     "permanent": false }
   ],
   "rewrites": [
     { "source": "/en", "destination": "/index.html" },
@@ -14,8 +16,8 @@
     { "source": "/ko", "destination": "/index.html" },
     { "source": "/vi", "destination": "/index.html" },
     { "source": "/ads", "destination": "/ads.html" },
-    { "source": "/advertiser", "destination": "/advertiser.html" },
-    { "source": "/developer", "destination": "/developer.html" },
+    { "source": "/ads/dashboard",     "destination": "/advertiser.html" },
+    { "source": "/publish/dashboard", "destination": "/developer.html" },
     { "source": "/demo", "destination": "/demo.html" },
     { "source": "/signup", "destination": "/signup.html" },
     { "source": "/publish/signup", "destination": "/signup.html" },
