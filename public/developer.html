@@ -226,48 +226,102 @@
         .nav-left {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 1.5rem;
         }
 
         .logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
-            font-weight: 800;
-            font-size: 1.25rem;
             color: var(--text-dark);
+            text-decoration: none;
         }
 
         .logo-mark {
-            width: 36px;
-            height: 36px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         .logo-mark svg { width: 100%; height: 100%; }
 
-        .nav-center {
+        .logo-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        /* "Dashboard" section label, sits after the logo */
+        .header-title {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        /* "Search actions ⌘K" placeholder pill */
+        .search-actions-btn {
+            background: #F3F4F6;
+            border: 1px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: #9CA3AF;
+            cursor: pointer;
+            font-family: inherit;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 8px;
         }
-
-        .nav-title {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .app-name {
-            color: var(--text-dark);
-            font-weight: 700;
+        .search-actions-btn kbd {
+            background: #fff;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            border: 1px solid #E5E7EB;
+            color: #6B7280;
+            font-family: inherit;
         }
 
         .nav-right {
             display: flex;
             align-items: center;
-            gap: 1.5rem;
+            gap: 1rem;
         }
+
+        /* Account label + name cluster on the right */
+        .account-info {
+            text-align: right;
+        }
+        .account-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .account-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        /* Circular icon buttons (notifications, settings) */
+        .header-icon-btn {
+            background: #F3F4F6;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            transition: background 0.15s;
+        }
+        .header-icon-btn:hover { background: #E5E7EB; }
 
         .logout-btn {
             padding: 0.55rem 1.1rem;
@@ -1086,10 +1140,14 @@
                 gap: 1rem;
             }
 
-            .nav-left, .nav-center, .nav-right {
+            .nav-left, .nav-right {
                 width: 100%;
                 justify-content: space-between;
             }
+            .nav-right { gap: 6px; }
+            .account-info { display: none; }
+            .search-actions-btn { display: none; }
+            .header-title { display: none; }
 
             .container {
                 padding: 1rem;
@@ -1209,10 +1267,10 @@
 
     <!-- Dashboard View -->
     <div id="dashboardView" class="dashboard-view">
-        <!-- Navigation -->
+        <!-- Navigation — mirrors /ads/dashboard header shape exactly -->
         <nav>
             <div class="nav-left">
-                <div class="logo">
+                <a href="/publish" class="logo" title="Back to Lumi SDK" style="text-decoration: none;">
                     <div class="logo-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
 <line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
 <line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>
@@ -1226,15 +1284,24 @@
 <text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></div>
-                    <span>Lumi SDK</span>
-                </div>
-            </div>
-            <div class="nav-center">
-                <span class="nav-title">Lumi SDK Dashboard</span>
+                    <span class="logo-text">Lumi SDK</span>
+                </a>
+                <div class="header-title">Dashboard</div>
+                <button class="search-actions-btn" title="Search actions">
+                    <span>Search actions</span>
+                    <kbd>⌘K</kbd>
+                </button>
             </div>
             <div class="nav-right">
-                <span class="app-name" id="navAppName">MyAI App</span>
-                <button class="logout-btn" onclick="handleLogout()">Log Out</button>
+                <div class="account-info">
+                    <div class="account-label">Account</div>
+                    <div class="account-name" id="navAppName">Loading...</div>
+                </div>
+                <button class="header-icon-btn" id="notifBtn" title="Notifications">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </button>
+                <button class="header-icon-btn" id="settingsBtn" title="Account Settings">⚙</button>
+                <button class="logout-btn" onclick="handleLogout()">Logout</button>
             </div>
         </nav>
 
@@ -2487,7 +2554,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             document.getElementById('revenueShare').textContent = stats.revenue_share + '%';
             document.getElementById('shareBar').style.width = stats.revenue_share + '%';
             document.getElementById('rpmValue').textContent = '$' + stats.rpm.toFixed(2);
-            document.getElementById('navAppName').textContent = userProfile.app_name;
+            document.getElementById('navAppName').textContent =
+                userProfile.app_name || (userProfile.email ? String(userProfile.email).split('@')[0] : 'Publisher');
 
             // Update integration guide with real keys
             updateIntegrationGuide();
