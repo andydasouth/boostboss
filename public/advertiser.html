@@ -3289,19 +3289,31 @@
                     localStorage.removeItem('bb_profile');
                 }
             } catch (_) {}
-            // Clear the Supabase OAuth session (sb-<project>-auth-token)
-            // so the next visit to /ads/signin doesn't auto-sign the user
-            // back in via handleOAuthReturn. Only when the publisher side
-            // is also signed out — otherwise we'd kick Jane out of /publish.
+            // Wipe EVERY Supabase-managed localStorage key so the next
+            // visit to /ads/signin can't auto-re-sign-in via a leftover
+            // Supabase session. This is intentionally broad: it clears
+            // all sb-* keys plus supabase.auth.signOut({ scope: 'local' }).
+            // If you were dual-signed-in on /publish, you'll be logged
+            // out of both — that's intentional for a clean logout.
             try {
-                if (!localStorage.getItem('bb_pub_token')) {
-                    Object.keys(localStorage).forEach(function (k) {
-                        if (k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
-                            localStorage.removeItem(k);
-                        }
-                    });
+                Object.keys(localStorage).forEach(function (k) {
+                    if (k.indexOf('sb-') === 0) localStorage.removeItem(k);
+                });
+            } catch (_) {}
+            try {
+                if (window.supabase && window.supabase.createClient) {
+                    const sbLogout = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                    sbLogout.auth.signOut({ scope: 'local' }).catch(function () {});
                 }
             } catch (_) {}
+            // Also drop the publisher keys — if you log out from one
+            // product you expect to be fully signed out.
+            localStorage.removeItem('bb_pub_token');
+            localStorage.removeItem('bb_pub_user');
+            localStorage.removeItem('bb_pub_profile');
+            localStorage.removeItem('bb_dev_session');
+            localStorage.removeItem('bb_dev_data');
+
             currentUser = null;
             currentUserData = null;
 

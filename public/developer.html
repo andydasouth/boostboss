@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lumi SDK — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -3188,21 +3189,36 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                         localStorage.removeItem('bb_profile');
                     }
                 } catch (_) {}
-                // Clear the Supabase OAuth session too (sb-<project>-auth-token),
-                // otherwise the next visit to /publish/signin would auto-sign
-                // the user back in via handleOAuthReturn's getSession() path.
-                // Only clears if no advertiser session is active — if the user
-                // still has bb_adv_* we leave Supabase's session alone so /ads
-                // stays signed in.
+                // Wipe EVERY Supabase-managed localStorage key so the next
+                // visit to /publish/signin can't auto-re-sign-in via a
+                // leftover Supabase session. This is intentionally broad:
+                // we clear all sb-* keys (auth-token, code-verifier, flow-
+                // state, refresh-token, etc.) plus call supabase.auth.signOut
+                // if the SDK is loaded so the server session is invalidated
+                // too. If you were dual-signed-in on /ads as well, you'll
+                // be logged out of both — that's the intended behavior here.
                 try {
-                    if (!localStorage.getItem('bb_adv_token')) {
-                        Object.keys(localStorage).forEach(function (k) {
-                            if (k.indexOf('sb-') === 0 && k.indexOf('-auth-token') !== -1) {
-                                localStorage.removeItem(k);
-                            }
-                        });
+                    Object.keys(localStorage).forEach(function (k) {
+                        if (k.indexOf('sb-') === 0) localStorage.removeItem(k);
+                    });
+                } catch (_) {}
+                try {
+                    if (window.supabase && window.supabase.createClient) {
+                        var sb = window.supabase.createClient(
+                            'https://glogijhwbrdkkjdsjujc.supabase.co',
+                            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imdsb2dpamh3YnJka2tqZHNqdWpjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMzA3NzcsImV4cCI6MjA5MTgwNjc3N30.9Y7e_3yiSuWptMLXcActGVJYHI6fKP1ibecnzke3J-0'
+                        );
+                        sb.auth.signOut({ scope: 'local' }).catch(function () {});
                     }
                 } catch (_) {}
+                // Also drop the advertiser keys — if you log out from one
+                // product you expect to be fully signed out. Dual-role
+                // users can sign in again on whichever product they want.
+                localStorage.removeItem('bb_adv_token');
+                localStorage.removeItem('bb_adv_user');
+                localStorage.removeItem('bb_adv_profile');
+                localStorage.removeItem('bb_session_token');
+                localStorage.removeItem('bb_user_data');
 
                 // Hand the user off to the Lumi SDK marketing page — the
                 // nav pill there will revert to "Sign in / Start earning"
