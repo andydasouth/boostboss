@@ -1186,7 +1186,10 @@ ad = bb.<span class="f">get_sponsored_content</span>(
         if (!name && user.email) name = String(user.email).split("@")[0];
         if (!name) name = "Dashboard";
 
-        var dashUrl = user.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+        // Always link to the dashboard that matches the marketing page
+        // the visitor is on right now. /publish → publisher dashboard.
+        // The dashboard itself handles role-mismatch (bounces to signup).
+        var dashUrl = "/publish/dashboard";
         var ctas = document.querySelector(".nav-ctas");
         if (!ctas) return;
         var esc = function (s) {
