@@ -2114,11 +2114,40 @@
       onScroll();
     }
 
+    // If the visitor is already signed in, swap the "Sign in / Launch a campaign"
+    // nav CTAs for a single pill showing their display name → dashboard.
+    function initAuthNav() {
+      try {
+        var token = localStorage.getItem("bb_token");
+        var userStr = localStorage.getItem("bb_user");
+        if (!token || !userStr) return;
+        var user = JSON.parse(userStr);
+        var profile = {};
+        try { profile = JSON.parse(localStorage.getItem("bb_profile") || "{}"); } catch (_) {}
+
+        var name = profile.company_name || profile.app_name;
+        if (!name && user.email) name = String(user.email).split("@")[0];
+        if (!name) name = "Dashboard";
+
+        var dashUrl = user.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+        var ctas = document.querySelector(".nav-ctas");
+        if (!ctas) return;
+        var esc = function (s) {
+          return String(s).replace(/[&<>"']/g, function (c) {
+            return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+          });
+        };
+        ctas.innerHTML = '<a class="btn btn-primary" href="' + dashUrl + '" title="Go to dashboard">' +
+                         esc(name) + ' →</a>';
+      } catch (e) { console.error("[initAuthNav]", e); }
+    }
+
     function init() {
       initReveals();
       initCounters();
       initBelt();
       initNav();
+      initAuthNav();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', init);
