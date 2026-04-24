@@ -1122,8 +1122,10 @@
     </style>
 </head>
 <body>
-    <!-- Auth View -->
-    <div id="authView" class="auth-container active">
+    <!-- Auth View (intentionally NOT ".active" — unauthed users are
+         bounced to /publish/signin via showAuthView(), so this block
+         never renders. Kept as a no-op fallback in case JS is blocked.) -->
+    <div id="authView" class="auth-container">
         <div class="auth-card">
             <div class="auth-card-header">
                 <div class="auth-logo-mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>
@@ -2730,8 +2732,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
         }
 
         function showAuthView() {
-            document.getElementById('authView').classList.add('active');
+            // /developer is the publisher dashboard — no embedded sign-in.
+            // Route unauthed users to the dedicated /publish/signin page so
+            // there is exactly one sign-in surface for publishers.
+            document.getElementById('authView').classList.remove('active');
             document.getElementById('dashboardView').classList.remove('active');
+            window.location.replace('/publish/signin');
         }
 
         function showDashboardView() {

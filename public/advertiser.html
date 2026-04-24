@@ -37,7 +37,7 @@
 
         /* Auth Layer */
         .auth-container {
-            display: flex;
+            display: none;         /* routed to /ads/signin — never rendered */
             justify-content: center;
             align-items: center;
             min-height: 100vh;
@@ -3953,8 +3953,12 @@
         }
 
         function showAuthForm() {
-            authContainer.style.display = 'flex';
+            // /advertiser is the advertiser dashboard — no embedded sign-in.
+            // Route unauthed users to the dedicated /ads/signin page so
+            // there is exactly one sign-in surface for advertisers.
+            authContainer.style.display = 'none';
             dashboardContainer.classList.remove('active');
+            window.location.replace('/ads/signin');
         }
 
         function showDashboard() {
