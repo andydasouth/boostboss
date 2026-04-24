@@ -354,8 +354,126 @@
         }
 
         .dashboard-view.active {
+            display: grid;
+            grid-template-columns: 240px 1fr;
+            min-height: 100vh;
+            align-items: stretch;
+        }
+
+        /* ───────────── SIDEBAR (left rail) ───────────── */
+        .sidebar {
+            background: #0F0F1A;
+            color: #E5E7EB;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 14px;
+            border-right: 1px solid #1F1F2E;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+        }
+        .sidebar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px 10px 20px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid #1F1F2E;
+            text-decoration: none;
+            color: #fff;
+        }
+        .sidebar-brand .mark { width: 32px; height: 32px; flex-shrink: 0; }
+        .sidebar-brand .mark svg { width: 100%; height: 100%; }
+        .sidebar-brand .name {
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+        .sidebar-section-label {
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #6B7280;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 14px 12px 6px;
+        }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            padding: 9px 12px;
+            border-radius: 8px;
+            color: #9CA3AF;
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+        }
+        .sidebar-nav a:hover { background: #1A1A2E; color: #F3F4F6; }
+        .sidebar-nav a.active {
+            background: rgba(255, 45, 120, 0.14);
+            color: #FF6B9D;
+        }
+        .sidebar-nav a .s-icon {
+            width: 18px; height: 18px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+        }
+        .sidebar-footer {
+            padding-top: 12px;
+            border-top: 1px solid #1F1F2E;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .sidebar-footer .avatar {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: linear-gradient(135deg, #FF8A1F, #FF2D78);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-weight: 700; font-size: 14px;
+            flex-shrink: 0;
+        }
+        .sidebar-footer .who { flex: 1; min-width: 0; }
+        .sidebar-footer .who .name { font-size: 13px; font-weight: 600; color: #F3F4F6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-footer .who .email { font-size: 11px; color: #6B7280; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-footer .logout-mini {
+            background: none; border: none; color: #9CA3AF;
+            cursor: pointer; padding: 4px; border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .sidebar-footer .logout-mini:hover { background: #1A1A2E; color: #FF6B9D; }
+        @media (max-width: 900px) {
+            .dashboard-view.active { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+        }
+
+        /* ───────────── MAIN AREA (right pane) ───────────── */
+        .main-area {
+            background: var(--bg-primary);
+            min-width: 0;
+            overflow-x: hidden;
+        }
+
+        /* Panel-based section routing — only the active panel's sections are visible */
+        .dashboard-view .section[data-panel] { display: none; }
+        .dashboard-view[data-active-panel="overview"]    .section[data-panel="overview"],
+        .dashboard-view[data-active-panel="earnings"]    .section[data-panel="earnings"],
+        .dashboard-view[data-active-panel="apps"]        .section[data-panel="apps"],
+        .dashboard-view[data-active-panel="formats"]     .section[data-panel="formats"],
+        .dashboard-view[data-active-panel="integration"] .section[data-panel="integration"],
+        .dashboard-view[data-active-panel="settings"]    .section[data-panel="settings"] {
             display: block;
         }
+        .dashboard-view .stats-grid[data-panel] { display: none; }
+        .dashboard-view[data-active-panel="overview"] .stats-grid[data-panel="overview"] { display: grid; }
 
         .page-header {
             margin-bottom: 2rem;
@@ -1267,8 +1385,58 @@
     </div>
 
     <!-- Dashboard View -->
-    <div id="dashboardView" class="dashboard-view">
-        <!-- Navigation — mirrors /ads/dashboard header shape exactly -->
+    <div id="dashboardView" class="dashboard-view" data-active-panel="overview">
+
+        <!-- LEFT SIDEBAR — product nav, categories, user chip ─────────── -->
+        <aside class="sidebar">
+            <a class="sidebar-brand" href="/publish" title="Back to Lumi SDK">
+                <span class="mark"><svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></span>
+                <span class="name">Lumi SDK</span>
+            </a>
+            <div class="sidebar-section-label">Publisher</div>
+            <nav class="sidebar-nav">
+                <a data-panel="overview" class="active">
+                    <span class="s-icon">📊</span>Overview
+                </a>
+                <a data-panel="earnings">
+                    <span class="s-icon">💰</span>Earnings
+                </a>
+                <a data-panel="apps">
+                    <span class="s-icon">📱</span>Apps &amp; Mediation
+                </a>
+                <a data-panel="formats">
+                    <span class="s-icon">🧩</span>Ad Formats
+                </a>
+                <a data-panel="integration">
+                    <span class="s-icon">🔌</span>Integration
+                </a>
+                <div class="sidebar-section-label">Account</div>
+                <a data-panel="settings">
+                    <span class="s-icon">⚙️</span>Settings
+                </a>
+                <a href="/docs" target="_blank" rel="noopener">
+                    <span class="s-icon">📚</span>Docs
+                </a>
+                <a href="/publish" style="color:#6B7280;">
+                    <span class="s-icon">↗</span>Marketing site
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="avatar" id="sidebarAvatar">L</div>
+                <div class="who">
+                    <div class="name" id="sidebarName">Loading…</div>
+                    <div class="email" id="sidebarEmail"></div>
+                </div>
+                <button class="logout-mini" onclick="handleLogout()" title="Log out">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                </button>
+            </div>
+        </aside>
+
+        <!-- MAIN AREA — topbar + routed panels ─────────────────────────── -->
+        <div class="main-area">
+
+        <!-- Top nav (topbar within main area) -->
         <nav>
             <div class="nav-left">
                 <a href="/publish" class="logo" title="Back to Lumi SDK" style="text-decoration: none;">
@@ -1990,12 +2158,85 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     ">npm Package</a>
                 </div>
             </div>
+
+            <!-- ─────────── SETTINGS PANEL (new) ─────────── -->
+            <div class="section" data-panel="settings">
+                <div class="section-title">Account Settings</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;">
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">App name</label>
+                        <input type="text" id="settingsAppName" placeholder="My AI App" style="width:100%;padding:11px 14px;border:1.5px solid var(--border-light);border-radius:10px;font-size:14px;margin-top:6px;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Email</label>
+                        <input type="text" id="settingsEmail" disabled style="width:100%;padding:11px 14px;border:1.5px solid var(--border-light);border-radius:10px;font-size:14px;margin-top:6px;background:#F9FAFB;color:#6B7280;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Website</label>
+                        <input type="text" id="settingsWebsite" placeholder="https://myai.app" style="width:100%;padding:11px 14px;border:1.5px solid var(--border-light);border-radius:10px;font-size:14px;margin-top:6px;">
+                    </div>
+                    <div>
+                        <label style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Contact phone</label>
+                        <input type="text" id="settingsPhone" placeholder="Optional" style="width:100%;padding:11px 14px;border:1.5px solid var(--border-light);border-radius:10px;font-size:14px;margin-top:6px;">
+                    </div>
+                </div>
+                <div style="margin-top:18px;display:flex;justify-content:flex-end;gap:10px;">
+                    <button onclick="saveAccountSettings()" style="padding:10px 20px;background:#FF2D78;color:#fff;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:14px;">Save changes</button>
+                </div>
+            </div>
+
+            <div class="section" data-panel="settings">
+                <div class="section-title">Notifications</div>
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <label style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--border-light);border-radius:10px;cursor:pointer;">
+                        <span>
+                            <span style="font-weight:600;font-size:14px;display:block;">Weekly earnings digest</span>
+                            <span style="font-size:12.5px;color:#6B7280;">Email every Monday with last week's performance.</span>
+                        </span>
+                        <input type="checkbox" checked style="width:18px;height:18px;">
+                    </label>
+                    <label style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--border-light);border-radius:10px;cursor:pointer;">
+                        <span>
+                            <span style="font-weight:600;font-size:14px;display:block;">Payout confirmations</span>
+                            <span style="font-size:12.5px;color:#6B7280;">Email on every payout wired to your bank.</span>
+                        </span>
+                        <input type="checkbox" checked style="width:18px;height:18px;">
+                    </label>
+                    <label style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--border-light);border-radius:10px;cursor:pointer;">
+                        <span>
+                            <span style="font-weight:600;font-size:14px;display:block;">Benna optimization updates</span>
+                            <span style="font-size:12.5px;color:#6B7280;">Get notified when Benna improves your fill rate or CTR.</span>
+                        </span>
+                        <input type="checkbox" style="width:18px;height:18px;">
+                    </label>
+                    <label style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--border-light);border-radius:10px;cursor:pointer;">
+                        <span>
+                            <span style="font-weight:600;font-size:14px;display:block;">Product news &amp; changelog</span>
+                            <span style="font-size:12.5px;color:#6B7280;">Occasional emails about new ad formats and SDK updates.</span>
+                        </span>
+                        <input type="checkbox" style="width:18px;height:18px;">
+                    </label>
+                </div>
+            </div>
+
+            <div class="section" data-panel="settings">
+                <div class="section-title">Danger zone</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 18px;border:1px solid #FECACA;border-radius:10px;background:#FEF2F2;">
+                    <div>
+                        <div style="font-weight:700;font-size:14px;color:#991B1B;">Delete publisher account</div>
+                        <div style="font-size:12.5px;color:#7F1D1D;margin-top:2px;">Removes your SDK key, your app profiles, and your earnings history. This cannot be undone.</div>
+                    </div>
+                    <button onclick="alert('Contact support@boostboss.ai to delete your account.')" style="padding:9px 16px;border:1px solid #DC2626;background:#fff;color:#DC2626;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px;">Request deletion</button>
+                </div>
+            </div>
+
         </div>
 
         <!-- Footer -->
         <footer>
             Lumi SDK © 2026 · <a href="/publish" style="color: #04BEFE; text-decoration: none;">← Back to boostboss.ai/publish</a>
         </footer>
+        </div><!-- /.main-area -->
     </div>
 
     <script>
@@ -3454,6 +3695,119 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                 }
             });
         })();
+
+        // ───────────── SIDEBAR PANEL ROUTER ─────────────
+        // Classifies each existing .section into a sidebar category based
+        // on its title, then wires up the sidebar nav to toggle which
+        // panel is active. Also routes the stats-grid into "overview".
+        (function initSidebarRouter() {
+            const dashboard = document.getElementById('dashboardView');
+            if (!dashboard) return;
+
+            // Map section titles to sidebar panels (case-insensitive substring).
+            const titleRules = [
+                { test: /revenue over last|quick start/i, panel: 'overview' },
+                { test: /onboarding|welcome to lumi/i,    panel: 'overview' },
+                { test: /mediation|waterfall/i,            panel: 'apps' },
+                { test: /ad formats you accept/i,          panel: 'formats' },
+                { test: /integration guide|test your integration|api keys|credentials/i, panel: 'integration' },
+                { test: /earnings history|payout settings/i, panel: 'earnings' },
+            ];
+            function classify(el) {
+                const title = el.querySelector('.section-title');
+                if (!title) return null;
+                const t = title.textContent || '';
+                for (const rule of titleRules) if (rule.test.test(t)) return rule.panel;
+                return null;
+            }
+
+            document.querySelectorAll('.container .section').forEach(el => {
+                if (el.hasAttribute('data-panel')) return; // already tagged (Settings)
+                const p = classify(el) || 'overview';
+                el.setAttribute('data-panel', p);
+            });
+            // Stats grid → overview
+            const stats = document.querySelector('.stats-grid');
+            if (stats && !stats.hasAttribute('data-panel')) stats.setAttribute('data-panel', 'overview');
+
+            // Page header text — matches active panel
+            const headerH1 = document.querySelector('.page-header h1');
+            const panelLabels = {
+                overview: 'Overview',
+                earnings: 'Earnings',
+                apps: 'Apps & Mediation',
+                formats: 'Ad Formats',
+                integration: 'Integration',
+                settings: 'Settings',
+            };
+            function switchPanel(panel) {
+                dashboard.setAttribute('data-active-panel', panel);
+                document.querySelectorAll('.sidebar-nav a[data-panel]').forEach(a => {
+                    a.classList.toggle('active', a.dataset.panel === panel);
+                });
+                if (headerH1) headerH1.textContent = panelLabels[panel] || 'Dashboard';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            document.querySelectorAll('.sidebar-nav a[data-panel]').forEach(a => {
+                a.addEventListener('click', e => { e.preventDefault(); switchPanel(a.dataset.panel); });
+            });
+
+            // Populate sidebar user chip from userProfile (set by loadDashboard)
+            function syncSidebarUser() {
+                if (typeof userProfile === 'undefined' || !userProfile) return;
+                const name  = userProfile.app_name || (userProfile.email || '').split('@')[0] || 'Publisher';
+                const email = userProfile.email || '';
+                const nameEl = document.getElementById('sidebarName');
+                const emailEl = document.getElementById('sidebarEmail');
+                const avatar = document.getElementById('sidebarAvatar');
+                if (nameEl) nameEl.textContent = name;
+                if (emailEl) emailEl.textContent = email;
+                if (avatar) avatar.textContent = (name[0] || 'L').toUpperCase();
+                // Pre-fill settings fields
+                const fill = (id, v) => { const el = document.getElementById(id); if (el && !el.value) el.value = v || ''; };
+                fill('settingsAppName', userProfile.app_name);
+                fill('settingsEmail', userProfile.email);
+                fill('settingsWebsite', userProfile.website);
+            }
+            // Poll for userProfile being populated (it's set by checkAuthStatus)
+            const syncInterval = setInterval(() => {
+                if (typeof userProfile !== 'undefined' && userProfile) {
+                    syncSidebarUser();
+                    clearInterval(syncInterval);
+                }
+            }, 200);
+            setTimeout(() => clearInterval(syncInterval), 10000);
+
+            // Initial state
+            switchPanel('overview');
+        })();
+
+        // Stub for Settings panel save button
+        function saveAccountSettings() {
+            if (typeof userProfile === 'undefined' || !userProfile) return;
+            const newName = document.getElementById('settingsAppName').value.trim();
+            const newSite = document.getElementById('settingsWebsite').value.trim();
+            const newPhone = document.getElementById('settingsPhone').value.trim();
+            if (newName) {
+                userProfile.app_name = newName;
+                const navEl = document.getElementById('navAppName');
+                if (navEl) navEl.textContent = newName;
+                const sideName = document.getElementById('sidebarName');
+                if (sideName) sideName.textContent = newName;
+                // Persist into bb_dev_data
+                try {
+                    const raw = localStorage.getItem('bb_dev_data');
+                    if (raw) {
+                        const d = JSON.parse(raw);
+                        d.app_name = newName;
+                        d.website  = newSite || d.website;
+                        d.phone    = newPhone || d.phone;
+                        localStorage.setItem('bb_dev_data', JSON.stringify(d));
+                    }
+                } catch (_) {}
+            }
+            if (typeof showToast === 'function') showToast('Settings saved', 'success');
+        }
     </script>
 </body>
 </html>
