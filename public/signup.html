@@ -686,8 +686,22 @@ document.getElementById("login-google-btn").addEventListener("click", () => sign
     var nsToken = localStorage.getItem(roleNs(selectedRole) + "_token");
     if (nsToken) return;
     ran = true;
+
+    // Strip the #access_token=…&refresh_token=… fragment that Supabase
+    // left in the URL bar — we don't want the user to see that ugly
+    // hash (or a trailing "#") while oauth_sync runs and the redirect
+    // lands. history.replaceState swaps the URL silently, no reload.
     try {
-      showToast("Linking Google account…", "info");
+      if (window.location.hash || window.location.href.indexOf("#") !== -1) {
+        history.replaceState(null, "", window.location.pathname + window.location.search);
+      }
+    } catch (_) {}
+
+    // Cover the whole signin form with a "Signing you in…" card so the
+    // user isn't staring at the form + random URL flash while we finish.
+    showOAuthOverlay();
+
+    try {
       const r = await fetch(API + "?action=oauth_sync", {
         method: "POST",
         headers: {
@@ -700,11 +714,12 @@ document.getElementById("login-google-btn").addEventListener("click", () => sign
       if (!r.ok || j.error) throw new Error(j.error || "OAuth sync failed");
 
       saveSession(j);
-      showToast("Signed in with Google!", "success");
       const dest = j.user?.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
-      setTimeout(() => window.location.href = dest, 500);
+      // Fast handoff — no toast delay, the overlay already signals what's happening.
+      window.location.replace(dest);
     } catch (err) {
       ran = false;  // allow retry if the backend call failed
+      hideOAuthOverlay();
       console.error("[OAuth sync]", err);
       showError("error", err.message || "Google sign-in sync failed");
     }
@@ -764,6 +779,37 @@ function showError(id, msg) {
 }
 function hideMessages() {
   document.querySelectorAll(".error-msg, .success-msg").forEach(el => el.style.display = "none");
+}
+
+// Full-page "Signing you in…" overlay shown during the OAuth → sync → dashboard
+// handoff so the user doesn't see the signin form flash or a "#" URL fragment.
+function showOAuthOverlay(label) {
+  if (document.getElementById("oauthOverlay")) return;
+  var el = document.createElement("div");
+  el.id = "oauthOverlay";
+  el.style.cssText =
+    "position:fixed;inset:0;z-index:10000;background:var(--bg-soft,#FAFAF7);" +
+    "display:flex;flex-direction:column;align-items:center;justify-content:center;" +
+    "gap:16px;animation:bbOverlayFade 0.2s ease-out;";
+  el.innerHTML =
+    '<div style="width:36px;height:36px;border-radius:50%;' +
+      'border:3px solid var(--line,#EAEAEF);border-top-color:var(--pink,#FF2D78);' +
+      'animation:bbSpin 0.8s linear infinite;"></div>' +
+    '<div style="font-size:15px;font-weight:600;color:var(--ink,#1A1A2E);' +
+      'font-family:inherit;">' + (label || "Signing you in…") + '</div>';
+  document.body.appendChild(el);
+  if (!document.getElementById("oauthOverlayStyles")) {
+    var style = document.createElement("style");
+    style.id = "oauthOverlayStyles";
+    style.textContent =
+      "@keyframes bbSpin { to { transform: rotate(360deg); } }" +
+      "@keyframes bbOverlayFade { from { opacity: 0; } to { opacity: 1; } }";
+    document.head.appendChild(style);
+  }
+}
+function hideOAuthOverlay() {
+  var el = document.getElementById("oauthOverlay");
+  if (el) el.remove();
 }
 
 function copyKey() {
