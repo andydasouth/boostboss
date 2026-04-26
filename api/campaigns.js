@@ -24,6 +24,7 @@
 
 const crypto = require("crypto");
 const { verifyJwt } = require("./auth.js");
+const { embedTokens } = require("./_lib/embeddings.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -255,6 +256,10 @@ module.exports = async function handler(req, res) {
     if ((req.method === "PATCH" || req.method === "POST") && action === "update") {
       return await handleUpdate(req, res);
     }
+    if (req.method === "POST" && action === "reembed") {
+      if (!requireAdmin(req)) return res.status(401).json({ error: "Admin authentication required" });
+      return await handleReembed(req, res);
+    }
 
     // Legacy compat: bare GET with advertiser_id
     if (req.method === "GET") return await handleList(req, res);
@@ -400,6 +405,19 @@ async function handleCreate(req, res) {
   }
 
   if (sb) {
+    // Refresh intent_embedding from the union of MCP-native targeting
+    // axes. Joining these into one string before embedding produces a
+    // single vector that captures the full targeting context (intent
+    // tokens, tools, hosts, surfaces). No-op when OPENAI_API_KEY unset.
+    const embText = [
+      ...(row.target_intent_tokens || []),
+      ...(row.target_active_tools  || []).map((t) => t.replace(/-mcp$/, "")),
+      ...(row.target_host_apps     || []),
+      ...(row.target_surfaces      || []),
+    ];
+    const vec = await embedTokens(embText);
+    if (vec) row.intent_embedding = vec;
+
     const { data, error } = await sb.from("campaigns").insert(row).select().single();
     if (error) return res.status(500).json({ error: error.message });
     return res.status(201).json({ campaign: data, policy, auto_approved: autoApproved });
@@ -429,6 +447,26 @@ async function handleUpdate(req, res) {
 
   const sb = supa();
   if (sb) {
+    // Re-embed only when an MCP targeting axis actually changed; otherwise
+    // we'd burn an OpenAI request on every status / budget toggle.
+    const targetingChanged = ["target_intent_tokens", "target_active_tools", "target_host_apps", "target_surfaces"]
+      .some((k) => updates[k] !== undefined);
+    if (targetingChanged) {
+      // We need the post-merge state to embed correctly — fetch the current
+      // row, overlay the updates, then embed the union.
+      const { data: existing } = await sb.from("campaigns")
+        .select("target_intent_tokens, target_active_tools, target_host_apps, target_surfaces")
+        .eq("id", b.id).maybeSingle();
+      const merged = Object.assign({}, existing || {}, updates);
+      const embText = [
+        ...(merged.target_intent_tokens || []),
+        ...(merged.target_active_tools  || []).map((t) => t.replace(/-mcp$/, "")),
+        ...(merged.target_host_apps     || []),
+        ...(merged.target_surfaces      || []),
+      ];
+      const vec = await embedTokens(embText);
+      if (vec) updates.intent_embedding = vec;
+    }
     const { data, error } = await sb.from("campaigns").update(updates).eq("id", b.id).select().single();
     if (error) return res.status(500).json({ error: error.message });
     return res.json({ campaign: data });
@@ -560,6 +598,50 @@ async function handleUploadCreative(req, res) {
     detected_type: type,
     message: "Creative URL validated. Attach to campaign via create or update.",
   });
+}
+
+// ── re-embed (admin) ───────────────────────────────────────────────────
+// Backfills campaigns.intent_embedding for every campaign that has any
+// MCP targeting populated. Idempotent — re-running just refreshes from
+// the current targeting tokens. Safe to call after enabling
+// OPENAI_API_KEY for the first time, or after editing the embedding
+// formula in this file.
+//
+// Hits the OpenAI API at most once per campaign (cached by token-set
+// hash within the request, so repeats across rows reuse the same vector).
+async function handleReembed(req, res) {
+  const sb = supa();
+  if (!sb) return res.status(503).json({ error: "Supabase not configured" });
+  if (!process.env.OPENAI_API_KEY) {
+    return res.status(503).json({ error: "OPENAI_API_KEY not set — cannot embed" });
+  }
+
+  const onlyId = (req.query && req.query.id) || (req.body && req.body.id);
+  let q = sb.from("campaigns").select(
+    "id, target_intent_tokens, target_active_tools, target_host_apps, target_surfaces"
+  );
+  if (onlyId) q = q.eq("id", onlyId);
+  const { data: campaigns, error } = await q;
+  if (error) return res.status(500).json({ error: error.message });
+
+  let touched = 0, skipped = 0, failed = 0;
+  for (const c of campaigns || []) {
+    const text = [
+      ...(c.target_intent_tokens || []),
+      ...(c.target_active_tools  || []).map((t) => t.replace(/-mcp$/, "")),
+      ...(c.target_host_apps     || []),
+      ...(c.target_surfaces      || []),
+    ];
+    if (text.length === 0) { skipped++; continue; }
+    const vec = await embedTokens(text);
+    if (!vec) { failed++; continue; }
+    const { error: uErr } = await sb.from("campaigns")
+      .update({ intent_embedding: vec, updated_at: new Date().toISOString() })
+      .eq("id", c.id);
+    if (uErr) { failed++; console.error("[reembed] update", c.id, uErr.message); }
+    else      { touched++; }
+  }
+  return res.json({ touched, skipped, failed, total: (campaigns || []).length });
 }
 
 // ── Exports for testing ─────────────────────────────────────────────────

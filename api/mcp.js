@@ -17,6 +17,7 @@
 
 const benna = require("./benna.js");
 const { mcpTargetingMatch, mintAuctionId } = require("./_lib/mcp_targeting.js");
+const { embedTokens } = require("./_lib/embeddings.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -352,6 +353,17 @@ async function handleGetSponsoredContent(body, args, res) {
   };
   const reqIntentTokens = Array.isArray(args.intent_tokens) ? args.intent_tokens : [];
 
+  // Embed the request's intent context ONCE for the whole auction. The
+  // helper caches by sorted-token hash so the same context across many
+  // ad_requests pays nothing after the first hit. Returns null when
+  // OPENAI_API_KEY is unset → Benna falls back to Jaccard.
+  const requestEmbedding = await embedTokens([
+    ...reqIntentTokens,
+    ...(mcpCtx.active_tools || []).map((t) => t.replace(/-mcp$/, "")),
+    ...(mcpCtx.host_app ? [mcpCtx.host_app] : []),
+    ...(effectiveSurface ? [effectiveSurface] : []),
+  ]);
+
   // Publisher-side brand-safety: refuse advertiser categories the publisher excluded.
   const excludedCats = (placement && placement.excluded_categories) || [];
   const excludedAdv  = (placement && placement.excluded_advertisers) || [];
@@ -416,6 +428,10 @@ async function handleGetSponsoredContent(body, args, res) {
           iab_cat: c.iab_cat || [],
           adomain: c.adomain || [],
         },
+        // Hot-path cosine path. When BOTH this AND campaign.intent_embedding
+        // are non-null, intentMatchScore() uses cosine similarity instead
+        // of Jaccard, which produces real semantic variance.
+        request_intent_embedding: requestEmbedding,
       });
       const kwBoost = keywordContextBoost(c, args.context_summary);
       // Apply the keyword-context heuristic on top of the §9 price as a
