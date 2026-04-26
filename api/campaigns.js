@@ -351,6 +351,12 @@ async function handleCreate(req, res) {
     target_languages: b.target_languages || ["en"],
     target_cpa: b.target_cpa || null,
     target_roas: b.target_roas || null,
+    // BBX MCP-native targeting (migration 04). Free-form arrays of strings.
+    // Empty array = no preference, campaign matches all values for that axis.
+    target_intent_tokens: Array.isArray(b.target_intent_tokens) ? b.target_intent_tokens : [],
+    target_active_tools:  Array.isArray(b.target_active_tools)  ? b.target_active_tools  : [],
+    target_host_apps:     Array.isArray(b.target_host_apps)     ? b.target_host_apps     : [],
+    target_surfaces:      Array.isArray(b.target_surfaces)      ? b.target_surfaces      : [],
     optimization_goal: b.optimization_goal || "target_cpa",
     billing_model: b.billing_model || "cpm",
     bid_amount: b.bid_amount || 5.00,
@@ -414,6 +420,8 @@ async function handleUpdate(req, res) {
     "target_cpa", "billing_model", "bid_amount",
     "daily_budget", "total_budget", "status", "skippable_after_sec",
     "start_date", "end_date", "optimization_goal", "target_roas",
+    // BBX MCP-native targeting (migration 04)
+    "target_intent_tokens", "target_active_tools", "target_host_apps", "target_surfaces",
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];

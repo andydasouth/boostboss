@@ -2140,14 +2140,11 @@
                                     padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
                                     font-size: 11px; cursor: pointer; font-family: inherit;
                                 ">Copy</button>
-                                <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script&gt;
-  !function(b,o,s,t){b.bbq=b.bbq||[];
-  var e=o.createElement(s);e.async=1;
-  e.src='https://cdn.boostboss.ai/pixel.js';
-  var n=o.getElementsByTagName(s)[0];
-  n.parentNode.insertBefore(e,n);
-  b.bbq.push(['init','<span id="pixelAdvId" style="color: #FF2D78;">YOUR_ADVERTISER_ID</span>']);
-  }(window,document,'script');
+                                <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script async src="https://boostboss.ai/pixel.js"
+  data-advertiser-id="<span id="pixelAdvId" style="color: #FF2D78;">YOUR_ADVERTISER_ID</span>"&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.bbq = window.bbq || [];
+  bbq.push(['track', 'signup', { value: 29.99, currency: 'USD' }]);
 &lt;/script&gt;</pre>
                             </div>
                             <div style="margin-top: 12px; display: flex; gap: 10px;">
@@ -2156,7 +2153,7 @@
                                     padding: 6px 12px; border-radius: 100px; font-weight: 500;
                                 " id="pixelStatus">Not detected yet</div>
                                 <div style="font-size: 12px; color: #6B7280; padding: 6px 0;">
-                                    Fire a test conversion: <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 11px;">bbq.push(['track','purchase',{value: 49.99}])</code>
+                                    Test the integration end-to-end: <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
                                 </div>
                             </div>
                         </div>
@@ -2790,6 +2787,23 @@
                             </div>
                         </div>
 
+                        <!-- BBX placement surfaces — protocol §4.1.
+                             Empty selection = bid on every surface. -->
+                        <div class="targeting-block">
+                            <div class="targeting-label">
+                                Surfaces
+                                <span class="hint">— where the ad renders. Leave empty for any.</span>
+                            </div>
+                            <div class="target-pills-row" id="surfacesRow">
+                                <div class="target-pill" data-value="chat" data-color="pink">Chat inline</div>
+                                <div class="target-pill" data-value="tool_response" data-color="pink">Tool response</div>
+                                <div class="target-pill" data-value="sidebar" data-color="pink">Sidebar</div>
+                                <div class="target-pill" data-value="loading_screen" data-color="pink">Loading screen</div>
+                                <div class="target-pill" data-value="status_line" data-color="pink">Status line</div>
+                                <div class="target-pill" data-value="web" data-color="pink">Web</div>
+                            </div>
+                        </div>
+
                         <!-- Reach estimator -->
                         <div class="reach-estimator">
                             <div class="reach-stat">
@@ -3160,8 +3174,8 @@
             // Render intent suggestions
             renderIntentSuggestions();
 
-            // Target pill toggles
-            document.querySelectorAll('#hostAppsRow .target-pill, #mcpToolsRow .target-pill, #aiModelsRow .target-pill').forEach(pill => {
+            // Target pill toggles (includes new BBX surfaces row)
+            document.querySelectorAll('#hostAppsRow .target-pill, #mcpToolsRow .target-pill, #aiModelsRow .target-pill, #surfacesRow .target-pill').forEach(pill => {
                 pill.addEventListener('click', () => {
                     const color = pill.getAttribute('data-color');
                     pill.classList.toggle('selected');
@@ -3392,7 +3406,12 @@
         // recent ten impressions, all from real auction data. Falls back to
         // the engine-status stub silently when there's nothing to show yet.
         function renderAuctionSummary(s) {
-            if (!s || s.impressions_with_intent === 0) return;
+            if (!s) return;
+            // Allow rendering if there are conversions even when no
+            // intent-tagged impressions yet (legacy / web-only conversions).
+            const hasIntent = s.impressions_with_intent > 0;
+            const conv = s.conversions || { count: 0, value: 0, by_type: {}, cvr: null, roas: null, cpa: null };
+            if (!hasIntent && conv.count === 0) return;
             // Update the live Benna panel status label with real intent stats
             const label = document.getElementById('bennaStatusLabel');
             if (label && s.avg_intent_match != null) {
@@ -3418,7 +3437,48 @@
                         ${r.cost != null ? '$' + Number(r.cost).toFixed(4) : '—'}
                     </td>
                 </tr>`).join('');
+            // Conversion KPI strip (protocol §6.2). Only rendered when at
+            // least one conversion fired; otherwise shows a setup hint.
+            const fmt$ = (v) => '$' + Number(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const convTypeRows = Object.entries(conv.by_type || {})
+                .sort((a, b) => b[1] - a[1])
+                .map(([k, n]) => `<span style="background:#EFF6FF;color:#1D4ED8;padding:3px 10px;border-radius:100px;font-size:12px;font-weight:500;margin-right:6px;">${escapeHtmlA(k)} · ${n}</span>`).join('');
+            const convBlock = conv.count > 0 ? `
+                <div style="border:1px solid #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:16px;background:#FAFAF7;">
+                    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Conversions · last 7 days</div>
+                            <div style="font-size:24px;font-weight:700;color:#111;line-height:1;">${conv.count.toLocaleString()}</div>
+                            <div style="font-size:12px;color:#6B7280;margin-top:4px;">Total value <strong style="color:#059669;">${fmt$(conv.value)}</strong></div>
+                            <div style="margin-top:8px;">${convTypeRows}</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,minmax(80px,auto));gap:14px;">
+                            <div>
+                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">CVR</div>
+                                <div style="font-size:18px;font-weight:700;color:#111;">${conv.cvr != null ? (conv.cvr * 100).toFixed(2) + '%' : '—'}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">CPA</div>
+                                <div style="font-size:18px;font-weight:700;color:#111;">${conv.cpa != null ? fmt$(conv.cpa) : '—'}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:10.5px;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">ROAS</div>
+                                <div style="font-size:18px;font-weight:700;color:${conv.roas != null && conv.roas >= 1 ? '#059669' : '#111'};">${conv.roas != null ? conv.roas.toFixed(2) + '×' : '—'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>` : `
+                <div style="border:1px dashed #E5E7EB;border-radius:12px;padding:14px 16px;margin-bottom:16px;background:#FAFAFA;">
+                    <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;">Conversions</div>
+                    <div style="font-size:13px;color:#6B7280;">
+                        Install the Boost Boss pixel on your conversion page to track ROAS.
+                        Forward <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">bbx_auc</code> from your CTA URL into a POST to
+                        <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">/api/track</code> with <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">event=conversion</code>.
+                    </div>
+                </div>`;
+
             host.innerHTML = `
+                ${convBlock}
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
                     <div>
                         <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Intent match distribution</div>
@@ -3815,6 +3875,40 @@
                 .map(p => p.getAttribute('data-value'));
             return { intents, hostApps, mcpTools, aiModels };
         }
+
+        // ── BBX MCP-native targeting helpers ─────────────────────────────
+        // Translate the form's friendly pill values into the canonical names
+        // the publisher SDK / Lumi sends in ad_request.host_app and
+        // ad_request.active_tools. The eligibility filter does straight
+        // string comparison, so both sides must use the same vocabulary.
+        function canonicaliseHostApp(v) {
+            if (!v) return v;
+            const map = {
+                claude:        'claude_desktop',
+                chatgpt:       'chatgpt',
+                cursor:        'cursor',
+                perplexity:    'perplexity',
+                replit:        'replit',
+                windsurf:      'windsurf',
+                vscode:        'vscode',
+                jetbrains:     'jetbrains',
+                claude_desktop:'claude_desktop',
+            };
+            const key = String(v).toLowerCase();
+            return map[key] || key;
+        }
+        function canonicaliseMcpTool(v) {
+            // SDK sends tools as canonical "<name>-mcp". The form pills
+            // collect short names (filesystem, github, stripe). Append the
+            // -mcp suffix unless it's already there.
+            if (!v) return v;
+            const s = String(v).toLowerCase();
+            return s.endsWith('-mcp') ? s : s + '-mcp';
+        }
+        function getSelectedSurfaces() {
+            return Array.from(document.querySelectorAll('#surfacesRow .target-pill.selected'))
+                .map(p => p.getAttribute('data-value'));
+        }
         function updateReachEstimate() {
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const signalCount = intents.length + hostApps.length + mcpTools.length + aiModels.length;
@@ -4052,6 +4146,15 @@
                 end_date: formData.get('end_date') || null,
                 adomain: formData.get('adomain') ? [formData.get('adomain')] : [],
                 iab_cat: formData.get('iab_cat') ? [formData.get('iab_cat')] : [],
+                // BBX MCP-native targeting (migration 04). The form's chip + pill
+                // groups already collect intents / hostApps / mcpTools — we
+                // canonicalise their values to match the publisher SDK's
+                // host_app + active_tools naming so eligibility joins on both
+                // sides match exactly.
+                target_intent_tokens: intents,
+                target_host_apps: hostApps.map(canonicaliseHostApp),
+                target_active_tools: mcpTools.map(canonicaliseMcpTool),
+                target_surfaces: getSelectedSurfaces(),
             };
 
             try {
@@ -4258,9 +4361,42 @@
                     if (radio) radio.checked = true;
                 }
 
-                // Populate intent chips
+                // Populate intent chips. Prefer target_intent_tokens (BBX
+                // canonical column); fall back to target_keywords for
+                // legacy campaigns created before the migration.
                 intentChips.innerHTML = '';
-                (c.target_keywords || []).forEach(kw => addIntentChip(kw));
+                const intentSeed = (c.target_intent_tokens && c.target_intent_tokens.length)
+                    ? c.target_intent_tokens
+                    : (c.target_keywords || []);
+                intentSeed.forEach(kw => addIntentChip(kw));
+
+                // Restore BBX MCP-native pill selections so editing a
+                // campaign doesn't silently wipe its targeting.
+                const restorePills = (rowSel, values, transform) => {
+                    document.querySelectorAll(rowSel + ' .target-pill').forEach(p => {
+                        p.classList.remove('selected', 'pink', 'cyan', 'yellow');
+                    });
+                    (values || []).forEach(raw => {
+                        const v = transform ? transform(raw) : raw;
+                        const pill = document.querySelector(rowSel + ` .target-pill[data-value="${v}"]`);
+                        if (pill) {
+                            pill.classList.add('selected');
+                            const colour = pill.getAttribute('data-color');
+                            if (colour) pill.classList.add(colour);
+                        }
+                    });
+                };
+                // Host apps: stored canonical (cursor / claude_desktop), pills
+                // are mostly canonical — but the demo "claude" pill maps to
+                // claude_desktop, so reverse the mapping when rehydrating.
+                restorePills('#hostAppsRow', c.target_host_apps, (canonical) =>
+                    canonical === 'claude_desktop' ? 'claude' : canonical);
+                // MCP tools: stored as "<name>-mcp", pills carry the short name.
+                restorePills('#mcpToolsRow', c.target_active_tools, (canonical) =>
+                    canonical.endsWith('-mcp') ? canonical.replace(/-mcp$/, '') : canonical);
+                // Surfaces: stored 1:1
+                restorePills('#surfacesRow', c.target_surfaces);
+                if (typeof updateReachEstimate === 'function') updateReachEstimate();
 
                 // Change modal title
                 const modalTitle = campaignModal.querySelector('.modal-header h2, h3');
@@ -4293,6 +4429,11 @@
                     bid_amount: parseFloat(formData.get('bid_amount')) || null,
                     daily_budget: parseFloat(formData.get('daily_budget')),
                     total_budget: parseFloat(formData.get('total_budget')),
+                    // BBX MCP-native targeting — same shape as create path
+                    target_intent_tokens: intents,
+                    target_host_apps: hostApps.map(canonicaliseHostApp),
+                    target_active_tools: mcpTools.map(canonicaliseMcpTool),
+                    target_surfaces: getSelectedSurfaces(),
                 };
 
                 try {

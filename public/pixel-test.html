@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BBX Pixel — Test Conversion Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0F0F1A; --panel: #1A1A2E; --border: #2A2A3E;
+      --text: #F3F4F6; --muted: #9CA3AF; --accent: #FF2D78;
+      --ok: #10B981; --warn: #F59E0B;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 64px; }
+    h1 { font-size: 26px; font-weight: 700; margin: 0 0 6px; }
+    .subtitle { color: var(--muted); font-size: 15px; margin-bottom: 24px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; margin-bottom: 18px; }
+    .card h2 { font-size: 13px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.06em; color: var(--muted); margin: 0 0 14px; }
+    code { background: #050510; color: #B0B0C7; padding: 1px 6px; border-radius: 4px;
+      font-size: 12.5px; }
+    .pre { background: #050510; border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 14px; font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: 12.5px; color: #B0B0C7; line-height: 1.55; white-space: pre-wrap;
+      word-break: break-all; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+    .row.full { grid-template-columns: 1fr; }
+    label { display: block; font-size: 11px; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 5px; }
+    input, select { width: 100%; padding: 9px 12px; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 7px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    .btn { display: inline-block; padding: 11px 22px; background: var(--accent); color: #fff;
+      border: none; border-radius: 9px; font-size: 14px; font-weight: 700; cursor: pointer;
+      font-family: inherit; }
+    .btn:hover { background: #FF1B6A; }
+    .btn.muted { background: var(--bg); color: var(--text); border: 1px solid var(--border); }
+    .pill { display: inline-block; padding: 2px 9px; background: var(--bg); color: var(--muted);
+      border-radius: 100px; font-size: 11px; font-weight: 600; }
+    .pill.ok    { background: rgba(16,185,129,0.18);  color: #6EE7B7; }
+    .pill.miss  { background: rgba(245,158,11,0.18);  color: #FCD34D; }
+    .footer-note { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.55; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Boost Boss Pixel — Conversion Test</h1>
+  <p class="subtitle">Verifies the pixel captures <code>bbx_auc</code> from the click URL and fires a conversion postback that attributes back to the winning auction.</p>
+
+  <!-- Status -->
+  <div class="card">
+    <h2>Step 1 — attribution detected</h2>
+    <div id="attrStatus">…detecting…</div>
+    <div class="footer-note">Append <code>?bbx_auc=ach_xxx&amp;bbx_cmp=cam_xxx</code> to this page's URL to simulate landing from a click. The pixel reads those query params (or a referrer URL containing them) and persists them in sessionStorage.</div>
+  </div>
+
+  <!-- Manual fire -->
+  <div class="card">
+    <h2>Step 2 — fire a test conversion</h2>
+    <div class="row">
+      <div>
+        <label>Conversion type</label>
+        <select id="convType">
+          <option value="signup">signup</option>
+          <option value="purchase">purchase</option>
+          <option value="tool_invoke">tool_invoke</option>
+          <option value="lead">lead</option>
+        </select>
+      </div>
+      <div>
+        <label>Value (USD)</label>
+        <input id="convValue" type="number" min="0" step="0.01" value="29.99">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>External id <span style="text-transform:none;font-weight:400;">(optional)</span></label>
+        <input id="convExtId" type="text" placeholder="user_abc123">
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;">
+        <button class="btn" id="fireBtn">Fire conversion</button>
+        <button class="btn muted" id="fireBeaconBtn" title="Same as Fire conversion but uses navigator.sendBeacon, surviving nav-away">via Beacon</button>
+      </div>
+    </div>
+    <div class="footer-note">The pixel uses <code>navigator.sendBeacon</code> when available, falling back to <code>fetch</code> with <code>keepalive:true</code>. Both survive a redirect after the conversion (e.g. on a checkout-success page that auto-navigates).</div>
+  </div>
+
+  <!-- Snippet for advertisers -->
+  <div class="card">
+    <h2>Step 3 — install on your site</h2>
+    <div class="footer-note" style="margin-bottom:8px;">Paste this on your conversion / thank-you page (before <code>&lt;/head&gt;</code>):</div>
+    <div class="pre" id="snippet"></div>
+  </div>
+
+  <!-- Live log of what was fired -->
+  <div class="card">
+    <h2>Step 4 — live log</h2>
+    <div id="log" class="pre" style="min-height:64px;">No conversions fired yet.</div>
+  </div>
+</div>
+
+<!-- Pre-script queue (matches the standard install pattern) -->
+<script>
+  window.bbq = window.bbq || [];
+  window.__BBX_PIXEL_DEBUG__ = true;   // dev mode → console.log on each fire
+</script>
+<!-- Load the pixel itself -->
+<script async src="/pixel.js"></script>
+<!-- Page-specific UI -->
+<script>
+  // ── Render attribution status from URL / referrer / sessionStorage ──
+  function getAttribution() {
+    let auc = null, cmp = null;
+    try {
+      const u = new URL(window.location.href);
+      auc = u.searchParams.get('bbx_auc');
+      cmp = u.searchParams.get('bbx_cmp');
+    } catch (_) {}
+    if (!auc && document.referrer) {
+      try {
+        const r = new URL(document.referrer);
+        auc = auc || r.searchParams.get('bbx_auc');
+        cmp = cmp || r.searchParams.get('bbx_cmp');
+      } catch (_) {}
+    }
+    try {
+      auc = auc || sessionStorage.getItem('bbx_auc');
+      cmp = cmp || sessionStorage.getItem('bbx_cmp');
+    } catch (_) {}
+    return { auc, cmp };
+  }
+  function renderAttr() {
+    const { auc, cmp } = getAttribution();
+    const host = document.getElementById('attrStatus');
+    if (!auc && !cmp) {
+      host.innerHTML = '<span class="pill miss">No attribution found</span>'
+        + '<div class="footer-note">Open <a href="/pixel-test.html?bbx_auc=ach_demo_test&amp;bbx_cmp=cam_demo_test" style="color:#FF6B9D;">this same page with demo params</a> to test.</div>';
+    } else {
+      host.innerHTML =
+        '<div style="display:flex;flex-wrap:wrap;gap:6px;">' +
+          '<span class="pill ok">Attribution detected</span>' +
+          (auc ? '<span class="pill">auction_id: <code>' + auc + '</code></span>' : '<span class="pill miss">no auction_id</span>') +
+          (cmp ? '<span class="pill">campaign_id: <code>' + cmp + '</code></span>' : '<span class="pill miss">no campaign_id</span>') +
+        '</div>';
+    }
+  }
+  renderAttr();
+
+  // ── Render the install snippet (uses this site's origin) ──
+  document.getElementById('snippet').textContent =
+    '<script async src="' + location.origin + '/pixel.js" data-advertiser-id="YOUR_ADVERTISER_ID"><' + '/script>\n' +
+    '<script>\n' +
+    '  window.bbq = window.bbq || [];\n' +
+    '  bbq.push([\'track\', \'signup\', { value: 29.99, currency: \'USD\' }]);\n' +
+    '<' + '/script>';
+
+  // ── Fire / log ──
+  const logEl = document.getElementById('log');
+  function log(line, ok) {
+    const ts = new Date().toTimeString().slice(0, 8);
+    if (logEl.textContent === 'No conversions fired yet.') logEl.textContent = '';
+    const colour = ok === false ? '#F87171' : '#6EE7B7';
+    logEl.innerHTML += '<div style="color:' + colour + ';">[' + ts + '] ' + line + '</div>';
+  }
+  function fire() {
+    const type = document.getElementById('convType').value;
+    const value = Number(document.getElementById('convValue').value) || 0;
+    const ext   = document.getElementById('convExtId').value.trim() || null;
+    const props = { value, currency: 'USD' };
+    if (ext) props.external_id = ext;
+    window.bbq.push(['track', type, props]);
+    log('bbq.push([\'track\', \'' + type + '\', ' + JSON.stringify(props) + '])', true);
+  }
+  document.getElementById('fireBtn').addEventListener('click', fire);
+  document.getElementById('fireBeaconBtn').addEventListener('click', fire);
+
+  // Re-render attribution after pixel.js loads (in case it just persisted to sessionStorage)
+  setTimeout(renderAttr, 200);
+</script>
+</body>
+</html>
