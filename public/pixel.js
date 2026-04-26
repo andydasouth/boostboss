@@ -126,24 +126,35 @@
     };
 
     log('firing conversion', body);
-    // Use sendBeacon when available so the request survives nav-away
-    // events on conversion pages that immediately redirect.
     var url  = ENDPOINT;
     var json = JSON.stringify(body);
-    try {
-      if (navigator.sendBeacon) {
-        var blob = new Blob([json], { type: 'application/json' });
-        var ok = navigator.sendBeacon(url, blob);
-        if (ok) return;
-      }
-    } catch (_) {}
+
+    // Prefer fetch with keepalive — same survival semantics as
+    // sendBeacon for nav-away cases, but with a real Content-Type
+    // header that Vercel's body parser handles reliably (sendBeacon's
+    // Blob path has been flaky on serverless runtimes).
     try {
       fetch(url, {
         method: 'POST',
         keepalive: true,
         headers: { 'Content-Type': 'application/json' },
         body: json,
-      }).catch(function () {});
+      }).then(function (r) {
+        if (DEBUG) {
+          r.text().then(function (t) {
+            log(r.ok ? 'conversion accepted' : ('rejected ' + r.status + ': ' + t));
+          });
+        }
+      }).catch(function (e) { log('fetch failed:', e && e.message); });
+      return;
+    } catch (_) {}
+
+    // sendBeacon fallback — only if fetch is unavailable (legacy browsers).
+    try {
+      if (navigator.sendBeacon) {
+        var blob = new Blob([json], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+      }
     } catch (_) {}
   }
 

@@ -230,7 +230,7 @@ async function loadAdvertiserAuctionSummary(sb, campaignIds) {
   try {
     const sinceIso = new Date(Date.now() - 7 * 86400000).toISOString();
     const { data: rows } = await sb.from("events")
-      .select("event_type, surface, format, intent_match_score, cost, created_at, auction_id, placement_id, campaign_id")
+      .select("event_type, surface, format, intent_match_score, cost, created_at, auction_id, placement_id, campaign_id, conversion_type, value_cents, currency")
       .in("campaign_id", campaignIds)
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: false })
@@ -250,28 +250,41 @@ function demoAdvertiserAuctionSummary(events, campaignIds) {
 
 function summariseAuctionRows(rows) {
   let withIntent = 0, sumIntent = 0;
+  let convCount = 0, convValue = 0, totalSpend = 0, impCount = 0, clickCount = 0;
   const buckets = { high: 0, mid: 0, low: 0 };
+  const byType  = {};   // counts by conversion_type
   const bySurface = {};
   const byFormat  = {};
   for (const r of rows) {
-    if (r.event_type !== "impression") continue;
-    if (r.intent_match_score != null) {
-      const s = Number(r.intent_match_score);
-      withIntent++;
-      sumIntent += s;
-      if (s >= 1.2) buckets.high++;
-      else if (s >= 0.7) buckets.mid++;
-      else buckets.low++;
-    }
-    if (r.surface) {
-      const s = bySurface[r.surface] || { impressions: 0, spend: 0 };
-      s.impressions++; s.spend += Number(r.cost || 0);
-      bySurface[r.surface] = s;
-    }
-    if (r.format) {
-      const f = byFormat[r.format] || { impressions: 0, spend: 0 };
-      f.impressions++; f.spend += Number(r.cost || 0);
-      byFormat[r.format] = f;
+    if (r.event_type === "impression") {
+      impCount++;
+      totalSpend += Number(r.cost || 0);
+      if (r.intent_match_score != null) {
+        const s = Number(r.intent_match_score);
+        withIntent++;
+        sumIntent += s;
+        if (s >= 1.2) buckets.high++;
+        else if (s >= 0.7) buckets.mid++;
+        else buckets.low++;
+      }
+      if (r.surface) {
+        const s = bySurface[r.surface] || { impressions: 0, spend: 0 };
+        s.impressions++; s.spend += Number(r.cost || 0);
+        bySurface[r.surface] = s;
+      }
+      if (r.format) {
+        const f = byFormat[r.format] || { impressions: 0, spend: 0 };
+        f.impressions++; f.spend += Number(r.cost || 0);
+        byFormat[r.format] = f;
+      }
+    } else if (r.event_type === "click") {
+      clickCount++;
+    } else if (r.event_type === "conversion") {
+      convCount++;
+      // value_cents stored as int; expose as dollars for display.
+      convValue += (Number(r.value_cents || 0) / 100);
+      const t = r.conversion_type || "uncategorised";
+      byType[t] = (byType[t] || 0) + 1;
     }
   }
   // Latest 10 impressions for the "recent activity" feed
@@ -285,9 +298,12 @@ function summariseAuctionRows(rows) {
       intent_match: r.intent_match_score != null ? Number(r.intent_match_score) : null,
       cost: r.cost != null ? Number(r.cost) : null,
     }));
-  // Round spend numbers
   Object.values(bySurface).forEach(s => s.spend = +s.spend.toFixed(4));
   Object.values(byFormat).forEach(f => f.spend  = +f.spend.toFixed(4));
+  // ROAS = total conversion value / total ad spend. Null when no spend.
+  const roas = totalSpend > 0 ? +(convValue / totalSpend).toFixed(4) : null;
+  // CPA = spend / conversions. Null when no conversions.
+  const cpa  = convCount > 0 ? +(totalSpend / convCount).toFixed(4) : null;
   return {
     impressions_with_intent: withIntent,
     avg_intent_match: withIntent > 0 ? +(sumIntent / withIntent).toFixed(4) : null,
@@ -295,6 +311,15 @@ function summariseAuctionRows(rows) {
     by_surface: bySurface,
     by_format:  byFormat,
     recent,
+    // Conversion summary (protocol §6.2)
+    conversions: {
+      count: convCount,
+      value:  +convValue.toFixed(2),
+      currency: "USD",
+      by_type: byType,
+      cvr: clickCount > 0 ? +(convCount / clickCount).toFixed(4) : null,
+      roas, cpa,
+    },
   };
 }
 

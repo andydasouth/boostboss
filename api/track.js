@@ -94,12 +94,22 @@ module.exports = async function handler(req, res) {
   // Short query keys (`auction`, `placement`, `ims`) come from the GET
   // pixel URLs minted by api/mcp.js; long body keys come from the POST
   // path that the SDK and JSON-RPC track_event tool use.
-  const auctionId   = params.auction || params.auction_id || null;
+  const auctionId   = params.auction || params.auction_id || params.bbx_auc || null;
   const placementId = params.placement || params.placement_id || null;
   const surface     = params.surface || null;
   const format      = params.format  || null;
   const intentMatchScore = params.ims != null ? Number(params.ims)
                        : (params.intent_match_score != null ? Number(params.intent_match_score) : null);
+
+  // ── Conversion-specific fields (protocol §6.2) ─────────────────────
+  // value comes in as USD dollars on the wire; we store cents as int.
+  const conversionType = params.conversion_type || params.type || null;
+  const valueRaw       = params.value != null ? params.value
+                       : (params.value_micros != null ? Number(params.value_micros) / 10000 : null);
+  const valueCents     = valueRaw != null && Number.isFinite(Number(valueRaw))
+                          ? Math.round(Number(valueRaw) * 100) : null;
+  const externalId     = params.external_id || params.bbx_eid || null;
+  const currency       = params.currency || "USD";
 
   if (!event || !campaignId) {
     return res.status(400).json({ error: "Missing event or campaign_id" });
@@ -122,7 +132,7 @@ module.exports = async function handler(req, res) {
     process.env.SUPABASE_SERVICE_ROLE_KEY ? "service_role" :
     process.env.SUPABASE_ANON_KEY ? "anon" : "none");
 
-  const valid = ["impression", "click", "close", "skip", "video_complete"];
+  const valid = ["impression", "click", "close", "skip", "video_complete", "conversion", "dismiss"];
   if (!valid.includes(event)) {
     return res.status(400).json({ error: `Invalid event type. Use: ${valid.join(", ")}` });
   }
@@ -180,6 +190,12 @@ module.exports = async function handler(req, res) {
     surface:      surface,
     format:       format,
     intent_match_score: Number.isFinite(intentMatchScore) ? intentMatchScore : null,
+    // Conversion fields (db/05_bbx_conversions.sql). Only populated when
+    // event === 'conversion'; null otherwise.
+    conversion_type: event === "conversion" ? conversionType : null,
+    value_cents:     event === "conversion" ? valueCents     : null,
+    external_id:     event === "conversion" ? externalId     : null,
+    currency:        event === "conversion" ? currency       : null,
     created_at: new Date().toISOString(),
   };
 

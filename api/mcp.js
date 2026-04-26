@@ -441,6 +441,20 @@ async function handleGetSponsoredContent(body, args, res) {
   }
   const track = `${base}/api/track?${trackParams.toString()}`;
 
+  // Append bbx_auc to the cta_url so the advertiser's conversion pixel
+  // can attribute the conversion back to this auction (protocol §5).
+  // Existing query string is preserved; we just tack on bbx_auc=...
+  // (and bbx_cmp= for clean dashboards). url_template macros from the
+  // bidder_response would replace this once external bidders ship.
+  function appendQuery(url, k, v) {
+    if (!url) return url;
+    const sep = url.includes("?") ? "&" : "?";
+    return url + sep + encodeURIComponent(k) + "=" + encodeURIComponent(v);
+  }
+  let ctaUrl = w.cta_url || "";
+  ctaUrl = appendQuery(ctaUrl, "bbx_auc", auctionId);
+  ctaUrl = appendQuery(ctaUrl, "bbx_cmp", String(w.id));
+
   return jsonRpc(res, body.id, {
     sponsored: {
       campaign_id: w.id,
@@ -450,7 +464,7 @@ async function handleGetSponsoredContent(body, args, res) {
       media_url: w.media_url,
       poster_url: w.poster_url || null,
       cta_label: w.cta_label,
-      cta_url: w.cta_url,
+      cta_url: ctaUrl,
       skippable_after_sec: w.skippable_after_sec || 3,
       tracking: {
         impression:     `${track}&event=impression`,

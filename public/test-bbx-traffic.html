@@ -85,6 +85,21 @@
         </select>
       </div>
     </div>
+    <div class="row">
+      <div>
+        <label>Conversion rate <span style="font-weight:400;text-transform:none;">— fired against auctions that got a click</span></label>
+        <select id="convRate">
+          <option value="0" selected>0% (no conversions)</option>
+          <option value="0.1">10% (typical SaaS signup)</option>
+          <option value="0.3">30% (high-intent demo)</option>
+          <option value="0.5">50% (showroom demo)</option>
+        </select>
+      </div>
+      <div>
+        <label>Conversion value (USD)</label>
+        <input id="convValue" type="number" min="0" step="1" value="29" style="width:100%;padding:10px 14px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;">
+      </div>
+    </div>
     <button class="btn" id="runBtn">Run test auctions →</button>
   </div>
 
@@ -142,7 +157,7 @@
 
   function pickScenario(i) { return SCENARIOS[i % SCENARIOS.length]; }
 
-  async function runOneAuction(i, apiKey, region, clickRate) {
+  async function runOneAuction(i, apiKey, region, clickRate, convRate, convValue) {
     const sc = pickScenario(i);
     const sessionId = `sess_test_${Date.now()}_${i}`;
 
@@ -192,6 +207,7 @@
     let line = `#${String(i+1).padStart(2)}  ${sc.surface.padEnd(14)} ${cmpId}  $${price.toFixed(2)} CPM · intent=${intent.toFixed(2)}  imp✓`;
 
     // 3. Maybe fire click
+    let clicked = false;
     if (Math.random() < clickRate) {
       await fetch('/api/track', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -202,7 +218,29 @@
           intent_match_score: intent,
         }),
       });
+      clicked = true;
       line += '  click✓';
+    }
+
+    // 4. Maybe fire conversion (only on auctions that got a click)
+    if (clicked && convRate > 0 && Math.random() < convRate) {
+      const convTypes = ['signup', 'purchase', 'tool_invoke', 'lead'];
+      const conversionType = convTypes[Math.floor(Math.random() * convTypes.length)];
+      // jitter the value ±20% so dashboards show variance
+      const v = convValue * (0.8 + Math.random() * 0.4);
+      await fetch('/api/track', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'conversion', campaign_id: cmpId, session_id: sessionId,
+          developer_id: apiKey, auction_id: aucId,
+          placement_id: sc.placement, surface: sc.surface, format: inner.auction.format,
+          conversion_type: conversionType,
+          value: +v.toFixed(2),
+          currency: 'USD',
+          external_id: 'demo_user_' + Math.random().toString(36).slice(2, 10),
+        }),
+      });
+      line += `  conv✓ ${conversionType} $${v.toFixed(2)}`;
     }
     addLog(line, 'ok');
   }
@@ -212,19 +250,21 @@
     if (!apiKey) { alert('Enter your publisher API key first.'); return; }
     const N = Math.min(200, Math.max(1, Number(document.getElementById('numAuctions').value) || 20));
     const clickRate = Number(document.getElementById('clickRate').value);
+    const convRate  = Number(document.getElementById('convRate').value);
+    const convValue = Number(document.getElementById('convValue').value) || 0;
     const region = document.getElementById('region').value;
 
     runBtn.disabled = true;
     runBtn.textContent = 'Running…';
     logCard.style.display = 'block';
     logEl.innerHTML = '';
-    addLog(`Starting ${N} auctions · click rate ${(clickRate*100).toFixed(0)}% · region ${region}`, 'dim');
+    addLog(`Starting ${N} auctions · click rate ${(clickRate*100).toFixed(0)}% · conv rate ${(convRate*100).toFixed(0)}% · region ${region}`, 'dim');
     addLog('────────────────────────────────────────────', 'dim');
 
     let ok = 0, failed = 0;
     for (let i = 0; i < N; i++) {
       try {
-        await runOneAuction(i, apiKey, region, clickRate);
+        await runOneAuction(i, apiKey, region, clickRate, convRate, convValue);
         ok++;
       } catch (e) {
         addLog(`#${i+1}  ERROR: ${e.message}`, 'err');
