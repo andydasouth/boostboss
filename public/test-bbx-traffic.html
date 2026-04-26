@@ -184,7 +184,11 @@
     const wrapped = await auctionResp.json();
     const inner = JSON.parse(wrapped.result.content[0].text);
     if (!inner.sponsored) {
-      addLog(`#${i+1}  no_fill (${inner.reason || 'unknown'})`, 'warn');
+      let reason = inner.reason || 'unknown';
+      if (reason === 'frequency_capped' && inner.frequency) {
+        reason = `frequency_capped (${inner.frequency.seen_today}/${inner.frequency.cap})`;
+      }
+      addLog(`#${i+1}  no_fill (${reason})`, 'warn');
       return;
     }
     const aucId = inner.auction.auction_id;

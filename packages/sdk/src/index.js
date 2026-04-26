@@ -35,6 +35,11 @@ class BoostBoss {
     this.timeoutMs = opts.timeoutMs || 3000;
     this.onEvent = opts.onEvent || null; // optional lifecycle hook
     this._sessionId = opts.sessionId || `sess_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+    // Stable per-user anonymous ID for placement frequency capping.
+    // Persisted in localStorage where available (browser) so it survives
+    // across sessions; in-memory fallback for Node / non-browser hosts.
+    // Caller can override via opts.anonymousId for advanced cases.
+    this._anonymousId = opts.anonymousId || this._loadOrMintAnonymousId();
     // Default placement context — applied to every getSponsoredContent unless
     // the caller overrides per-call. Lets a publisher configure once and call
     // many times without repeating placement_id / surface every time.
@@ -75,6 +80,7 @@ class BoostBoss {
       user_region: params.region || this.defaultRegion,
       user_language: params.language || this.defaultLanguage,
       session_id: this._sessionId,
+      anonymous_id: this._anonymousId,
       session_len_min: params.sessionLenMin,
       developer_api_key: this.apiKey,
       // BBX MCP-native fields (protocol §4.1). Per-call values fall back to
@@ -144,6 +150,7 @@ class BoostBoss {
       event,
       campaign_id: campaignId,
       session_id: this._sessionId,
+      anonymous_id: this._anonymousId,
       developer_api_key: this.apiKey,
       auction_id:   opts.auctionId   || cached.auction_id   || undefined,
       placement_id: opts.placementId || cached.placement_id || undefined,
@@ -167,6 +174,32 @@ class BoostBoss {
     if (typeof this.onEvent === "function") {
       try { this.onEvent(name, payload); } catch (e) { /* silent */ }
     }
+  }
+
+  // Stable anonymous_id for freq cap. Browser: localStorage, salted hash,
+  // 1-year TTL stamp. Node: in-memory only (resets per process).
+  _loadOrMintAnonymousId() {
+    const KEY  = "bb_anon_id";
+    const TKEY = "bb_anon_ts";
+    const TTL  = 365 * 24 * 3600 * 1000;          // rotate annually
+    let storage = null;
+    try { if (typeof localStorage !== "undefined") storage = localStorage; } catch (_) {}
+    if (storage) {
+      try {
+        const id = storage.getItem(KEY);
+        const ts = Number(storage.getItem(TKEY) || 0);
+        if (id && (Date.now() - ts) < TTL) return id;
+      } catch (_) {}
+    }
+    const fresh = "uuh_" + (
+      (typeof crypto !== "undefined" && crypto.randomUUID)
+        ? crypto.randomUUID().replace(/-/g, "")
+        : (Date.now().toString(36) + Math.random().toString(36).slice(2, 14))
+    );
+    if (storage) {
+      try { storage.setItem(KEY, fresh); storage.setItem(TKEY, String(Date.now())); } catch (_) {}
+    }
+    return fresh;
   }
 
   async _fetch(url, body) {

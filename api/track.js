@@ -84,6 +84,9 @@ module.exports = async function handler(req, res) {
   const event      = params.event;
   const campaignId = params.campaign_id;
   const sessionId  = params.session || params.session_id || null;
+  // Stable per-user id for freq capping (db/06_freq_cap.sql).
+  // GET pixel beacons can pass it as `anon`; POST passes `anonymous_id`.
+  const anonymousId = params.anon || params.anonymous_id || null;
   // Callers (MCP handler, SDK pixel, direct API) may pass EITHER the
   // publisher's UUID or their api_key ("bb_dev_live_..."). events.developer_id
   // is a UUID column, so we resolve api_keys to UUIDs before insert —
@@ -190,6 +193,7 @@ module.exports = async function handler(req, res) {
     surface:      surface,
     format:       format,
     intent_match_score: Number.isFinite(intentMatchScore) ? intentMatchScore : null,
+    anonymous_id: anonymousId,
     // Conversion fields (db/05_bbx_conversions.sql). Only populated when
     // event === 'conversion'; null otherwise.
     conversion_type: event === "conversion" ? conversionType : null,

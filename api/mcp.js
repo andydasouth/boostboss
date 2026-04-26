@@ -272,6 +272,28 @@ async function handleGetSponsoredContent(body, args, res) {
   const effectiveSurface = (placement && placement.surface) || args.surface || null;
   const effectiveFloor   = placement ? Number(placement.floor_cpm) : 0;
 
+  // ── Frequency cap enforcement (placement-level, per anonymous_id, per day) ──
+  // Skipped silently if the SDK didn't send anonymous_id (legacy callers)
+  // or if there's no placement to read the cap from. Cap of 0 means "off".
+  if (sb && placement && args.anonymous_id) {
+    const cap = Number(placement.freq_cap_per_user_per_day) || 0;
+    if (cap > 0) {
+      const { data: capRow } = await sb.rpc("bbx_freq_cap_count", {
+        p_anonymous_id: String(args.anonymous_id),
+        p_placement_id: placement.id,
+      });
+      const seenToday = Number(capRow) || 0;
+      if (seenToday >= cap) {
+        return jsonRpc(res, body.id, {
+          sponsored: null,
+          reason: "frequency_capped",
+          auction_id: auctionId,
+          frequency: { seen_today: seenToday, cap },
+        });
+      }
+    }
+  }
+
   // Load campaigns
   let campaigns;
   if (sb) {
