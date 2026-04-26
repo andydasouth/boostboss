@@ -1981,6 +1981,21 @@
                 </div>
             </section>
 
+            <!-- BBX Auction Summary — populated by renderAuctionSummary() from real
+                 stats.auction_summary data when the advertiser has impressions w/
+                 intent_match_score. Hidden until the panel has content. -->
+            <section class="campaigns-section" id="bbxAuctionSummaryWrap" style="margin-top:0;">
+                <div class="campaigns-header" style="margin-bottom:12px;">
+                    <div class="campaigns-title">Auction intelligence</div>
+                    <div style="font-size:11px;color:#9CA3AF;">Last 7 days · live BBX auction signal</div>
+                </div>
+                <div id="bbxAuctionSummary" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px;">
+                    <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:14px 0;">
+                        Run a campaign to populate this panel — surfaces, intent-match histogram, and recent impressions appear here automatically.
+                    </div>
+                </div>
+            </section>
+
             <!-- Performance Chart -->
             <div class="chart-section">
                 <div class="chart-title">Daily Impressions (Last 14 Days)</div>
@@ -3356,11 +3371,90 @@
 
                 // Render chart
                 renderChart(stats.daily || []);
+
+                // BBX auction summary — populates the Benna engine panel from
+                // real auction data when available, falling back to the stub
+                // /api/benna engine-status when the advertiser has no traffic yet.
+                if (stats.auction_summary) {
+                    renderAuctionSummary(stats.auction_summary);
+                }
             } catch (error) {
                 console.error('Error loading stats:', error);
                 document.getElementById('totalImpressions').textContent = '0';
                 document.getElementById('totalClicks').textContent = '0';
             }
+        }
+
+        // ── BBX Auction Summary panel ───────────────────────────────────
+        // Renders intent-match histogram + per-surface breakdown + the most
+        // recent ten impressions, all from real auction data. Falls back to
+        // the engine-status stub silently when there's nothing to show yet.
+        function renderAuctionSummary(s) {
+            if (!s || s.impressions_with_intent === 0) return;
+            // Update the live Benna panel status label with real intent stats
+            const label = document.getElementById('bennaStatusLabel');
+            if (label && s.avg_intent_match != null) {
+                label.textContent = `OPTIMIZING · avg intent match ${s.avg_intent_match.toFixed(2)}`;
+            }
+            // If a host element exists for the auction-summary block, populate it.
+            const host = document.getElementById('bbxAuctionSummary');
+            if (!host) return;
+            const total = s.impressions_with_intent;
+            const buckets = s.intent_buckets || { high: 0, mid: 0, low: 0 };
+            const pct = (n) => total > 0 ? ((n / total) * 100).toFixed(0) + '%' : '0%';
+            const surfaces = Object.entries(s.by_surface || {})
+                .sort((a, b) => b[1].impressions - a[1].impressions);
+            const recentRows = (s.recent || []).map(r => `
+                <tr style="border-top:1px solid #F3F4F6;font-size:12px;">
+                    <td style="padding:8px 12px;color:#6B7280;font-family:monospace;">${(r.ts || '').slice(11, 19)}</td>
+                    <td style="padding:8px 12px;">${escapeHtmlA(r.surface || '—')}</td>
+                    <td style="padding:8px 12px;">${escapeHtmlA(r.format || '—')}</td>
+                    <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums;">
+                        ${r.intent_match != null ? r.intent_match.toFixed(2) : '—'}
+                    </td>
+                    <td style="padding:8px 12px;text-align:right;font-variant-numeric:tabular-nums;color:#059669;">
+                        ${r.cost != null ? '$' + Number(r.cost).toFixed(4) : '—'}
+                    </td>
+                </tr>`).join('');
+            host.innerHTML = `
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:14px;">
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Intent match distribution</div>
+                        <div style="display:flex;gap:6px;align-items:center;font-size:13px;">
+                            <span style="background:#D1FAE5;color:#059669;padding:3px 10px;border-radius:100px;font-weight:600;">High ${pct(buckets.high)}</span>
+                            <span style="background:#FEF3C7;color:#92400E;padding:3px 10px;border-radius:100px;font-weight:600;">Mid ${pct(buckets.mid)}</span>
+                            <span style="background:#F3F4F6;color:#6B7280;padding:3px 10px;border-radius:100px;font-weight:600;">Low ${pct(buckets.low)}</span>
+                        </div>
+                        <div style="font-size:11px;color:#9CA3AF;margin-top:6px;">
+                            ${total.toLocaleString()} impressions w/ intent · avg ${s.avg_intent_match != null ? s.avg_intent_match.toFixed(2) : '—'}
+                        </div>
+                    </div>
+                    <div>
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Top surfaces</div>
+                        ${surfaces.slice(0, 4).map(([k, v]) => `
+                            <div style="display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;">
+                                <span style="color:#374151;">${escapeHtmlA(k)}</span>
+                                <span style="color:#6B7280;font-variant-numeric:tabular-nums;">${v.impressions.toLocaleString()} imps · $${Number(v.spend).toFixed(2)}</span>
+                            </div>`).join('') || '<div style="font-size:12px;color:#9CA3AF;">No data yet</div>'}
+                    </div>
+                </div>
+                <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Recent impressions</div>
+                <table style="width:100%;border-collapse:collapse;">
+                    <thead>
+                        <tr style="background:#FAFAFA;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;">
+                            <th style="padding:7px 12px;text-align:left;font-weight:600;">Time</th>
+                            <th style="padding:7px 12px;text-align:left;font-weight:600;">Surface</th>
+                            <th style="padding:7px 12px;text-align:left;font-weight:600;">Format</th>
+                            <th style="padding:7px 12px;text-align:right;font-weight:600;">Intent</th>
+                            <th style="padding:7px 12px;text-align:right;font-weight:600;">Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody>${recentRows || '<tr><td colspan="5" style="padding:12px;text-align:center;color:#9CA3AF;font-size:12px;">No recent impressions</td></tr>'}</tbody>
+                </table>`;
+        }
+        function escapeHtmlA(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
         // Load campaigns with filter support

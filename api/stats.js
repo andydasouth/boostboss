@@ -166,7 +166,17 @@ async function handleAdvertiserStats(id, req, res) {
     }
 
     const totals = rollUpTotals(dailyStats);
-    return res.json({ campaigns: campaigns || [], daily: dailyStats, totals });
+
+    // BBX auction-level breakdowns — give the advertiser dashboard its
+    // intent-match, surface, and recent-auction panels backed by real data.
+    const auction_summary = await loadAdvertiserAuctionSummary(sb, campaignIds);
+
+    return res.json({
+      campaigns: campaigns || [],
+      daily: dailyStats,
+      totals,
+      auction_summary,
+    });
   }
 
   // ── Demo fallback: use real in-memory data + seeded history ──
@@ -198,7 +208,94 @@ async function handleAdvertiserStats(id, req, res) {
   }
 
   const totals = rollUpTotals(dailyStats);
-  return res.json({ campaigns, daily: dailyStats, totals });
+  // Demo auction summary from in-memory events
+  const auction_summary = demoAdvertiserAuctionSummary(events, campaigns.map(c => c.id));
+  return res.json({ campaigns, daily: dailyStats, totals, auction_summary });
+}
+
+// ── Auction summary helpers ──────────────────────────────────────────
+// Surfaces what the advertiser dashboard needs to render its "Benna engine"
+// panel from real data: intent-match histogram, per-surface breakdown,
+// recent-impression sample.
+async function loadAdvertiserAuctionSummary(sb, campaignIds) {
+  const empty = {
+    impressions_with_intent: 0,
+    avg_intent_match: null,
+    intent_buckets: { high: 0, mid: 0, low: 0 },
+    by_surface: {},
+    by_format: {},
+    recent: [],
+  };
+  if (!Array.isArray(campaignIds) || campaignIds.length === 0) return empty;
+  try {
+    const sinceIso = new Date(Date.now() - 7 * 86400000).toISOString();
+    const { data: rows } = await sb.from("events")
+      .select("event_type, surface, format, intent_match_score, cost, created_at, auction_id, placement_id, campaign_id")
+      .in("campaign_id", campaignIds)
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: false })
+      .limit(2000);
+    return summariseAuctionRows(rows || []);
+  } catch (e) {
+    console.error("[Stats] auction summary failed:", e.message);
+    return empty;
+  }
+}
+
+function demoAdvertiserAuctionSummary(events, campaignIds) {
+  const ids = new Set((campaignIds || []).map(String));
+  const filtered = (events || []).filter(e => ids.has(String(e.campaign_id)));
+  return summariseAuctionRows(filtered);
+}
+
+function summariseAuctionRows(rows) {
+  let withIntent = 0, sumIntent = 0;
+  const buckets = { high: 0, mid: 0, low: 0 };
+  const bySurface = {};
+  const byFormat  = {};
+  for (const r of rows) {
+    if (r.event_type !== "impression") continue;
+    if (r.intent_match_score != null) {
+      const s = Number(r.intent_match_score);
+      withIntent++;
+      sumIntent += s;
+      if (s >= 1.2) buckets.high++;
+      else if (s >= 0.7) buckets.mid++;
+      else buckets.low++;
+    }
+    if (r.surface) {
+      const s = bySurface[r.surface] || { impressions: 0, spend: 0 };
+      s.impressions++; s.spend += Number(r.cost || 0);
+      bySurface[r.surface] = s;
+    }
+    if (r.format) {
+      const f = byFormat[r.format] || { impressions: 0, spend: 0 };
+      f.impressions++; f.spend += Number(r.cost || 0);
+      byFormat[r.format] = f;
+    }
+  }
+  // Latest 10 impressions for the "recent activity" feed
+  const recent = rows
+    .filter(r => r.event_type === "impression")
+    .slice(0, 10)
+    .map(r => ({
+      ts: r.created_at, auction_id: r.auction_id || null,
+      placement_id: r.placement_id || null,
+      surface: r.surface || null, format: r.format || null,
+      intent_match: r.intent_match_score != null ? Number(r.intent_match_score) : null,
+      cost: r.cost != null ? Number(r.cost) : null,
+    }));
+  // Round spend numbers
+  Object.values(bySurface).forEach(s => s.spend = +s.spend.toFixed(4));
+  Object.values(byFormat).forEach(f => f.spend  = +f.spend.toFixed(4));
+  return {
+    impressions_with_intent: withIntent,
+    avg_intent_match: withIntent > 0 ? +(sumIntent / withIntent).toFixed(4) : null,
+    intent_buckets: buckets,
+    by_surface: bySurface,
+    by_format:  byFormat,
+    recent,
+  };
 }
 
 // ── Developer stats ───────────────────────────────────────────────────
@@ -219,11 +316,17 @@ async function handleDeveloperStats(devKey, req, res) {
     // aggregate cron).
     dailyStats = await mergeLiveEvents(sb, dailyStats, { developerId: dev.id });
 
+    // Per-placement breakdown — pulls from the placement_daily_stats view
+    // (created by migration 04). Joined with placements so we have surface
+    // / format / status without a second round-trip.
+    const placements = await loadPlacementBreakdown(sb, dev.id);
+
     const totals = rollUpDevTotals(dailyStats);
     return res.json({
       developer: formatDeveloper(dev),
       daily: dailyStats,
       totals,
+      placements,
     });
   }
 
@@ -243,6 +346,9 @@ async function handleDeveloperStats(devKey, req, res) {
     }
   }
 
+  // Demo placement breakdown — derive from the in-memory events we just rolled up.
+  const placements = demoPlacementBreakdown(events, devKey);
+
   const totals = rollUpDevTotals(dailyStats);
   return res.json({
     developer: {
@@ -255,7 +361,128 @@ async function handleDeveloperStats(devKey, req, res) {
     },
     daily: dailyStats,
     totals,
+    placements,
   });
+}
+
+// ── Placement breakdown helpers ───────────────────────────────────────
+// Pulls per-placement metrics for a publisher dashboard. Reads the
+// placement_daily_stats view (migration 04) joined with placements so
+// we get human-readable name + status alongside the numbers.
+async function loadPlacementBreakdown(sb, developerId) {
+  try {
+    const sinceDate = new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10);
+    const { data: rows, error } = await sb.from("placement_daily_stats")
+      .select("placement_id, surface, format, impressions, clicks, video_completes, gross_spend, publisher_earnings, ecpm, ctr, avg_intent_match")
+      .eq("developer_id", developerId)
+      .gte("date", sinceDate);
+    if (error || !rows) return [];
+
+    // Aggregate across days into per-placement totals
+    const byPlacement = new Map();
+    for (const r of rows) {
+      const k = r.placement_id;
+      if (!k) continue;
+      if (!byPlacement.has(k)) {
+        byPlacement.set(k, {
+          placement_id: k, surface: r.surface, format: r.format,
+          impressions: 0, clicks: 0, video_completes: 0,
+          gross_spend: 0, publisher_earnings: 0,
+          intent_match_sum: 0, intent_match_n: 0,
+        });
+      }
+      const b = byPlacement.get(k);
+      b.impressions       += Number(r.impressions || 0);
+      b.clicks            += Number(r.clicks || 0);
+      b.video_completes   += Number(r.video_completes || 0);
+      b.gross_spend       += Number(r.gross_spend || 0);
+      b.publisher_earnings+= Number(r.publisher_earnings || 0);
+      if (r.avg_intent_match != null) {
+        b.intent_match_sum += Number(r.avg_intent_match);
+        b.intent_match_n   += 1;
+      }
+    }
+
+    // Hydrate with placement metadata (name, status, floor)
+    const ids = [...byPlacement.keys()];
+    if (ids.length === 0) return [];
+    const { data: meta } = await sb.from("placements")
+      .select("id, name, surface, format, floor_cpm, status")
+      .in("id", ids);
+    const metaById = new Map((meta || []).map(m => [m.id, m]));
+
+    return [...byPlacement.values()].map(b => {
+      const m = metaById.get(b.placement_id) || {};
+      const ecpm = b.impressions > 0 ? (b.gross_spend / b.impressions) * 1000 : 0;
+      const ctr  = b.impressions > 0 ? (b.clicks / b.impressions) : 0;
+      return {
+        placement_id: b.placement_id,
+        name: m.name || b.placement_id,
+        surface: b.surface || m.surface,
+        format:  b.format  || m.format,
+        floor_cpm: m.floor_cpm != null ? Number(m.floor_cpm) : null,
+        status:  m.status || "unknown",
+        impressions: b.impressions,
+        clicks: b.clicks,
+        video_completes: b.video_completes,
+        gross_spend:        +b.gross_spend.toFixed(4),
+        publisher_earnings: +b.publisher_earnings.toFixed(4),
+        ecpm: +ecpm.toFixed(4),
+        ctr:  +ctr.toFixed(4),
+        avg_intent_match: b.intent_match_n > 0
+          ? +(b.intent_match_sum / b.intent_match_n).toFixed(4)
+          : null,
+      };
+    }).sort((a, b) => b.publisher_earnings - a.publisher_earnings);
+  } catch (e) {
+    console.error("[Stats] placement breakdown failed:", e.message);
+    return [];
+  }
+}
+
+// Demo equivalent — derive placement metrics from in-memory events for a
+// given developer key. Used only when SUPABASE env is missing.
+function demoPlacementBreakdown(events, devKey) {
+  const byPlacement = new Map();
+  for (const ev of events || []) {
+    if (devKey && ev.developer_id !== devKey) continue;
+    if (!ev.placement_id) continue;
+    const k = ev.placement_id;
+    if (!byPlacement.has(k)) {
+      byPlacement.set(k, {
+        placement_id: k, surface: ev.surface || null, format: ev.format || null,
+        impressions: 0, clicks: 0, video_completes: 0,
+        gross_spend: 0, publisher_earnings: 0,
+        intent_match_sum: 0, intent_match_n: 0,
+      });
+    }
+    const b = byPlacement.get(k);
+    if (ev.event_type === "impression") b.impressions++;
+    if (ev.event_type === "click") b.clicks++;
+    if (ev.event_type === "video_complete") b.video_completes++;
+    b.gross_spend        += Number(ev.cost || 0);
+    b.publisher_earnings += Number(ev.developer_payout || 0);
+    if (ev.intent_match_score != null) {
+      b.intent_match_sum += Number(ev.intent_match_score);
+      b.intent_match_n   += 1;
+    }
+  }
+  return [...byPlacement.values()].map(b => {
+    const ecpm = b.impressions > 0 ? (b.gross_spend / b.impressions) * 1000 : 0;
+    const ctr  = b.impressions > 0 ? (b.clicks / b.impressions) : 0;
+    return {
+      placement_id: b.placement_id,
+      name: b.placement_id,
+      surface: b.surface, format: b.format,
+      floor_cpm: null, status: "active",
+      impressions: b.impressions, clicks: b.clicks, video_completes: b.video_completes,
+      gross_spend:        +b.gross_spend.toFixed(4),
+      publisher_earnings: +b.publisher_earnings.toFixed(4),
+      ecpm: +ecpm.toFixed(4), ctr: +ctr.toFixed(4),
+      avg_intent_match: b.intent_match_n > 0
+        ? +(b.intent_match_sum / b.intent_match_n).toFixed(4) : null,
+    };
+  }).sort((a, b) => b.publisher_earnings - a.publisher_earnings);
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-sdk",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Lumi SDK — Monetize your AI app with context-aware, native sponsored content ranked in real time by Benna. Part of the Boost Boss ad network.",
   "main": "src/index.js",
   "types": "src/index.d.ts",

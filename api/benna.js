@@ -99,6 +99,199 @@ function hash(str) {
   return Math.abs(h);
 }
 
+// ─── Protocol §9 — price model ─────────────────────────────────────────
+// price_cpm = advertiser_bid_cpm
+//           × placement_baseline_ctr
+//           × geo_multiplier
+//           × format_multiplier
+//           × intent_match_score   (cosine of embeddings; Jaccard fallback)
+//           × safety_multiplier    (1 unless brand-safety violation)
+//
+// All multipliers are bounded so a single bad signal can't blow up a bid.
+// Defaults are the v0 priors; once we have outcome data, replace these
+// constants with learned tables.
+
+const GEO_MULTIPLIERS = {
+  US: 1.00, CA: 0.95, GB: 0.90, AU: 0.90, JP: 0.85, DE: 0.80, FR: 0.75,
+  KR: 0.80, SG: 0.85, NL: 0.80,
+  // Tier-2
+  IT: 0.55, ES: 0.50, BR: 0.30, MX: 0.30,
+  // Emerging
+  IN: 0.20, ID: 0.18, VN: 0.15, NG: 0.12,
+  // Special bucket: "global" / unknown ⇒ 0.5
+};
+const GEO_DEFAULT = 0.50;
+
+// Maps a placement.format (image|video|native|text_card) crossed with a
+// placement.surface (chat|tool_response|sidebar|...) to a multiplier.
+// Surface dominates: tool_response > chat > sidebar > web. Within a
+// surface, video > native > image > banner.
+function formatMultiplier(format, surface) {
+  const surfaceTable = {
+    tool_response:  1.40,   // sponsored result mixed into tool output (highest intent)
+    chat:           1.00,
+    sidebar:        0.65,
+    loading_screen: 1.20,   // interstitial-equivalent
+    status_line:    0.45,
+    web:            0.85,
+  };
+  const formatTable = {
+    video:     1.25,
+    native:    1.00,
+    image:     0.90,
+    text_card: 0.95,
+    banner:    0.80,
+  };
+  const sm = surface ? (surfaceTable[surface] ?? 1.0) : 1.0;
+  const fm = format  ? (formatTable[format]   ?? 1.0) : 1.0;
+  return +(sm * fm).toFixed(4);
+}
+
+function geoMultiplier(country) {
+  if (!country) return GEO_DEFAULT;
+  const code = String(country).toUpperCase().slice(0, 2);
+  return GEO_MULTIPLIERS[code] ?? GEO_DEFAULT;
+}
+
+// Cosine similarity for two equal-length numeric arrays. Returns null
+// if the inputs are unusable (lets caller fall back to Jaccard).
+function cosineSimilarity(a, b) {
+  if (!Array.isArray(a) || !Array.isArray(b) || a.length === 0 || a.length !== b.length) {
+    return null;
+  }
+  let dot = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) {
+    const x = +a[i], y = +b[i];
+    dot += x * y; na += x * x; nb += y * y;
+  }
+  if (na === 0 || nb === 0) return null;
+  return dot / (Math.sqrt(na) * Math.sqrt(nb));
+}
+
+// Embedding-aware intent match. Tries cosine over the supplied embeddings
+// first (text-embedding-3-small, 1536 dims), falls back to Jaccard over
+// the raw token arrays. Output is clipped to [0.2, 1.5] per protocol §9.
+function intentMatchScore(reqTokens, campaignTokens, opts = {}) {
+  // Embedding path
+  if (opts.requestEmbedding && opts.campaignEmbedding) {
+    const sim = cosineSimilarity(opts.requestEmbedding, opts.campaignEmbedding);
+    if (sim != null) {
+      // sim ∈ [-1, 1] → clip negatives to 0 → rescale to [0.2, 1.5]
+      const s = Math.max(0, Math.min(1, sim));
+      return +Math.max(0.2, Math.min(1.5, 0.4 + s * 1.4)).toFixed(4);
+    }
+  }
+
+  // Jaccard fallback (same shape as _lib/mcp_targeting.js so behaviour
+  // is consistent whether the embedding is populated or not)
+  const a = (reqTokens || []).map((t) => String(t).toLowerCase());
+  const b = (campaignTokens || []).map((t) => String(t).toLowerCase());
+  if (a.length === 0 || b.length === 0) return 1.0;
+  const setA = new Set(a);
+  const setB = new Set(b);
+  let inter = 0;
+  for (const t of setA) if (setB.has(t)) inter++;
+  const union = setA.size + setB.size - inter;
+  if (union === 0) return 1.0;
+  const j = inter / union;
+  return +Math.max(0.2, Math.min(1.5, 0.4 + j * 1.4)).toFixed(4);
+}
+
+// Brand-safety check: returns 1.0 unless the campaign is excluded by the
+// placement's category or advertiser-domain blocklist. 0 = no bid.
+function safetyMultiplier(campaign, placement) {
+  const excludedCats = (placement && placement.excluded_categories) || [];
+  const excludedAdv  = (placement && placement.excluded_advertisers) || [];
+  const overlap = (a, b) => Array.isArray(a) && Array.isArray(b) && a.some((x) => b.includes(x));
+  if (overlap(campaign.iab_cat, excludedCats)) return 0;
+  if (overlap(campaign.adomain, excludedAdv))  return 0;
+  return 1;
+}
+
+/**
+ * Compute the auction price for one campaign × placement × request triple.
+ * This is the protocol §9 entry point. mcp.js and rtb.js call this once
+ * per eligible candidate and pick the highest price_cpm that clears the
+ * placement floor.
+ *
+ * Input shape:
+ *   {
+ *     placement: { id, surface, format, floor_cpm,
+ *                  excluded_categories, excluded_advertisers,
+ *                  baseline_ctr },                       -- optional, default 1.0
+ *     context:   { intent_tokens[], country, host_app, ... },
+ *     campaign:  { bid_amount,                           -- advertiser's max CPM
+ *                  format, target_intent_tokens, intent_embedding,
+ *                  iab_cat, adomain },
+ *     request_intent_embedding,                          -- optional cached vector
+ *   }
+ *
+ * Output:
+ *   {
+ *     price_cpm,                   -- USD per 1000 impressions
+ *     cleared_floor: bool,
+ *     factors: { ... },            -- breakdown for debugging / dashboards
+ *     latency_ms,
+ *     model_version,
+ *   }
+ */
+function scorePrice(req) {
+  const t0 = process.hrtime ? process.hrtime.bigint() : null;
+  const placement = req.placement || {};
+  const context   = req.context   || {};
+  const campaign  = req.campaign  || {};
+
+  const advertiser_bid_cpm = Number(campaign.bid_amount) || 0;
+  const baseline_ctr       = Number(placement.baseline_ctr) || 1.0;
+  const geo_mult           = geoMultiplier(context.country);
+  const format_mult        = formatMultiplier(
+    campaign.format || placement.format,
+    placement.surface
+  );
+  const intent_match = intentMatchScore(
+    context.intent_tokens || [],
+    campaign.target_intent_tokens || [],
+    {
+      requestEmbedding: req.request_intent_embedding,
+      campaignEmbedding: campaign.intent_embedding,
+    }
+  );
+  const safety_mult = safetyMultiplier(campaign, placement);
+
+  const price_cpm = advertiser_bid_cpm
+    * baseline_ctr
+    * geo_mult
+    * format_mult
+    * intent_match
+    * safety_mult;
+
+  const floor_cpm = Number(placement.floor_cpm) || 0;
+  const cleared_floor = price_cpm > 0 && price_cpm >= floor_cpm;
+
+  let latency_ms = 0.1;
+  if (t0 != null) {
+    const t1 = process.hrtime.bigint();
+    latency_ms = Number((t1 - t0) / 1000n) / 1000;
+    if (!Number.isFinite(latency_ms) || latency_ms < 0.1) latency_ms = 0.1;
+  }
+
+  return {
+    price_cpm: +price_cpm.toFixed(4),
+    cleared_floor,
+    factors: {
+      advertiser_bid_cpm: +advertiser_bid_cpm.toFixed(4),
+      baseline_ctr:       +baseline_ctr.toFixed(4),
+      geo_multiplier:     +geo_mult.toFixed(4),
+      format_multiplier:  +format_mult.toFixed(4),
+      intent_match_score: intent_match,
+      safety_multiplier:  safety_mult,
+      floor_cpm:          +floor_cpm.toFixed(4),
+    },
+    latency_ms: +latency_ms.toFixed(2),
+    model_version: MODEL_VERSION,
+  };
+}
+
 // ─── engine status (what the advertiser dashboard pulls) ───
 function engineStatus(advertiserId = "default") {
   const rnd = seeded(hash(advertiserId + currentBucketSeed()));
@@ -172,12 +365,19 @@ module.exports = async function handler(req, res) {
       return res.status(200).json(engineStatus(advertiserId));
     }
 
-    // POST predict
-    if (req.method === "POST") {
+    // POST predict — legacy signal-based bid scoring
+    if (req.method === "POST" && (op !== "price")) {
       const body = req.body || {};
       const context = body.context || {};
       const campaign = body.campaign || {};
       const result = scoreBid(context, campaign);
+      return res.status(200).json(result);
+    }
+
+    // POST price — protocol §9 price model (placement-aware, with floor)
+    if (req.method === "POST" && op === "price") {
+      const body = req.body || {};
+      const result = scorePrice(body);
       return res.status(200).json(result);
     }
 
@@ -191,5 +391,13 @@ module.exports = async function handler(req, res) {
 // Expose the core inference so other services (MCP, internal tools)
 // can call Benna directly without a second HTTP hop.
 module.exports.scoreBid = scoreBid;
+module.exports.scorePrice = scorePrice;
 module.exports.engineStatus = engineStatus;
 module.exports.MODEL_VERSION = MODEL_VERSION;
+// Internal helpers — exported for unit tests and for callers that want
+// to compute one factor in isolation.
+module.exports._intentMatchScore = intentMatchScore;
+module.exports._cosineSimilarity = cosineSimilarity;
+module.exports._geoMultiplier = geoMultiplier;
+module.exports._formatMultiplier = formatMultiplier;
+module.exports._safetyMultiplier = safetyMultiplier;

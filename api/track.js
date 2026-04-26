@@ -90,6 +90,17 @@ module.exports = async function handler(req, res) {
   // otherwise Postgres rejects the insert and the impression vanishes.
   let developerId = params.dev || params.developer_id || null;
 
+  // ── BBX auction-keyed fields (protocol §6) ─────────────────────────
+  // Short query keys (`auction`, `placement`, `ims`) come from the GET
+  // pixel URLs minted by api/mcp.js; long body keys come from the POST
+  // path that the SDK and JSON-RPC track_event tool use.
+  const auctionId   = params.auction || params.auction_id || null;
+  const placementId = params.placement || params.placement_id || null;
+  const surface     = params.surface || null;
+  const format      = params.format  || null;
+  const intentMatchScore = params.ims != null ? Number(params.ims)
+                       : (params.intent_match_score != null ? Number(params.intent_match_score) : null);
+
   if (!event || !campaignId) {
     return res.status(400).json({ error: "Missing event or campaign_id" });
   }
@@ -162,6 +173,13 @@ module.exports = async function handler(req, res) {
     user_agent: (req.headers && req.headers["user-agent"]) || "",
     cost: 0,
     developer_payout: 0,
+    // BBX auction-keyed fields (columns added by db/04_bbx_mcp_extensions.sql §3).
+    // All nullable; legacy callers without auction context still work.
+    auction_id:   auctionId,
+    placement_id: placementId,
+    surface:      surface,
+    format:       format,
+    intent_match_score: Number.isFinite(intentMatchScore) ? intentMatchScore : null,
     created_at: new Date().toISOString(),
   };
 
@@ -169,6 +187,30 @@ module.exports = async function handler(req, res) {
 
   if (sb) {
     // ── Supabase path ──
+
+    // Idempotency: per protocol §6.3, at most one event row per
+    // (auction_id, event_type). When auction_id is set, check first so we
+    // don't double-charge the advertiser for retried impressions / clicks.
+    // Index `events_auction_type_unique` (partial, where auction_id is not null)
+    // is the underlying constraint.
+    if (auctionId) {
+      const { data: existing } = await sb.from("events")
+        .select("id").eq("auction_id", auctionId).eq("event_type", event)
+        .limit(1).maybeSingle();
+      if (existing) {
+        res.setHeader("x-track-deduplicated", "1");
+        if (req.method === "GET") {
+          res.setHeader("Content-Type", "image/gif");
+          res.setHeader("Cache-Control", "no-store");
+          return res.send(PIXEL_GIF);
+        }
+        return res.json({
+          tracked: true, deduplicated: true, event,
+          campaign_id: campaignId, auction_id: auctionId,
+        });
+      }
+    }
+
     // Insert with cost pre-computed so we never need a second update (fixes race condition)
     if (["impression", "click", "video_complete"].includes(event)) {
       const { data: campaign } = await sb.from("campaigns")
@@ -192,9 +234,31 @@ module.exports = async function handler(req, res) {
       }
     }
     const { error } = await sb.from("events").insert(record);
-    if (error) console.error("[Track] event insert:", error.message);
+    if (error) {
+      // 23505 = unique_violation. If the partial unique index fired between
+      // our pre-check and the insert (race), treat as deduplication, not error.
+      if (error.code === "23505") {
+        res.setHeader("x-track-deduplicated", "race");
+      } else {
+        console.error("[Track] event insert:", error.message);
+      }
+    }
   } else {
     // ── Demo path — compute cost and attribute to developer ──
+    // Demo idempotency: scan the in-memory store for (auction_id, event_type).
+    if (auctionId && DEMO_EVENTS.some((r) => r.auction_id === auctionId && r.event_type === event)) {
+      res.setHeader("x-track-deduplicated", "1");
+      if (req.method === "GET") {
+        res.setHeader("Content-Type", "image/gif");
+        res.setHeader("Cache-Control", "no-store");
+        return res.send(PIXEL_GIF);
+      }
+      return res.json({
+        tracked: true, deduplicated: true, event,
+        campaign_id: campaignId, auction_id: auctionId,
+      });
+    }
+
     if (["impression", "click", "video_complete"].includes(event)) {
       let campaign = null;
       try {
@@ -230,6 +294,7 @@ module.exports = async function handler(req, res) {
 
   return res.json({
     tracked: true, event, campaign_id: campaignId,
+    auction_id: auctionId, placement_id: placementId,
     mode: HAS_SUPABASE ? "supabase" : "demo",
   });
 };

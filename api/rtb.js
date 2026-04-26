@@ -18,6 +18,7 @@
 const benna = require("./benna.js");
 const ledger = require("./_lib/ledger.js");
 const seats = require("./_lib/seats.js");
+const { mcpTargetingMatch } = require("./_lib/mcp_targeting.js");
 
 // Verbose auction logging — on by default in non-production, opt-in via
 // BBX_DEBUG=1 in production. Errors always log; routine WIN/LOSS/NO_BID
@@ -166,6 +167,30 @@ function contextFromBidRequest(bidReq, imp) {
   if (!ctx.session_len && bidReq.user && bidReq.user.ext && bidReq.user.ext.session_len_min) {
     ctx.session_len = bidReq.user.ext.session_len_min;
   }
+
+  // MCP-native targeting fields. Promote them onto ctx so the targeting
+  // helpers (mcpTargetingMatch / intentMatchScore) can read them flat.
+  // OpenRTB callers pass these via ext.mcp_context; if they're already
+  // there from the Object.assign at the top of the function we just keep
+  // them. Otherwise pull anything we can from the standard fields.
+  if (!ctx.surface) {
+    // Best-effort surface inference from the imp shape
+    if (imp && imp.native) ctx.surface = "chat";
+    else if (imp && imp.banner) ctx.surface = "web";
+    else if (imp && imp.video) ctx.surface = "web";
+  }
+  if (!ctx.host_app && ctx.host) {
+    // Map common publisher domains to their canonical host_app name so
+    // campaigns targeting host_app=cursor (not cursor.com) still match.
+    const host = String(ctx.host).toLowerCase();
+    if (host.includes("cursor"))            ctx.host_app = "cursor";
+    else if (host.includes("claude"))       ctx.host_app = "claude_desktop";
+    else if (host.includes("vscode"))       ctx.host_app = "vscode";
+    else if (host.includes("jetbrains"))    ctx.host_app = "jetbrains";
+  }
+  if (!Array.isArray(ctx.active_tools)) ctx.active_tools = [];
+  if (!Array.isArray(ctx.intent_tokens)) ctx.intent_tokens = [];
+  if (!ctx.placement_id && imp && imp.tagid) ctx.placement_id = imp.tagid;
 
   return ctx;
 }
@@ -439,8 +464,25 @@ module.exports = async function handler(req, res) {
     // Respect tmax — enforce a soft budget; we log if we came close
     const tmax = Number(bidReq.tmax) || 200;
 
+    // Materialise MCP-native context once for the whole BidRequest. Per-imp
+    // overrides happen inside the impression loop below; this top-level
+    // snapshot is what we persist on rtb_auctions for analytics + reporting.
+    const topMcpCtx = contextFromBidRequest(bidReq, bidReq.imp[0] || {});
+
     // Persist the auction request (single source of truth for billing)
-    await ledger.recordAuction(bidReq, auth.seat.seat_id);
+    await ledger.recordAuction(bidReq, auth.seat.seat_id, {
+      mcp_context: {
+        intent_tokens: topMcpCtx.intent_tokens || [],
+        active_tools: topMcpCtx.active_tools || [],
+        host:         topMcpCtx.host || null,
+        host_app:     topMcpCtx.host_app || null,
+        surface:      topMcpCtx.surface || null,
+        intent:       topMcpCtx.intent || null,
+        region:       topMcpCtx.region || null,
+        session_len:  topMcpCtx.session_len || null,
+      },
+      placement_id: topMcpCtx.placement_id || null,
+    });
 
     // Load campaigns once per bid request
     let campaigns;
@@ -463,14 +505,51 @@ module.exports = async function handler(req, res) {
       if (pool.length === 0) continue;
 
       const mcpCtx = contextFromBidRequest(bidReq, imp);
+
+      // Layer MCP-native targeting on top of OpenRTB-level eligibility.
+      // Mirrors the JSON-RPC path in api/mcp.js so both auction surfaces
+      // accept identical campaign targeting (target_active_tools, etc.).
+      const mcpPool = pool.filter((c) => mcpTargetingMatch(c, mcpCtx));
+      if (mcpPool.length === 0) continue;
+
+      // Surface inference for protocol §9 (OpenRTB carries it in mcpCtx.surface)
+      const surface = mcpCtx.surface || (imp.native ? "chat" : (imp.video ? "web" : "web"));
+      // Country code for geo_multiplier (ISO-3166-1 alpha-2)
+      const country = (bidReq.device && bidReq.device.geo && (bidReq.device.geo.country || "").toUpperCase().slice(0, 2)) || null;
+
       let best = null;
-      for (const c of pool) {
+      for (const c of mcpPool) {
+        // Keep legacy signal-based scoring for the dashboard's signal_contributions
         const score = benna.scoreBid(mcpCtx, { target_cpa: c.target_cpa, goal: "target_cpa", format: c.format });
-        // Floor check: Benna returns a per-impression bid; OpenRTB floors are CPM
-        const floorCpm = imp.bidfloor || 0;
-        const bidCpm = score.bid_usd * 1000;
-        if (bidCpm < floorCpm) continue;
-        if (!best || bidCpm > best.score.bid_usd * 1000) best = { campaign: c, score };
+        // Protocol §9 price model — placement-aware, with floor
+        const priced = benna.scorePrice({
+          placement: {
+            surface,
+            format: c.format,
+            floor_cpm: imp.bidfloor || 0,
+            // OpenRTB ext.mcp_context can carry these; default empty
+            excluded_categories: bidReq.bcat || [],
+            excluded_advertisers: bidReq.badv || [],
+            baseline_ctr: 1.0,
+          },
+          context: {
+            intent_tokens: mcpCtx.intent_tokens || [],
+            country,
+            host_app: mcpCtx.host_app,
+          },
+          campaign: {
+            bid_amount: c.bid_amount,
+            format: c.format,
+            target_intent_tokens: c.target_intent_tokens || [],
+            intent_embedding: c.intent_embedding || null,
+            iab_cat: c.iab_cat || [],
+            adomain: c.adomain || [],
+          },
+        });
+        if (!priced.cleared_floor) continue;
+        if (!best || priced.price_cpm > best.priced.price_cpm) {
+          best = { campaign: c, score, priced, effectiveBidUsd: priced.price_cpm / 1000 };
+        }
       }
       if (!best) continue;
       const bid = buildBid(imp, best.campaign, best.score, bidReq);

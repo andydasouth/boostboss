@@ -53,8 +53,12 @@ function todayKey() {
 
 // ── Public API ──────────────────────────────────────────────────────────
 
-/** Record an incoming BidRequest. Returns the auction_id (echoes req.id). */
-async function recordAuction(bidReq, seatId = null) {
+/** Record an incoming BidRequest. Returns the auction_id (echoes req.id).
+ *  `extras` lets the caller materialise MCP-native targeting context onto
+ *  the row alongside the raw OpenRTB body, matching the columns added in
+ *  db/04_bbx_mcp_extensions.sql §4.
+ */
+async function recordAuction(bidReq, seatId = null, extras = {}) {
   const row = {
     id: bidReq.id,
     seat_id: seatId,
@@ -64,6 +68,10 @@ async function recordAuction(bidReq, seatId = null) {
     site_domain: (bidReq.site && bidReq.site.domain) || null,
     app_bundle: (bidReq.app && bidReq.app.bundle) || null,
     raw: bidReq, // we keep the full body for forensics; trim in prod if storage matters
+    // MCP-native context (jsonb column added by migration 04). Stored even
+    // if the SDK didn't pass intent_tokens — empty objects are harmless.
+    mcp_context: extras.mcp_context || null,
+    placement_id: extras.placement_id || null,
   };
   const sb = supa();
   if (sb) {

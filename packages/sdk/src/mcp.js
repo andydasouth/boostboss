@@ -18,15 +18,20 @@ const { BoostBoss } = require("./index.js");
 
 const BB_TOOL_SCHEMA = {
   name: "get_sponsored_content",
-  description: "Fetch a contextually relevant sponsored recommendation from Boost Boss. Ranked in real time by Benna.",
+  description: "Fetch a contextually relevant sponsored recommendation from Boost Boss. Ranked in real time by Benna using MCP signals (intent_tokens, active_tools, host_app, surface).",
   inputSchema: {
     type: "object",
     properties: {
-      context_summary: { type: "string", description: "What the user is currently working on or asking about" },
-      host: { type: "string", description: "Host application (cursor.com, claude.ai, raycast.com, perplexity.ai)" },
-      user_region: { type: "string" },
-      user_language: { type: "string" },
+      context_summary:   { type: "string", description: "What the user is currently working on or asking about" },
+      host:              { type: "string", description: "Host URL or app name (cursor.com, claude.ai, raycast.com, perplexity.ai)" },
+      host_app:          { type: "string", description: "Canonical host app: cursor, claude_desktop, vscode, jetbrains" },
+      user_region:       { type: "string" },
+      user_language:     { type: "string" },
       format_preference: { type: "string", enum: ["image", "video", "native", "any"] },
+      placement_id:      { type: "string", description: "Publisher placement_id (recommended) — enables floor + freq cap + per-placement reporting" },
+      surface:           { type: "string", enum: ["chat", "tool_response", "sidebar", "loading_screen", "status_line", "web"] },
+      intent_tokens:     { type: "array", items: { type: "string" }, description: "Free-form intent strings advertisers bid against" },
+      active_tools:      { type: "array", items: { type: "string" }, description: "Canonical names of MCP servers currently connected" },
     },
     required: ["context_summary"],
   },
@@ -41,6 +46,9 @@ function withBoostBoss(server, opts = {}) {
     apiKey: opts.apiKey,
     region: opts.region,
     language: opts.language,
+    placementId: opts.placementId,
+    surface:     opts.surface,
+    hostApp:     opts.hostApp,
   });
   // Optional gate: function returning false to suppress ads on certain requests
   const gate = opts.gate || (() => true);
@@ -65,9 +73,14 @@ function withBoostBoss(server, opts = {}) {
       const ad = await bb.getSponsoredContent({
         context: args.context_summary,
         host: args.host,
+        hostApp: args.host_app,
         format: args.format_preference || "any",
         region: args.user_region,
         language: args.user_language,
+        placementId: args.placement_id,
+        surface: args.surface,
+        intentTokens: args.intent_tokens,
+        activeTools: args.active_tools,
       });
       return { jsonrpc: "2.0", id: request.id, result: { content: [{ type: "text", text: JSON.stringify(ad) }] } };
     }

@@ -1832,6 +1832,22 @@ def track_impression(campaign_id: str, developer_id: str):
                 </div>
             </div>
 
+            <!-- BBX Placements Breakdown — per-slot economics from placement_daily_stats -->
+            <div class="section" data-panel="earnings">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <div class="section-title" style="margin-bottom: 0;">Placements</div>
+                    <div style="font-size: 12px; color: #6B7280;">
+                        Last 30 days · grouped by <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:11px;">placement_id</code>
+                    </div>
+                </div>
+                <div id="placementsContainer" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;">
+                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;">Loading…</div>
+                </div>
+                <div style="font-size: 11px; color: #9CA3AF; margin-top: 10px; line-height: 1.5;">
+                    Each row is one slot inside your app. Higher <strong>Intent</strong> scores mean Benna is matching the right ads to that placement's context — chase 1.0+ to maximise eCPM.
+                </div>
+            </div>
+
             <!-- Earnings History Table -->
             <div class="section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
@@ -2459,6 +2475,8 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                     revenue_share: data.developer?.revenue_share_pct || 85,
                     rpm: parseFloat(data.totals?.rpm) || 0,
                     daily,
+                    // BBX per-placement breakdown — from placement_daily_stats view
+                    placements: Array.isArray(data.placements) ? data.placements : [],
                 };
             } catch (error) {
                 console.error('Stats load error:', error);
@@ -2600,6 +2618,76 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             } else {
                 document.getElementById('earningsTableBody').innerHTML = '<tr><td colspan="6" style="text-align: center; color: #666;">No earnings data yet</td></tr>';
             }
+
+            // Render BBX per-placement breakdown
+            renderPlacements(stats.placements || []);
+        }
+
+        // ── BBX Placements panel ─────────────────────────────────────────
+        // Shows per-placement metrics from placement_daily_stats: impressions,
+        // CTR, eCPM, publisher earnings, average intent-match score. Empty
+        // state is "no traffic yet" — clicking the placement_id copies it for
+        // the publisher to paste into their SDK call.
+        function renderPlacements(placements) {
+            const host = document.getElementById('placementsContainer');
+            if (!host) return;
+            if (!placements || placements.length === 0) {
+                host.innerHTML = `
+                    <div style="padding:32px;text-align:center;color:#9CA3AF;background:#FAFAFA;border:1px dashed #E5E7EB;border-radius:12px;">
+                        <div style="font-size:32px;margin-bottom:6px;">📍</div>
+                        <div style="font-weight:600;color:#6B7280;font-size:14px;margin-bottom:4px;">No placement traffic yet</div>
+                        <div style="font-size:13px;color:#9CA3AF;">
+                            Pass <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px;">placement_id</code> to <code style="background:#F3F4F6;padding:2px 6px;border-radius:4px;font-size:12px;">getSponsoredContent()</code> to start measuring per-slot economics.
+                        </div>
+                    </div>`;
+                return;
+            }
+            const fmt$ = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmtPct = (n) => (Number(n || 0) * 100).toFixed(2) + '%';
+            const intentBadge = (s) => {
+                if (s == null) return '<span style="color:#9CA3AF;font-size:12px;">—</span>';
+                const v = Number(s);
+                const colour = v >= 1.2 ? '#059669' : (v >= 0.7 ? '#D97706' : '#9CA3AF');
+                return `<span style="color:${colour};font-weight:600;font-size:13px;">${v.toFixed(2)}</span>`;
+            };
+            const rows = placements.map(p => `
+                <tr style="border-top:1px solid #F3F4F6;">
+                    <td style="padding:12px 14px;">
+                        <div style="font-weight:600;font-size:13.5px;color:#111;">${escapeHtml(p.name || p.placement_id)}</div>
+                        <div style="font-size:11px;color:#9CA3AF;font-family:monospace;">${escapeHtml(p.placement_id)}</div>
+                    </td>
+                    <td style="padding:12px 14px;font-size:12px;color:#6B7280;">
+                        <span style="background:#EFF6FF;color:#1D4ED8;padding:2px 8px;border-radius:100px;font-weight:500;">${escapeHtml(p.surface || '—')}</span>
+                        <span style="margin-left:6px;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:100px;font-weight:500;">${escapeHtml(p.format || '—')}</span>
+                    </td>
+                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${(p.impressions||0).toLocaleString()}</td>
+                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${(p.clicks||0).toLocaleString()}</td>
+                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${fmtPct(p.ctr)}</td>
+                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;">${fmt$(p.ecpm)}</td>
+                    <td style="padding:12px 14px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#059669;">${fmt$(p.publisher_earnings)}</td>
+                    <td style="padding:12px 14px;text-align:right;">${intentBadge(p.avg_intent_match)}</td>
+                </tr>`).join('');
+            host.innerHTML = `
+                <table style="width:100%;border-collapse:collapse;font-size:13px;">
+                    <thead>
+                        <tr style="background:#FAFAFA;">
+                            <th style="padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Placement</th>
+                            <th style="padding:10px 14px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Surface / Format</th>
+                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Imps</th>
+                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Clicks</th>
+                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">CTR</th>
+                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">eCPM</th>
+                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;">Earnings</th>
+                            <th style="padding:10px 14px;text-align:right;font-size:11px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:600;" title="Average Benna intent-match score (cosine of intent_tokens × campaign targeting). 1.5 = perfect, 0.4 = no overlap.">Intent</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rows}</tbody>
+                </table>`;
+        }
+
+        function escapeHtml(s) {
+            return String(s == null ? '' : s).replace(/[&<>"']/g, (c) =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         }
 
         // Substitute the publisher's real api_key into every code snippet in

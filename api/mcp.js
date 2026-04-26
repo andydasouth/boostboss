@@ -16,6 +16,7 @@
  */
 
 const benna = require("./benna.js");
+const { mcpTargetingMatch, mintAuctionId } = require("./_lib/mcp_targeting.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -135,6 +136,10 @@ function keywordContextBoost(campaign, ctxText) {
   return hits;
 }
 
+// MCP-native targeting helpers live in api/_lib/mcp_targeting.js so the
+// OpenRTB path (api/rtb.js) and the JSON-RPC path here apply identical
+// eligibility + scoring. See protocol §9.
+
 // ────────────────────────────────────────────────────────────────────────
 //                                HANDLER
 // ────────────────────────────────────────────────────────────────────────
@@ -173,7 +178,7 @@ module.exports = async function handler(req, res) {
         tools: [
           {
             name: "get_sponsored_content",
-            description: "Get a contextually relevant sponsored recommendation matched to conversation context. Ads are ranked in real time by Benna AI using MCP signals (intent, tool, host, session).",
+            description: "Get a contextually relevant sponsored recommendation matched to conversation context. Ads are ranked in real time by Benna AI using MCP signals (intent_tokens, active_tools, host, surface, session).",
             inputSchema: {
               type: "object",
               properties: {
@@ -183,15 +188,20 @@ module.exports = async function handler(req, res) {
                 session_id:      { type: "string", description: "Unique session ID" },
                 developer_api_key: { type: "string", description: "Developer Lumi SDK API key" },
                 format_preference: { type: "string", enum: ["image", "video", "native", "any"] },
-                host:            { type: "string", description: "Host application (e.g., cursor.com) — Benna AI uses this as a ranking signal" },
+                host:            { type: "string", description: "Host URL or app name (e.g., cursor.com or 'cursor')" },
+                host_app:        { type: "string", description: "Canonical host-app name for targeting: cursor, claude_desktop, vscode, jetbrains" },
                 session_len_min: { type: "number", description: "Minutes in-session — longer sessions signal stronger intent" },
+                placement_id:    { type: "string", description: "Publisher's placement_id (e.g., plc_chat_inline_default). Enables placement-aware floor + freq cap." },
+                surface:         { type: "string", enum: ["chat", "tool_response", "sidebar", "loading_screen", "status_line", "web"], description: "UI surface this impression is rendering into" },
+                intent_tokens:   { type: "array", items: { type: "string" }, description: "Free-form intent strings, e.g. ['billing_integration','saas','stripe']" },
+                active_tools:    { type: "array", items: { type: "string" }, description: "Canonical names of MCP servers connected in this session, e.g. ['stripe-mcp','quickbooks-mcp']" },
               },
               required: ["context_summary"],
             },
           },
           {
             name: "track_event",
-            description: "Track ad event: impression, click, close, video_complete, skip",
+            description: "Track ad event: impression, click, close, video_complete, skip. Pass auction_id from get_sponsored_content for idempotent (auction × event) recording.",
             inputSchema: {
               type: "object",
               properties: {
@@ -199,6 +209,11 @@ module.exports = async function handler(req, res) {
                 campaign_id:   { type: "string" },
                 session_id:    { type: "string" },
                 developer_api_key: { type: "string" },
+                auction_id:    { type: "string", description: "Auction ID from get_sponsored_content; used as the idempotency key" },
+                placement_id:  { type: "string", description: "Publisher placement_id; persisted on the events row" },
+                surface:       { type: "string", description: "UI surface this impression rendered into" },
+                format:        { type: "string", description: "Creative format actually rendered" },
+                intent_match_score: { type: "number", description: "Benna intent-match score returned by get_sponsored_content" },
               },
               required: ["event", "campaign_id"],
             },
@@ -234,26 +249,41 @@ module.exports = async function handler(req, res) {
 // ── get_sponsored_content ───────────────────────────────────────────────
 async function handleGetSponsoredContent(body, args, res) {
   const sessionId = args.session_id || "anon_" + Date.now();
+  const auctionId = mintAuctionId();
 
   // Rate limit
   const last = sessionCache.get(sessionId);
   if (last && Date.now() - last < RATE_LIMIT_MS) {
-    return jsonRpc(res, body.id, { sponsored: null, reason: "rate_limited" });
+    return jsonRpc(res, body.id, { sponsored: null, reason: "rate_limited", auction_id: auctionId });
   }
+
+  // ── Resolve placement (optional but recommended) ──
+  // If the SDK passes a placement_id, we look it up to get its surface,
+  // format, and floor_cpm. Without a placement_id we fall back to
+  // request-level surface/format and a default floor (back-compat).
+  const sb = supa();
+  let placement = null;
+  if (args.placement_id && sb) {
+    const { data: p } = await sb.from("placements")
+      .select("id,developer_id,surface,format,floor_cpm,freq_cap_per_user_per_day,excluded_categories,excluded_advertisers,status")
+      .eq("id", args.placement_id).eq("status", "active").maybeSingle();
+    if (p) placement = p;
+  }
+  const effectiveSurface = (placement && placement.surface) || args.surface || null;
+  const effectiveFloor   = placement ? Number(placement.floor_cpm) : 0;
 
   // Load campaigns
   let campaigns;
-  const sb = supa();
   if (sb) {
     const { data, error } = await sb.from("campaigns").select("*").eq("status", "active");
     if (error || !data || data.length === 0) {
-      return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns" });
+      return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns", auction_id: auctionId });
     }
     campaigns = data;
   } else {
     campaigns = demoCampaigns();
     if (campaigns.length === 0) {
-      return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns" });
+      return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns", auction_id: auctionId });
     }
   }
 
@@ -292,6 +322,35 @@ async function handleGetSponsoredContent(body, args, res) {
   // own product without gaming the auction.
   const publisherHost = normalizeHost(args.host);
 
+  // MCP targeting context derived from request args (and placement if present).
+  const mcpCtx = {
+    surface:      effectiveSurface,
+    host_app:     args.host_app || null,
+    active_tools: Array.isArray(args.active_tools) ? args.active_tools : [],
+  };
+  const reqIntentTokens = Array.isArray(args.intent_tokens) ? args.intent_tokens : [];
+
+  // Publisher-side brand-safety: refuse advertiser categories the publisher excluded.
+  const excludedCats = (placement && placement.excluded_categories) || [];
+  const excludedAdv  = (placement && placement.excluded_advertisers) || [];
+  const overlapsArr  = (a, b) => Array.isArray(a) && Array.isArray(b)
+    && a.some((x) => b.includes(x));
+
+  // Build the placement context that scorePrice() needs. When no placement
+  // was supplied we synthesize one from the request args + format defaults
+  // so the protocol §9 multipliers (geo / format / safety) still apply.
+  const scorePlacement = placement || {
+    surface: effectiveSurface,
+    format:  null,
+    floor_cpm: 0,
+    excluded_categories: [],
+    excluded_advertisers: [],
+    baseline_ctr: 1.0,
+  };
+
+  // Country code for geo_multiplier — Benna expects ISO-3166-1 alpha-2.
+  const countryCode = (args.user_region || "").toUpperCase().slice(0, 2) || null;
+
   const scored = campaigns
     .filter((c) => eligible(c, region, lang))
     .filter((c) => {
@@ -302,26 +361,60 @@ async function handleGetSponsoredContent(body, args, res) {
       // Explicit false = off; missing/undefined/true = on (generous default).
       return developerFormats[fmt] !== false;
     })
+    // Placement format gate: campaign format must match placement.format.
+    .filter((c) => !placement || (c.format || "native") === placement.format)
+    // Placement brand-safety: publisher's per-placement category / advertiser blocklists.
+    // (Also enforced as safety_multiplier=0 inside scorePrice; we filter early
+    // to skip the cost of a model call on doomed candidates.)
+    .filter((c) => !overlapsArr(c.iab_cat, excludedCats))
+    .filter((c) => !overlapsArr(c.adomain, excludedAdv))
+    // MCP-native targeting: surface, host_app, active_tools.
+    .filter((c) => mcpTargetingMatch(c, mcpCtx))
     .map((c) => {
-      const kwBoost = keywordContextBoost(c, args.context_summary);
+      // Keep the legacy signal-based prediction for the dashboard's
+      // p_click / p_convert / signal_contributions readout — but use the
+      // protocol §9 price model (scorePrice) for the actual auction.
       const prediction = benna.scoreBid(bennaCtx, {
         target_cpa: c.target_cpa || c.bid_amount || 4.5,
         goal: c.optimization_goal || "target_cpa",
         format: c.format,
       });
-      const effectiveBid = prediction.bid_usd * (1 + kwBoost * 0.15);
+      const priced = benna.scorePrice({
+        placement: scorePlacement,
+        context: {
+          intent_tokens: reqIntentTokens,
+          country: countryCode,
+          host_app: mcpCtx.host_app,
+        },
+        campaign: {
+          bid_amount: c.bid_amount,
+          format: c.format,
+          target_intent_tokens: c.target_intent_tokens || [],
+          intent_embedding: c.intent_embedding || null,
+          iab_cat: c.iab_cat || [],
+          adomain: c.adomain || [],
+        },
+      });
+      const kwBoost = keywordContextBoost(c, args.context_summary);
+      // Apply the keyword-context heuristic on top of the §9 price as a
+      // small bonus so the existing demo behaviour (target_keywords matches)
+      // still nudges things — once embeddings ship we can drop this.
+      const effective_price_cpm = priced.price_cpm * (1 + kwBoost * 0.15);
       const selfPromote = publisherHost && campaignMatchesHost(c, publisherHost);
-      return { c, prediction, kwBoost, effectiveBid, selfPromote };
+      return { c, prediction, priced, kwBoost, effective_price_cpm, selfPromote };
     })
-    .filter((x) => x.effectiveBid > 0)
-    // Self-promoted campaigns win first; among the rest, highest bid wins.
+    // Floor enforcement: drop bids that didn't clear the placement floor.
+    // Self-promote bypasses the floor (house ad always allowed to fill).
+    .filter((x) => x.effective_price_cpm > 0 && (x.selfPromote || x.effective_price_cpm >= effectiveFloor))
+    // Self-promoted campaigns win first; among the rest, highest CPM wins.
     .sort((a, b) => {
       if (a.selfPromote !== b.selfPromote) return a.selfPromote ? -1 : 1;
-      return b.effectiveBid - a.effectiveBid;
+      return b.effective_price_cpm - a.effective_price_cpm;
     });
 
   if (scored.length === 0) {
-    return jsonRpc(res, body.id, { sponsored: null, reason: "no_match" });
+    const reason = effectiveFloor > 0 ? "below_floor" : "no_match";
+    return jsonRpc(res, body.id, { sponsored: null, reason, auction_id: auctionId });
   }
 
   const winner = scored[0];
@@ -330,7 +423,23 @@ async function handleGetSponsoredContent(body, args, res) {
   sessionCache.set(sessionId, Date.now());
 
   const base = process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai";
-  const track = `${base}/api/track?campaign_id=${w.id}&session=${sessionId}&dev=${developerId || ""}`;
+  // Auction-keyed tracking URLs. /api/track will use (auction_id, event_type)
+  // as the idempotency key (events_auction_type_unique partial index, see
+  // db/04_bbx_mcp_extensions.sql §3).
+  const trackParams = new URLSearchParams({
+    campaign_id: String(w.id),
+    session: sessionId,
+    dev: developerId || "",
+    auction: auctionId,
+  });
+  if (placement && placement.id) trackParams.set("placement", placement.id);
+  if (effectiveSurface)          trackParams.set("surface", effectiveSurface);
+  if (w.format)                  trackParams.set("format", String(w.format));
+  const ims = winner.priced && winner.priced.factors && winner.priced.factors.intent_match_score;
+  if (Number.isFinite(ims)) {
+    trackParams.set("ims", ims.toFixed(4));
+  }
+  const track = `${base}/api/track?${trackParams.toString()}`;
 
   return jsonRpc(res, body.id, {
     sponsored: {
@@ -350,16 +459,40 @@ async function handleGetSponsoredContent(body, args, res) {
         video_complete: `${track}&event=video_complete`,
       },
     },
+    auction: {
+      auction_id: auctionId,
+      placement_id: placement ? placement.id : null,
+      surface: effectiveSurface,
+      format: w.format,
+      floor_cpm: effectiveFloor || null,
+      winning_price_cpm: +winner.effective_price_cpm.toFixed(4),
+      intent_match_score: winner.priced.factors.intent_match_score,
+      candidates_considered: scored.length,
+      // Protocol §9 factor breakdown — what each multiplier contributed
+      // to the winning price. Used by the advertiser dashboard's "why
+      // did this campaign win" panel.
+      price_breakdown: winner.priced.factors,
+    },
     benna: {
       model_version: p.model_version,
+      // Legacy fields (kept so the existing dashboard panels render)
       bid_usd: p.bid_usd,
-      effective_bid_usd: +winner.effectiveBid.toFixed(4),
+      effective_bid_usd: +(winner.effective_price_cpm / 1000).toFixed(6),
       p_click: p.p_click,
       p_convert: p.p_convert,
       signal_contributions: p.signal_contributions,
+      // §9 fields
+      price_cpm: +winner.effective_price_cpm.toFixed(4),
+      cleared_floor: winner.priced.cleared_floor,
       latency_ms: p.latency_ms,
       candidates_considered: scored.length,
       context: bennaCtx,
+      mcp_targeting: {
+        surface:       effectiveSurface,
+        host_app:      mcpCtx.host_app,
+        active_tools:  mcpCtx.active_tools,
+        intent_tokens: reqIntentTokens,
+      },
       self_promote: !!winner.selfPromote,
     },
   });
@@ -388,6 +521,13 @@ async function handleTrackEvent(body, args, res) {
       campaign_id: args.campaign_id,
       session_id: args.session_id || null,
       developer_id: args.developer_api_key || null,
+      // Auction-keyed fields per protocol §6 (events_auction_type_unique
+      // idempotency index). All optional — track.js handles missing values.
+      auction_id:   args.auction_id || null,
+      placement_id: args.placement_id || null,
+      surface:      args.surface || null,
+      format:       args.format || null,
+      intent_match_score: args.intent_match_score != null ? Number(args.intent_match_score) : null,
     },
   };
   let trackErr = null;
