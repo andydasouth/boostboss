@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>BBX — Generate Test Traffic</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    :root {
+      --bg: #0F0F1A; --panel: #1A1A2E; --border: #2A2A3E;
+      --text: #F3F4F6; --muted: #9CA3AF; --accent: #FF2D78; --ok: #10B981; --warn: #F59E0B;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; }
+    .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 64px; }
+    h1 { font-size: 28px; font-weight: 700; margin: 0 0 6px; }
+    .subtitle { color: var(--muted); font-size: 15px; margin-bottom: 28px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+      padding: 24px; margin-bottom: 18px; }
+    .card h2 { font-size: 14px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin: 0 0 16px; }
+    label { display: block; font-size: 12px; color: var(--muted); font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+    input, select { width: 100%; padding: 10px 14px; background: var(--bg); color: var(--text);
+      border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .row.full { grid-template-columns: 1fr; }
+    .help { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .btn { display: block; width: 100%; padding: 14px; background: var(--accent); color: #fff;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: all 0.15s; }
+    .btn:hover:not(:disabled) { background: #FF1B6A; transform: translateY(-1px); }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .log { background: #050510; border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px; font-family: "SFMono-Regular", Consolas, monospace; font-size: 12.5px;
+      line-height: 1.6; max-height: 380px; overflow-y: auto; white-space: pre-wrap; }
+    .log .ok { color: var(--ok); } .log .warn { color: var(--warn); } .log .err { color: var(--accent); }
+    .log .dim { color: var(--muted); }
+    .links { display: flex; gap: 12px; margin-top: 18px; }
+    .links a { flex: 1; text-align: center; padding: 12px; background: var(--bg); color: var(--text);
+      text-decoration: none; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-weight: 600; transition: all 0.15s; }
+    .links a:hover { border-color: var(--accent); color: var(--accent); }
+    .badge { display: inline-block; padding: 2px 8px; background: var(--bg); color: var(--muted);
+      border-radius: 100px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h1>BBX — Generate Test Traffic <span class="badge">internal</span></h1>
+  <p class="subtitle">Fires fake-but-real auctions, impressions, and clicks against your live BBX. Use it to populate the <strong>Placements</strong> panel on the publisher dashboard and the <strong>Auction Intelligence</strong> panel on the advertiser dashboard.</p>
+
+  <div class="card">
+    <h2>Step 1 — settings</h2>
+    <div class="row">
+      <div>
+        <label>Publisher API key</label>
+        <input id="apiKey" placeholder="bb_dev_demo_key_001" autocomplete="off">
+        <div class="help">Found on your <a href="/publish/dashboard" style="color:var(--accent)">publisher dashboard</a> under "API Key".</div>
+      </div>
+      <div>
+        <label>Number of auctions</label>
+        <input id="numAuctions" type="number" value="20" min="1" max="200">
+      </div>
+    </div>
+    <div class="row">
+      <div>
+        <label>Click rate</label>
+        <select id="clickRate">
+          <option value="0">0% (impressions only)</option>
+          <option value="0.2">20% (realistic)</option>
+          <option value="0.5" selected>50% (high-engagement demo)</option>
+          <option value="1">100% (every impression clicked)</option>
+        </select>
+      </div>
+      <div>
+        <label>Geo region</label>
+        <select id="region">
+          <option value="US" selected>US (premium)</option>
+          <option value="GB">GB</option>
+          <option value="JP">JP</option>
+          <option value="DE">DE</option>
+          <option value="IN">IN (emerging)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" id="runBtn">Run test auctions →</button>
+  </div>
+
+  <div class="card" id="logCard" style="display:none;">
+    <h2>Step 2 — live log</h2>
+    <div class="log" id="log"></div>
+    <div class="links">
+      <a href="/publish/dashboard">Publisher dashboard →</a>
+      <a href="/ads/dashboard">Advertiser dashboard →</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── Auto-fill API key from local session if available ──
+  // Both publisher dashboards stash the api_key under bb_pub_data / bb_dev_data,
+  // so logged-in publishers don't have to type it again.
+  (function autofillKey() {
+    const candidates = ['bb_pub_data', 'bb_dev_data', 'bb_user_data'];
+    for (const k of candidates) {
+      try {
+        const raw = localStorage.getItem(k);
+        if (!raw) continue;
+        const d = JSON.parse(raw);
+        if (d && d.api_key) {
+          document.getElementById('apiKey').value = d.api_key;
+          return;
+        }
+      } catch (_) {}
+    }
+  })();
+
+  const SCENARIOS = [
+    { surface: 'tool_response', placement: 'plc_demo002_tool_result', host: 'cursor', intents: ['stripe', 'billing', 'saas'],          tools: ['stripe-mcp'] },
+    { surface: 'chat',          placement: 'plc_demo001_chat_inline', host: 'cursor', intents: ['vercel', 'deploy', 'nextjs'],         tools: ['vercel-mcp', 'github-mcp'] },
+    { surface: 'tool_response', placement: 'plc_demo002_tool_result', host: 'cursor', intents: ['cursor', 'code', 'debug_py'],         tools: ['shell-mcp', 'filesystem-mcp'] },
+    { surface: 'sidebar',       placement: 'plc_demo001_sidebar',     host: 'claude_desktop', intents: ['notion', 'docs', 'wiki'],     tools: ['notion-mcp'] },
+    { surface: 'chat',          placement: 'plc_demo002_chat_inline', host: 'cursor', intents: ['python', 'debug_py', 'refactor'],     tools: ['shell-mcp'] },
+    { surface: 'tool_response', placement: 'plc_demo002_tool_result', host: 'vscode', intents: ['saas', 'analytics', 'optimization'],  tools: [] },
+    { surface: 'chat',          placement: 'plc_demo001_chat_inline', host: 'cursor', intents: ['design', 'website', 'no-code'],       tools: [] },
+    { surface: 'sidebar',       placement: 'plc_demo001_sidebar',     host: 'claude_desktop', intents: ['team', 'project', 'planning'],tools: ['notion-mcp'] },
+  ];
+
+  const logEl = document.getElementById('log');
+  const runBtn = document.getElementById('runBtn');
+  const logCard = document.getElementById('logCard');
+
+  function addLog(msg, cls = '') {
+    const line = document.createElement('div');
+    if (cls) line.className = cls;
+    line.textContent = msg;
+    logEl.appendChild(line);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function pickScenario(i) { return SCENARIOS[i % SCENARIOS.length]; }
+
+  async function runOneAuction(i, apiKey, region, clickRate) {
+    const sc = pickScenario(i);
+    const sessionId = `sess_test_${Date.now()}_${i}`;
+
+    // 1. Open the auction
+    const auctionResp = await fetch('/api/mcp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        jsonrpc: '2.0', id: i, method: 'tools/call',
+        params: { name: 'get_sponsored_content', arguments: {
+          context_summary: `working on ${sc.intents.join(', ')}`,
+          session_id: sessionId,
+          developer_api_key: apiKey,
+          user_region: region,
+          surface: sc.surface,
+          host_app: sc.host,
+          placement_id: sc.placement,
+          intent_tokens: sc.intents,
+          active_tools: sc.tools,
+        } }
+      }),
+    });
+    if (!auctionResp.ok) throw new Error(`/api/mcp ${auctionResp.status}`);
+    const wrapped = await auctionResp.json();
+    const inner = JSON.parse(wrapped.result.content[0].text);
+    if (!inner.sponsored) {
+      addLog(`#${i+1}  no_fill (${inner.reason || 'unknown'})`, 'warn');
+      return;
+    }
+    const aucId = inner.auction.auction_id;
+    const cmpId = inner.sponsored.campaign_id;
+    const price = inner.auction.winning_price_cpm;
+    const intent = inner.auction.intent_match_score;
+
+    // 2. Fire impression
+    const impR = await fetch('/api/track', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        event: 'impression', campaign_id: cmpId, session_id: sessionId,
+        developer_id: apiKey, auction_id: aucId,
+        placement_id: sc.placement, surface: sc.surface, format: inner.auction.format,
+        intent_match_score: intent,
+      }),
+    });
+    if (!impR.ok) throw new Error(`/api/track imp ${impR.status}`);
+
+    let line = `#${String(i+1).padStart(2)}  ${sc.surface.padEnd(14)} ${cmpId}  $${price.toFixed(2)} CPM · intent=${intent.toFixed(2)}  imp✓`;
+
+    // 3. Maybe fire click
+    if (Math.random() < clickRate) {
+      await fetch('/api/track', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          event: 'click', campaign_id: cmpId, session_id: sessionId,
+          developer_id: apiKey, auction_id: aucId,
+          placement_id: sc.placement, surface: sc.surface, format: inner.auction.format,
+          intent_match_score: intent,
+        }),
+      });
+      line += '  click✓';
+    }
+    addLog(line, 'ok');
+  }
+
+  runBtn.addEventListener('click', async () => {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    if (!apiKey) { alert('Enter your publisher API key first.'); return; }
+    const N = Math.min(200, Math.max(1, Number(document.getElementById('numAuctions').value) || 20));
+    const clickRate = Number(document.getElementById('clickRate').value);
+    const region = document.getElementById('region').value;
+
+    runBtn.disabled = true;
+    runBtn.textContent = 'Running…';
+    logCard.style.display = 'block';
+    logEl.innerHTML = '';
+    addLog(`Starting ${N} auctions · click rate ${(clickRate*100).toFixed(0)}% · region ${region}`, 'dim');
+    addLog('────────────────────────────────────────────', 'dim');
+
+    let ok = 0, failed = 0;
+    for (let i = 0; i < N; i++) {
+      try {
+        await runOneAuction(i, apiKey, region, clickRate);
+        ok++;
+      } catch (e) {
+        addLog(`#${i+1}  ERROR: ${e.message}`, 'err');
+        failed++;
+      }
+      // Tiny delay so we don't hammer rate-limits and so the log streams visibly
+      await new Promise(r => setTimeout(r, 80));
+    }
+    addLog('────────────────────────────────────────────', 'dim');
+    addLog(`Done. ${ok} succeeded, ${failed} failed.`, ok > 0 ? 'ok' : 'err');
+    addLog('Open the dashboard links below to see your data.', 'dim');
+
+    runBtn.disabled = false;
+    runBtn.textContent = 'Run again →';
+  });
+</script>
+</body>
+</html>
