@@ -192,6 +192,15 @@ function requireAdmin(req) {
   const authHeader = req.headers && req.headers.authorization;
   if (!authHeader) return null;
   const token = authHeader.replace(/^Bearer\s+/i, "");
+
+  // Static admin-key fallback. When BBX_ADMIN_KEY is set in the env,
+  // any caller presenting that exact secret as `Authorization: Bearer ...`
+  // is treated as admin. Useful for one-shot ops (re-embed backfill,
+  // cron jobs, manual cleanup) without juggling Supabase JWTs.
+  if (process.env.BBX_ADMIN_KEY && token && token === process.env.BBX_ADMIN_KEY) {
+    return { role: "admin", source: "static_key" };
+  }
+
   const claims = verifyJwt(token);
   if (!claims) return null;
   // Production: only admin role. Demo: admin OR advertiser (admin.html logs in as advertiser).
