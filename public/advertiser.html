@@ -3369,15 +3369,17 @@
                 document.getElementById('ctrTrend').textContent = '—';
                 document.getElementById('spendTrend').textContent = '—';
 
-                // Render chart
-                renderChart(stats.daily || []);
-
-                // BBX auction summary — populates the Benna engine panel from
-                // real auction data when available, falling back to the stub
-                // /api/benna engine-status when the advertiser has no traffic yet.
+                // BBX auction summary FIRST — render before chart so a
+                // chart-rendering error can't suppress it. Each render is
+                // wrapped in try/catch so one bug can't take out the rest.
                 if (stats.auction_summary) {
-                    renderAuctionSummary(stats.auction_summary);
+                    try { renderAuctionSummary(stats.auction_summary); }
+                    catch (e) { console.error('renderAuctionSummary failed:', e); }
                 }
+
+                // Render chart
+                try { renderChart(stats.daily || []); }
+                catch (e) { console.error('renderChart failed:', e); }
             } catch (error) {
                 console.error('Error loading stats:', error);
                 document.getElementById('totalImpressions').textContent = '0';
@@ -4078,10 +4080,15 @@
 
         // Utility functions
         function formatNumber(num, isDecimal = false) {
+            // Coerce string inputs (e.g., totals.spend = "317.10") to numbers.
+            // rollUpTotals on the server returns spend/ctr as strings, so we
+            // can't assume the caller hands us a real Number.
+            const n = Number(num);
+            if (!Number.isFinite(n)) return isDecimal ? '0.00' : '0';
             if (isDecimal) {
-                return num.toFixed(2);
+                return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
-            return num.toLocaleString();
+            return n.toLocaleString('en-US');
         }
 
         function showAuthForm() {
