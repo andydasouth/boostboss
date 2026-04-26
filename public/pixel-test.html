@@ -81,8 +81,8 @@
         <input id="convExtId" type="text" placeholder="user_abc123">
       </div>
       <div style="display:flex;align-items:flex-end;gap:8px;">
-        <button class="btn" id="fireBtn">Fire conversion</button>
-        <button class="btn muted" id="fireBeaconBtn" title="Same as Fire conversion but uses navigator.sendBeacon, surviving nav-away">via Beacon</button>
+        <button class="btn" id="fireBtn" type="button" onclick="window.fireConversion && window.fireConversion()">Fire conversion</button>
+        <button class="btn muted" id="fireBeaconBtn" type="button" onclick="window.fireConversion && window.fireConversion()" title="Same as Fire conversion but uses navigator.sendBeacon, surviving nav-away">via Beacon</button>
       </div>
     </div>
     <div class="footer-note">The pixel uses <code>navigator.sendBeacon</code> when available, falling back to <code>fetch</code> with <code>keepalive:true</code>. Both survive a redirect after the conversion (e.g. on a checkout-success page that auto-navigates).</div>
@@ -165,17 +165,28 @@
     const colour = ok === false ? '#F87171' : '#6EE7B7';
     logEl.innerHTML += '<div style="color:' + colour + ';">[' + ts + '] ' + line + '</div>';
   }
-  function fire() {
-    const type = document.getElementById('convType').value;
-    const value = Number(document.getElementById('convValue').value) || 0;
-    const ext   = document.getElementById('convExtId').value.trim() || null;
-    const props = { value, currency: 'USD' };
-    if (ext) props.external_id = ext;
-    window.bbq.push(['track', type, props]);
-    log('bbq.push([\'track\', \'' + type + '\', ' + JSON.stringify(props) + '])', true);
-  }
-  document.getElementById('fireBtn').addEventListener('click', fire);
-  document.getElementById('fireBeaconBtn').addEventListener('click', fire);
+  // Exposed on window so the inline onclick fallback in the markup
+  // can call this even if a later script error breaks addEventListener.
+  window.fireConversion = function () {
+    try {
+      const type = document.getElementById('convType').value;
+      const value = Number(document.getElementById('convValue').value) || 0;
+      const ext   = document.getElementById('convExtId').value.trim() || null;
+      const props = { value: value, currency: 'USD' };
+      if (ext) props.external_id = ext;
+      window.bbq = window.bbq || [];
+      window.bbq.push(['track', type, props]);
+      log('bbq.push([\'track\', \'' + type + '\', ' + JSON.stringify(props) + '])', true);
+    } catch (e) {
+      log('ERROR: ' + e.message, false);
+      console.error('[pixel-test] fire failed:', e);
+    }
+  };
+  // Also wire addEventListener as primary path
+  try {
+    document.getElementById('fireBtn').addEventListener('click', window.fireConversion);
+    document.getElementById('fireBeaconBtn').addEventListener('click', window.fireConversion);
+  } catch (e) { console.error('[pixel-test] addEventListener failed:', e); }
 
   // Re-render attribution after pixel.js loads (in case it just persisted to sessionStorage)
   setTimeout(renderAttr, 200);
