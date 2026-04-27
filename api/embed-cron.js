@@ -1,10 +1,10 @@
 /**
- * Boost Boss — Embedding Cache Worker
+ * Boost Boss — Embedding Cache Worker (Voyage AI)
  *
- * Drains intent_embedding_misses, calls OpenAI in batch, promotes results
- * into intent_embedding_cache. Designed to run on a Vercel cron (every
- * 5–10 minutes) but also exposable as an admin-triggered endpoint for
- * one-shot seeding.
+ * Drains intent_embedding_misses, batch-calls Voyage's embeddings API,
+ * promotes results into intent_embedding_cache. Designed to run on a
+ * Vercel cron (every 10 minutes) but also exposable as an
+ * admin-triggered endpoint for one-shot seeding.
  *
  *   GET  /api/embed-cron                       → drain up to MAX tokens, embed, promote
  *   POST /api/embed-cron?action=seed           → seed with body.tokens (admin only)
@@ -16,16 +16,17 @@
  *     CRON_SECRET env var).
  *   - Admin actions accept BBX_ADMIN_KEY via Authorization header.
  *
- * Cost / capacity (text-embedding-3-small at $0.02 / 1M tokens):
- *   - 1 token avg ≈ 4 chars ≈ 1 OpenAI input token
+ * Cost / capacity (voyage-3-lite at $0.02 / 1M tokens):
+ *   - 1 BoostBoss token avg ≈ 4 chars ≈ ~1 model input token
  *   - Batch of 100 unique words = ~$0.000002. Negligible.
- *   - OpenAI batch endpoint accepts up to 2048 inputs per call.
+ *   - Voyage batch endpoint accepts up to 128 inputs per request.
  */
 
-const MAX_TOKENS_PER_RUN = 500;     // limit OpenAI calls per cron tick
-const OPENAI_BATCH_SIZE  = 200;     // per request to /v1/embeddings
-const MODEL              = "text-embedding-3-small";
-const DIMS               = 1536;
+const MAX_TOKENS_PER_RUN = 500;     // limit API calls per cron tick
+const BATCH_SIZE         = 128;     // per request to /v1/embeddings (voyage's per-call max is 128)
+const MODEL              = "voyage-3-lite";
+const DIMS               = 512;
+const ENDPOINT           = "https://api.voyageai.com/v1/embeddings";
 
 let _supabase = null;
 function supa() {
@@ -72,26 +73,28 @@ function normaliseTokens(tokens) {
   return out;
 }
 
-// Call OpenAI's batch embeddings endpoint. Returns a parallel array of
-// 1536-dim vectors, or throws.
+// Call Voyage's batch embeddings endpoint. Returns a parallel array of
+// 512-dim vectors, or throws.
 async function batchEmbed(tokens) {
-  const r = await fetch("https://api.openai.com/v1/embeddings", {
+  const r = await fetch(ENDPOINT, {
     method: "POST",
     headers: {
       "Content-Type":  "application/json",
-      "Authorization": "Bearer " + process.env.OPENAI_API_KEY,
+      "Authorization": "Bearer " + process.env.VOYAGE_API_KEY,
     },
     body: JSON.stringify({ model: MODEL, input: tokens }),
   });
   if (!r.ok) {
     const t = await r.text().catch(() => "");
-    throw new Error("OpenAI " + r.status + ": " + t.slice(0, 300));
+    throw new Error("Voyage " + r.status + ": " + t.slice(0, 300));
   }
   const j = await r.json();
   if (!j || !Array.isArray(j.data) || j.data.length !== tokens.length) {
-    throw new Error("OpenAI returned wrong shape (" + (j.data ? j.data.length : "?") + " vs " + tokens.length + ")");
+    throw new Error("Voyage returned wrong shape (" + (j.data ? j.data.length : "?") + " vs " + tokens.length + ")");
   }
-  return j.data.map((row) => row.embedding);
+  // Voyage's response order matches the input order, but the index field
+  // tells us explicitly. Sort by index to be safe.
+  return j.data.sort((a, b) => (a.index || 0) - (b.index || 0)).map((row) => row.embedding);
 }
 
 // Promote (tokens, vectors) into the cache via the SQL upsert RPC.
@@ -119,7 +122,7 @@ async function handleStats(sb, res) {
     model:          MODEL,
     dims:           DIMS,
     max_per_run:    MAX_TOKENS_PER_RUN,
-    batch_size:     OPENAI_BATCH_SIZE,
+    batch_size:     BATCH_SIZE,
   });
 }
 
@@ -127,11 +130,11 @@ async function handleSeed(sb, body, res) {
   const tokens = normaliseTokens(body.tokens);
   if (tokens.length === 0) return res.status(400).json({ error: "tokens[] required" });
   if (tokens.length > 1000) return res.status(400).json({ error: "max 1000 tokens per seed call" });
-  if (!process.env.OPENAI_API_KEY) return res.status(503).json({ error: "OPENAI_API_KEY not set" });
+  if (!process.env.VOYAGE_API_KEY) return res.status(503).json({ error: "VOYAGE_API_KEY not set" });
 
   let promoted = 0, failed = 0;
-  for (let i = 0; i < tokens.length; i += OPENAI_BATCH_SIZE) {
-    const slice = tokens.slice(i, i + OPENAI_BATCH_SIZE);
+  for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
+    const slice = tokens.slice(i, i + BATCH_SIZE);
     try {
       const vecs = await batchEmbed(slice);
       promoted += await promote(sb, slice, vecs);
@@ -144,8 +147,8 @@ async function handleSeed(sb, body, res) {
 }
 
 async function handleDrain(sb, res) {
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(503).json({ error: "OPENAI_API_KEY not set", drained: 0 });
+  if (!process.env.VOYAGE_API_KEY) {
+    return res.status(503).json({ error: "VOYAGE_API_KEY not set", drained: 0 });
   }
   // Pull the highest-priority misses (most miss_count first, then most recent).
   const { data: missRows, error } = await sb.from("intent_embedding_misses")
@@ -161,8 +164,8 @@ async function handleDrain(sb, res) {
   }
 
   let promoted = 0, failed = 0;
-  for (let i = 0; i < tokens.length; i += OPENAI_BATCH_SIZE) {
-    const slice = tokens.slice(i, i + OPENAI_BATCH_SIZE);
+  for (let i = 0; i < tokens.length; i += BATCH_SIZE) {
+    const slice = tokens.slice(i, i + BATCH_SIZE);
     try {
       const vecs = await batchEmbed(slice);
       promoted += await promote(sb, slice, vecs);

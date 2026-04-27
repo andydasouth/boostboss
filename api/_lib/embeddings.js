@@ -1,27 +1,29 @@
 /**
- * Boost Boss — OpenAI Embeddings helper
+ * Boost Boss — Voyage AI Embeddings helper
  *
- * Wraps text-embedding-3-small with an in-memory LRU cache so the bid
- * path doesn't pay a 50–100ms round-trip on every request. Used for:
+ * Wraps voyage-3-lite (Anthropic's recommended embedding provider) with
+ * an in-memory LRU cache for the cron's offline embedding work. Bid-path
+ * lookups hit Postgres only — no external API calls during auctions.
  *
  *   • Campaign-side: when an advertiser saves target_intent_tokens, we
- *     embed once and persist into campaigns.intent_embedding (vector(1536)).
- *   • Request-side: each ad_request's intent_tokens get embedded at bid
- *     time, cached by sorted-token hash so identical contexts are free.
+ *     embed once and persist into campaigns.intent_embedding (vector(512)).
+ *   • Request-side (Stage 1): bid path calls lookupCachedEmbedding() —
+ *     averages cached per-token vectors, fire-and-forgets misses to the
+ *     /api/embed-cron drain queue.
  *
  * Both vectors flow into Benna.scorePrice as opts.requestEmbedding /
  * opts.campaignEmbedding, where intentMatchScore() takes the cosine
  * similarity path (clipped to [0.2, 1.5]) per protocol §9.
  *
- * If OPENAI_API_KEY is unset, every helper resolves to null and the
- * caller falls back to the Jaccard implementation. The system NEVER
- * breaks because of a missing key — embeddings are an optimisation,
- * not a hard dependency.
+ * If VOYAGE_API_KEY is unset, every embed helper resolves to null and
+ * the caller falls back to the Jaccard implementation. The system
+ * NEVER breaks because of a missing key — embeddings are an
+ * optimisation, not a hard dependency.
  */
 
-const MODEL    = "text-embedding-3-small";
-const DIMS     = 1536;
-const ENDPOINT = "https://api.openai.com/v1/embeddings";
+const MODEL    = "voyage-3-lite";
+const DIMS     = 512;
+const ENDPOINT = "https://api.voyageai.com/v1/embeddings";
 
 // In-memory LRU. Vercel reuses warm function instances so this stays
 // hot across requests; cold starts pay one network call to re-prime.
@@ -60,7 +62,7 @@ function normaliseTokens(tokens) {
 }
 
 function isAvailable() {
-  return Boolean(process.env.OPENAI_API_KEY);
+  return Boolean(process.env.VOYAGE_API_KEY);
 }
 
 /**
@@ -81,18 +83,20 @@ async function embedText(text) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": "Bearer " + process.env.OPENAI_API_KEY,
+        "Authorization": "Bearer " + process.env.VOYAGE_API_KEY,
       },
-      body: JSON.stringify({ model: MODEL, input: t }),
+      // Voyage accepts an array OR string for `input`; we send an array
+      // so the same call shape works whether we batch or single-shot.
+      body: JSON.stringify({ model: MODEL, input: [t] }),
     });
     if (!r.ok) {
-      console.error("[embeddings] OpenAI", r.status, await r.text().catch(() => ""));
+      console.error("[embeddings] Voyage", r.status, await r.text().catch(() => ""));
       return null;
     }
     const j = await r.json();
     const vec = j && j.data && j.data[0] && j.data[0].embedding;
     if (!Array.isArray(vec) || vec.length !== DIMS) {
-      console.error("[embeddings] bad shape from OpenAI");
+      console.error("[embeddings] bad shape from Voyage");
       return null;
     }
     cacheSet(k, vec);
@@ -106,7 +110,7 @@ async function embedText(text) {
 /**
  * Embed an array of intent tokens. Tokens are normalised + sorted so
  * the same set in a different order hits the same cache entry.
- * Returns null when no usable input or when OPENAI_API_KEY is unset.
+ * Returns null when no usable input or when VOYAGE_API_KEY is unset.
  */
 async function embedTokens(tokens) {
   const norm = normaliseTokens(tokens);

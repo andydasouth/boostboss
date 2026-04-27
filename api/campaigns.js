@@ -417,7 +417,7 @@ async function handleCreate(req, res) {
     // Refresh intent_embedding from the union of MCP-native targeting
     // axes. Joining these into one string before embedding produces a
     // single vector that captures the full targeting context (intent
-    // tokens, tools, hosts, surfaces). No-op when OPENAI_API_KEY unset.
+    // tokens, tools, hosts, surfaces). No-op when VOYAGE_API_KEY unset.
     const embText = [
       ...(row.target_intent_tokens || []),
       ...(row.target_active_tools  || []).map((t) => t.replace(/-mcp$/, "")),
@@ -457,7 +457,7 @@ async function handleUpdate(req, res) {
   const sb = supa();
   if (sb) {
     // Re-embed only when an MCP targeting axis actually changed; otherwise
-    // we'd burn an OpenAI request on every status / budget toggle.
+    // we'd burn a Voyage request on every status / budget toggle.
     const targetingChanged = ["target_intent_tokens", "target_active_tools", "target_host_apps", "target_surfaces"]
       .some((k) => updates[k] !== undefined);
     if (targetingChanged) {
@@ -613,16 +613,16 @@ async function handleUploadCreative(req, res) {
 // Backfills campaigns.intent_embedding for every campaign that has any
 // MCP targeting populated. Idempotent — re-running just refreshes from
 // the current targeting tokens. Safe to call after enabling
-// OPENAI_API_KEY for the first time, or after editing the embedding
+// VOYAGE_API_KEY for the first time, or after editing the embedding
 // formula in this file.
 //
-// Hits the OpenAI API at most once per campaign (cached by token-set
-// hash within the request, so repeats across rows reuse the same vector).
+// Hits Voyage at most once per campaign (cached by token-set hash within
+// the request, so repeats across rows reuse the same vector).
 async function handleReembed(req, res) {
   const sb = supa();
   if (!sb) return res.status(503).json({ error: "Supabase not configured" });
-  if (!process.env.OPENAI_API_KEY) {
-    return res.status(503).json({ error: "OPENAI_API_KEY not set — cannot embed" });
+  if (!process.env.VOYAGE_API_KEY) {
+    return res.status(503).json({ error: "VOYAGE_API_KEY not set — cannot embed" });
   }
 
   const onlyId = (req.query && req.query.id) || (req.body && req.body.id);

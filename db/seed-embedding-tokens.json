@@ -1,5 +1,5 @@
 {
-  "_comment": "Initial token list to seed intent_embedding_cache. Run with: curl -X POST 'https://boostboss.ai/api/embed-cron?action=seed' -H 'Authorization: Bearer $BBX_ADMIN_KEY' -H 'Content-Type: application/json' --data-binary @db/seed-embedding-tokens.json",
+  "_comment": "Initial token list to seed intent_embedding_cache via Voyage AI's voyage-3-lite (512 dims). Run with: curl -X POST 'https://boostboss.ai/api/embed-cron?action=seed' -H 'Authorization: Bearer $BBX_ADMIN_KEY' -H 'Content-Type: application/json' --data-binary @db/seed-embedding-tokens.json",
   "tokens": [
     "code", "coding", "debug", "debugging", "refactor", "refactoring",
     "review", "tests", "testing", "unit_test", "integration_test", "lint",
