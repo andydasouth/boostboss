@@ -104,7 +104,7 @@
       "schedule": "15 1 * * *"
     },
     {
-      "path": "/api/embed-cron",
+      "path": "/api/campaigns?action=embed_drain",
       "schedule": "*/10 * * * *"
     }
   ]

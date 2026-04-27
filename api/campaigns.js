@@ -209,6 +209,19 @@ function requireAdmin(req) {
   return null;
 }
 
+// Accepts either an admin (via requireAdmin) OR Vercel cron (via the
+// CRON_SECRET signature header). Used by the embed-* actions.
+function requireAdminOrCron(req) {
+  if (requireAdmin(req)) return true;
+  const h = req.headers || {};
+  if (process.env.CRON_SECRET) {
+    if (h["x-vercel-signature"] === process.env.CRON_SECRET) return true;
+    const auth = (h.authorization || "").replace(/^Bearer\s+/i, "");
+    if (auth && auth === process.env.CRON_SECRET) return true;
+  }
+  return false;
+}
+
 // ────────────────────────────────────────────────────────────────────────
 //                                HANDLER
 // ────────────────────────────────────────────────────────────────────────
@@ -268,6 +281,13 @@ module.exports = async function handler(req, res) {
     if (req.method === "POST" && action === "reembed") {
       if (!requireAdmin(req)) return res.status(401).json({ error: "Admin authentication required" });
       return await handleReembed(req, res);
+    }
+    // ── Embedding cache ops (merged from former api/embed-cron.js) ──
+    // Routed through campaigns.js because Vercel Hobby tier limits us
+    // to 12 serverless functions and a separate file pushed us over.
+    if (action === "embed_stats" || action === "embed_drain" || action === "embed_seed") {
+      if (!requireAdminOrCron(req)) return res.status(401).json({ error: "Unauthorised" });
+      return await handleEmbedAction(action, req, res);
     }
 
     // Legacy compat: bare GET with advertiser_id
@@ -651,6 +671,106 @@ async function handleReembed(req, res) {
     else      { touched++; }
   }
   return res.json({ touched, skipped, failed, total: (campaigns || []).length });
+}
+
+// ── Embedding cache ops (merged from former /api/embed-cron) ──────────
+// Same handlers as before — drain misses, batch-call Voyage, promote.
+// Routed via /api/campaigns?action=embed_stats|embed_drain|embed_seed.
+const VOYAGE_ENDPOINT       = "https://api.voyageai.com/v1/embeddings";
+const VOYAGE_MODEL          = "voyage-3-lite";
+const VOYAGE_DIMS           = 512;
+const EMBED_MAX_PER_RUN     = 500;
+const EMBED_BATCH_SIZE      = 128;
+
+function _embedNormaliseTokens(tokens) {
+  const seen = new Set(), out = [];
+  for (const raw of tokens || []) {
+    const t = String(raw || "").trim().toLowerCase();
+    if (!t || t.length > 64 || seen.has(t)) continue;
+    seen.add(t); out.push(t);
+  }
+  return out;
+}
+
+async function _voyageBatchEmbed(tokens) {
+  const r = await fetch(VOYAGE_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type":  "application/json",
+      "Authorization": "Bearer " + process.env.VOYAGE_API_KEY,
+    },
+    body: JSON.stringify({ model: VOYAGE_MODEL, input: tokens }),
+  });
+  if (!r.ok) throw new Error("Voyage " + r.status + ": " + (await r.text().catch(() => "")).slice(0, 300));
+  const j = await r.json();
+  if (!j || !Array.isArray(j.data) || j.data.length !== tokens.length) {
+    throw new Error("Voyage shape mismatch (" + (j.data ? j.data.length : "?") + " vs " + tokens.length + ")");
+  }
+  return j.data.sort((a, b) => (a.index || 0) - (b.index || 0)).map((row) => row.embedding);
+}
+
+async function _embedPromote(sb, tokens, vectors) {
+  const asLiterals = vectors.map((v) => "[" + v.join(",") + "]");
+  const { data, error } = await sb.rpc("bbx_promote_embeddings", {
+    p_tokens: tokens, p_embeddings: asLiterals,
+  });
+  if (error) throw new Error("promote: " + error.message);
+  return Number(data) || tokens.length;
+}
+
+async function handleEmbedAction(action, req, res) {
+  const sb = supa();
+  if (!sb) return res.status(503).json({ error: "Supabase not configured" });
+
+  if (action === "embed_stats") {
+    const [cacheRes, missRes] = await Promise.all([
+      sb.from("intent_embedding_cache").select("token", { count: "exact", head: true }),
+      sb.from("intent_embedding_misses").select("token", { count: "exact", head: true }),
+    ]);
+    return res.status(200).json({
+      cache_size:  cacheRes.count || 0,
+      miss_queue:  missRes.count  || 0,
+      model:       VOYAGE_MODEL,
+      dims:        VOYAGE_DIMS,
+      max_per_run: EMBED_MAX_PER_RUN,
+      batch_size:  EMBED_BATCH_SIZE,
+    });
+  }
+
+  if (action === "embed_seed") {
+    const tokens = _embedNormaliseTokens((req.body || {}).tokens);
+    if (tokens.length === 0)   return res.status(400).json({ error: "tokens[] required" });
+    if (tokens.length > 1000)  return res.status(400).json({ error: "max 1000 tokens per seed call" });
+    if (!process.env.VOYAGE_API_KEY) return res.status(503).json({ error: "VOYAGE_API_KEY not set" });
+    let promoted = 0, failed = 0;
+    for (let i = 0; i < tokens.length; i += EMBED_BATCH_SIZE) {
+      const slice = tokens.slice(i, i + EMBED_BATCH_SIZE);
+      try { promoted += await _embedPromote(sb, slice, await _voyageBatchEmbed(slice)); }
+      catch (e) { console.error("[embed_seed] batch:", e.message); failed += slice.length; }
+    }
+    return res.status(200).json({ requested: tokens.length, promoted, failed });
+  }
+
+  if (action === "embed_drain") {
+    if (!process.env.VOYAGE_API_KEY) return res.status(503).json({ error: "VOYAGE_API_KEY not set", drained: 0 });
+    const { data: missRows, error } = await sb.from("intent_embedding_misses")
+      .select("token")
+      .order("miss_count", { ascending: false })
+      .order("last_seen", { ascending: false })
+      .limit(EMBED_MAX_PER_RUN);
+    if (error) return res.status(500).json({ error: error.message });
+    const tokens = (missRows || []).map((r) => r.token).filter(Boolean);
+    if (tokens.length === 0) return res.status(200).json({ drained: 0, promoted: 0, message: "miss queue empty" });
+    let promoted = 0, failed = 0;
+    for (let i = 0; i < tokens.length; i += EMBED_BATCH_SIZE) {
+      const slice = tokens.slice(i, i + EMBED_BATCH_SIZE);
+      try { promoted += await _embedPromote(sb, slice, await _voyageBatchEmbed(slice)); }
+      catch (e) { console.error("[embed_drain] batch:", e.message); failed += slice.length; }
+    }
+    return res.status(200).json({ drained: tokens.length, promoted, failed });
+  }
+
+  return res.status(400).json({ error: "Unknown embed action" });
 }
 
 // ── Exports for testing ─────────────────────────────────────────────────
