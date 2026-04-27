@@ -17,7 +17,7 @@
 
 const benna = require("./benna.js");
 const { mcpTargetingMatch, mintAuctionId } = require("./_lib/mcp_targeting.js");
-const { embedTokens } = require("./_lib/embeddings.js");
+const { lookupCachedEmbedding } = require("./_lib/embeddings.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -353,11 +353,13 @@ async function handleGetSponsoredContent(body, args, res) {
   };
   const reqIntentTokens = Array.isArray(args.intent_tokens) ? args.intent_tokens : [];
 
-  // Embed the request's intent context ONCE for the whole auction. The
-  // helper caches by sorted-token hash so the same context across many
-  // ad_requests pays nothing after the first hit. Returns null when
-  // OPENAI_API_KEY is unset → Benna falls back to Jaccard.
-  const requestEmbedding = await embedTokens([
+  // Look up cached per-token embeddings via a single indexed Postgres
+  // query, average the hit vectors, and use that as the request-side
+  // context vector. NO OpenAI calls in the hot path — any tokens that
+  // miss the cache are logged async into intent_embedding_misses and
+  // picked up by /api/embed-cron on the next tick. Returns null when
+  // every token misses → Benna falls back to Jaccard.
+  const requestEmbedding = await lookupCachedEmbedding([
     ...reqIntentTokens,
     ...(mcpCtx.active_tools || []).map((t) => t.replace(/-mcp$/, "")),
     ...(mcpCtx.host_app ? [mcpCtx.host_app] : []),

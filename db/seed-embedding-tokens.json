@@ -1,0 +1,77 @@
+{
+  "_comment": "Initial token list to seed intent_embedding_cache. Run with: curl -X POST 'https://boostboss.ai/api/embed-cron?action=seed' -H 'Authorization: Bearer $BBX_ADMIN_KEY' -H 'Content-Type: application/json' --data-binary @db/seed-embedding-tokens.json",
+  "tokens": [
+    "code", "coding", "debug", "debugging", "refactor", "refactoring",
+    "review", "tests", "testing", "unit_test", "integration_test", "lint",
+    "fix_bug", "ship", "deploy", "deployment", "ci", "cd", "rollback",
+    "python", "javascript", "typescript", "rust", "go", "ruby", "java",
+    "swift", "kotlin", "elixir", "php", "c", "cpp", "csharp", "scala",
+
+    "react", "vue", "svelte", "nextjs", "nuxt", "remix", "astro",
+    "tailwind", "css", "html", "node", "express", "fastify", "django",
+    "flask", "rails", "spring", "laravel",
+
+    "database", "sql", "postgres", "mysql", "mongodb", "redis", "sqlite",
+    "supabase", "prisma", "drizzle", "schema", "migration", "query",
+    "index", "transaction", "rls",
+
+    "api", "rest", "graphql", "grpc", "webhook", "endpoint", "auth",
+    "authentication", "oauth", "jwt", "session", "cookie", "cors",
+    "rate_limit", "load_balancer",
+
+    "billing", "subscription", "subscriptions", "payment", "payments",
+    "checkout", "invoicing", "invoice", "stripe", "paypal", "tax",
+    "revenue", "pricing", "tier",
+
+    "saas", "b2b", "b2c", "enterprise", "startup", "indie", "freemium",
+    "trial", "onboarding", "activation", "retention", "churn",
+    "engagement", "growth", "marketing", "ads", "advertising", "campaign",
+    "conversion", "funnel", "ab_test", "experiment",
+
+    "design", "ui", "ux", "figma", "wireframe", "prototype", "mockup",
+    "brand", "logo", "typography", "color_palette", "style_guide",
+    "no_code", "low_code", "website", "landing_page",
+
+    "data", "analytics", "dashboard", "report", "metric", "kpi",
+    "etl", "warehouse", "snowflake", "bigquery", "clickhouse",
+    "lookml", "tableau", "power_bi", "cube",
+
+    "ml", "ai", "llm", "rag", "embedding", "vector", "fine_tune",
+    "fine_tuning", "agent", "chatbot", "copilot", "claude", "gpt",
+    "openai", "anthropic", "model", "inference",
+
+    "cursor", "cursor_ide", "claude_desktop", "vscode", "jetbrains",
+    "windsurf", "replit", "codeium", "copilot_chat",
+
+    "stripe-mcp", "github-mcp", "filesystem-mcp", "shell-mcp",
+    "browser-mcp", "slack-mcp", "notion-mcp", "linear-mcp",
+    "figma-mcp", "google-drive-mcp", "postgres-mcp", "supabase-mcp",
+    "vercel-mcp", "aws-mcp", "gcp-mcp",
+
+    "git", "github", "gitlab", "pull_request", "merge", "branch",
+    "commit", "diff", "blame",
+
+    "infra", "infrastructure", "devops", "docker", "kubernetes", "k8s",
+    "terraform", "pulumi", "ansible", "monitoring", "logging",
+    "tracing", "observability", "datadog", "sentry", "newrelic",
+    "grafana", "prometheus",
+
+    "security", "vulnerability", "audit", "secret", "encryption",
+    "rotation", "compliance", "soc2", "gdpr", "pii",
+
+    "chat", "tool_response", "sidebar", "loading_screen", "status_line",
+    "interstitial",
+
+    "writing", "content", "copywriting", "blog", "newsletter", "seo",
+    "translation", "summary", "summarisation", "rewrite", "edit",
+
+    "research", "search", "literature_review", "citation", "fact_check",
+    "scrape", "extract", "parse",
+
+    "productivity", "todo", "task", "calendar", "schedule", "meeting",
+    "notes", "wiki", "knowledge_base", "documentation",
+
+    "video", "image", "audio", "transcribe", "generate", "edit_video",
+    "thumbnail", "podcast"
+  ]
+}

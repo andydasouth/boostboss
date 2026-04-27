@@ -114,9 +114,109 @@ async function embedTokens(tokens) {
   return await embedText(norm.join(" "));
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// HOT-PATH CACHE LOOKUP (Stage 1 — OpenAI off the bid path)
+// ──────────────────────────────────────────────────────────────────────
+//
+// At bid time we don't call OpenAI. Instead we:
+//   1. Normalise the request's intent tokens.
+//   2. Look them all up in intent_embedding_cache via a single indexed
+//      Postgres query (sub-5ms).
+//   3. Average the returned vectors → request_intent_embedding.
+//   4. Fire-and-forget log any tokens that missed so /api/embed-cron
+//      will pick them up on the next run.
+//
+// Net effect: zero external network calls during auctions. Postgres
+// query latency only.
+
+let _cachedSupa = null;
+function _supa() {
+  if (_cachedSupa) return _cachedSupa;
+  if (!process.env.SUPABASE_URL) return null;
+  if (!(process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY)) return null;
+  try {
+    const { createClient } = require("@supabase/supabase-js");
+    _cachedSupa = createClient(
+      process.env.SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
+    );
+    return _cachedSupa;
+  } catch (_) { return null; }
+}
+
+// Average N vectors of equal length. Returns null if the input is empty.
+// Used at bid time to compose a multi-token context vector from per-token
+// cache hits.
+function averageVectors(vecs) {
+  if (!Array.isArray(vecs) || vecs.length === 0) return null;
+  const dim = vecs[0].length;
+  const out = new Array(dim).fill(0);
+  for (const v of vecs) {
+    if (!v || v.length !== dim) continue;
+    for (let i = 0; i < dim; i++) out[i] += Number(v[i]) || 0;
+  }
+  for (let i = 0; i < dim; i++) out[i] /= vecs.length;
+  return out;
+}
+
+/**
+ * Look up cached embeddings for a token list and return their average.
+ * - Returns the averaged vector when at least one token hit (partial
+ *   coverage is acceptable; missed tokens are logged for the cron).
+ * - Returns null when zero tokens hit (caller falls back to Jaccard).
+ *
+ * Also fires bbx_log_embedding_misses() in the background for any
+ * tokens that weren't in the cache, so the cron picks them up.
+ */
+async function lookupCachedEmbedding(tokens) {
+  const norm = normaliseTokens(tokens);
+  if (norm.length === 0) return null;
+  const sb = _supa();
+  if (!sb) return null;
+
+  try {
+    const { data, error } = await sb.from("intent_embedding_cache")
+      .select("token, embedding")
+      .in("token", norm);
+    if (error) {
+      console.error("[embeddings] cache lookup:", error.message);
+      return null;
+    }
+
+    const hitTokens  = new Set();
+    const hitVectors = [];
+    for (const row of (data || [])) {
+      hitTokens.add(row.token);
+      // Supabase returns vectors as JSON-encoded "[...]" strings or as arrays
+      // depending on driver version. Coerce both.
+      let vec = row.embedding;
+      if (typeof vec === "string") {
+        try { vec = JSON.parse(vec); } catch (_) { vec = null; }
+      }
+      if (Array.isArray(vec) && vec.length === DIMS) hitVectors.push(vec);
+    }
+
+    // Log misses async — never block the bid path on this RPC. We don't
+    // even await the promise; just fire and forget.
+    const misses = norm.filter((t) => !hitTokens.has(t));
+    if (misses.length > 0) {
+      sb.rpc("bbx_log_embedding_misses", { p_tokens: misses })
+        .then(() => {})
+        .catch((e) => console.error("[embeddings] miss log:", e.message));
+    }
+
+    return hitVectors.length > 0 ? averageVectors(hitVectors) : null;
+  } catch (e) {
+    console.error("[embeddings] lookup failed:", e.message);
+    return null;
+  }
+}
+
 module.exports = {
   embedText,
   embedTokens,
+  lookupCachedEmbedding,
+  averageVectors,
   isAvailable,
   MODEL,
   DIMS,
