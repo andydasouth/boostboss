@@ -105,7 +105,7 @@
     },
     {
       "path": "/api/campaigns?action=embed_drain",
-      "schedule": "*/10 * * * *"
+      "schedule": "30 1 * * *"
     }
   ]
 }
