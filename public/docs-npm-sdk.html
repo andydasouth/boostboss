@@ -70,9 +70,9 @@
     <h1>NPM SDK integration</h1>
     <p class="lede">For browser extensions, Electron apps, Tauri apps, and any environment where the JS snippet doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React and Vue components included.</p>
 
-    <div class="callout warn">
-      <strong>⚠️ Spec, not snapshot.</strong>
-      <p>The <code>@boostbossai/lumi-sdk</code> npm package described on this page is <strong>not yet published</strong>. Browser-extension and Electron support is on the roadmap once the JS Snippet refactor lands and the existing browser SDK is split into a published npm package. If you're shipping an extension and want early access, email <a href="mailto:hello@boostboss.ai">hello@boostboss.ai</a>. Everything below describes the target API.</p>
+    <div class="callout info">
+      <strong>v0.1 — beta. Live on npm today.</strong>
+      <p><code>@boostbossai/lumi-sdk@0.1.0</code> is published — <code>npm install @boostbossai/lumi-sdk</code> resolves and works. Three entry points: <code>@boostbossai/lumi-sdk</code> (vanilla <code>Lumi</code> class), <code>@boostbossai/lumi-sdk/react</code> (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>), <code>@boostbossai/lumi-sdk/vue</code> (<code>&lt;LumiSlot /&gt;</code> + <code>provideLumi</code>). Manifest v3 compliant — zero <code>eval</code>, zero remote code execution. Sandbox flow works without signup using <code>publisherId: "pub_test_demo"</code>. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="quick-start">Quick start</h2>
