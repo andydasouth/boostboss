@@ -18,6 +18,7 @@
 const benna = require("./benna.js");
 const { mcpTargetingMatch, mintAuctionId } = require("./_lib/mcp_targeting.js");
 const { lookupCachedEmbedding } = require("./_lib/embeddings.js");
+const { isSandboxCredential, buildSandboxResponse } = require("./_lib/sandbox.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -251,6 +252,24 @@ module.exports = async function handler(req, res) {
 async function handleGetSponsoredContent(body, args, res) {
   const sessionId = args.session_id || "anon_" + Date.now();
   const auctionId = mintAuctionId();
+
+  // ── Sandbox short-circuit ───────────────────────────────────────────
+  // pub_test_* / sk_test_* credentials skip the auction entirely and
+  // get a fixed creative from a small rotation pool. Lets publishers
+  // verify SDK integration end-to-end without signup, and gives a
+  // predictable demo for outreach. Beacons fire to /api/track with
+  // sandbox=1 so track.js short-circuits cost computation and tags
+  // is_sandbox=true on the row. See api/_lib/sandbox.js.
+  if (isSandboxCredential(args)) {
+    const sandboxAuctionId = "auc_sandbox_" + auctionId.replace(/^auc_/, "");
+    const base = (process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai").replace(/\/$/, "");
+    return jsonRpc(res, body.id, buildSandboxResponse({
+      auctionId: sandboxAuctionId,
+      base,
+      sessionId,
+      args,
+    }));
+  }
 
   // Rate limit
   const last = sessionCache.get(sessionId);

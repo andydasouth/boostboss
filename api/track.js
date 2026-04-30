@@ -104,6 +104,15 @@ module.exports = async function handler(req, res) {
   const intentMatchScore = params.ims != null ? Number(params.ims)
                        : (params.intent_match_score != null ? Number(params.intent_match_score) : null);
 
+  // Sandbox flag — set by /api/mcp's sandbox short-circuit (pub_test_*
+  // / sk_test_* publishers). When true: skip cost computation, skip
+  // budget deduction, tag the row is_sandbox=true so dashboards can
+  // exclude sandbox traffic from real metrics. See db/07_sandbox.sql
+  // and api/_lib/sandbox.js.
+  const isSandbox = params.sandbox === "1" || params.sandbox === 1
+                 || params.bbx_sandbox === "1" || params.bbx_sandbox === 1
+                 || (typeof auctionId === "string" && auctionId.startsWith("auc_sandbox_"));
+
   // ── Conversion-specific fields (protocol §6.2) ─────────────────────
   // value comes in as USD dollars on the wire; we store cents as int.
   const conversionType = params.conversion_type || params.type || null;
@@ -217,6 +226,10 @@ module.exports = async function handler(req, res) {
     currency:        event === "conversion" ? currency       : null,
     // Integration source (db/06_integration_method.sql). NULL allowed.
     integration_method: integrationMethod,
+    // Sandbox flag (db/07_sandbox.sql). True when the event came from a
+    // pub_test_* / sk_test_* publisher; dashboard queries WHERE is_sandbox=false
+    // to exclude test traffic from real metrics.
+    is_sandbox: isSandbox,
     created_at: new Date().toISOString(),
   };
 
@@ -249,7 +262,10 @@ module.exports = async function handler(req, res) {
     }
 
     // Insert with cost pre-computed so we never need a second update (fixes race condition)
-    if (["impression", "click", "video_complete"].includes(event)) {
+    // Sandbox events skip cost computation entirely — record stays at cost=0,
+    // payout=0, and no budget is deducted. is_sandbox tags the row so the
+    // dashboard can exclude it from real metrics.
+    if (!isSandbox && ["impression", "click", "video_complete"].includes(event)) {
       const { data: campaign } = await sb.from("campaigns")
         .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget")
         .eq("id", campaignId).single();
