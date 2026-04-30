@@ -1,0 +1,43 @@
+{
+  "name": "@boostbossai/lumi-slack",
+  "version": "0.1.0",
+  "description": "Boost Boss Lumi helper for Slack bots — convert ad payloads from /v1/ad-request into Slack Block Kit objects.",
+  "license": "Apache-2.0",
+  "author": "Boost Boss <hello@boostboss.ai> (https://boostboss.ai)",
+  "homepage": "https://boostboss.ai/docs/rest-api",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andydasouth/boostboss.git",
+    "directory": "sdk/lumi-slack"
+  },
+  "bugs": { "url": "https://github.com/andydasouth/boostboss/issues", "email": "hello@boostboss.ai" },
+  "keywords": ["boostboss", "lumi", "slack", "block-kit", "ads", "monetization", "ad-network"],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "engines": { "node": ">=18" },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "test": "node --test test/*.test.mjs",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0"
+  },
+  "sideEffects": false
+}

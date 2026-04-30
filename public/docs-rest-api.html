@@ -70,77 +70,112 @@
     <h1>REST API integration</h1>
     <p class="lede">For AI bots running server-side — Discord, Telegram, Slack, or any platform where you can't ship a JS bundle to the user. One <code>POST /v1/ad-request</code> from your bot's response handler. Helper libraries map the response to each platform's native message format.</p>
 
-    <div class="callout warn">
-      <strong>⚠️ Spec, not snapshot.</strong>
-      <p>The public <code>POST /v1/ad-request</code> endpoint described on this page and the helper libraries (<code>@boostbossai/lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are <strong>not yet published</strong>. Boost Boss's internal HTTP API exists today and powers our own integrations; exposing it as a public, bearer-authed endpoint with helper libraries on npm is on the roadmap. If you're building a Discord/Telegram/Slack AI bot and want early access, email <a href="mailto:hello@boostboss.ai">hello@boostboss.ai</a>. Everything below describes the target API.</p>
+    <div class="callout info">
+      <strong>v0.1 — beta. Live today.</strong>
+      <p><code>POST https://boostboss.ai/v1/ad-request</code> is publicly bearer-authed and live. All three helper libraries are published on npm: <code>@boostbossai/lumi-discord</code>, <code>@boostbossai/lumi-telegram</code>, <code>@boostbossai/lumi-slack</code>. Try the sandbox flow with bearer <code>sk_test_demo</code> — no signup required to verify integration end-to-end. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="endpoint">The one endpoint you'll call</h2>
-<pre>POST https://api.boostboss.ai/v1/ad-request
+<pre>POST https://boostboss.ai/v1/ad-request
 Authorization: Bearer ${API_KEY}
 Content-Type: application/json
 
 {
-  <span class="str">"format"</span>: <span class="str">"embed"</span>,                  <span class="cm">// "embed" | "card" | "text"</span>
+  <span class="str">"format"</span>: <span class="str">"embed"</span>,                       <span class="cm">// "embed" | "card" | "text" | "native" | "banner"</span>
   <span class="str">"context"</span>: <span class="str">"user asked about Stripe billing"</span>,
-  <span class="str">"platform"</span>: <span class="str">"discord"</span>,              <span class="cm">// optional, helps shape response</span>
-  <span class="str">"user_region"</span>: <span class="str">"US"</span>                  <span class="cm">// optional, ISO region</span>
+  <span class="str">"platform"</span>: <span class="str">"discord"</span>,                   <span class="cm">// optional: "discord" | "telegram" | "slack" | string</span>
+  <span class="str">"user_region"</span>: <span class="str">"US"</span>,                      <span class="cm">// optional, ISO region</span>
+  <span class="str">"user_language"</span>: <span class="str">"en"</span>,                    <span class="cm">// optional, ISO 639-1 code</span>
+  <span class="str">"session_id"</span>: <span class="str">"sess_abc123"</span>                <span class="cm">// optional, used for frequency capping</span>
 }</pre>
-    <p>Response includes <code>headline</code>, <code>body</code>, <code>image_url</code>, <code>click_url</code>, <code>impression_url</code>, and a <code>disclosure_label</code>. Render whichever fields fit your platform.</p>
+
+    <h3>Response shape (with ad)</h3>
+<pre>{
+  <span class="str">"ad"</span>: {
+    <span class="str">"ad_id"</span>:            <span class="str">"cmp_..."</span>,
+    <span class="str">"auction_id"</span>:       <span class="str">"auc_..."</span>,
+    <span class="str">"type"</span>:             <span class="str">"image"</span>,
+    <span class="str">"headline"</span>:         <span class="str">"..."</span>,
+    <span class="str">"body"</span>:             <span class="str">"..."</span>,
+    <span class="str">"image_url"</span>:        <span class="str">"https://..."</span>,
+    <span class="str">"cta_label"</span>:        <span class="str">"..."</span>,
+    <span class="str">"click_url"</span>:        <span class="str">"https://boostboss.ai/api/track?...&amp;event=click"</span>,
+    <span class="str">"impression_url"</span>:   <span class="str">"https://boostboss.ai/api/track?...&amp;event=impression"</span>,
+    <span class="str">"disclosure_label"</span>: <span class="str">"Sponsored"</span>,
+    <span class="str">"sandbox"</span>:          <span class="kw">false</span>
+  }
+}</pre>
+
+    <h3>Response shape (no fill)</h3>
+<pre>{ <span class="str">"ad"</span>: <span class="kw">null</span>, <span class="str">"reason"</span>: <span class="str">"no_campaigns"</span> }</pre>
 
     <h2 id="discord-example">Discord example</h2>
-<pre><span class="cm">// Inside your Discord bot's response handler:</span>
-<span class="kw">const</span> ad = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.boostboss.ai/v1/ad-request'</span>, {
+<pre><span class="kw">import</span> { <span class="fn">toDiscordEmbed</span>, <span class="fn">toDiscordComponents</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-discord'</span>;
+
+<span class="cm">// Inside your Discord bot's response handler:</span>
+<span class="kw">const</span> { ad } = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://boostboss.ai/v1/ad-request'</span>, {
   method:  <span class="str">'POST'</span>,
-  headers: { <span class="str">'Authorization'</span>: <span class="str">`Bearer ${API_KEY}`</span> },
-  body:    <span class="fn">JSON.stringify</span>({
+  headers: {
+    <span class="str">'Authorization'</span>: <span class="str">`Bearer ${process.env.BBX_API_KEY}`</span>,
+    <span class="str">'Content-Type'</span>:  <span class="str">'application/json'</span>,
+  },
+  body: <span class="fn">JSON.stringify</span>({
     format:   <span class="str">'embed'</span>,
     context:  userQuery,
-    platform: <span class="str">'discord'</span>
-  })
+    platform: <span class="str">'discord'</span>,
+  }),
 }).<span class="fn">then</span>(r =&gt; r.<span class="fn">json</span>());
 
-message.<span class="fn">reply</span>({
-  content: aiResponse,
-  embeds:  [ad.<span class="fn">toDiscordEmbed</span>()]   <span class="cm">// from @boostbossai/lumi-discord</span>
-});</pre>
+<span class="kw">if</span> (ad) {
+  <span class="kw">await</span> message.<span class="fn">reply</span>({
+    content: aiResponse,
+    embeds:     [<span class="fn">toDiscordEmbed</span>(ad)],
+    components: [<span class="fn">toDiscordComponents</span>(ad)],
+  });
+  <span class="fn">fetch</span>(ad.impression_url).<span class="fn">catch</span>(() =&gt; {});  <span class="cm">// fire-and-forget</span>
+}</pre>
 
     <h2 id="helpers">Helper libraries</h2>
-    <p>Each helper library maps the generic ad response to the target platform's native format. Same source data; different output shape.</p>
-    <ul>
-      <li><code>@boostbossai/lumi-discord</code> — <code>toDiscordEmbed()</code>, <code>toDiscordComponents()</code></li>
-      <li><code>@boostbossai/lumi-telegram</code> — <code>toTelegramMessage()</code>, <code>toTelegramInlineKeyboard()</code></li>
-      <li><code>@boostbossai/lumi-slack</code> — <code>toSlackBlocks()</code>, <code>toSlackAttachment()</code></li>
-    </ul>
+    <p>Each helper library is a tiny pure-transform package (~30–50 lines, zero runtime dependencies) that maps the generic <code>ad</code> object to the target platform's native format. Install only the one you need.</p>
+    <table>
+      <thead><tr><th>Package</th><th>Functions</th><th>Install</th></tr></thead>
+      <tbody>
+        <tr><td><code>@boostbossai/lumi-discord</code></td><td><code>toDiscordEmbed(ad)</code>, <code>toDiscordComponents(ad)</code></td><td><code>npm i @boostbossai/lumi-discord</code></td></tr>
+        <tr><td><code>@boostbossai/lumi-telegram</code></td><td><code>toTelegramMessage(ad)</code>, <code>toTelegramInlineKeyboard(ad)</code></td><td><code>npm i @boostbossai/lumi-telegram</code></td></tr>
+        <tr><td><code>@boostbossai/lumi-slack</code></td><td><code>toSlackBlocks(ad)</code>, <code>toSlackAttachment(ad)</code></td><td><code>npm i @boostbossai/lumi-slack</code></td></tr>
+      </tbody>
+    </table>
 
     <h2 id="impression-tracking">Impression tracking</h2>
-    <p>After your bot sends the message containing the ad, hit the <code>impression_url</code> we returned:</p>
-<pre><span class="kw">await</span> <span class="fn">fetch</span>(ad.impression_url);   <span class="cm">// fire-and-forget; no auth needed</span></pre>
-    <p>The helper libraries fire this automatically when you call their <code>send()</code> wrapper. If you're using raw <code>fetch</code> + <code>message.reply</code>, fire it yourself after the message has actually been delivered.</p>
+    <p>After your bot sends the message, fire the <code>impression_url</code> as a fire-and-forget GET:</p>
+<pre><span class="fn">fetch</span>(ad.impression_url).<span class="fn">catch</span>(() =&gt; {});  <span class="cm">// no auth, no body, no retry needed</span></pre>
+    <p>The beacon is auction-keyed and idempotent — duplicate fires from retries are de-duplicated server-side. Don't fire it before the message is actually sent; the impression count drives publisher revenue.</p>
 
     <h2 id="click-tracking">Click tracking</h2>
     <p>The <code>click_url</code> we return is already a tracking redirect — link your CTA button to it directly. Don't substitute the underlying advertiser URL; that bypasses tracking and breaks revenue attribution.</p>
 
     <h2 id="rate-limits">Rate limits</h2>
-    <p>1,000 requests/minute per publisher. Burst capacity above the steady rate is allowed for short windows. Email <code>support@boostboss.ai</code> if you're approaching the cap and need it raised.</p>
+    <p>1,000 requests/minute per publisher. Burst capacity above the steady rate is allowed for short windows. Email <code>hello@boostboss.ai</code> if you're approaching the cap and need it raised.</p>
 
     <h2 id="errors">Error codes</h2>
     <table>
-      <thead><tr><th>HTTP</th><th>Code</th><th>Meaning</th></tr></thead>
+      <thead><tr><th>HTTP</th><th>Body shape</th><th>Meaning</th></tr></thead>
       <tbody>
-        <tr><td>200</td><td>—</td><td>Ad available; render and track impression.</td></tr>
-        <tr><td>204</td><td><code>NO_FILL</code></td><td>No advertiser matched. Send your AI response without an ad.</td></tr>
-        <tr><td>401</td><td><code>BBX_AUTH</code></td><td>Bearer token invalid or revoked.</td></tr>
-        <tr><td>429</td><td><code>BBX_RATE_LIMIT</code></td><td>Per-minute cap exceeded.</td></tr>
-        <tr><td>5xx</td><td>—</td><td>Upstream issue. Treat as no-fill; do not retry on the bot path.</td></tr>
+        <tr><td>200</td><td><code>{ ad: {...} }</code></td><td>Ad available; render + fire impression.</td></tr>
+        <tr><td>200</td><td><code>{ ad: null, reason: "..." }</code></td><td>No advertiser matched. Send your AI response without an ad.</td></tr>
+        <tr><td>400</td><td><code>{ error: "missing_context" }</code></td><td>Body validation failed. Check that <code>context</code> is non-empty.</td></tr>
+        <tr><td>401</td><td><code>{ error: "missing_authorization" }</code></td><td>Authorization header missing or malformed.</td></tr>
+        <tr><td>405</td><td><code>{ error: "method_not_allowed" }</code></td><td>Use POST. GET is not supported.</td></tr>
+        <tr><td>5xx</td><td><code>{ error: "upstream_error" }</code></td><td>Internal auction issue. Treat as no-fill; do not retry on the bot path.</td></tr>
       </tbody>
     </table>
 
-    <h2 id="api-reference-link">Full reference</h2>
-    <p>While this page is being expanded, the underlying endpoints (<code>/v1/ad-request</code>, beacons, error semantics) are documented in the <a href="/docs/api-reference#api-fetch-ad">API reference</a>.</p>
-
     <h2 id="testing">Testing</h2>
-    <p>Use a sandbox API key from the dashboard (prefix <code>sk_test_</code>) — sandbox always returns a fixed creative regardless of context. No real demand-side calls; impressions don't count.</p>
+    <p>Use bearer <code>sk_test_demo</code> in development — sandbox short-circuits the auction and returns a fixed creative from a small rotation pool. No real demand-side calls; impressions are tagged <code>is_sandbox=true</code> in the database and never accrue revenue or charge advertisers.</p>
+<pre>curl -sS https://boostboss.ai/v1/ad-request \
+  -H <span class="str">"Authorization: Bearer sk_test_demo"</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{"context":"smoke test","format":"embed","platform":"discord"}'</span></pre>
 
     <div class="page-nav">
       <a href="/docs/npm-sdk">
