@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCP integration — Boost Boss Docs</title>
+<meta name="description" content="MCP JSON-RPC integration reference for Boost Boss publishers. Install @boostbossai/lumi-mcp, attach to a tool handler, earn per call.">
+<meta property="og:title" content="MCP integration — Boost Boss Docs">
+<meta property="og:url" content="https://boostboss.ai/docs/mcp">
+<link rel="canonical" href="https://boostboss.ai/docs/mcp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/docs.css">
+</head>
+<body>
+
+<nav class="docs-nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-tag">docs</span>
+    </a>
+    <div class="nav-right">
+      <a href="/publish">Publishers</a>
+      <a href="/ads">Advertisers</a>
+      <a class="btn btn-ghost" href="/publish/signin">Sign in</a>
+      <a class="btn btn-primary" href="/publish/signup">Start earning</a>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar">
+    <div class="side-section">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="/docs">Overview</a></li>
+        <li><a href="/docs/quickstart" class="deferred">Quickstart</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Publisher integration</h6>
+      <ul>
+        <li><a href="/docs/mcp" class="active">MCP JSON-RPC</a></li>
+        <li><a href="/docs/js-snippet">JS Snippet</a></li>
+        <li><a href="/docs/npm-sdk">NPM SDK</a></li>
+        <li><a href="/docs/rest-api">REST API</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="/docs/api-reference">API reference</a></li>
+        <li><a href="/docs/reporting" class="deferred">Reporting</a></li>
+        <li><a href="/docs/payouts" class="deferred">Payouts</a></li>
+        <li><a href="/docs/policies" class="deferred">Policies</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="docs-main">
+    <div class="breadcrumbs">
+      <a href="/docs">Docs</a><span class="sep">/</span>
+      <span>MCP integration</span>
+    </div>
+
+    <h1>MCP integration</h1>
+    <p class="lede">Add three lines to any MCP tool handler. Sponsored content gets appended to your tool's response and rendered natively by the MCP host (Claude Desktop, Cursor, Cline, Continue, Zed, Windsurf). Time to first ad: under 10 minutes.</p>
+
+    <h2 id="prerequisites">Prerequisites</h2>
+    <ul>
+      <li>A Boost Boss publisher account — <a href="/publish/signup">sign up</a> if you haven't.</li>
+      <li>An MCP server that exposes at least one tool. <code>@modelcontextprotocol/sdk</code> ≥ 1.0 supported; older MCP server libraries work but aren't actively tested.</li>
+      <li>Node.js ≥ 18 (or any runtime that supports <code>fetch</code>).</li>
+      <li>Bearer token from your <a href="/publish/dashboard">publisher dashboard</a> (settings → API keys).</li>
+    </ul>
+
+    <h2 id="installation">Installation</h2>
+<pre><span class="cm"># npm</span>
+npm install @boostbossai/lumi-mcp
+
+<span class="cm"># pnpm</span>
+pnpm add @boostbossai/lumi-mcp
+
+<span class="cm"># yarn</span>
+yarn add @boostbossai/lumi-mcp</pre>
+    <p>The package ships with TypeScript types and works with both <code>stdio</code> and <code>streamable-http</code> transports.</p>
+
+    <h2 id="initialization">Initialization</h2>
+<pre><span class="kw">import</span> { <span class="fn">LumiMCP</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-mcp'</span>;
+
+<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">LumiMCP</span>({
+  publisherId: process.env.<span class="str">BBX_PUBLISHER_ID</span>,
+  apiKey:      process.env.<span class="str">BBX_API_KEY</span>,
+  transport:   <span class="str">'stdio'</span>,        <span class="cm">// 'stdio' | 'http' (auto-detect by default)</span>
+  debug:       <span class="kw">false</span>             <span class="cm">// log every ad request to stderr</span>
+});</pre>
+    <table>
+      <thead><tr><th>Option</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>publisherId</code></td><td>string</td><td>yes</td><td>Your <code>pub_xxx</code> identifier from the dashboard.</td></tr>
+        <tr><td><code>apiKey</code></td><td>string</td><td>yes</td><td>Bearer token. Keep server-side; never embed in client code.</td></tr>
+        <tr><td><code>transport</code></td><td>"stdio" | "http"</td><td>no</td><td>Auto-detected from your MCP server config. Override only if you need to.</td></tr>
+        <tr><td><code>debug</code></td><td>boolean</td><td>no</td><td>Logs every <code>fetchAd</code> call and response to <code>stderr</code>. Default: <code>false</code>.</td></tr>
+        <tr><td><code>timeoutMs</code></td><td>number</td><td>no</td><td>Network timeout per request. Default: <code>2500</code>.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="core-api">Core API</h2>
+
+    <h3 id="fetchAd"><code>lumi.fetchAd(opts)</code></h3>
+    <p>Fetches a sponsored content payload contextually matched to <code>opts.context</code>. Returns <code>null</code> if no fill (no advertiser matched, frequency cap hit, etc.) — your tool should still return its primary output normally.</p>
+<pre><span class="kw">const</span> ad = <span class="kw">await</span> lumi.<span class="fn">fetchAd</span>({
+  context: <span class="str">'stripe customer creation'</span>,    <span class="cm">// the user's intent or tool topic</span>
+  format:  <span class="str">'native'</span>,                       <span class="cm">// 'native' | 'banner' | 'inline'</span>
+  toolName: request.params.name              <span class="cm">// optional, used for analytics</span>
+});
+
+<span class="kw">if</span> (!ad) {
+  <span class="kw">return</span> { content: result };               <span class="cm">// no fill — return primary output only</span>
+}</pre>
+    <h4>Parameters</h4>
+    <table>
+      <thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>context</code></td><td>string</td><td>yes</td><td>Free text that describes what the user is doing. Used for contextual matching.</td></tr>
+        <tr><td><code>format</code></td><td>string</td><td>no</td><td>Preferred ad format. Default: <code>"native"</code>.</td></tr>
+        <tr><td><code>toolName</code></td><td>string</td><td>no</td><td>Name of the MCP tool being called. Improves analytics.</td></tr>
+        <tr><td><code>userRegion</code></td><td>string</td><td>no</td><td>ISO region (US, EU, APAC). If omitted, inferred from request.</td></tr>
+      </tbody>
+    </table>
+
+    <h3 id="toMCPBlock"><code>ad.toMCPBlock()</code></h3>
+    <p>Converts the ad payload to an MCP <code>content</code> block ready to append to your tool's <code>content</code> array. Handles disclosure label, image rendering, and click-tracking link transparently.</p>
+<pre><span class="kw">return</span> {
+  content: [
+    ...result,
+    ad.<span class="fn">toMCPBlock</span>()       <span class="cm">// appends a sponsored block, never replaces</span>
+  ]
+};</pre>
+
+    <h3 id="trackImpression"><code>lumi.trackImpression(ad)</code></h3>
+    <p>Fires the impression beacon. Called automatically by <code>toMCPBlock()</code> — only invoke manually if you're using a custom rendering path.</p>
+
+    <h3 id="trackClick"><code>lumi.trackClick(ad)</code></h3>
+    <p>Fires the click beacon. The click URL embedded in <code>toMCPBlock()</code> already redirects through Boost Boss for tracking — only invoke manually if you build your own link.</p>
+
+    <h2 id="rendering">Rendering the ad</h2>
+    <p>You don't render anything yourself. <code>toMCPBlock()</code> returns a structured MCP content block, and the host (Claude Desktop, Cursor, etc.) renders it natively in whatever style fits its UI. The block looks roughly like this on the wire:</p>
+<pre>{
+  <span class="str">"type"</span>: <span class="str">"text"</span>,
+  <span class="str">"text"</span>: <span class="str">"\n\n— Sponsored —\nStripe Atlas helps you launch a US company..."</span>,
+  <span class="str">"_meta"</span>: {
+    <span class="str">"boostboss"</span>: { <span class="str">"impressionId"</span>: <span class="str">"imp_..."</span>, <span class="str">"adId"</span>: <span class="str">"ad_..."</span> }
+  }
+}</pre>
+    <div class="callout info">
+      <strong>Disclosure is non-negotiable.</strong>
+      <p>The "— Sponsored —" prefix is part of every block. <code>toMCPBlock()</code> bakes it in; do not remove it. Stripping the disclosure is a policy violation that suspends payouts.</p>
+    </div>
+
+    <h2 id="event-handling">Event handling</h2>
+    <p>The MCP integration is server-side, so there's no <code>onClick</code>/<code>onClose</code> like the JS snippet — clicks are tracked via redirect URL, impressions via the <code>toMCPBlock()</code> render. If you want server-side hooks for analytics:</p>
+<pre>lumi.<span class="fn">on</span>(<span class="str">'impression'</span>, ({ adId, advertiserId, cpm }) =&gt; {
+  metrics.<span class="fn">increment</span>(<span class="str">'lumi.impressions'</span>);
+});
+
+lumi.<span class="fn">on</span>(<span class="str">'no_fill'</span>, ({ context }) =&gt; {
+  console.<span class="fn">debug</span>(<span class="str">'no fill for context:'</span>, context);
+});
+
+lumi.<span class="fn">on</span>(<span class="str">'error'</span>, ({ code, message }) =&gt; {
+  metrics.<span class="fn">increment</span>(<span class="str">'lumi.errors'</span>, { code });
+});</pre>
+
+    <h2 id="error-handling">Error handling</h2>
+    <p><code>fetchAd()</code> never throws on the bid path — network failures, timeouts, and policy rejections all resolve to <code>null</code>. Your tool's primary output is never delayed by Lumi.</p>
+    <table>
+      <thead><tr><th>Error code</th><th>Meaning</th><th>What to do</th></tr></thead>
+      <tbody>
+        <tr><td><code>BBX_AUTH</code></td><td>Invalid or revoked API key</td><td>Check dashboard → API keys; rotate if compromised.</td></tr>
+        <tr><td><code>BBX_RATE_LIMIT</code></td><td>1k requests/minute exceeded</td><td>Email <code>support@boostboss.ai</code> for a higher cap.</td></tr>
+        <tr><td><code>BBX_TIMEOUT</code></td><td>Network or upstream timeout</td><td>No-op; ad just won't render. Lumi never blocks your tool response.</td></tr>
+        <tr><td><code>BBX_NO_FILL</code></td><td>No matching advertiser</td><td>Expected sometimes; not an error condition.</td></tr>
+        <tr><td><code>BBX_POLICY</code></td><td>Content matched a policy block</td><td>Check dashboard → policy audit log for the rule that fired.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="testing">Testing</h2>
+    <p>Use a sandbox publisher ID in development — every ad request gets a fixed test creative back, no real demand-side calls happen, and impressions never accrue revenue.</p>
+<pre><span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">LumiMCP</span>({
+  publisherId: <span class="str">'pub_test_demo'</span>,
+  apiKey:      <span class="str">'sk_test_demo'</span>,
+  debug:       <span class="kw">true</span>
+});</pre>
+    <p>The sandbox always returns a creative (no <code>null</code>), so you can exercise <code>toMCPBlock()</code> rendering paths reliably. Switch to your live publisher ID + API key before going to production.</p>
+
+    <h2 id="going-live">Going live</h2>
+    <p>Production checklist before flipping to live keys:</p>
+    <ul>
+      <li>Replace sandbox <code>publisherId</code> and <code>apiKey</code> with the live values from your dashboard.</li>
+      <li>Confirm Stripe Connect is set up (no payouts without it).</li>
+      <li>Submit your MCP server's listing URL on the dashboard for the <code>sellers.json</code> equivalent — this is the MCP analog of <code>ads.txt</code> and is required for advertiser trust.</li>
+      <li>Set <code>debug: false</code> for production — avoids stderr noise on cold start.</li>
+      <li>Run one live tool call end-to-end and verify the impression appears in your dashboard within 30 seconds.</li>
+    </ul>
+
+    <h2 id="troubleshooting">Troubleshooting</h2>
+    <h4><code>fetchAd</code> always returns <code>null</code>.</h4>
+    <p>Check three things in order: (1) is your <code>apiKey</code> live (not <code>sk_test_</code>) when expecting real fills, (2) does the <code>context</code> string have any actual content (empty contexts get auto-rejected), (3) check the dashboard policy audit log — your account may be in review.</p>
+    <h4>The host doesn't render the sponsored block.</h4>
+    <p>Some MCP hosts collapse adjacent text blocks. If <code>toMCPBlock()</code> output is concatenated into your tool's text, the host may render it as one long string. Add a separator block (<code>{ type: 'separator' }</code> on supported hosts) between your output and the ad, or return them as distinct content array entries.</p>
+    <h4>Disclosure label appears in a different language than my user.</h4>
+    <p>Pass <code>userLanguage</code> to <code>fetchAd</code> — Lumi serves disclosure in 40+ languages but defaults to <code>en</code>.</p>
+    <h4>I'm getting <code>BBX_RATE_LIMIT</code> at low volume.</h4>
+    <p>The 1k/minute cap is per-publisher; if you're behind a load balancer with many MCP server instances, all share the same cap. Email support to raise.</p>
+    <h4>I want to disable Lumi for a specific tool.</h4>
+    <p>Just don't call <code>fetchAd</code> in that tool's handler. Lumi is opt-in per tool; nothing is auto-injected.</p>
+
+    <h2 id="changelog">Changelog</h2>
+    <p>See the <a href="/docs/api-reference#changelog">API reference changelog</a> for SDK release notes and protocol changes.</p>
+
+    <div class="page-nav">
+      <a href="/docs">
+        <div class="nav-dir">← Back</div>
+        <div class="nav-title">Docs overview</div>
+      </a>
+      <a class="next" href="/docs/js-snippet">
+        <div class="nav-dir">Next →</div>
+        <div class="nav-title">JS Snippet</div>
+      </a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

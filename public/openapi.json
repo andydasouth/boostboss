@@ -8,7 +8,7 @@
     "contact": {
       "name": "Boost Boss Platform",
       "email": "sdk@boostboss.ai",
-      "url": "https://boostboss.ai/docs.html"
+      "url": "https://boostboss.ai/docs/api-reference"
     },
     "license": { "name": "Apache-2.0" },
     "termsOfService": "https://boostboss.ai/terms"

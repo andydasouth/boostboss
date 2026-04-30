@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>REST API integration — Boost Boss Docs</title>
+<meta name="description" content="REST API integration for AI bots. POST /v1/ad-request from your bot's response handler. Helper libraries for Discord, Telegram, Slack message formats.">
+<meta property="og:title" content="REST API integration — Boost Boss Docs">
+<meta property="og:url" content="https://boostboss.ai/docs/rest-api">
+<link rel="canonical" href="https://boostboss.ai/docs/rest-api">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/docs.css">
+</head>
+<body>
+
+<nav class="docs-nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-tag">docs</span>
+    </a>
+    <div class="nav-right">
+      <a href="/publish">Publishers</a>
+      <a href="/ads">Advertisers</a>
+      <a class="btn btn-ghost" href="/publish/signin">Sign in</a>
+      <a class="btn btn-primary" href="/publish/signup">Start earning</a>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar">
+    <div class="side-section">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="/docs">Overview</a></li>
+        <li><a href="/docs/quickstart" class="deferred">Quickstart</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Publisher integration</h6>
+      <ul>
+        <li><a href="/docs/mcp">MCP JSON-RPC</a></li>
+        <li><a href="/docs/js-snippet">JS Snippet</a></li>
+        <li><a href="/docs/npm-sdk">NPM SDK</a></li>
+        <li><a href="/docs/rest-api" class="active">REST API</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="/docs/api-reference">API reference</a></li>
+        <li><a href="/docs/reporting" class="deferred">Reporting</a></li>
+        <li><a href="/docs/payouts" class="deferred">Payouts</a></li>
+        <li><a href="/docs/policies" class="deferred">Policies</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="docs-main">
+    <div class="breadcrumbs">
+      <a href="/docs">Docs</a><span class="sep">/</span>
+      <span>REST API</span>
+    </div>
+
+    <h1>REST API integration</h1>
+    <p class="lede">For AI bots running server-side — Discord, Telegram, Slack, or any platform where you can't ship a JS bundle to the user. One <code>POST /v1/ad-request</code> from your bot's response handler. Helper libraries map the response to each platform's native message format.</p>
+
+    <div class="callout note">
+      <strong>This page is being expanded.</strong>
+      <p>The full deep-dive (every endpoint, every parameter, retry semantics, helper-lib API for Discord/Telegram/Slack) is in progress. For the time being, the comprehensive <a href="/docs/api-reference">API reference</a> covers the underlying endpoints in detail.</p>
+    </div>
+
+    <h2 id="endpoint">The one endpoint you'll call</h2>
+<pre>POST https://api.boostboss.ai/v1/ad-request
+Authorization: Bearer ${API_KEY}
+Content-Type: application/json
+
+{
+  <span class="str">"format"</span>: <span class="str">"embed"</span>,                  <span class="cm">// "embed" | "card" | "text"</span>
+  <span class="str">"context"</span>: <span class="str">"user asked about Stripe billing"</span>,
+  <span class="str">"platform"</span>: <span class="str">"discord"</span>,              <span class="cm">// optional, helps shape response</span>
+  <span class="str">"user_region"</span>: <span class="str">"US"</span>                  <span class="cm">// optional, ISO region</span>
+}</pre>
+    <p>Response includes <code>headline</code>, <code>body</code>, <code>image_url</code>, <code>click_url</code>, <code>impression_url</code>, and a <code>disclosure_label</code>. Render whichever fields fit your platform.</p>
+
+    <h2 id="discord-example">Discord example</h2>
+<pre><span class="cm">// Inside your Discord bot's response handler:</span>
+<span class="kw">const</span> ad = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.boostboss.ai/v1/ad-request'</span>, {
+  method:  <span class="str">'POST'</span>,
+  headers: { <span class="str">'Authorization'</span>: <span class="str">`Bearer ${API_KEY}`</span> },
+  body:    <span class="fn">JSON.stringify</span>({
+    format:   <span class="str">'embed'</span>,
+    context:  userQuery,
+    platform: <span class="str">'discord'</span>
+  })
+}).<span class="fn">then</span>(r =&gt; r.<span class="fn">json</span>());
+
+message.<span class="fn">reply</span>({
+  content: aiResponse,
+  embeds:  [ad.<span class="fn">toDiscordEmbed</span>()]   <span class="cm">// from @boostbossai/lumi-discord</span>
+});</pre>
+
+    <h2 id="helpers">Helper libraries</h2>
+    <p>Each helper library maps the generic ad response to the target platform's native format. Same source data; different output shape.</p>
+    <ul>
+      <li><code>@boostbossai/lumi-discord</code> — <code>toDiscordEmbed()</code>, <code>toDiscordComponents()</code></li>
+      <li><code>@boostbossai/lumi-telegram</code> — <code>toTelegramMessage()</code>, <code>toTelegramInlineKeyboard()</code></li>
+      <li><code>@boostbossai/lumi-slack</code> — <code>toSlackBlocks()</code>, <code>toSlackAttachment()</code></li>
+    </ul>
+
+    <h2 id="impression-tracking">Impression tracking</h2>
+    <p>After your bot sends the message containing the ad, hit the <code>impression_url</code> we returned:</p>
+<pre><span class="kw">await</span> <span class="fn">fetch</span>(ad.impression_url);   <span class="cm">// fire-and-forget; no auth needed</span></pre>
+    <p>The helper libraries fire this automatically when you call their <code>send()</code> wrapper. If you're using raw <code>fetch</code> + <code>message.reply</code>, fire it yourself after the message has actually been delivered.</p>
+
+    <h2 id="click-tracking">Click tracking</h2>
+    <p>The <code>click_url</code> we return is already a tracking redirect — link your CTA button to it directly. Don't substitute the underlying advertiser URL; that bypasses tracking and breaks revenue attribution.</p>
+
+    <h2 id="rate-limits">Rate limits</h2>
+    <p>1,000 requests/minute per publisher. Burst capacity above the steady rate is allowed for short windows. Email <code>support@boostboss.ai</code> if you're approaching the cap and need it raised.</p>
+
+    <h2 id="errors">Error codes</h2>
+    <table>
+      <thead><tr><th>HTTP</th><th>Code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td>200</td><td>—</td><td>Ad available; render and track impression.</td></tr>
+        <tr><td>204</td><td><code>NO_FILL</code></td><td>No advertiser matched. Send your AI response without an ad.</td></tr>
+        <tr><td>401</td><td><code>BBX_AUTH</code></td><td>Bearer token invalid or revoked.</td></tr>
+        <tr><td>429</td><td><code>BBX_RATE_LIMIT</code></td><td>Per-minute cap exceeded.</td></tr>
+        <tr><td>5xx</td><td>—</td><td>Upstream issue. Treat as no-fill; do not retry on the bot path.</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="api-reference-link">Full reference</h2>
+    <p>While this page is being expanded, the underlying endpoints (<code>/v1/ad-request</code>, beacons, error semantics) are documented in the <a href="/docs/api-reference#api-fetch-ad">API reference</a>.</p>
+
+    <h2 id="testing">Testing</h2>
+    <p>Use a sandbox API key from the dashboard (prefix <code>sk_test_</code>) — sandbox always returns a fixed creative regardless of context. No real demand-side calls; impressions don't count.</p>
+
+    <div class="page-nav">
+      <a href="/docs/npm-sdk">
+        <div class="nav-dir">← Previous</div>
+        <div class="nav-title">NPM SDK</div>
+      </a>
+      <a class="next" href="/docs/api-reference">
+        <div class="nav-dir">Next →</div>
+        <div class="nav-title">API reference</div>
+      </a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

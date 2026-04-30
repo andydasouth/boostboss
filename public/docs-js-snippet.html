@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS Snippet integration — Boost Boss Docs</title>
+<meta name="description" content="JS snippet integration reference for Boost Boss publishers. One async script tag, slot placement via data-lumi-slot, CSS-variable theming.">
+<meta property="og:title" content="JS Snippet integration — Boost Boss Docs">
+<meta property="og:url" content="https://boostboss.ai/docs/js-snippet">
+<link rel="canonical" href="https://boostboss.ai/docs/js-snippet">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/docs.css">
+</head>
+<body>
+
+<nav class="docs-nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-tag">docs</span>
+    </a>
+    <div class="nav-right">
+      <a href="/publish">Publishers</a>
+      <a href="/ads">Advertisers</a>
+      <a class="btn btn-ghost" href="/publish/signin">Sign in</a>
+      <a class="btn btn-primary" href="/publish/signup">Start earning</a>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar">
+    <div class="side-section">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="/docs">Overview</a></li>
+        <li><a href="/docs/quickstart" class="deferred">Quickstart</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Publisher integration</h6>
+      <ul>
+        <li><a href="/docs/mcp">MCP JSON-RPC</a></li>
+        <li><a href="/docs/js-snippet" class="active">JS Snippet</a></li>
+        <li><a href="/docs/npm-sdk">NPM SDK</a></li>
+        <li><a href="/docs/rest-api">REST API</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="/docs/api-reference">API reference</a></li>
+        <li><a href="/docs/reporting" class="deferred">Reporting</a></li>
+        <li><a href="/docs/payouts" class="deferred">Payouts</a></li>
+        <li><a href="/docs/policies" class="deferred">Policies</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="docs-main">
+    <div class="breadcrumbs">
+      <a href="/docs">Docs</a><span class="sep">/</span>
+      <span>JS Snippet</span>
+    </div>
+
+    <h1>JS Snippet integration</h1>
+    <p class="lede">One async <code>&lt;script&gt;</code> tag in your <code>&lt;head&gt;</code>, one or more <code>&lt;div data-lumi-slot&gt;</code> elements where you want ads. No backend changes. Works with any LLM provider (OpenAI, Anthropic, Gemini, open-source) and any framework (LangChain, Vercel AI SDK, CrewAI, plain React) — Lumi attaches at the rendering surface.</p>
+
+    <h2 id="prerequisites">Prerequisites</h2>
+    <ul>
+      <li>A Boost Boss publisher account — <a href="/publish/signup">sign up</a> if you haven't.</li>
+      <li>A web app you control where you can edit the HTML <code>&lt;head&gt;</code> and place markup in templates/components.</li>
+      <li>Modern browsers (last 2 versions of Chrome, Safari, Firefox, Edge). No IE11.</li>
+    </ul>
+
+    <h2 id="installation">Installation</h2>
+    <p>Add the snippet to your <code>&lt;head&gt;</code>. Async; no impact on first paint.</p>
+<pre><span class="tag">&lt;script</span> <span class="attr">async</span>
+  <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+  <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/script&gt;</span></pre>
+    <p>Replace <code>pub_xxx</code> with your publisher ID from the dashboard.</p>
+
+    <h2 id="initialization">Slot placement</h2>
+    <p>Drop a <code>&lt;div&gt;</code> with <code>data-lumi-slot</code> wherever you want an ad. Lumi auto-discovers slots on page load and on DOM mutations (so SPA route changes work without ceremony).</p>
+<pre><span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"sidebar"</span><span class="tag">&gt;&lt;/div&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"inline"</span> <span class="attr">data-lumi-context</span>=<span class="str">"checkout flow"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+
+    <h3>Slot data attributes</h3>
+    <table>
+      <thead><tr><th>Attribute</th><th>Values</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>data-lumi-slot</code></td><td><code>banner</code> · <code>sidebar</code> · <code>inline</code> · <code>interstitial</code></td><td>Ad format. Lumi picks creative dimensions accordingly.</td></tr>
+        <tr><td><code>data-lumi-context</code></td><td>any string</td><td>Context signal for matching. Defaults to page <code>&lt;h1&gt;</code> + URL path.</td></tr>
+        <tr><td><code>data-lumi-frequency</code></td><td><code>once</code> · <code>session</code> · <code>always</code></td><td>How often this slot refreshes. Default: <code>session</code>.</td></tr>
+        <tr><td><code>data-lumi-fallback</code></td><td>any HTML id</td><td>Element to show when no ad fills the slot (e.g. your own promo).</td></tr>
+      </tbody>
+    </table>
+
+    <h2 id="theming">Theming</h2>
+    <p>Lumi reads CSS variables from the slot's computed style — set them once on <code>:root</code> or scope per slot.</p>
+<pre><span class="kw">:root</span> {
+  <span class="attr">--lumi-primary</span>:    <span class="str">#FF2D78</span>;        <span class="cm">/* CTA button color */</span>
+  <span class="attr">--lumi-text</span>:       <span class="str">#0F0F1A</span>;        <span class="cm">/* body text */</span>
+  <span class="attr">--lumi-muted</span>:      <span class="str">#6B7280</span>;        <span class="cm">/* sponsored label */</span>
+  <span class="attr">--lumi-bg</span>:         <span class="str">#FFFFFF</span>;        <span class="cm">/* card background */</span>
+  <span class="attr">--lumi-radius</span>:     <span class="str">12px</span>;           <span class="cm">/* corner radius */</span>
+  <span class="attr">--lumi-font</span>:       <span class="str">'Inter', sans-serif</span>;
+}</pre>
+    <p>The default look is neutral; styled themes match your brand without a CSS reset war.</p>
+
+    <h2 id="core-api">Programmatic API</h2>
+    <p>For SPA route changes or programmatic refreshes, use the global <code>window.Lumi</code> object. Available after the script loads (<code>lumi:ready</code> event fires).</p>
+
+    <h3 id="lumi-refresh"><code>Lumi.refresh(slotId?)</code></h3>
+    <p>Re-fetches and re-renders ads. Pass a slot element or selector to refresh just one slot; omit to refresh all.</p>
+<pre><span class="cm">// refresh all slots after a route change</span>
+router.<span class="fn">on</span>(<span class="str">'navigated'</span>, () =&gt; <span class="fn">Lumi.refresh</span>());
+
+<span class="cm">// refresh a specific slot</span>
+<span class="fn">Lumi.refresh</span>(<span class="str">'#main-banner'</span>);</pre>
+
+    <h3 id="lumi-destroy"><code>Lumi.destroy()</code></h3>
+    <p>Removes all rendered ads and disconnects observers. Call when you tear down a page section that contained Lumi slots.</p>
+
+    <h3 id="lumi-render"><code>Lumi.render(slotEl, opts)</code></h3>
+    <p>Manually mount a slot. Useful for slots created after page load that aren't auto-discovered (rare; the MutationObserver covers most cases).</p>
+<pre><span class="kw">const</span> el = document.<span class="fn">getElementById</span>(<span class="str">'late-bound-slot'</span>);
+<span class="fn">Lumi.render</span>(el, { format: <span class="str">'inline'</span>, context: <span class="str">'pricing page'</span> });</pre>
+
+    <h2 id="event-handling">Event handling</h2>
+    <p>Lumi dispatches DOM events on <code>window</code>. Listen for any of:</p>
+<pre>window.<span class="fn">addEventListener</span>(<span class="str">'lumi:ready'</span>, () =&gt; { <span class="cm">/* SDK loaded */</span> });
+
+window.<span class="fn">addEventListener</span>(<span class="str">'lumi:impression'</span>, (e) =&gt; {
+  <span class="kw">const</span> { adId, advertiserId, slot, format } = e.detail;
+  analytics.<span class="fn">track</span>(<span class="str">'ad_impression'</span>, { adId, format });
+});
+
+window.<span class="fn">addEventListener</span>(<span class="str">'lumi:click'</span>,    (e) =&gt; { <span class="cm">/* user clicked */</span> });
+window.<span class="fn">addEventListener</span>(<span class="str">'lumi:close'</span>,    (e) =&gt; { <span class="cm">/* dismissed */</span> });
+window.<span class="fn">addEventListener</span>(<span class="str">'lumi:no_fill'</span>,  (e) =&gt; { <span class="cm">/* slot stayed empty */</span> });
+window.<span class="fn">addEventListener</span>(<span class="str">'lumi:error'</span>,    (e) =&gt; { <span class="cm">/* see e.detail.code */</span> });</pre>
+
+    <h2 id="ssr">SSR and SPA support</h2>
+    <p>Lumi is fully client-side — render the slot DOM server-side, the SDK hydrates on load. Specifics for popular frameworks:</p>
+
+    <h4>Next.js (App Router)</h4>
+    <p>Add the script in <code>app/layout.tsx</code> via <code>next/script</code> with <code>strategy="afterInteractive"</code>. Slots can live in any server or client component.</p>
+<pre><span class="kw">import</span> Script <span class="kw">from</span> <span class="str">'next/script'</span>;
+<span class="kw">export default function</span> <span class="fn">RootLayout</span>({ children }) {
+  <span class="kw">return</span> (
+    <span class="tag">&lt;html&gt;</span><span class="tag">&lt;body&gt;</span>{children}
+      <span class="tag">&lt;Script</span> <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+        <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span> <span class="attr">strategy</span>=<span class="str">"afterInteractive"</span> <span class="tag">/&gt;</span>
+    <span class="tag">&lt;/body&gt;&lt;/html&gt;</span>
+  );
+}</pre>
+
+    <h4>Nuxt 3</h4>
+    <p>Use <code>useHead</code> in <code>app.vue</code> or a layout, with <code>defer: true</code>.</p>
+
+    <h4>Remix</h4>
+    <p>Add to <code>root.tsx</code> via <code>&lt;Scripts&gt;</code> sibling. No SSR-time fetch needed — Lumi only runs in the browser.</p>
+
+    <h4>SPA route changes</h4>
+    <p>Lumi's <code>MutationObserver</code> auto-detects slots that mount/unmount as you change routes. If you find specific slots aren't refreshing, call <code>Lumi.refresh()</code> explicitly in your route hook.</p>
+
+    <h2 id="error-handling">Error handling</h2>
+    <p>The snippet never throws into your app. Failures resolve to a <code>lumi:error</code> event and the slot stays empty (or shows your <code>data-lumi-fallback</code> element if configured).</p>
+    <table>
+      <thead><tr><th>Error code</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>BBX_AUTH</code></td><td>Publisher ID unknown or revoked. Check dashboard.</td></tr>
+        <tr><td><code>BBX_CSP</code></td><td>Content Security Policy blocks the script. See "CSP" below.</td></tr>
+        <tr><td><code>BBX_NETWORK</code></td><td>Network failure or CORS issue. Slot stays empty.</td></tr>
+        <tr><td><code>BBX_NO_FILL</code></td><td>No matching advertiser. Not an error per se — emitted as <code>lumi:no_fill</code> for clarity.</td></tr>
+      </tbody>
+    </table>
+
+    <h3>CSP (Content Security Policy)</h3>
+    <p>If your site uses CSP, allow Lumi's host:</p>
+<pre>script-src  <span class="str">'self'</span> <span class="str">https://cdn.boostboss.ai</span>;
+connect-src <span class="str">'self'</span> <span class="str">https://api.boostboss.ai</span>;
+img-src     <span class="str">'self'</span> <span class="str">https://cdn.boostboss.ai</span> <span class="str">data:</span>;</pre>
+
+    <h2 id="testing">Testing</h2>
+    <p>Use <code>data-publisher-id="pub_test_demo"</code> in development. Sandbox always returns a fixed creative regardless of context, so you can verify slot rendering in dev without hitting real demand-side calls.</p>
+<pre><span class="tag">&lt;script</span> <span class="attr">async</span>
+  <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+  <span class="attr">data-publisher-id</span>=<span class="str">"pub_test_demo"</span>
+  <span class="attr">data-debug</span>=<span class="str">"true"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/script&gt;</span></pre>
+    <p>Set <code>data-debug="true"</code> to log every event to the console. Switch to your live publisher ID before deploying.</p>
+
+    <h2 id="going-live">Going live</h2>
+    <ul>
+      <li>Replace sandbox publisher ID with your live <code>pub_xxx</code>.</li>
+      <li>Remove <code>data-debug="true"</code>.</li>
+      <li>Confirm Stripe Connect is set up.</li>
+      <li>Add Boost Boss to your CSP if you have one (see above).</li>
+      <li>Verify one impression appears in your dashboard within 60 seconds of going live.</li>
+    </ul>
+
+    <h2 id="troubleshooting">Troubleshooting</h2>
+    <h4>The slot is empty.</h4>
+    <p>Check the console for <code>lumi:no_fill</code> or <code>lumi:error</code> events. <code>no_fill</code> means there's no matched advertiser right now; <code>error</code> means something's misconfigured (auth, CSP, network).</p>
+
+    <h4>The script blocks page load.</h4>
+    <p>It shouldn't — the snippet uses <code>async</code>. If you see a blocking warning in Lighthouse, double-check the <code>async</code> attribute is actually present on your <code>&lt;script&gt;</code> tag.</p>
+
+    <h4>Ads don't refresh between SPA routes.</h4>
+    <p>Most apps work without intervention thanks to <code>MutationObserver</code>. If yours doesn't, call <code>Lumi.refresh()</code> in your route-change hook (Next.js: <code>useRouter().events</code>; Vue Router: <code>router.afterEach</code>; React Router: <code>useLocation</code> with an effect).</p>
+
+    <h4>Theming doesn't apply.</h4>
+    <p>Make sure the CSS variables are set on a parent of the slot (most commonly <code>:root</code>). The slot reads <code>getComputedStyle</code> at mount time.</p>
+
+    <h4>Ads pass page-speed budgets in dev but not production.</h4>
+    <p>Caching: lumi.js is cached aggressively. Bust it by appending <code>?v=YYYYMMDD</code> if you suspect stale SDK behavior. Most production issues are CDN-caching mismatches, not SDK regressions.</p>
+
+    <h2 id="changelog">Changelog</h2>
+    <p>See the <a href="/docs/api-reference#changelog">API reference changelog</a> for SDK release notes.</p>
+
+    <div class="page-nav">
+      <a href="/docs/mcp">
+        <div class="nav-dir">← Previous</div>
+        <div class="nav-title">MCP integration</div>
+      </a>
+      <a class="next" href="/docs/npm-sdk">
+        <div class="nav-dir">Next →</div>
+        <div class="nav-title">NPM SDK</div>
+      </a>
+    </div>
+  </main>
+</div>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPM SDK integration — Boost Boss Docs</title>
+<meta name="description" content="NPM SDK integration for browser extensions. Manifest v3 native, runs in service workers and content scripts. React + Vue components included.">
+<meta property="og:title" content="NPM SDK integration — Boost Boss Docs">
+<meta property="og:url" content="https://boostboss.ai/docs/npm-sdk">
+<link rel="canonical" href="https://boostboss.ai/docs/npm-sdk">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/docs.css">
+</head>
+<body>
+
+<nav class="docs-nav">
+  <div class="nav-inner">
+    <a class="brand" href="/">
+      <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text></svg>
+      <span class="brand-name">Boost Boss</span>
+      <span class="brand-tag">docs</span>
+    </a>
+    <div class="nav-right">
+      <a href="/publish">Publishers</a>
+      <a href="/ads">Advertisers</a>
+      <a class="btn btn-ghost" href="/publish/signin">Sign in</a>
+      <a class="btn btn-primary" href="/publish/signup">Start earning</a>
+    </div>
+  </div>
+</nav>
+
+<div class="docs-shell">
+  <aside class="docs-sidebar">
+    <div class="side-section">
+      <h6>Getting started</h6>
+      <ul>
+        <li><a href="/docs">Overview</a></li>
+        <li><a href="/docs/quickstart" class="deferred">Quickstart</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Publisher integration</h6>
+      <ul>
+        <li><a href="/docs/mcp">MCP JSON-RPC</a></li>
+        <li><a href="/docs/js-snippet">JS Snippet</a></li>
+        <li><a href="/docs/npm-sdk" class="active">NPM SDK</a></li>
+        <li><a href="/docs/rest-api">REST API</a></li>
+      </ul>
+    </div>
+    <div class="side-section">
+      <h6>Reference</h6>
+      <ul>
+        <li><a href="/docs/api-reference">API reference</a></li>
+        <li><a href="/docs/reporting" class="deferred">Reporting</a></li>
+        <li><a href="/docs/payouts" class="deferred">Payouts</a></li>
+        <li><a href="/docs/policies" class="deferred">Policies</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="docs-main">
+    <div class="breadcrumbs">
+      <a href="/docs">Docs</a><span class="sep">/</span>
+      <span>NPM SDK</span>
+    </div>
+
+    <h1>NPM SDK integration</h1>
+    <p class="lede">For browser extensions, Electron apps, Tauri apps, and any environment where the JS snippet doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React and Vue components included.</p>
+
+    <div class="callout note">
+      <strong>This page is being expanded.</strong>
+      <p>The full deep-dive (per-platform setup, React/Vue components, Manifest v3 specifics, Electron renderer vs main process, CSP guidance, full event reference) is in progress. For the time being, this page covers the essentials and points you at the comprehensive <a href="/docs/api-reference">API reference</a> for everything else.</p>
+    </div>
+
+    <h2 id="quick-start">Quick start</h2>
+<pre>npm install @boostbossai/lumi-sdk</pre>
+<pre><span class="kw">import</span> { <span class="fn">Lumi</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-sdk'</span>;
+
+<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">Lumi</span>({
+  publisherId: <span class="str">'pub_xxx'</span>,
+  format:      <span class="str">'sidebar'</span>,
+  debug:       <span class="kw">false</span>
+});
+
+lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
+
+    <h2 id="when-to-use">When to use this vs. the JS snippet</h2>
+    <p>If you can drop a <code>&lt;script&gt;</code> tag in your HTML <code>&lt;head&gt;</code>, use the <a href="/docs/js-snippet">JS snippet</a> — it's lighter and auto-discovers slots.</p>
+    <p>Use the NPM SDK when:</p>
+    <ul>
+      <li>You're shipping a browser extension (Manifest v3 forbids remote code, so the script tag isn't viable).</li>
+      <li>You're inside an Electron / Tauri app where loading remote scripts is locked down.</li>
+      <li>You want full TypeScript types and programmatic control instead of declarative slot markup.</li>
+      <li>You're using a framework with strict CSP that blocks third-party script tags.</li>
+    </ul>
+
+    <h2 id="manifest-v3">Manifest v3 setup</h2>
+    <p>The SDK is bundled with your extension code, so no remote-script restrictions apply. Use it from your service worker, content script, sidepanel, or popup — same import either way.</p>
+<pre><span class="cm">// manifest.json — no special permissions needed beyond what your extension already requests</span>
+{
+  <span class="str">"manifest_version"</span>: <span class="num">3</span>,
+  <span class="str">"host_permissions"</span>: [
+    <span class="str">"https://api.boostboss.ai/*"</span>
+  ],
+  <span class="str">"content_security_policy"</span>: {
+    <span class="str">"extension_pages"</span>: <span class="str">"script-src 'self'; connect-src 'self' https://api.boostboss.ai"</span>
+  }
+}</pre>
+    <p>The SDK doesn't use <code>eval</code>, <code>new Function</code>, or remote script loading — Chrome Web Store reviewers flag those, and we don't go near them.</p>
+
+    <h2 id="react">React component</h2>
+<pre><span class="kw">import</span> { <span class="fn">LumiSlot</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-sdk/react'</span>;
+
+<span class="kw">function</span> <span class="fn">Sidebar</span>() {
+  <span class="kw">return</span> <span class="tag">&lt;LumiSlot</span> <span class="attr">format</span>=<span class="str">"sidebar"</span> <span class="attr">context</span>=<span class="str">"document.title"</span> <span class="tag">/&gt;</span>;
+}</pre>
+
+    <h2 id="vue">Vue component</h2>
+<pre><span class="kw">import</span> { <span class="fn">LumiSlot</span> } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-sdk/vue'</span>;
+<span class="kw">export default</span> {
+  components: { <span class="fn">LumiSlot</span> }
+}</pre>
+<pre><span class="tag">&lt;template&gt;</span>
+  <span class="tag">&lt;LumiSlot</span> <span class="attr">format</span>=<span class="str">"sidebar"</span> <span class="attr">:context</span>=<span class="str">"docTitle"</span> <span class="tag">/&gt;</span>
+<span class="tag">&lt;/template&gt;</span></pre>
+
+    <h2 id="api-reference-link">Full reference</h2>
+    <p>While this page is being filled out, the comprehensive SDK API (all methods, all options, error codes, beacon endpoints) lives in the <a href="/docs/api-reference#sdks">API reference SDK section</a>.</p>
+
+    <h2 id="testing">Testing</h2>
+    <p>Use <code>publisherId: 'pub_test_demo'</code> in development — sandbox always returns a fixed creative.</p>
+
+    <div class="callout info">
+      <strong>Need this page expanded?</strong>
+      <p>Email <a href="mailto:hello@boostboss.ai">hello@boostboss.ai</a> with what you're building — we prioritize the doc deep-dives based on what publishers are actually shipping.</p>
+    </div>
+
+    <div class="page-nav">
+      <a href="/docs/js-snippet">
+        <div class="nav-dir">← Previous</div>
+        <div class="nav-title">JS Snippet</div>
+      </a>
+      <a class="next" href="/docs/rest-api">
+        <div class="nav-dir">Next →</div>
+        <div class="nav-title">REST API</div>
+      </a>
+    </div>
+  </main>
+</div>
+</body>
+</html>
