@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>For MCP Server Developers — Boost Boss</title>
-<meta name="description" content="Earn revenue every time your MCP tool is called. The first ad network built natively into the Model Context Protocol. Three lines of code. Claude Desktop, Cursor, Cline render the rest.">
-<meta property="og:title" content="For MCP Server Developers — Boost Boss">
-<meta property="og:description" content="Monetize per MCP tool call. Three lines of code. 85% revshare.">
-<meta property="og:url" content="https://boostboss.ai/publish/mcp">
-<link rel="canonical" href="https://boostboss.ai/publish/mcp">
+<title>For AI App Builders — Boost Boss</title>
+<meta name="description" content="Add ad revenue to your AI app in under 5 minutes. One script tag. Works with OpenAI, Anthropic, Gemini, open-source models, and any agent framework.">
+<meta property="og:title" content="For AI App Builders — Boost Boss">
+<meta property="og:description" content="Monetize any AI app or agent. One script tag. Works with any LLM backend.">
+<meta property="og:url" content="https://boostboss.ai/publish/ai-apps">
+<link rel="canonical" href="https://boostboss.ai/publish/ai-apps">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,23 +21,11 @@
     --bg: #FFFFFF; --bg-soft: #FAFAF7; --code-bg: #0F0F1A;
   }
   html { scroll-behavior: smooth; }
-  body {
-    font-family: 'Inter', -apple-system, sans-serif;
-    color: var(--ink); line-height: 1.55;
-    -webkit-font-smoothing: antialiased; font-size: 16px;
-    background:
-      radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%),
-      radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%),
-      radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%),
-      #FAFAF7;
-    background-attachment: fixed; min-height: 100vh;
-  }
+  body { font-family: 'Inter', -apple-system, sans-serif; color: var(--ink); line-height: 1.55; -webkit-font-smoothing: antialiased; font-size: 16px; background: radial-gradient(ellipse 60% 40% at 18% 8%, rgba(255, 45, 120, 0.08), transparent 60%), radial-gradient(ellipse 55% 35% at 82% 30%, rgba(4, 190, 254, 0.08), transparent 60%), radial-gradient(ellipse 50% 35% at 10% 85%, rgba(255, 230, 0, 0.10), transparent 60%), #FAFAF7; background-attachment: fixed; min-height: 100vh; }
   a { color: inherit; text-decoration: none; }
   .wrap { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
-  .wrap-narrow { max-width: 880px; margin: 0 auto; padding: 0 24px; }
   h1, h2, h3, h4 { font-family: 'Space Grotesk', sans-serif; letter-spacing: -0.02em; }
 
-  /* NAV */
   nav.site-nav { position: sticky; top: 0; z-index: 100; background: rgba(250,250,247,0.86); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border-bottom: 1px solid rgba(15,15,26,0.06); }
   .nav-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; max-width: 1140px; margin: 0 auto; padding: 0 24px; }
   .brand { display: flex; align-items: center; gap: 10px; }
@@ -54,45 +42,39 @@
   .btn-primary { background: var(--pink); color: #fff; border-color: var(--pink); }
   .btn-primary:hover { background: var(--pink-dark); border-color: var(--pink-dark); }
   .btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 10px; }
-  .btn-block { width: 100%; }
 
-  /* HERO */
   .hero { padding: 80px 0 60px; }
   .eyebrow { display: inline-block; padding: 6px 13px; background: rgba(255, 45, 120, 0.10); color: var(--pink-dark); font-size: 12.5px; font-weight: 700; border-radius: 999px; margin-bottom: 18px; letter-spacing: 0.06em; text-transform: uppercase; }
   .hero h1 { font-size: clamp(40px, 5.4vw, 64px); font-weight: 700; line-height: 1.05; margin-bottom: 22px; max-width: 880px; }
   .hero h1 .grad { background: linear-gradient(90deg, var(--pink), var(--cyan)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
   .hero .sub { font-size: 19px; color: var(--ink-soft); max-width: 720px; margin-bottom: 32px; line-height: 1.5; }
 
-  /* SECTION HEADER */
   section { padding: 70px 0; }
   .section-eyebrow { display: block; font-size: 12.5px; font-weight: 700; color: var(--pink-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
   h2.section-h { font-size: clamp(28px, 3.4vw, 38px); font-weight: 700; line-height: 1.15; margin-bottom: 16px; }
   .section-sub { font-size: 17px; color: var(--ink-soft); max-width: 640px; margin-bottom: 40px; }
 
-  /* HOW IT WORKS */
   .how-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
   .how-step { background: #fff; border: 1.5px solid var(--line); border-radius: 14px; padding: 28px 26px; }
   .how-step .num { width: 36px; height: 36px; border-radius: 10px; background: var(--ink); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; font-family: 'Space Grotesk', sans-serif; margin-bottom: 18px; }
   .how-step h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
   .how-step p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; }
 
-  /* CODE BLOCK */
   .code-block { background: var(--code-bg); color: #E5E7EB; border-radius: 14px; padding: 28px 28px; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.7; overflow-x: auto; max-width: 880px; }
   .code-block .kw { color: #C792EA; }
   .code-block .str { color: #C3E88D; }
-  .code-block .fn { color: #82AAFF; }
+  .code-block .tag { color: #F07178; }
+  .code-block .attr { color: #FFCB6B; }
   .code-block .cm { color: #6B7280; font-style: italic; }
   .code-caption { font-size: 14px; color: var(--ink-soft); margin-top: 14px; max-width: 880px; }
   .code-caption a { color: var(--pink); font-weight: 600; }
   .code-caption a:hover { text-decoration: underline; }
 
-  /* WHO THIS IS FOR */
   .who { background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .who ul { list-style: none; padding: 0; margin: 0; max-width: 760px; }
   .who li { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; font-size: 16px; color: var(--ink); }
   .who li .check { flex-shrink: 0; width: 22px; height: 22px; border-radius: 6px; background: rgba(4, 190, 254, 0.14); color: var(--cyan); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; margin-top: 3px; }
 
-  /* REVENUE EXAMPLE */
   .revenue-card { background: linear-gradient(140deg, rgba(255, 45, 120, 0.06), rgba(4, 190, 254, 0.06)); border: 1.5px solid var(--line); border-radius: 18px; padding: 36px 38px; max-width: 720px; }
   .revenue-card .label { display: inline-block; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 18px; }
   .revenue-card .rev-row { display: flex; justify-content: space-between; gap: 20px; padding: 12px 0; border-bottom: 1px dashed rgba(15,15,26,0.10); font-size: 15.5px; }
@@ -101,20 +83,16 @@
   .revenue-card .rev-row:last-child .v { color: var(--pink-dark); font-family: 'Space Grotesk', sans-serif; }
   .revenue-card .disclaimer { font-size: 12.5px; color: var(--muted); margin-top: 18px; line-height: 1.5; }
 
-  /* FAQ */
   .faq-list { max-width: 880px; }
   .faq-item { border-bottom: 1px solid var(--line); padding: 20px 0; }
   .faq-item:first-child { padding-top: 0; }
   .faq-item h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
   .faq-item p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.55; }
 
-  /* CTA FOOTER */
   .cta-footer { padding: 90px 0 110px; text-align: center; }
   .cta-footer h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 14px; }
   .cta-footer p { font-size: 16.5px; color: var(--ink-soft); margin-bottom: 28px; }
-  .cta-footer .perk { display: inline-block; padding: 6px 14px; background: rgba(255, 230, 0, 0.16); color: #8a6d00; font-size: 13.5px; font-weight: 600; border-radius: 999px; margin-top: 16px; }
 
-  /* SITE FOOTER */
   footer.site-footer { padding: 40px 0 60px; border-top: 1px solid var(--line); background: #fff; }
   .footer-inner { display: flex; flex-wrap: wrap; gap: 30px; justify-content: space-between; align-items: center; }
   .footer-brand { display: flex; align-items: center; gap: 10px; }
@@ -135,7 +113,6 @@
 </head>
 <body>
 
-<!-- NAV -->
 <nav class="site-nav">
   <div class="nav-inner">
     <a class="brand" href="/">
@@ -143,8 +120,8 @@
       <span class="brand-name">Boost Boss</span>
     </a>
     <div class="nav-links">
-      <a href="/publish/mcp" class="active">MCP Servers</a>
-      <a href="/publish/ai-apps">AI Apps</a>
+      <a href="/publish/mcp">MCP Servers</a>
+      <a href="/publish/ai-apps" class="active">AI Apps</a>
       <a href="/publish/extensions">Extensions</a>
       <a href="/publish/bots">Bots</a>
     </div>
@@ -155,127 +132,119 @@
   </div>
 </nav>
 
-<!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <span class="eyebrow">For MCP Server Developers</span>
-    <h1>Earn revenue every time your <span class="grad">MCP tool</span> is called.</h1>
-    <p class="sub">Boost Boss is the only ad network built natively into the Model Context Protocol. Your server adds three lines. Claude Desktop, Cursor, Cline, and every MCP host renders the rest.</p>
+    <span class="eyebrow">For AI App Builders</span>
+    <h1>Add ad revenue to your AI app in <span class="grad">under 5 minutes</span>.</h1>
+    <p class="sub">One script tag. Works with OpenAI, Anthropic, Gemini, open-source models, and any agent framework. No backend changes required.</p>
     <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
   </div>
 </section>
 
-<!-- HOW IT WORKS -->
 <section>
   <div class="wrap">
     <span class="section-eyebrow">How it works</span>
-    <h2 class="section-h">From <code>npm install</code> to first impression in under 10 minutes.</h2>
+    <h2 class="section-h">Sign up. Paste. Earn.</h2>
     <div class="how-grid">
       <div class="how-step">
         <div class="num">1</div>
-        <h4>Connect your MCP server</h4>
-        <p>Add three lines: install <code>@boostbossai/lumi-mcp</code>, init with your publisher ID, attach to a tool handler.</p>
+        <h4>Sign up</h4>
+        <p>Copy your snippet from the dashboard. One publisher ID, ready to paste.</p>
       </div>
       <div class="how-step">
         <div class="num">2</div>
-        <h4>Tools keep working</h4>
-        <p>Your existing tool output is unchanged. Boost Boss appends a sponsored block — never replaces, never delays.</p>
+        <h4>Paste into your <code>&lt;head&gt;</code></h4>
+        <p>Async, lazy-loaded, zero impact on first paint. Works in Next.js, Nuxt, Remix, Vite, plain HTML.</p>
       </div>
       <div class="how-step">
         <div class="num">3</div>
-        <h4>Earn per call</h4>
-        <p>Boost Boss attaches relevant ads to tool responses. You earn on every impression and every click.</p>
+        <h4>Place ad slots</h4>
+        <p>Drop a <code>&lt;div data-lumi-slot&gt;</code> wherever you want ads. Boost Boss renders the rest.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- INTEGRATION SNIPPET -->
 <section>
   <div class="wrap">
     <span class="section-eyebrow">Integration snippet</span>
-    <h2 class="section-h">Three lines, one tool handler.</h2>
-<pre class="code-block"><span class="kw">import</span> { LumiMCP } <span class="kw">from</span> <span class="str">'@boostbossai/lumi-mcp'</span>;
-<span class="kw">const</span> lumi = <span class="kw">new</span> <span class="fn">LumiMCP</span>({ publisherId: <span class="str">'pub_xxx'</span> });
+    <h2 class="section-h">One snippet. Any AI stack.</h2>
+<pre class="code-block"><span class="tag">&lt;script</span> <span class="attr">async</span>
+  <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+  <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span><span class="tag">&gt;</span>
+<span class="tag">&lt;/script&gt;</span>
 
-<span class="cm">// Inside any existing tool handler:</span>
-<span class="kw">const</span> ad = <span class="kw">await</span> lumi.<span class="fn">fetchAd</span>({ context: request.params.name });
-<span class="kw">return</span> { content: [...result, ad.<span class="fn">toMCPBlock</span>()] };</pre>
-    <p class="code-caption">That's it. The MCP host renders the ad payload natively. <a href="/docs/mcp">Full docs →</a></p>
+<span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
+    <p class="code-caption">That's the entire integration. Same snippet for OpenAI, Anthropic, Gemini, LangChain, Vercel AI SDK, CrewAI — Lumi works at the rendering surface, not the agent logic. <a href="/docs/js-snippet">Full docs →</a></p>
   </div>
 </section>
 
-<!-- WHO THIS IS FOR -->
 <section class="who">
   <div class="wrap">
     <span class="section-eyebrow">Who this is for</span>
-    <h2 class="section-h">If any of these sound like you, MCP is your path.</h2>
+    <h2 class="section-h">If you ship AI in a browser, this is your path.</h2>
     <ul>
-      <li><span class="check">✓</span><span>You ship an MCP server listed on <strong>mcp.so</strong>, <strong>Smithery</strong>, <strong>Glama</strong>, or <strong>PulseMCP</strong>.</span></li>
-      <li><span class="check">✓</span><span>Your server is called by users of Claude Desktop, Cursor, Cline, Continue, Zed AI, or Windsurf.</span></li>
-      <li><span class="check">✓</span><span>You'd like a real revenue stream beyond GitHub Sponsors.</span></li>
-      <li><span class="check">✓</span><span>You build for developer audiences and want premium CPMs that match the audience value.</span></li>
+      <li><span class="check">✓</span><span>You shipped an AI chat app, AI assistant, or AI tool with a web UI.</span></li>
+      <li><span class="check">✓</span><span>You use any LLM provider — we don't care which.</span></li>
+      <li><span class="check">✓</span><span>You built with LangChain, Vercel AI SDK, CrewAI, LlamaIndex, AutoGen, Mastra, or rolled your own.</span></li>
+      <li><span class="check">✓</span><span>You're tired of subscription churn as your only monetization.</span></li>
     </ul>
   </div>
 </section>
 
-<!-- REVENUE EXAMPLE -->
 <section>
   <div class="wrap">
     <span class="section-eyebrow">Revenue example</span>
-    <h2 class="section-h">What "earning per call" actually looks like.</h2>
+    <h2 class="section-h">What 5,000 daily users can earn.</h2>
     <div class="revenue-card">
       <span class="label">Illustrative — not a guarantee</span>
-      <div class="rev-row"><span>Daily tool calls</span><span class="v">5,000</span></div>
-      <div class="rev-row"><span>Ad impressions per day (1 in 3 calls)</span><span class="v">~1,500</span></div>
-      <div class="rev-row"><span>Average CPM (developer audience premium)</span><span class="v">$12</span></div>
-      <div class="rev-row"><span>Monthly publisher revenue</span><span class="v">~$540</span></div>
-      <p class="disclaimer">Numbers are illustrative for a moderately active MCP server. Actual revenue depends on tool-call volume, fill rate, advertiser demand, and your audience composition. CPMs vary; developer-tooling traffic typically sits at the high end.</p>
+      <div class="rev-row"><span>Daily active users</span><span class="v">5,000</span></div>
+      <div class="rev-row"><span>Ad impressions per user per day</span><span class="v">~5</span></div>
+      <div class="rev-row"><span>Daily impressions</span><span class="v">25,000</span></div>
+      <div class="rev-row"><span>Blended CPM</span><span class="v">$4</span></div>
+      <div class="rev-row"><span>Monthly publisher revenue</span><span class="v">~$3,000</span></div>
+      <p class="disclaimer">Numbers are illustrative for an AI app with conversational UX. Actual revenue depends on session length, slot placement, fill rate, and audience. Verticals with stronger commercial intent (developer tooling, finance, B2B SaaS) typically run higher CPMs.</p>
     </div>
   </div>
 </section>
 
-<!-- FAQ -->
 <section class="who">
   <div class="wrap">
     <span class="section-eyebrow">Frequently asked</span>
-    <h2 class="section-h">The questions every MCP dev asks first.</h2>
+    <h2 class="section-h">The questions every AI app builder asks.</h2>
     <div class="faq-list">
       <div class="faq-item">
-        <h4>Will ads break my MCP integration?</h4>
-        <p>No. Ads are appended, not substituted. Your tool's primary output is unchanged — the host renders your tool result first, the sponsored block second.</p>
+        <h4>Does this work with my agent framework?</h4>
+        <p>Yes. Lumi is framework-agnostic. We integrate at the rendering surface, not the agent logic — so LangChain, Vercel AI SDK, CrewAI, LlamaIndex, AutoGen, Mastra, or your own custom orchestration all work the same way.</p>
       </div>
       <div class="faq-item">
-        <h4>What does an MCP ad look like to the user?</h4>
-        <p>A clearly labeled sponsored block in the tool response, rendered by the host (Claude Desktop, Cursor, etc.). The user always sees both the answer and the disclosure — there's no hidden injection.</p>
+        <h4>Will ads slow down my app?</h4>
+        <p>No. The script is async and lazy-loaded — zero impact on first paint, no blocking on your bundle. Ad slots render after your AI surface is interactive.</p>
       </div>
       <div class="faq-item">
-        <h4>Can I block specific advertisers?</h4>
-        <p>Yes. Category-level blocks (e.g., no recruiting ads) and domain-level blocks (e.g., never these specific competitors) — all controlled from your publisher dashboard.</p>
+        <h4>What if I'm using Server-Sent Events for streaming?</h4>
+        <p>Lumi works alongside SSE. Ads render in your UI separately from your model's stream — you don't need to interleave anything. The ad slot is a sibling element, not a stream consumer.</p>
       </div>
       <div class="faq-item">
-        <h4>Does this work with stdio AND HTTP transports?</h4>
-        <p>Yes — both transports are supported. <code>@boostbossai/lumi-mcp</code> auto-detects which one your server uses; the SDK works identically across both.</p>
+        <h4>Can I theme the ads to match my UI?</h4>
+        <p>Yes. Lumi reads your CSS variables for color and typography (<code>--lumi-primary</code>, <code>--lumi-text</code>, <code>--lumi-radius</code>, etc.). The default look is neutral; the themed look matches your brand.</p>
       </div>
       <div class="faq-item">
-        <h4>Is this approved by Anthropic?</h4>
-        <p>Boost Boss operates within MCP's public protocol — we don't require Anthropic's approval. We follow MCP disclosure norms strictly: every sponsored block is labeled, never disguised as tool output.</p>
+        <h4>Can I run my own ads alongside Boost Boss?</h4>
+        <p>Yes. We don't lock down inventory. Boost Boss renders only in slots you explicitly tag with <code>data-lumi-slot</code> — everything else is yours.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- CTA FOOTER -->
 <section class="cta-footer">
   <div class="wrap">
-    <h2>Ready to monetize your MCP server?</h2>
-    <p>Three lines. Ten minutes. Weekly payouts.</p>
+    <h2>Ready to monetize your AI app?</h2>
+    <p>One snippet. Five minutes. Weekly payouts.</p>
     <a class="btn btn-primary btn-lg" href="/publish/signup">Apply as a Founding Publisher →</a>
-    <div><span class="perk">⚡ First 20 MCP publishers get 90/10 revshare for 6 months</span></div>
   </div>
 </section>
 
-<!-- SITE FOOTER -->
 <footer class="site-footer">
   <div class="wrap footer-inner">
     <a class="brand footer-brand" href="/">
@@ -284,7 +253,7 @@
     </a>
     <div class="footer-links">
       <a href="/publish">Publishers</a>
-      <a href="/publish/ai-apps">AI Apps</a>
+      <a href="/publish/mcp">MCP</a>
       <a href="/publish/extensions">Extensions</a>
       <a href="/publish/bots">Bots</a>
       <a href="/docs">Docs</a>

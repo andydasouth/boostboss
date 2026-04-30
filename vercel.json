@@ -32,9 +32,9 @@
     { "source": "/exchange", "destination": "/exchange.html" },
     { "source": "/publish", "destination": "/publish.html" },
     { "source": "/publish/mcp", "destination": "/publish-mcp.html" },
-    { "source": "/publish/apps", "destination": "/publish-apps.html" },
-    { "source": "/publish/bots", "destination": "/publish-bots.html" },
+    { "source": "/publish/ai-apps", "destination": "/publish-ai-apps.html" },
     { "source": "/publish/extensions", "destination": "/publish-extensions.html" },
+    { "source": "/publish/bots", "destination": "/publish-bots.html" },
     { "source": "/trust", "destination": "/trust.html" }
   ],
   "headers": [
