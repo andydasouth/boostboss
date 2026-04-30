@@ -70,9 +70,9 @@
     <h1>REST API integration</h1>
     <p class="lede">For AI bots running server-side — Discord, Telegram, Slack, or any platform where you can't ship a JS bundle to the user. One <code>POST /v1/ad-request</code> from your bot's response handler. Helper libraries map the response to each platform's native message format.</p>
 
-    <div class="callout note">
-      <strong>This page is being expanded.</strong>
-      <p>The full deep-dive (every endpoint, every parameter, retry semantics, helper-lib API for Discord/Telegram/Slack) is in progress. For the time being, the comprehensive <a href="/docs/api-reference">API reference</a> covers the underlying endpoints in detail.</p>
+    <div class="callout warn">
+      <strong>⚠️ Spec, not snapshot.</strong>
+      <p>The public <code>POST /v1/ad-request</code> endpoint described on this page and the helper libraries (<code>@boostbossai/lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are <strong>not yet published</strong>. Boost Boss's internal HTTP API exists today and powers our own integrations; exposing it as a public, bearer-authed endpoint with helper libraries on npm is on the roadmap. If you're building a Discord/Telegram/Slack AI bot and want early access, email <a href="mailto:hello@boostboss.ai">hello@boostboss.ai</a>. Everything below describes the target API.</p>
     </div>
 
     <h2 id="endpoint">The one endpoint you'll call</h2>

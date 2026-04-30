@@ -70,6 +70,11 @@
     <h1>JS Snippet integration</h1>
     <p class="lede">One async <code>&lt;script&gt;</code> tag in your <code>&lt;head&gt;</code>, one or more <code>&lt;div data-lumi-slot&gt;</code> elements where you want ads. No backend changes. Works with any LLM provider (OpenAI, Anthropic, Gemini, open-source) and any framework (LangChain, Vercel AI SDK, CrewAI, plain React) — Lumi attaches at the rendering surface.</p>
 
+    <div class="callout warn">
+      <strong>⚠️ Spec, not snapshot.</strong>
+      <p>This page describes the target slot-based API (<code>data-lumi-slot</code>, CSS-variable theming, <code>cdn.boostboss.ai/lumi.js</code>). A working browser SDK exists today at <code>https://boostboss.ai/sdk.js</code> using an older format-driven API (<code>BoostBoss.init({ apiKey })</code> with <code>requestAd({ context })</code>) — refactor to match this page's spec is in progress. If you'd like to integrate against the existing SDK while we ship the new API, email <a href="mailto:hello@boostboss.ai">hello@boostboss.ai</a>.</p>
+    </div>
+
     <h2 id="prerequisites">Prerequisites</h2>
     <ul>
       <li>A Boost Boss publisher account — <a href="/publish/signup">sign up</a> if you haven't.</li>
