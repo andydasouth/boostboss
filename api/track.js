@@ -174,6 +174,21 @@ module.exports = async function handler(req, res) {
     }
   }
 
+  // Per-request integration source — tagged so the dashboard can slice
+  // impressions/clicks by which integration the request came through.
+  // Set by SDKs via X-Lumi-Source header. Falls back to params.integration_method
+  // (for callers that pass it in the body) or null. Whitelisted to prevent
+  // garbage; the DB CHECK constraint (db/06_integration_method.sql) enforces
+  // the same set as a backstop.
+  const _src = String(
+    (req.headers && req.headers["x-lumi-source"]) ||
+    params.integration_method ||
+    ""
+  ).toLowerCase().trim();
+  const integrationMethod = ["mcp", "js-snippet", "npm-sdk", "rest-api"].includes(_src)
+    ? _src
+    : null;
+
   const record = {
     event_type: event,
     campaign_id: campaignId,
@@ -200,6 +215,8 @@ module.exports = async function handler(req, res) {
     value_cents:     event === "conversion" ? valueCents     : null,
     external_id:     event === "conversion" ? externalId     : null,
     currency:        event === "conversion" ? currency       : null,
+    // Integration source (db/06_integration_method.sql). NULL allowed.
+    integration_method: integrationMethod,
     created_at: new Date().toISOString(),
   };
 

@@ -568,7 +568,9 @@ async function handleTrackEvent(body, args, res) {
   };
   const mockReq = {
     method: "POST",
-    headers: {},
+    // Tag every impression/click coming through MCP with integration_method='mcp'
+    // so the dashboard can slice by source. db/06_integration_method.sql.
+    headers: { "x-lumi-source": "mcp" },
     query: {},
     body: {
       event: args.event,
