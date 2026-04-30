@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lumi.js Smoke Test</title>
+<style>
+  :root {
+    /* Theme tokens picked up by lumi.js — match the rest of the BB site palette */
+    --lumi-primary: #FF2D78;
+    --lumi-text:    #0F0F1A;
+    --lumi-muted:   #6B7280;
+    --lumi-bg:      #FFFFFF;
+    --lumi-border:  #E5E7EB;
+    --lumi-radius:  12px;
+    --lumi-font:    'Inter', -apple-system, sans-serif;
+  }
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    color: #0F0F1A; line-height: 1.55; max-width: 720px;
+    margin: 40px auto; padding: 0 24px; background: #FAFAF7;
+  }
+  h1 { font-size: 28px; margin-bottom: 6px; }
+  .lede { color: #4B4B5E; margin-bottom: 28px; }
+  section { margin: 32px 0; }
+  h2 { font-size: 16px; font-weight: 700; margin-bottom: 10px;
+       color: #4B4B5E; text-transform: uppercase; letter-spacing: 0.04em; }
+  pre {
+    background: #0F0F1A; color: #E5E7EB; padding: 12px 16px; border-radius: 8px;
+    font-size: 12.5px; overflow-x: auto;
+  }
+  .meta { font-size: 12.5px; color: #6B7280; margin-top: 8px; }
+  #event-log {
+    background: #fff; border: 1px solid #E5E7EB; border-radius: 10px;
+    padding: 14px 16px; font-family: monospace; font-size: 12px;
+    max-height: 240px; overflow-y: auto; min-height: 60px;
+  }
+  #event-log .event { padding: 3px 0; border-bottom: 1px dashed #E5E7EB; }
+  #event-log .event:last-child { border-bottom: none; }
+</style>
+</head>
+<body>
+
+<h1>Lumi.js smoke test</h1>
+<p class="lede">Loads <code>boostboss.ai/lumi.js</code> with sandbox publisher ID. Each section below has a <code>data-lumi-slot</code> div — Lumi auto-discovers them on page load and fills with a sandbox creative.</p>
+
+<section>
+  <h2>Banner format</h2>
+  <div data-lumi-slot="banner" data-lumi-context="setting up Stripe billing for SaaS"></div>
+</section>
+
+<section>
+  <h2>Sidebar format</h2>
+  <div data-lumi-slot="sidebar" data-lumi-context="vector database for AI search"></div>
+</section>
+
+<section>
+  <h2>Inline format</h2>
+  <p>Some preceding paragraph text. Lorem ipsum dolor sit amet, consectetur. Below this, an inline ad:</p>
+  <div data-lumi-slot="inline" data-lumi-context="dev tooling for code review"></div>
+  <p>And the paragraph continues here.</p>
+</section>
+
+<section>
+  <h2>Programmatic API</h2>
+  <button onclick="Lumi.refresh()">Refresh all</button>
+  <button onclick="Lumi.render('#late-bound', { format: 'banner', context: 'ai agents observability' })">Mount #late-bound</button>
+  <button onclick="document.querySelector('[data-lumi-slot=interstitial-trigger]').setAttribute('data-lumi-slot','interstitial')">Show interstitial</button>
+  <div id="late-bound" style="margin-top: 12px;"></div>
+  <div data-lumi-slot="interstitial-trigger" data-lumi-context="open-source LLM hosting" style="display:none"></div>
+</section>
+
+<section>
+  <h2>Event log</h2>
+  <div id="event-log"></div>
+  <p class="meta">Listening for: <code>lumi:ready</code>, <code>lumi:impression</code>, <code>lumi:click</code>, <code>lumi:no_fill</code>, <code>lumi:close</code>, <code>lumi:error</code></p>
+</section>
+
+<section>
+  <h2>State</h2>
+  <pre id="state">(loading)</pre>
+  <p class="meta"><a href="javascript:document.getElementById('state').textContent = JSON.stringify(Lumi._state(), null, 2)">refresh state</a></p>
+</section>
+
+<script>
+  const log = document.getElementById("event-log");
+  function logEvent(name, e) {
+    const div = document.createElement("div");
+    div.className = "event";
+    const t = new Date().toLocaleTimeString();
+    div.textContent = `[${t}] ${name} ${JSON.stringify(e.detail).slice(0, 200)}`;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+  ["ready","impression","click","close","no_fill","error"].forEach(n => {
+    window.addEventListener("lumi:" + n, e => logEvent("lumi:" + n, e));
+  });
+  window.addEventListener("lumi:ready", () => {
+    document.getElementById("state").textContent = JSON.stringify(Lumi._state(), null, 2);
+  });
+</script>
+
+<script async
+  src="/lumi.js"
+  data-publisher-id="pub_test_demo"
+  data-debug="true"></script>
+
+</body>
+</html>

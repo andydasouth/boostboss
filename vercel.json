@@ -62,6 +62,14 @@
       ]
     },
     {
+      "source": "/lumi.js",
+      "headers": [
+        { "key": "Content-Type", "value": "application/javascript" },
+        { "key": "Cache-Control", "value": "public, max-age=3600" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" }
+      ]
+    },
+    {
       "source": "/pixel.js",
       "headers": [
         { "key": "Content-Type", "value": "application/javascript" },

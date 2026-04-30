@@ -148,12 +148,23 @@ function keywordContextBoost(campaign, ctxText) {
 module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  // X-Lumi-Source needs to be in the allowed list because the JS snippet
+  // sends it on bid requests; without it, browsers fail the CORS preflight.
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Lumi-Source");
   res.setHeader("x-mcp-mode", HAS_SUPABASE ? "supabase" : "demo");
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   const body = req.body || {};
+
+  // Pull the integration_method from the X-Lumi-Source header (set by SDKs
+  // and the JS snippet on every request). We bake it into the tracking
+  // URLs returned by get_sponsored_content so the impression beacon
+  // (a server-less GET from the browser) carries the source forward.
+  const _lumiSource = String((req.headers && req.headers["x-lumi-source"]) || "")
+    .toLowerCase().trim();
+  const _validSources = ["mcp", "js-snippet", "npm-sdk", "rest-api"];
+  const _integrationMethod = _validSources.includes(_lumiSource) ? _lumiSource : null;
 
   // ── initialize ──
   if (body.method === "initialize") {
@@ -231,6 +242,10 @@ module.exports = async function handler(req, res) {
     const args = (body.params && body.params.arguments) || {};
 
     if (toolName === "get_sponsored_content") {
+      // Forward integration_method into the tool args so handleGetSponsoredContent
+      // can stamp it onto tracking URLs. Underscore prefix marks it as
+      // SDK-derived rather than caller-supplied.
+      if (_integrationMethod) args._integration_method = _integrationMethod;
       return await handleGetSponsoredContent(body, args, res);
     }
     if (toolName === "track_event") {
@@ -498,6 +513,10 @@ async function handleGetSponsoredContent(body, args, res) {
   if (Number.isFinite(ims)) {
     trackParams.set("ims", ims.toFixed(4));
   }
+  // Bake integration_method (from X-Lumi-Source header) into the tracking
+  // URL so the GET-based impression beacon carries the source forward
+  // when track.js writes the events row. db/06_integration_method.sql.
+  if (args._integration_method) trackParams.set("integration_method", args._integration_method);
   const track = `${base}/api/track?${trackParams.toString()}`;
 
   // Append bbx_auc to the cta_url so the advertiser's conversion pixel

@@ -129,6 +129,10 @@ function buildSandboxResponse({ auctionId, base, sessionId, args }) {
   });
   if (args.surface) trackParams.set("surface", args.surface);
   if (c.type)       trackParams.set("format", c.type);
+  // Forward integration_method into the beacon URL — same path the live
+  // auction takes (api/mcp.js handleGetSponsoredContent). Lets the
+  // dashboard slice sandbox traffic by integration_method too.
+  if (args._integration_method) trackParams.set("integration_method", args._integration_method);
   const track = `${base}/api/track?${trackParams.toString()}`;
 
   // Append the sandbox auction id to the cta_url so attribution is

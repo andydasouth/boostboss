@@ -70,9 +70,9 @@
     <h1>JS Snippet integration</h1>
     <p class="lede">One async <code>&lt;script&gt;</code> tag in your <code>&lt;head&gt;</code>, one or more <code>&lt;div data-lumi-slot&gt;</code> elements where you want ads. No backend changes. Works with any LLM provider (OpenAI, Anthropic, Gemini, open-source) and any framework (LangChain, Vercel AI SDK, CrewAI, plain React) — Lumi attaches at the rendering surface.</p>
 
-    <div class="callout warn">
-      <strong>⚠️ Spec, not snapshot.</strong>
-      <p>This page describes the target slot-based API (<code>data-lumi-slot</code>, CSS-variable theming, <code>cdn.boostboss.ai/lumi.js</code>). A working browser SDK exists today at <code>https://boostboss.ai/sdk.js</code> using an older format-driven API (<code>BoostBoss.init({ apiKey })</code> with <code>requestAd({ context })</code>) — refactor to match this page's spec is in progress. If you'd like to integrate against the existing SDK while we ship the new API, email <a href="mailto:hello@boostboss.ai">hello@boostboss.ai</a>.</p>
+    <div class="callout info">
+      <strong>v0.1 — beta. Live on <code>boostboss.ai/lumi.js</code> today.</strong>
+      <p>The slot-based API documented on this page is shipped. <code>&lt;script src="https://boostboss.ai/lumi.js"&gt;</code> resolves and works against the live Boost Boss backend. Try the sandbox flow with <code>data-publisher-id="pub_test_demo"</code> — no signup required to verify integration end-to-end. The legacy <code>BoostBoss.init</code> API at <code>boostboss.ai/sdk.js</code> remains supported for backward compatibility. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="prerequisites">Prerequisites</h2>
@@ -85,7 +85,7 @@
     <h2 id="installation">Installation</h2>
     <p>Add the snippet to your <code>&lt;head&gt;</code>. Async; no impact on first paint.</p>
 <pre><span class="tag">&lt;script</span> <span class="attr">async</span>
-  <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
   <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span><span class="tag">&gt;</span>
 <span class="tag">&lt;/script&gt;</span></pre>
     <p>Replace <code>pub_xxx</code> with your publisher ID from the dashboard.</p>
@@ -161,7 +161,7 @@ window.<span class="fn">addEventListener</span>(<span class="str">'lumi:error'</
 <span class="kw">export default function</span> <span class="fn">RootLayout</span>({ children }) {
   <span class="kw">return</span> (
     <span class="tag">&lt;html&gt;</span><span class="tag">&lt;body&gt;</span>{children}
-      <span class="tag">&lt;Script</span> <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+      <span class="tag">&lt;Script</span> <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
         <span class="attr">data-publisher-id</span>=<span class="str">"pub_xxx"</span> <span class="attr">strategy</span>=<span class="str">"afterInteractive"</span> <span class="tag">/&gt;</span>
     <span class="tag">&lt;/body&gt;&lt;/html&gt;</span>
   );
@@ -190,14 +190,14 @@ window.<span class="fn">addEventListener</span>(<span class="str">'lumi:error'</
 
     <h3>CSP (Content Security Policy)</h3>
     <p>If your site uses CSP, allow Lumi's host:</p>
-<pre>script-src  <span class="str">'self'</span> <span class="str">https://cdn.boostboss.ai</span>;
-connect-src <span class="str">'self'</span> <span class="str">https://api.boostboss.ai</span>;
-img-src     <span class="str">'self'</span> <span class="str">https://cdn.boostboss.ai</span> <span class="str">data:</span>;</pre>
+<pre>script-src  <span class="str">'self'</span> <span class="str">https://boostboss.ai</span>;
+connect-src <span class="str">'self'</span> <span class="str">https://boostboss.ai</span>;
+img-src     <span class="str">'self'</span> <span class="str">https://boostboss.ai</span> <span class="str">data:</span>;</pre>
 
     <h2 id="testing">Testing</h2>
     <p>Use <code>data-publisher-id="pub_test_demo"</code> in development. Sandbox always returns a fixed creative regardless of context, so you can verify slot rendering in dev without hitting real demand-side calls.</p>
 <pre><span class="tag">&lt;script</span> <span class="attr">async</span>
-  <span class="attr">src</span>=<span class="str">"https://cdn.boostboss.ai/lumi.js"</span>
+  <span class="attr">src</span>=<span class="str">"https://boostboss.ai/lumi.js"</span>
   <span class="attr">data-publisher-id</span>=<span class="str">"pub_test_demo"</span>
   <span class="attr">data-debug</span>=<span class="str">"true"</span><span class="tag">&gt;</span>
 <span class="tag">&lt;/script&gt;</span></pre>
