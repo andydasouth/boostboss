@@ -4,7 +4,7 @@ Boost Boss Lumi SDK for MCP servers. Earn revenue from sponsored content rendere
 
 [Full docs → boostboss.ai/docs/mcp](https://boostboss.ai/docs/mcp) · [Become a publisher](https://boostboss.ai/publish)
 
-> **Status:** in development. Wire-compatible with the live Boost Boss MCP backend; first published version targets `0.1.x`. Email hello@boostboss.ai for early-access cohort.
+> **Status:** v0.1 beta — published to npm. Wire-compatible with the live Boost Boss MCP backend. Sandbox mode works without signup (`publisherId: "pub_test_demo"`, `apiKey: "sk_test_demo"`). Email hello@boostboss.ai to join the Founding Publisher cohort for live inventory.
 
 ## Install
 
