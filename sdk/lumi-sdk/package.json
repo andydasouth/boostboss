@@ -1,6 +1,6 @@
 {
   "name": "@boostbossai/lumi-sdk",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "description": "Boost Boss Lumi SDK — programmatic ad rendering for browser extensions, Electron / Tauri apps, React, and Vue. Same backend as the JS snippet; class-based API for environments where a <script> tag isn't an option.",
   "license": "Apache-2.0",
   "author": "Boost Boss <hello@boostboss.ai> (https://boostboss.ai)",
@@ -10,10 +10,22 @@
     "url": "git+https://github.com/andydasouth/boostboss.git",
     "directory": "sdk/lumi-sdk"
   },
-  "bugs": { "url": "https://github.com/andydasouth/boostboss/issues", "email": "hello@boostboss.ai" },
+  "bugs": {
+    "url": "https://github.com/andydasouth/boostboss/issues",
+    "email": "hello@boostboss.ai"
+  },
   "keywords": [
-    "boostboss", "lumi", "ads", "monetization", "ad-network",
-    "browser-extension", "manifest-v3", "electron", "tauri", "react", "vue"
+    "boostboss",
+    "lumi",
+    "ads",
+    "monetization",
+    "ad-network",
+    "browser-extension",
+    "manifest-v3",
+    "electron",
+    "tauri",
+    "react",
+    "vue"
   ],
   "type": "module",
   "main": "./dist/index.cjs",
@@ -37,8 +49,14 @@
     },
     "./package.json": "./package.json"
   },
-  "files": ["dist", "README.md", "LICENSE"],
-  "engines": { "node": ">=18" },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
@@ -49,19 +67,23 @@
     "prepublishOnly": "npm run build && npm test"
   },
   "peerDependencies": {
-    "react":     ">=17.0.0",
-    "vue":       ">=3.0.0"
+    "react": ">=17.0.0",
+    "vue": ">=3.0.0"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "vue":   { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
   },
   "devDependencies": {
-    "tsup":              "^8.0.0",
-    "typescript":        "^5.4.0",
-    "@types/react":      "^18.2.0",
-    "react":             "^18.2.0",
-    "vue":               "^3.4.0"
+    "tsup": "^8.0.0",
+    "typescript": "^5.4.0",
+    "@types/react": "^18.2.0",
+    "react": "^18.2.0",
+    "vue": "^3.4.0"
   },
   "sideEffects": false
 }
