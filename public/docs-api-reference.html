@@ -752,7 +752,12 @@
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
       <h1 id="introduction">Boost Boss API</h1>
-      <p>The monetization and advertising API for the AI era. REST-based, JSON everywhere, sub-50ms median latency.</p>
+      <p>The monetization and advertising API for the AI era. REST-based, JSON everywhere.</p>
+    </div>
+
+    <div class="callout" style="margin: 18px 0 26px; padding: 16px 20px; background: rgba(255, 230, 0, 0.10); border-left: 3px solid #C9A800; border-radius: 10px;">
+      <strong style="display:block; margin-bottom: 6px; color: var(--ink);">⚠️ Spec, not snapshot.</strong>
+      <p style="margin: 0; font-size: 14.5px; color: var(--ink-soft);">This reference describes the full target surface of the Boost Boss API. Some sections are live today (publisher integration via the <a href="/docs/mcp" style="color: var(--pink); font-weight: 600;">MCP</a> and <a href="/docs/js-snippet" style="color: var(--pink); font-weight: 600;">JS snippet</a> paths); some describe planned behavior on the roadmap. The TypeScript SDK is in beta. Python, Go, Swift, and Kotlin SDKs are not yet published. The OpenRTB 2.6 BBX adapter is documented as the spec advertisers should integrate against; live DSP integrations are in progress. Treat anything here as "what we're building toward," not "what you can paste right now," unless you're working through one of the four <a href="/docs" style="color: var(--pink); font-weight: 600;">live publisher integration paths</a>.</p>
     </div>
 
     <p>The Boost Boss API lets you <strong>fetch ads</strong>, <strong>beacon events</strong>, and <strong>manage campaigns</strong> programmatically. This reference covers every endpoint, every parameter, and every response field. The API is organized around REST — predictable URLs, standard HTTP verbs, standard status codes, JSON request and response bodies.</p>
@@ -906,90 +911,19 @@
     </div>
 
     <div class="sdk-panel" data-lang="py" id="sdk-python">
-      <p style="margin-top:14px">Full async support, type hints throughout. Works with asyncio, trio, and anyio.</p>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-        <pre>pip install boostboss</pre>
-      </div>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">Python</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre><span class="k">from</span> <span class="n">boostboss</span> <span class="k">import</span> BoostBoss
-
-bb = BoostBoss(api_key=<span class="s">"bb_sk_live_***"</span>)
-
-ad = bb.<span class="f">fetch</span>(
-    format=<span class="s">"native"</span>,
-    context=user_message,
-    mcp_tools=[<span class="s">"filesystem"</span>, <span class="s">"github"</span>],
-    model=<span class="s">"claude-sonnet-4"</span>,
-)
-
-<span class="k">if</span> ad:
-    render_card(ad.headline, ad.body, ad.cta_text)
-    ad.<span class="f">track_click</span>()  <span class="c"># on user click</span></pre>
-      </div>
+      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:hello@boostboss.ai" class="inline-link">hello@boostboss.ai</a>.</p>
     </div>
 
     <div class="sdk-panel" data-lang="go" id="sdk-go">
-      <p style="margin-top:14px">Idiomatic Go with context support and structured errors.</p>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">bash</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-        <pre>go get github.com/boostboss/go-sdk</pre>
-      </div>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">Go</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre><span class="k">import</span> <span class="s">"github.com/boostboss/go-sdk"</span>
-
-bb := boostboss.<span class="f">New</span>(<span class="s">"bb_sk_live_***"</span>)
-
-ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
-    Format:   <span class="s">"native"</span>,
-    Context:  userMessage,
-    McpTools: []<span class="k">string</span>{<span class="s">"filesystem"</span>, <span class="s">"github"</span>},
-    Model:    <span class="s">"claude-sonnet-4"</span>,
-})
-<span class="k">if</span> err != <span class="b">nil</span> { <span class="f">log</span>.<span class="f">Fatal</span>(err) }</pre>
-      </div>
+      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:hello@boostboss.ai" class="inline-link">hello@boostboss.ai</a>.</p>
     </div>
 
     <div class="sdk-panel" data-lang="swift" id="sdk-swift">
-      <p style="margin-top:14px">Swift concurrency with async/await. SPM and CocoaPods support.</p>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">Swift Package Manager</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-        <pre>.package(url: "https://github.com/boostboss/swift-sdk", from: "1.0.0")</pre>
-      </div>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">Swift</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre><span class="k">import</span> BoostBoss
-
-<span class="k">let</span> bb = BoostBoss(apiKey: <span class="s">"bb_sk_live_***"</span>)
-
-<span class="k">let</span> ad = <span class="k">try await</span> bb.<span class="f">fetch</span>(
-    format: .native,
-    context: userMessage,
-    mcpTools: [<span class="s">"filesystem"</span>, <span class="s">"github"</span>]
-)</pre>
-      </div>
+      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:hello@boostboss.ai" class="inline-link">hello@boostboss.ai</a>.</p>
     </div>
 
     <div class="sdk-panel" data-lang="kotlin" id="sdk-kotlin">
-      <p style="margin-top:14px">Coroutine-based with Kotlin Multiplatform support. JVM, Android, and JS targets.</p>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">Gradle</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-        <pre>implementation("ai.boostboss:sdk:1.0.0")</pre>
-      </div>
-      <div class="code-block with-head">
-        <div class="code-head"><span class="lang">Kotlin</span><span class="copy" onclick="copyCode(this)">Copy</span></div>
-<pre><span class="k">import</span> ai.boostboss.BoostBoss
-
-<span class="k">val</span> bb = BoostBoss(apiKey = <span class="s">"bb_sk_live_***"</span>)
-
-<span class="k">val</span> ad = bb.<span class="f">fetch</span>(
-    format = <span class="s">"native"</span>,
-    context = userMessage,
-    mcpTools = <span class="f">listOf</span>(<span class="s">"filesystem"</span>, <span class="s">"github"</span>)
-)</pre>
-      </div>
+      <p style="margin-top:14px"><strong>Not yet published.</strong> Python, Go, Swift, and Kotlin SDKs are on the roadmap. Today the only published client is <a href="#sdk-typescript" class="inline-link">TypeScript</a>; for non-JS environments, integrate against the <a href="#api-fetch-ad" class="inline-link">REST API</a> directly. If you'd like us to prioritize your language, email <a href="mailto:hello@boostboss.ai" class="inline-link">hello@boostboss.ai</a>.</p>
     </div>
 
     <!-- FETCH AD -->
@@ -999,7 +933,7 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
       <a class="try-btn" href="/playground.html?endpoint=fetch" title="Open in Playground">▶ Try it</a>
     </div>
 
-    <p>Runs a real-time auction against your targeting parameters and returns the winning ad creative with signed beacon URLs. Median latency: <strong>47ms p50</strong>, <strong>180ms p99</strong>.</p>
+    <p>Runs a real-time auction against your targeting parameters and returns the winning ad creative with signed beacon URLs. Designed for sub-100ms response times on the bid path; published latency targets will appear here once we have measured production data.</p>
 
     <h4>Request body</h4>
     <table class="params">
@@ -1166,7 +1100,7 @@ ad, err := bb.<span class="f">Fetch</span>(ctx, &amp;boostboss.FetchRequest{
 
     <!-- BENNA -->
     <h2 id="benna-overview">Benna — the ranking engine</h2>
-    <p><strong>Benna</strong> is the model that ranks every bid served through Boost Boss. It's an MCP-native ranker: instead of scoring on cookies, device IDs, and page URLs, it scores on the signals that actually predict conversion in an AI surface — user intent, the MCP tool about to be called, the host application, and session length. Benna runs at <strong>sub-5ms p50</strong> and returns a full attribution block so every decision is inspectable.</p>
+    <p><strong>Benna</strong> is the model that ranks every bid served through Boost Boss. It's an MCP-native ranker: instead of scoring on cookies, device IDs, and page URLs, it scores on the signals that actually predict conversion in an AI surface — user intent, the MCP tool about to be called, the host application, and session length. Designed to run on the hot path with negligible added latency, returning a full attribution block so every decision is inspectable. (Current implementation is a deterministic stub; the trained ranker is on the roadmap.)</p>
 
     <p>Benna powers the first-party Boost Boss exchange (BBX) by default. You don't need to call it directly — the SDK does it for you. <strong>But if you operate your own demand stack</strong> and want to plug Benna into an existing mediation waterfall or header bidder, we license the raw inference endpoint at <strong>$0.002 per call</strong>. Every response includes the model version, predicted click &amp; conversion rates, and a signal-by-signal contribution breakdown.</p>
 
@@ -1615,10 +1549,8 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
     <!-- CHANGELOG -->
     <h2 id="changelog">Changelog</h2>
     <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
-      <h4 style="margin-top:0">v1.0.0 — April 2026</h4>
-      <p>Initial public release of the Boost Boss API. Includes Fetch Ad, Beacon, Campaign Management, Stats, Benna scoring, OpenRTB 2.6 adapter (BBX), and SDKs for TypeScript, Python, Go, Swift, and Kotlin.</p>
-      <h4>v0.9.0-beta — March 2026</h4>
-      <p>Closed beta with 12 launch partners. Added MCP-native targeting signals, frequency capping, and webhook support.</p>
+      <h4 style="margin-top:0">v0.x — 2026 (in development)</h4>
+      <p>Surface API specified across Fetch Ad, Beacon, Campaign Management, Stats, Benna scoring, and the OpenRTB 2.6 adapter (BBX). TypeScript SDK in beta; Python, Go, Swift, Kotlin clients on the roadmap. Live publisher integration paths are documented separately under <a href="/docs" class="inline-link">/docs</a>.</p>
     </div>
 
     <!-- FEEDBACK -->
@@ -1944,7 +1876,6 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
         <h4>Company</h4>
         <ul>
           <li><a href="/">About</a></li>
-          <li><a href="/docs">Blog</a></li>
           <li><a href="mailto:careers@boostboss.ai">Careers</a></li>
           <li><a href="mailto:hello@boostboss.ai">Contact</a></li>
         </ul>
@@ -1953,12 +1884,10 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
         <h4>Trust &amp; legal</h4>
         <ul>
           <li><a href="/trust">Trust center</a></li>
-          <li><a href="/trust.html#compliance">SOC 2 · GDPR · CCPA</a></li>
-          <li><a href="/trust.html#security">Security</a></li>
+          <li><a href="/trust#compliance">SOC 2 · GDPR · CCPA</a></li>
+          <li><a href="/trust#security">Security</a></li>
           <li><a href="/sellers.json">sellers.json</a></li>
           <li><a href="/ads.txt">ads.txt</a></li>
-          <li><a href="/trust">Privacy</a></li>
-          <li><a href="/trust">Terms</a></li>
         </ul>
       </div>
     </div>

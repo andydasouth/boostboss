@@ -70,6 +70,11 @@
     <h1>MCP integration</h1>
     <p class="lede">Add three lines to any MCP tool handler. Sponsored content gets appended to your tool's response and rendered natively by the MCP host (Claude Desktop, Cursor, Cline, Continue, Zed, Windsurf). Time to first ad: under 10 minutes.</p>
 
+    <div class="callout note">
+      <strong>About the SDK.</strong>
+      <p><code>@boostbossai/lumi-mcp</code> is the MCP-specific wrapper documented on this page. Internally it uses the lower-level <code>@boostbossai/lumi-sdk</code> client (a <code>BoostBoss</code> object — see the <a href="/docs/api-reference#sdks">API reference</a>) for transport, auth, and beacons. Most MCP publishers should stick with <code>lumi-mcp</code>; reach for the underlying client only if you need fine-grained control the wrapper doesn't expose.</p>
+    </div>
+
     <h2 id="prerequisites">Prerequisites</h2>
     <ul>
       <li>A Boost Boss publisher account — <a href="/publish/signup">sign up</a> if you haven't.</li>
