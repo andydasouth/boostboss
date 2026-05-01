@@ -86,9 +86,12 @@
   }
   .nav-links { display: flex; gap: 28px; align-items: center; }
   .nav-links a {
-    font-size: 14.5px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s;
+    font-size: 14.5px; font-weight: 700; color: var(--ink);
+    opacity: 0.92;
+    transition: color 0.15s, opacity 0.15s;
   }
-  .nav-links a:hover { color: var(--ink); }
+  .nav-links a:hover { opacity: 1; color: var(--pink); }
+  .nav-links a.active { opacity: 1; color: var(--pink); }
   .nav-ctas { display: flex; gap: 10px; align-items: center; }
 
   /* Logged-in advertiser pill — replaces "Sign in" / "Launch a campaign"
