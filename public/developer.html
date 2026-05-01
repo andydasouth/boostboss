@@ -390,6 +390,7 @@
             flex-direction: column;
             min-height: 160px;
             position: relative;
+            cursor: pointer;
         }
         .ic-card:hover {
             border-color: rgba(255, 45, 120, 0.35);
@@ -399,6 +400,36 @@
         .ic-card.ic-active {
             border-color: rgba(4, 190, 254, 0.40);
             background: linear-gradient(180deg, rgba(4, 190, 254, 0.04), #fff 60%);
+        }
+        /* Selected card — visually marked as the active tab. */
+        .ic-card.ic-selected {
+            border-color: #FF2D78;
+            border-width: 2px;
+            box-shadow: 0 8px 24px rgba(255, 45, 120, 0.14);
+            transform: translateY(-1px);
+        }
+        .ic-card.ic-selected::after {
+            content: "";
+            position: absolute;
+            left: 0; right: 0; bottom: -22px;
+            height: 22px;
+            background: linear-gradient(180deg, transparent, rgba(255, 45, 120, 0.04));
+            pointer-events: none;
+        }
+        /* Down-arrow indicator on the selected card pointing to its panel below. */
+        .ic-card.ic-selected .ic-selected-marker {
+            display: inline-flex;
+        }
+        .ic-selected-marker {
+            display: none;
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            width: 14px;
+            height: 14px;
+            background: #FF2D78;
+            border-radius: 2px;
         }
         .ic-header {
             display: flex;
@@ -1490,18 +1521,6 @@
                 </div>
             </div>
 
-            <!-- Your integrations — 4 doors, state-aware -->
-            <div class="section" id="integrationCardsSection">
-                <div class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
-                    <span>Your integrations</span>
-                    <a href="#integrationGuide" onclick="onboardScrollToGuide(); return false;" style="font-size: 12px; font-weight: 600; color: #FF2D78; text-decoration: none;">Set up another →</a>
-                </div>
-                <p style="color: #6B7280; font-size: 13px; margin: 0 0 16px 0;">One publisher account, four doors. Active doors show last 7 days; "Not started" doors have a one-click setup. <a href="/publish" style="color: #FF2D78; text-decoration: none;">Learn about each door →</a></p>
-                <div class="integration-cards-grid" id="integrationCardsGrid">
-                    <!-- 4 cards rendered by renderIntegrationCards(). Defaults to all "Not started" until stats load. -->
-                </div>
-            </div>
-
             <!-- Revenue Chart -->
             <div class="section">
                 <div class="section-title">Revenue Over Last 14 Days</div>
@@ -1702,17 +1721,14 @@
                 </div>
             </div>
 
-            <!-- Integration Guide — door tabs + copy-paste snippets -->
+            <!-- Integrations — unified section: state-aware cards as tab selectors + per-door install/code panels -->
             <div class="section integration-steps" id="integrationGuide">
-                <div class="section-title">Integration Guide</div>
-                <p style="color: #6B7280; font-size: 13px; margin: 0 0 18px 0;">Pick the door that matches what you've built. Each tab is self-contained — install command, code sample, and verify step. You can integrate against more than one door using the same publisher account.</p>
+                <div class="section-title">Integrations</div>
+                <p style="color: #6B7280; font-size: 13px; margin: 0 0 16px 0;">One publisher account, four doors. Click the door you're setting up — the install + code sample appears below. Active doors show last 7 days; "Not started" doors are ready to set up. <a href="/publish" style="color: #FF2D78; text-decoration: none;">About each door →</a></p>
 
-                <!-- Door tabs (replaces old framework tabs). Each tab matches one of the four shipped doors. -->
-                <div id="doorTabs" style="display: flex; gap: 6px; border-bottom: 1px solid #E5E7EB; margin-bottom: 18px; flex-wrap: wrap;">
-                    <button class="fw-tab active" data-tab="mcp" onclick="selectDoorTab('mcp')">⚙️ Lumi SDK for MCP</button>
-                    <button class="fw-tab" data-tab="js-snippet" onclick="selectDoorTab('js-snippet')">💬 Lumi SDK script tag</button>
-                    <button class="fw-tab" data-tab="npm-sdk" onclick="selectDoorTab('npm-sdk')">🧩 Lumi SDK for browser extensions</button>
-                    <button class="fw-tab" data-tab="rest-api" onclick="selectDoorTab('rest-api')">🤖 Lumi API for Bots</button>
+                <!-- Cards-as-tabs: 4 cards carry state AND act as the tab UI. -->
+                <div class="integration-cards-grid" id="integrationCardsGrid" style="margin-bottom: 22px;">
+                    <!-- Rendered by renderIntegrationCards(). Each card calls selectDoorTab() on click. -->
                 </div>
 
                 <!-- Door 1: Lumi SDK for MCP -->
@@ -2845,20 +2861,31 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             const grid = document.getElementById('integrationCardsGrid');
             if (!grid) return;
             const data = byMethod || {};
+            // Default selected door = first Active, else "mcp." Read from
+            // sessionStorage if a previous tab pick is remembered.
+            let selectedDoor = null;
+            try { selectedDoor = sessionStorage.getItem('bb_dashboard_target_door'); } catch (_) {}
+            if (!selectedDoor) {
+                const firstActive = INTEGRATION_DOORS.find(d => (data[d.key] || {}).impressions > 0);
+                selectedDoor = firstActive ? firstActive.key : 'mcp';
+            }
             const html = INTEGRATION_DOORS.map(d => {
                 const m = data[d.key] || { impressions: 0, clicks: 0, earnings: 0 };
                 const active = (m.impressions || 0) > 0;
-                const stateClass = active ? 'ic-active' : 'ic-inactive';
+                const isSelected = d.key === selectedDoor;
+                const stateClass  = active ? 'ic-active' : 'ic-inactive';
+                const selClass    = isSelected ? 'ic-selected' : '';
                 const badge = active
                     ? '<span class="ic-badge ic-badge-active">● Active</span>'
                     : '<span class="ic-badge ic-badge-inactive">Not started</span>';
                 const impressions = active ? Number(m.impressions || 0).toLocaleString() : '—';
                 const earnings    = active ? '$' + Number(m.earnings || 0).toFixed(2) : '—';
-                const cta = active
-                    ? `<a class="ic-cta" href="${d.docs}">View docs →</a>`
-                    : `<button class="ic-cta" onclick="dashboardScrollToDoor('${d.key}')">Set up</button>`;
+                const ctaLabel    = isSelected
+                    ? '✓ Selected — see install + code below'
+                    : (active ? 'Switch to this door' : 'Set up');
                 return `
-                    <div class="ic-card ${stateClass}" data-door="${d.key}">
+                    <div class="ic-card ${stateClass} ${selClass}" data-door="${d.key}" onclick="selectDoorTab('${d.key}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDoorTab('${d.key}')}">
+                        <span class="ic-selected-marker" aria-hidden="true"></span>
                         <div class="ic-header">
                             <div>
                                 <span class="ic-icon" aria-hidden="true">${d.icon}</span>
@@ -2876,10 +2903,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
                                 <div class="ic-stat-value" data-metric="earnings">${earnings}</div>
                             </div>
                         </div>
-                        ${cta}
+                        <div class="ic-cta" style="pointer-events: none;">${ctaLabel}</div>
                     </div>`;
             }).join('');
             grid.innerHTML = html;
+            // Sync the actual panel visibility with the rendered selected card.
+            selectDoorTab(selectedDoor);
         }
 
         // Re-fetch stats with the dropdown's current door filter and re-render
@@ -3158,13 +3187,29 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
 
         // Door tab switcher for the Integration Guide. Each tab is one of
         // the four doors (mcp / js-snippet / npm-sdk / rest-api), matching
-        // integration_method values in the events table.
+        // integration_method values in the events table. Also drives the
+        // "selected" visual state on the cards above the panels.
         function selectDoorTab(name) {
             document.querySelectorAll('.fw-tab').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === name);
             });
             document.querySelectorAll('.fw-panel').forEach(panel => {
                 panel.style.display = panel.id === 'fw-' + name ? '' : 'none';
+            });
+            // Sync the cards' selected state — the cards ARE the tabs in
+            // the merged section.
+            document.querySelectorAll('.ic-card').forEach(card => {
+                const isSel = card.dataset.door === name;
+                card.classList.toggle('ic-selected', isSel);
+                const cta = card.querySelector('.ic-cta');
+                if (cta) {
+                    if (isSel) {
+                        cta.textContent = '✓ Selected — see install + code below';
+                    } else {
+                        const isActive = card.classList.contains('ic-active');
+                        cta.textContent = isActive ? 'Switch to this door' : 'Set up';
+                    }
+                }
             });
             // Remember last-picked door so reload returns the publisher to
             // their place. Also consumed by dashboardScrollToDoor() after
