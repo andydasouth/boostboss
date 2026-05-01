@@ -1053,6 +1053,42 @@
         .target-pill.selected.pink { background: #FF2D78; border-color: #FF2D78; }
         .target-pill.selected.cyan { background: #04BEFE; border-color: #04BEFE; color: #1A1A2E; }
         .target-pill.selected.yellow { background: #FFE600; border-color: #FFE600; color: #1A1A2E; }
+        /* Door cards — maps to target_integration_methods */
+        .door-card {
+            position: relative;
+            padding: 12px 12px 14px;
+            border: 1.5px solid #1A1A2E;
+            background: #fff;
+            border-radius: 10px;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.1s, transform 0.1s;
+        }
+        .door-card:hover { background: #FAFAF7; }
+        .door-card[data-active="true"] {
+            background: #1A1A2E;
+            color: #fff;
+        }
+        .door-card[data-active="true"]::after {
+            content: "✓";
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .door-card .door-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 3px;
+            margin-bottom: 8px;
+        }
+        .door-card .door-name { font-size: 13px; font-weight: 700; line-height: 1.2; }
+        .door-card .door-hint { font-size: 11px; opacity: 0.7; margin-top: 3px; line-height: 1.3; }
+        @media (max-width: 760px) {
+            #doorsRow { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+        }
         .intent-input-row {
             display: flex;
             gap: 8px;
@@ -2722,6 +2758,40 @@
                             <span class="ai-targeting-badge">Boost Boss AI</span>
                         </div>
 
+                        <!-- Doors — which publisher integrations to run on.
+                             Maps to target_integration_methods column
+                             (db/09_target_integration_methods.sql). All four
+                             selected by default = "run everywhere." -->
+                        <div class="targeting-block">
+                            <div class="targeting-label">
+                                Doors
+                                <span class="hint">— which publisher surfaces your ad runs on. All on = max reach.</span>
+                            </div>
+                            <div id="doorsRow" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px;">
+                                <div class="door-card" data-value="mcp" data-active="true">
+                                    <div class="door-dot" style="background:#FF2D78;"></div>
+                                    <div class="door-name">MCP tools</div>
+                                    <div class="door-hint">Claude Desktop · Cursor · Cline</div>
+                                </div>
+                                <div class="door-card" data-value="js-snippet" data-active="true">
+                                    <div class="door-dot" style="background:#04BEFE;"></div>
+                                    <div class="door-name">AI apps</div>
+                                    <div class="door-hint">Web AI chat · agent UIs</div>
+                                </div>
+                                <div class="door-card" data-value="npm-sdk" data-active="true">
+                                    <div class="door-dot" style="background:#FFE600;"></div>
+                                    <div class="door-name">Extensions</div>
+                                    <div class="door-hint">Chrome · Edge · Firefox</div>
+                                </div>
+                                <div class="door-card" data-value="rest-api" data-active="true">
+                                    <div class="door-dot" style="background:#7C3AED;"></div>
+                                    <div class="door-name">Bots</div>
+                                    <div class="door-hint">Discord · Telegram · Slack</div>
+                                </div>
+                            </div>
+                            <div id="doorsSummary" style="font-size:11.5px;color:#6B7280;margin-top:8px;">All 4 doors selected · max reach</div>
+                        </div>
+
                         <!-- Intent signals -->
                         <div class="targeting-block">
                             <div class="targeting-label">
@@ -3186,6 +3256,17 @@
                 });
             });
 
+            // Door cards — toggle data-active flag, refresh summary
+            document.querySelectorAll('#doorsRow .door-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    const wasActive = card.getAttribute('data-active') === 'true';
+                    card.setAttribute('data-active', wasActive ? 'false' : 'true');
+                    updateDoorsSummary();
+                    updateReachEstimate();
+                });
+            });
+            updateDoorsSummary();
+
             // Escape key to close modal
             document.addEventListener('keydown', (e) => {
                 if (e.key === 'Escape' && campaignModal.classList.contains('active')) {
@@ -3425,6 +3506,26 @@
             const pct = (n) => total > 0 ? ((n / total) * 100).toFixed(0) + '%' : '0%';
             const surfaces = Object.entries(s.by_surface || {})
                 .sort((a, b) => b[1].impressions - a[1].impressions);
+
+            // ── Per-door breakdown ──────────────────────────────────────
+            // Maps integration_method (mcp / js-snippet / npm-sdk / rest-api)
+            // returned by /api/stats into Boost Boss's four publisher doors.
+            // The advertiser sees "where my spend went" grouped by surface
+            // family rather than the lower-level surface flag.
+            const DOOR_LABELS = {
+                'mcp':        { label: 'MCP tools',  hint: 'Claude Desktop · Cursor', color: '#FF2D78' },
+                'js-snippet': { label: 'AI apps',    hint: 'Web AI chat',             color: '#04BEFE' },
+                'npm-sdk':    { label: 'Extensions', hint: 'Chrome · Edge · Firefox', color: '#FFE600' },
+                'rest-api':   { label: 'Bots',       hint: 'Discord · Telegram · Slack', color: '#7C3AED' },
+                'untagged':   { label: 'Untagged',   hint: 'Pre-tag legacy traffic',  color: '#9CA3AF' },
+            };
+            const byMethod = s.by_integration_method || {};
+            const doorEntries = Object.entries(byMethod)
+                .map(([k, v]) => ({ key: k, ...DOOR_LABELS[k] || { label: k, hint: '', color: '#9CA3AF' }, ...v }))
+                .filter(d => d.impressions > 0)
+                .sort((a, b) => b.spend - a.spend);
+            const doorTotalSpend = doorEntries.reduce((sum, d) => sum + Number(d.spend || 0), 0);
+            const doorTotalImps  = doorEntries.reduce((sum, d) => sum + Number(d.impressions || 0), 0);
             const recentRows = (s.recent || []).map(r => `
                 <tr style="border-top:1px solid #F3F4F6;font-size:12px;">
                     <td style="padding:8px 12px;color:#6B7280;font-family:monospace;">${(r.ts || '').slice(11, 19)}</td>
@@ -3500,6 +3601,52 @@
                             </div>`).join('') || '<div style="font-size:12px;color:#9CA3AF;">No data yet</div>'}
                     </div>
                 </div>
+
+                <!-- WHERE YOUR SPEND WENT — per-door breakdown by integration_method -->
+                <div style="border:1px solid #E5E7EB;border-radius:12px;padding:16px;margin-bottom:16px;background:#FAFAF7;">
+                    <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px;">
+                        <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;">Where your spend went</div>
+                        <div style="font-size:11px;color:#9CA3AF;">By publisher integration · last 7 days</div>
+                    </div>
+                    ${doorEntries.length === 0 ? `
+                        <div style="font-size:13px;color:#9CA3AF;padding:12px 0;text-align:center;">No tagged impressions yet — your campaign hasn't served on a tagged surface this week.</div>
+                    ` : `
+                        <!-- Stacked proportional bar -->
+                        <div style="display:flex;height:14px;border-radius:7px;overflow:hidden;background:#F3F4F6;margin-bottom:14px;">
+                            ${doorEntries.map(d => {
+                                const pct = doorTotalSpend > 0
+                                    ? (Number(d.spend) / doorTotalSpend) * 100
+                                    : (Number(d.impressions) / Math.max(doorTotalImps, 1)) * 100;
+                                if (pct < 0.5) return '';
+                                return `<div title="${escapeHtmlA(d.label)}: $${Number(d.spend).toFixed(2)}" style="width:${pct.toFixed(2)}%;background:${d.color};"></div>`;
+                            }).join('')}
+                        </div>
+                        <!-- Per-door cells -->
+                        <div style="display:grid;grid-template-columns:repeat(${Math.min(doorEntries.length, 4)},minmax(0,1fr));gap:10px;">
+                            ${doorEntries.slice(0, 4).map(d => {
+                                const pct = doorTotalSpend > 0
+                                    ? ((Number(d.spend) / doorTotalSpend) * 100).toFixed(1)
+                                    : '0.0';
+                                const ctr = d.impressions > 0
+                                    ? ((Number(d.clicks || 0) / d.impressions) * 100).toFixed(2) + '%'
+                                    : '—';
+                                return `
+                                    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:10px;padding:11px 12px;">
+                                        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                                            <span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${d.color};flex-shrink:0;"></span>
+                                            <span style="font-size:12px;font-weight:700;color:#111;">${escapeHtmlA(d.label)}</span>
+                                        </div>
+                                        <div style="font-size:18px;font-weight:700;color:#111;line-height:1;font-variant-numeric:tabular-nums;">$${Number(d.spend).toFixed(2)}</div>
+                                        <div style="font-size:10.5px;color:#9CA3AF;margin-top:2px;">${pct}% of spend</div>
+                                        <div style="font-size:11px;color:#6B7280;margin-top:6px;font-variant-numeric:tabular-nums;">${Number(d.impressions).toLocaleString()} imps · ${ctr} CTR</div>
+                                        <div style="font-size:10.5px;color:#9CA3AF;margin-top:2px;">${escapeHtmlA(d.hint)}</div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
+                </div>
+
                 <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">Recent impressions</div>
                 <table style="width:100%;border-collapse:collapse;">
                     <thead>
@@ -3909,6 +4056,36 @@
             return Array.from(document.querySelectorAll('#surfacesRow .target-pill.selected'))
                 .map(p => p.getAttribute('data-value'));
         }
+        // Door cards — read which integration_methods this campaign opts into.
+        // Empty array (or all 4 selected) means "all doors" on the wire so the
+        // back-end matches the legacy permissive behavior. We send the explicit
+        // subset only when the advertiser narrowed below 4.
+        function getSelectedIntegrationMethods() {
+            const allCards = Array.from(document.querySelectorAll('#doorsRow .door-card'));
+            const active = allCards.filter(c => c.getAttribute('data-active') === 'true')
+                .map(c => c.getAttribute('data-value'));
+            // All 4 selected → empty array (= no preference). This keeps wire
+            // payloads small and intent ("max reach") explicit.
+            if (active.length === 0 || active.length === allCards.length) return [];
+            return active;
+        }
+        function updateDoorsSummary() {
+            const allCards = Array.from(document.querySelectorAll('#doorsRow .door-card'));
+            const active = allCards.filter(c => c.getAttribute('data-active') === 'true');
+            const summary = document.getElementById('doorsSummary');
+            if (!summary) return;
+            if (active.length === 0) {
+                summary.textContent = 'No doors selected · campaign won\'t serve';
+                summary.style.color = '#B91C1C';
+            } else if (active.length === allCards.length) {
+                summary.textContent = 'All 4 doors selected · max reach';
+                summary.style.color = '#6B7280';
+            } else {
+                const names = active.map(c => c.querySelector('.door-name').textContent).join(', ');
+                summary.textContent = active.length + ' / 4 doors · ' + names;
+                summary.style.color = '#6B7280';
+            }
+        }
         function updateReachEstimate() {
             const { intents, hostApps, mcpTools, aiModels } = getTargetingSelections();
             const signalCount = intents.length + hostApps.length + mcpTools.length + aiModels.length;
@@ -4155,6 +4332,8 @@
                 target_host_apps: hostApps.map(canonicaliseHostApp),
                 target_active_tools: mcpTools.map(canonicaliseMcpTool),
                 target_surfaces: getSelectedSurfaces(),
+                // Per-door opt-in (migration 09). Empty array = all four doors.
+                target_integration_methods: getSelectedIntegrationMethods(),
             };
 
             try {
@@ -4396,6 +4575,16 @@
                     canonical.endsWith('-mcp') ? canonical.replace(/-mcp$/, '') : canonical);
                 // Surfaces: stored 1:1
                 restorePills('#surfacesRow', c.target_surfaces);
+                // Doors: empty array means "all" (back-compat); subset means
+                // explicit allowlist. Reflect that on the cards.
+                const doorAllow = Array.isArray(c.target_integration_methods) ? c.target_integration_methods : [];
+                document.querySelectorAll('#doorsRow .door-card').forEach(card => {
+                    const v = card.getAttribute('data-value');
+                    // Empty allowlist = all on (matches the auction's "no preference" semantics)
+                    const active = doorAllow.length === 0 || doorAllow.includes(v);
+                    card.setAttribute('data-active', active ? 'true' : 'false');
+                });
+                if (typeof updateDoorsSummary === 'function') updateDoorsSummary();
                 if (typeof updateReachEstimate === 'function') updateReachEstimate();
 
                 // Change modal title
@@ -4434,6 +4623,8 @@
                     target_host_apps: hostApps.map(canonicaliseHostApp),
                     target_active_tools: mcpTools.map(canonicaliseMcpTool),
                     target_surfaces: getSelectedSurfaces(),
+                    // Per-door opt-in (migration 09). Empty array = all four doors.
+                    target_integration_methods: getSelectedIntegrationMethods(),
                 };
 
                 try {

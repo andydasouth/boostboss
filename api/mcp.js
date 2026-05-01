@@ -473,7 +473,22 @@ async function handleGetSponsoredContent(body, args, res) {
   const afterPlacementFormat = afterFormatToggle.filter((c) => !placement || (c.format || "native") === placement.format);
   const afterBlocklistCat    = afterPlacementFormat.filter((c) => !overlapsArr(c.iab_cat, excludedCats));
   const afterBlocklistAdv    = afterBlocklistCat.filter((c) => !overlapsArr(c.adomain, excludedAdv));
-  const afterMcp             = afterBlocklistAdv.filter((c) => mcpTargetingMatch(c, mcpCtx));
+  // Door filter — campaigns can opt into specific publisher integration
+  // doors via target_integration_methods (db/09_target_integration_methods.sql).
+  // Empty array means "all doors" — every existing campaign passes through
+  // unchanged. When set, the request's integration_method (from the
+  // X-Lumi-Source header) must be in the campaign's allowlist. If the
+  // request has no integration_method (legacy / untagged), the campaign
+  // is excluded from the campaign's allowlist set rather than served — the
+  // advertiser explicitly opted in to a door, so untagged traffic falls
+  // through to other campaigns.
+  const reqMethod = args._integration_method || null;
+  const afterDoor = afterBlocklistAdv.filter((c) => {
+    const allowed = Array.isArray(c.target_integration_methods) ? c.target_integration_methods : [];
+    if (allowed.length === 0) return true;
+    return reqMethod != null && allowed.includes(reqMethod);
+  });
+  const afterMcp             = afterDoor.filter((c) => mcpTargetingMatch(c, mcpCtx));
 
   const candidatesScored = afterMcp.map((c) => {
       // p_click / p_convert / signal_contributions for the dashboard
@@ -538,6 +553,7 @@ async function handleGetSponsoredContent(body, args, res) {
     after_placement_format: afterPlacementFormat.length,
     after_blocklist_cat:    afterBlocklistCat.length,
     after_blocklist_adv:    afterBlocklistAdv.length,
+    after_door:             afterDoor.length,
     after_mcp:              afterMcp.length,
     after_floor:            scored.length,
     drop_reasons: {
@@ -546,7 +562,8 @@ async function handleGetSponsoredContent(body, args, res) {
       placement_format: afterFormatToggle.length    - afterPlacementFormat.length,
       blocklist_cat:    afterPlacementFormat.length - afterBlocklistCat.length,
       blocklist_adv:    afterBlocklistCat.length    - afterBlocklistAdv.length,
-      mcp:              afterBlocklistAdv.length    - afterMcp.length,
+      door:             afterBlocklistAdv.length    - afterDoor.length,
+      mcp:              afterDoor.length            - afterMcp.length,
       floor:            candidatesScored.length     - scored.length,
     },
   };

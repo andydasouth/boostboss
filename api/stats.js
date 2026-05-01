@@ -224,13 +224,14 @@ async function loadAdvertiserAuctionSummary(sb, campaignIds) {
     intent_buckets: { high: 0, mid: 0, low: 0 },
     by_surface: {},
     by_format: {},
+    by_integration_method: {},
     recent: [],
   };
   if (!Array.isArray(campaignIds) || campaignIds.length === 0) return empty;
   try {
     const sinceIso = new Date(Date.now() - 7 * 86400000).toISOString();
     const { data: rows } = await sb.from("events")
-      .select("event_type, surface, format, intent_match_score, cost, created_at, auction_id, placement_id, campaign_id, conversion_type, value_cents, currency")
+      .select("event_type, surface, format, integration_method, intent_match_score, cost, created_at, auction_id, placement_id, campaign_id, conversion_type, value_cents, currency")
       .in("campaign_id", campaignIds)
       .gte("created_at", sinceIso)
       .order("created_at", { ascending: false })
@@ -255,6 +256,12 @@ function summariseAuctionRows(rows) {
   const byType  = {};   // counts by conversion_type
   const bySurface = {};
   const byFormat  = {};
+  // Per-door breakdown — events are tagged with integration_method
+  // (mcp / js-snippet / npm-sdk / rest-api) by db/06_integration_method.sql.
+  // Each method maps 1:1 to one of Boost Boss's four publisher integration
+  // doors, so the advertiser dashboard can show "where your spend went"
+  // grouped by surface family rather than just by lower-level surface flag.
+  const byIntegrationMethod = {};
   for (const r of rows) {
     if (r.event_type === "impression") {
       impCount++;
@@ -277,8 +284,16 @@ function summariseAuctionRows(rows) {
         f.impressions++; f.spend += Number(r.cost || 0);
         byFormat[r.format] = f;
       }
+      const im = r.integration_method || "untagged";
+      const m = byIntegrationMethod[im] || { impressions: 0, clicks: 0, spend: 0 };
+      m.impressions++; m.spend += Number(r.cost || 0);
+      byIntegrationMethod[im] = m;
     } else if (r.event_type === "click") {
       clickCount++;
+      const im = r.integration_method || "untagged";
+      const m = byIntegrationMethod[im] || { impressions: 0, clicks: 0, spend: 0 };
+      m.clicks++;
+      byIntegrationMethod[im] = m;
     } else if (r.event_type === "conversion") {
       convCount++;
       // value_cents stored as int; expose as dollars for display.
@@ -300,6 +315,7 @@ function summariseAuctionRows(rows) {
     }));
   Object.values(bySurface).forEach(s => s.spend = +s.spend.toFixed(4));
   Object.values(byFormat).forEach(f => f.spend  = +f.spend.toFixed(4));
+  Object.values(byIntegrationMethod).forEach(m => { m.spend = +m.spend.toFixed(4); });
   // ROAS = total conversion value / total ad spend. Null when no spend.
   const roas = totalSpend > 0 ? +(convValue / totalSpend).toFixed(4) : null;
   // CPA = spend / conversions. Null when no conversions.
@@ -310,6 +326,7 @@ function summariseAuctionRows(rows) {
     intent_buckets: buckets,
     by_surface: bySurface,
     by_format:  byFormat,
+    by_integration_method: byIntegrationMethod,
     recent,
     // Conversion summary (protocol §6.2)
     conversions: {

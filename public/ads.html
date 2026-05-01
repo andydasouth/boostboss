@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>SuperBoost Ads — Reach AI-native users</title>
-<meta name="description" content="SuperBoost Ads is the performance ad platform for the AI era. Reach users inside Claude, ChatGPT, Cursor, Perplexity and every MCP-powered app. AI-native targeting. Real bids. Real ROI.">
+<meta name="description" content="SuperBoost Ads is the performance ad platform for the AI era. One campaign reaches four AI surfaces — MCP tools (Claude Desktop, Cursor), web AI apps, browser extensions, and chat bots. AI-native targeting. Real bids. Real ROI.">
 <meta property="og:title" content="SuperBoost Ads — Reach AI-native users">
-<meta property="og:description" content="SuperBoost Ads is the performance ad platform for the AI era. AI-native targeting across Claude, ChatGPT, Cursor, Perplexity and every MCP app.">
+<meta property="og:description" content="One campaign, four AI surfaces. Reach users inside MCP tools, web AI apps, browser extensions, and chat bots. AI-native targeting.">
 <meta property="og:url" content="https://boostboss.ai/ads">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SuperBoost Ads — Reach AI-native users">
-<meta name="twitter:description" content="Self-serve advertising platform for AI-native audiences.">
+<meta name="twitter:description" content="One campaign, four AI surfaces. The performance ad platform for AI-native audiences.">
 <link rel="canonical" href="https://boostboss.ai/advertiser">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -314,6 +314,33 @@
     background: #FFE6EE; padding: 2px 8px; border-radius: 100px;
     letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 10px;
   }
+
+  /* YOUR REACH — 4-door grid */
+  .reach-section { padding: 96px 0; }
+  .reach-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 48px; }
+  .reach-card {
+    background: #fff; border: 1.5px solid var(--ink); border-radius: 14px;
+    padding: 0; overflow: hidden; display: flex; flex-direction: column;
+  }
+  .reach-card .rc-mockup {
+    background: var(--bg-soft); border-bottom: 1.5px solid var(--ink);
+    padding: 14px 14px 6px; aspect-ratio: 4 / 3;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .reach-card .rc-mockup svg { width: 100%; height: auto; max-height: 200px; display: block; }
+  .reach-card .rc-body { padding: 18px 18px 20px; flex: 1; display: flex; flex-direction: column; }
+  .reach-card .rc-eyebrow {
+    font-size: 11px; font-weight: 700; color: var(--pink);
+    letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 6px;
+  }
+  .reach-card h4 { font-size: 17px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.01em; }
+  .reach-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.45; }
+  .reach-card .rc-foot {
+    margin-top: auto; padding-top: 12px; border-top: 1px dashed rgba(15,15,26,0.10);
+    font-size: 12px; color: var(--muted); font-family: 'JetBrains Mono', monospace;
+  }
+  @media (max-width: 1080px) { .reach-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px)  { .reach-grid { grid-template-columns: 1fr; } }
 
   /* HOW BIDDING WORKS */
   section.how { padding: 96px 0; text-align: center; }
@@ -1281,8 +1308,8 @@
       <span class="brand-name">Super<span style="color: var(--pink);">Boost Ads</span></span>
     </a>
     <div class="nav-links">
+      <a href="#reach">Your reach</a>
       <a href="#targeting">Targeting</a>
-      <a href="#placements">Placements</a>
       <a href="#bidding">How it works</a>
       <a href="#pricing">Pricing</a>
       <a href="#brand-deals">Brand Deals</a>
@@ -1297,19 +1324,211 @@
 <!-- HERO -->
 <section class="hero">
   <div class="wrap">
-    <div class="badge" data-reveal><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · AI-native targeting on MCP signals</div>
+    <div class="badge" data-reveal><span class="dot"></span>Powered by <a href="https://benna.ai" target="_blank" style="color: inherit; text-decoration: underline; text-decoration-color: var(--pink); text-underline-offset: 3px; font-weight: 700;">Benna AI</a> · One campaign, four AI surfaces</div>
     <h1 data-reveal style="--reveal-delay:80ms">
-      Reach the <span class="accent-pink">1B+ users</span><br>
-      inside every AI app.
+      Reach <span class="accent-pink">four AI surfaces</span><br>
+      from one campaign.
     </h1>
     <p class="sub" data-reveal style="--reveal-delay:160ms">
-      SuperBoost Ads puts your brand directly in the context of Claude, ChatGPT, Cursor, Perplexity and every MCP-powered agent. Bid in real time. Target by intent, not cookies. Pay only for real outcomes.
+      SuperBoost Ads runs across MCP tools (Claude Desktop, Cursor), web AI chat, browser extensions, and chat bots — so your brand shows up wherever your audience is using AI. Bid in real time. Target by intent, not cookies. Pay only for real outcomes.
     </p>
     <div class="hero-ctas" data-reveal style="--reveal-delay:240ms">
       <a class="btn btn-primary btn-lg" href="/ads/signup">Launch your first campaign →</a>
       <a class="btn btn-outline btn-lg" href="#bidding">See how bidding works</a>
     </div>
     <div class="hero-micro" data-reveal style="--reveal-delay:320ms">No setup fees · $100 starter credit · Live in under 10 minutes</div>
+  </div>
+</section>
+
+<!-- YOUR REACH — 4 surfaces, one campaign -->
+<section class="reach-section" id="reach">
+  <div class="wrap">
+    <div class="section-header">
+      <span class="eyebrow pink" data-reveal>Your reach</span>
+      <h2 data-reveal style="--reveal-delay:80ms">Four AI surfaces. One campaign.</h2>
+      <p>Your campaign automatically distributes across every AI surface where your audience lives — MCP tools, web AI apps, browser extensions, and chat bots. Targeting decides where it lands; the auction picks the moment.</p>
+    </div>
+    <div class="reach-grid">
+
+      <!-- DOOR 1 — MCP Tools -->
+      <div class="reach-card" data-reveal>
+        <div class="rc-mockup">
+          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored block in a Claude Desktop tool response">
+            <rect x="6" y="6" width="268" height="188" rx="8" fill="#FAFAF7" stroke="#1F1F2E" stroke-width="1.5"/>
+            <rect x="6" y="6" width="268" height="20" rx="8" fill="#EFEEE9"/>
+            <rect x="6" y="20" width="268" height="6" fill="#EFEEE9"/>
+            <circle cx="16" cy="16" r="3" fill="#FF5F57"/><circle cx="26" cy="16" r="3" fill="#FEBC2E"/><circle cx="36" cy="16" r="3" fill="#28C840"/>
+            <text x="140" y="19" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" fill="#6B7280">Claude Desktop</text>
+            <!-- User msg -->
+            <rect x="120" y="38" width="146" height="20" rx="6" fill="#0F0F1A"/>
+            <text x="128" y="51" font-family="Inter, sans-serif" font-size="8" fill="#FFFFFF">Deploy my FastAPI app?</text>
+            <!-- Tool result -->
+            <rect x="20" y="68" width="246" height="40" rx="6" fill="#FFFFFF" stroke="#E5E7EB"/>
+            <text x="28" y="81" font-family="Inter, sans-serif" font-size="7" font-weight="600" fill="#6B7280">TOOL RESULT</text>
+            <text x="28" y="93" font-family="Inter, sans-serif" font-size="8" fill="#0F0F1A">Railway, Fly.io, Vercel — all good options.</text>
+            <!-- Sponsored -->
+            <rect x="20" y="118" width="246" height="62" rx="6" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.4"/>
+            <rect x="20" y="118" width="246" height="14" rx="6" fill="#FFE6F0"/>
+            <text x="28" y="129" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
+            <rect x="28" y="140" width="22" height="22" rx="4" fill="#0F0F1A"/>
+            <text x="39" y="156" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">▲</text>
+            <text x="58" y="151" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds</text>
+            <text x="58" y="162" font-family="Inter, sans-serif" font-size="7.5" fill="#4B4B5E">Free hobby · git push to deploy</text>
+            <rect x="58" y="167" width="50" height="11" rx="3" fill="#0F0F1A"/>
+            <text x="83" y="175" text-anchor="middle" font-family="Inter, sans-serif" font-size="7" font-weight="600" fill="#FFFFFF">Try Free →</text>
+          </svg>
+        </div>
+        <div class="rc-body">
+          <span class="rc-eyebrow">Door 1 · MCP tools</span>
+          <h4>Inside Claude Desktop &amp; Cursor</h4>
+          <p>Your ad renders alongside MCP tool results. Highest-intent surface — developers seeing your brand the moment they ask "how do I deploy."</p>
+          <div class="rc-foot">surface: tool_response</div>
+        </div>
+      </div>
+
+      <!-- DOOR 2 — Web AI Apps -->
+      <div class="reach-card" data-reveal style="--reveal-delay:60ms">
+        <div class="rc-mockup">
+          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored card in a web AI chat conversation">
+            <rect x="6" y="6" width="268" height="188" rx="8" fill="#FFFFFF" stroke="#1F1F2E" stroke-width="1.5"/>
+            <rect x="6" y="6" width="268" height="22" rx="8" fill="#F1F1ED"/>
+            <rect x="6" y="22" width="268" height="6" fill="#F1F1ED"/>
+            <circle cx="16" cy="17" r="3" fill="#FF5F57"/><circle cx="26" cy="17" r="3" fill="#FEBC2E"/><circle cx="36" cy="17" r="3" fill="#28C840"/>
+            <rect x="48" y="13" width="200" height="9" rx="4" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="0.8"/>
+            <text x="55" y="20" font-family="Inter, sans-serif" font-size="6.5" fill="#6B7280">chat.myaiapp.com</text>
+            <!-- Sidebar -->
+            <rect x="6" y="28" width="64" height="166" fill="#0F0F1A"/>
+            <rect x="14" y="36" width="48" height="11" rx="3" fill="#FF2D78"/>
+            <text x="38" y="44" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" fill="#FFFFFF" font-weight="700">+ New chat</text>
+            <rect x="14" y="56" width="48" height="6" rx="2" fill="#1F1F2E"/>
+            <rect x="14" y="66" width="38" height="6" rx="2" fill="#1F1F2E"/>
+            <rect x="14" y="76" width="44" height="6" rx="2" fill="#1F1F2E"/>
+            <!-- User msg -->
+            <rect x="170" y="40" width="96" height="14" rx="5" fill="#0F0F1A"/>
+            <text x="178" y="50" font-family="Inter, sans-serif" font-size="7" fill="#FFFFFF">Best deploy option?</text>
+            <!-- Assistant -->
+            <text x="78" y="68" font-family="Inter, sans-serif" font-size="7" fill="#0F0F1A">Railway and Fly.io are solid.</text>
+            <!-- Sponsored -->
+            <rect x="78" y="78" width="188" height="58" rx="6" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.4"/>
+            <text x="86" y="89" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
+            <rect x="86" y="98" width="26" height="26" rx="5" fill="#0F0F1A"/>
+            <text x="99" y="116" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">▲</text>
+            <text x="120" y="105" font-family="Space Grotesk, sans-serif" font-size="8.5" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
+            <text x="120" y="116" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">Free hobby · global edge</text>
+            <rect x="120" y="121" width="40" height="9" rx="2" fill="#0F0F1A"/>
+            <text x="140" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="6.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+            <text x="78" y="148" font-family="Inter, sans-serif" font-size="7" fill="#0F0F1A">Want me to walk through the Railway flow?</text>
+            <rect x="78" y="160" width="188" height="14" rx="7" fill="#FFFFFF" stroke="#E5E7EB"/>
+            <text x="86" y="169" font-family="Inter, sans-serif" font-size="6.5" fill="#9CA3AF">Send a message…</text>
+          </svg>
+        </div>
+        <div class="rc-body">
+          <span class="rc-eyebrow">Door 2 · AI apps</span>
+          <h4>Inline in web AI chat</h4>
+          <p>ChatGPT-likes, vertical AI tools, agent UIs. Your sponsored card renders inline, same chrome as the AI's own messages — never interruptive.</p>
+          <div class="rc-foot">surface: chat</div>
+        </div>
+      </div>
+
+      <!-- DOOR 3 — Browser Extensions -->
+      <div class="reach-card" data-reveal style="--reveal-delay:120ms">
+        <div class="rc-mockup">
+          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored block in a browser extension side panel">
+            <rect x="6" y="6" width="268" height="188" rx="8" fill="#FFFFFF" stroke="#1F1F2E" stroke-width="1.5"/>
+            <rect x="6" y="6" width="268" height="22" rx="8" fill="#F1F1ED"/>
+            <rect x="6" y="22" width="268" height="6" fill="#F1F1ED"/>
+            <circle cx="16" cy="17" r="3" fill="#FF5F57"/><circle cx="26" cy="17" r="3" fill="#FEBC2E"/><circle cx="36" cy="17" r="3" fill="#28C840"/>
+            <rect x="48" y="13" width="160" height="9" rx="4" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="0.8"/>
+            <text x="55" y="20" font-family="Inter, sans-serif" font-size="6.5" fill="#6B7280">nytimes.com/article</text>
+            <rect x="220" y="13" width="14" height="9" rx="2" fill="#FF2D78"/>
+            <!-- Page (left) -->
+            <rect x="6" y="28" width="172" height="166" fill="#FAFAF7"/>
+            <text x="14" y="44" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#0F0F1A">AI infrastructure spend</text>
+            <text x="14" y="55" font-family="Inter, sans-serif" font-size="6" fill="#9CA3AF">April 29, 2026</text>
+            <rect x="14" y="62" width="156" height="44" rx="4" fill="#E5E4DD"/>
+            <text x="14" y="120" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">Demand for hosted AI services</text>
+            <text x="14" y="131" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">has tripled in the past year, but</text>
+            <text x="14" y="142" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">the bottleneck has shifted from</text>
+            <text x="14" y="153" font-family="Inter, sans-serif" font-size="7" fill="#4B4B5E">raw compute to deployment.</text>
+            <!-- Side panel (right) -->
+            <rect x="178" y="28" width="96" height="166" fill="#FFFFFF" stroke="#E5E7EB"/>
+            <rect x="178" y="28" width="96" height="14" fill="#0F0F1A"/>
+            <text x="186" y="38" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#FFFFFF">Article AI</text>
+            <text x="186" y="56" font-family="Inter, sans-serif" font-size="7" font-weight="700" fill="#9CA3AF" letter-spacing="0.4">SUMMARY</text>
+            <text x="186" y="68" font-family="Inter, sans-serif" font-size="6.5" fill="#0F0F1A">▸ AI infra demand 3× YoY</text>
+            <text x="186" y="78" font-family="Inter, sans-serif" font-size="6.5" fill="#0F0F1A">▸ Compute → deployment</text>
+            <text x="186" y="88" font-family="Inter, sans-serif" font-size="6.5" fill="#0F0F1A">▸ Integration is the lever</text>
+            <!-- Sponsored at bottom -->
+            <rect x="184" y="120" width="84" height="68" rx="5" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.4"/>
+            <text x="190" y="130" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
+            <rect x="190" y="136" width="20" height="20" rx="4" fill="#0F0F1A"/>
+            <text x="200" y="151" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">▲</text>
+            <text x="216" y="147" font-family="Space Grotesk, sans-serif" font-size="7" font-weight="700" fill="#0F0F1A">Vercel</text>
+            <text x="216" y="156" font-family="Inter, sans-serif" font-size="6" fill="#4B4B5E">Deploy fast</text>
+            <rect x="190" y="166" width="44" height="10" rx="2" fill="#0F0F1A"/>
+            <text x="212" y="174" text-anchor="middle" font-family="Inter, sans-serif" font-size="6" font-weight="600" fill="#FFFFFF">Try Free →</text>
+          </svg>
+        </div>
+        <div class="rc-body">
+          <span class="rc-eyebrow">Door 3 · Extensions</span>
+          <h4>Browser side panels</h4>
+          <p>Chrome, Edge, Firefox AI extensions — summarizers, writing assistants, sidebars. Contextual to whatever the user is reading. No surveillance, no cookies.</p>
+          <div class="rc-foot">surface: sidebar</div>
+        </div>
+      </div>
+
+      <!-- DOOR 4 — Bots -->
+      <div class="reach-card" data-reveal style="--reveal-delay:180ms">
+        <div class="rc-mockup">
+          <svg viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Sponsored attachment in a Telegram bot reply">
+            <rect x="6" y="6" width="268" height="188" rx="8" fill="#E7EBF0" stroke="#1F1F2E" stroke-width="1.5"/>
+            <!-- Phone frame centered -->
+            <rect x="98" y="14" width="84" height="172" rx="14" fill="#1F1F2E"/>
+            <rect x="101" y="17" width="78" height="166" rx="11" fill="#FFFFFF"/>
+            <rect x="128" y="20" width="24" height="6" rx="3" fill="#1F1F2E"/>
+            <!-- Telegram header -->
+            <rect x="101" y="29" width="78" height="14" fill="#5288C1"/>
+            <circle cx="113" cy="36" r="4" fill="#FFFFFF"/>
+            <text x="113" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="5" font-weight="700" fill="#5288C1">D</text>
+            <text x="121" y="35" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#FFFFFF">DocBot</text>
+            <text x="121" y="41" font-family="Inter, sans-serif" font-size="4.5" fill="#D6E5F2">@docbot · online</text>
+            <!-- Chat backdrop -->
+            <rect x="101" y="43" width="78" height="128" fill="#E7EBF0"/>
+            <!-- User msg right -->
+            <rect x="124" y="48" width="50" height="14" rx="4" fill="#EFFDDE"/>
+            <text x="128" y="56" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Deploy options?</text>
+            <text x="170" y="62" text-anchor="end" font-family="Inter, sans-serif" font-size="3.5" fill="#9CA3AF">10:24 ✓✓</text>
+            <!-- Bot reply -->
+            <rect x="106" y="66" width="62" height="14" rx="4" fill="#FFFFFF"/>
+            <text x="110" y="74" font-family="Inter, sans-serif" font-size="5.5" fill="#0F0F1A">Railway and Fly.io.</text>
+            <!-- Sponsored card -->
+            <rect x="106" y="84" width="68" height="76" rx="4" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.2"/>
+            <rect x="106" y="84" width="68" height="22" rx="4" fill="#0F0F1A"/>
+            <rect x="106" y="100" width="68" height="6" fill="#0F0F1A"/>
+            <text x="140" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
+            <text x="110" y="116" font-family="Inter, sans-serif" font-size="4.5" font-weight="700" fill="#E01E65" letter-spacing="0.3">SPONSORED · Vercel</text>
+            <text x="110" y="126" font-family="Inter, sans-serif" font-size="6" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
+            <text x="110" y="135" font-family="Inter, sans-serif" font-size="5" fill="#4B4B5E">Free hobby · git push</text>
+            <rect x="110" y="142" width="38" height="11" rx="2" fill="#5288C1"/>
+            <text x="129" y="149" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="600" fill="#FFFFFF">Try Free</text>
+            <text x="152" y="149" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">vercel.com</text>
+            <!-- Composer -->
+            <rect x="101" y="171" width="78" height="12" fill="#F4F3EE"/>
+            <rect x="105" y="174" width="60" height="6" rx="3" fill="#FFFFFF"/>
+            <text x="108" y="179" font-family="Inter, sans-serif" font-size="4.5" fill="#9CA3AF">Message…</text>
+            <circle cx="172" cy="177" r="4" fill="#5288C1"/>
+            <text x="172" y="180" text-anchor="middle" font-family="Inter, sans-serif" font-size="5.5" font-weight="700" fill="#FFFFFF">→</text>
+          </svg>
+        </div>
+        <div class="rc-body">
+          <span class="rc-eyebrow">Door 4 · Bots</span>
+          <h4>Discord, Telegram, Slack</h4>
+          <p>AI bots reply with your sponsored message in the platform's native format — Discord embed, Telegram card, Slack attachment. Same campaign, three formats.</p>
+          <div class="rc-foot">surface: chat (bot)</div>
+        </div>
+      </div>
+
+    </div>
   </div>
 </section>
 
@@ -1662,41 +1881,8 @@
 </section>
 
 <!-- PLACEMENTS -->
-<section class="placements-section" id="placements">
-  <div class="wrap">
-    <div class="section-header">
-      <span class="eyebrow pink" data-reveal>Placements</span>
-      <h2 data-reveal style="--reveal-delay:80ms">Native by default. Never interruptive.</h2>
-      <p>Every format is designed to feel like part of the AI app — so users engage instead of ignore.</p>
-    </div>
-    <div class="placements-grid">
-      <div class="placement">
-        <div class="pl-head">Inline chat card</div>
-        <div class="pl-body">
-          <div class="mini-sponsored">◆ Sponsored · via SuperBoost</div>
-          <h4>Ship better code 10× faster</h4>
-          <p>The AI coding assistant that actually reads your codebase. Used by 50,000+ devs.</p>
-        </div>
-      </div>
-      <div class="placement">
-        <div class="pl-head">Tool-result card</div>
-        <div class="pl-body">
-          <div class="mini-sponsored">◆ Sponsored · via SuperBoost</div>
-          <h4>Design handoff, one click</h4>
-          <p>Export Figma to production code instantly. Free tier for teams under 5.</p>
-        </div>
-      </div>
-      <div class="placement">
-        <div class="pl-head">Agent suggestion</div>
-        <div class="pl-body">
-          <div class="mini-sponsored">◆ Sponsored · via SuperBoost</div>
-          <h4>Try Linear for this</h4>
-          <p>Issue tracking built for AI-native teams. Connect via MCP in one click.</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+<!-- (Old "Placements" 3-card section removed 2026-05-01 — superseded by the
+     "Your reach" 4-surface section above the fold.) -->
 
 <!-- HOW BIDDING WORKS -->
 <section class="how" id="bidding">

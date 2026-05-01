@@ -82,6 +82,7 @@ function seedDemoCampaigns() {
       target_keywords: ["python", "fastapi", "deploy"],
       target_intent_tokens: ["code", "python", "fastapi", "deploy", "ide"],
       target_active_tools: [],
+      target_integration_methods: [],
       target_host_apps: ["cursor", "vscode", "claude_desktop"],
       target_surfaces: ["chat", "tool_response", "sidebar"],
       target_regions: ["us-west", "us-east", "global"], target_languages: ["en"],
@@ -100,6 +101,7 @@ function seedDemoCampaigns() {
       target_keywords: ["debug", "error", "trace", "logs", "monitoring"],
       target_intent_tokens: ["debug_py", "error", "exception", "traceback", "monitoring", "observability"],
       target_active_tools: [],
+      target_integration_methods: [],
       target_host_apps: ["cursor", "vscode", "claude_desktop", "jetbrains"],
       target_surfaces: ["chat", "tool_response", "sidebar"],
       target_regions: ["global"], target_languages: ["en"],
@@ -118,6 +120,7 @@ function seedDemoCampaigns() {
       target_keywords: ["deploy", "hosting", "infrastructure"],
       target_intent_tokens: ["deploy", "hosting", "infrastructure", "nextjs", "node", "python"],
       target_active_tools: [],
+      target_integration_methods: [],
       target_host_apps: ["cursor", "vscode", "claude_desktop"],
       target_surfaces: ["chat", "tool_response"],
       target_regions: ["us-west", "eu-central"], target_languages: ["en"],
@@ -136,6 +139,7 @@ function seedDemoCampaigns() {
       target_keywords: ["code review", "team", "enterprise"],
       target_intent_tokens: ["code", "review", "refactor", "team", "enterprise"],
       target_active_tools: [],
+      target_integration_methods: [],
       target_host_apps: ["cursor", "vscode", "jetbrains"],
       target_surfaces: ["chat", "sidebar"],
       target_regions: ["global"], target_languages: ["en"],
@@ -407,6 +411,12 @@ async function handleCreate(req, res) {
     target_active_tools:  Array.isArray(b.target_active_tools)  ? b.target_active_tools  : [],
     target_host_apps:     Array.isArray(b.target_host_apps)     ? b.target_host_apps     : [],
     target_surfaces:      Array.isArray(b.target_surfaces)      ? b.target_surfaces      : [],
+    // Per-campaign opt-in to specific publisher integration doors
+    // (db/09_target_integration_methods.sql). Allowlisted to the four
+    // X-Lumi-Source values; anything else is dropped silently. Empty = all.
+    target_integration_methods: Array.isArray(b.target_integration_methods)
+      ? b.target_integration_methods.filter((m) => ["mcp","js-snippet","npm-sdk","rest-api"].includes(m))
+      : [],
     optimization_goal: b.optimization_goal || "target_cpa",
     billing_model: b.billing_model || "cpm",
     bid_amount: b.bid_amount || 5.00,
@@ -485,9 +495,16 @@ async function handleUpdate(req, res) {
     "start_date", "end_date", "optimization_goal", "target_roas",
     // BBX MCP-native targeting (migration 04)
     "target_intent_tokens", "target_active_tools", "target_host_apps", "target_surfaces",
+    // Per-door opt-in (migration 09)
+    "target_integration_methods",
   ];
   const updates = {};
   for (const k of allowed) if (b[k] !== undefined) updates[k] = b[k];
+  // Validate the door allowlist if it was updated.
+  if (Array.isArray(updates.target_integration_methods)) {
+    updates.target_integration_methods = updates.target_integration_methods
+      .filter((m) => ["mcp","js-snippet","npm-sdk","rest-api"].includes(m));
+  }
   updates.updated_at = new Date().toISOString();
 
   const sb = supa();
