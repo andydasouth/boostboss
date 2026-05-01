@@ -233,57 +233,56 @@
             gap: 1.5rem;
         }
 
+        /* Top-left logo — exact mirror of /publish nav. Sizes locked to
+           36px rocket / 20px wordmark / 13px Lumi SDK / 14px sparkle so
+           the brand chrome doesn't shift between marketing → dashboard. */
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.625rem;
+            gap: 10px;
             color: var(--text-dark);
             text-decoration: none;
         }
 
         .logo-mark {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         .logo-mark svg { width: 100%; height: 100%; }
 
-        /* "Boost Boss" wordmark — sits between the rocket and the Lumi SDK
-           rainbow mark, mirrors /publish nav structure. */
         .logo .brand-name {
             font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.2rem;
+            font-size: 20px;
             font-weight: 700;
             color: var(--text-dark);
-            letter-spacing: -0.02em;
+            letter-spacing: -0.5px;
         }
 
         .logo-text {
-            font-size: 1rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 13px;
             font-weight: 700;
             color: var(--text-dark);
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            margin-left: 10px;
+            margin-left: 12px;
             padding-left: 12px;
             border-left: 1px solid rgba(15,15,26,0.12);
             letter-spacing: -0.01em;
         }
-        /* Rainbow gradient on the "Lumi SDK" wordmark — same treatment as
-           the publisher marketing pages so the dashboard feels native to
-           the same product family. */
         .logo-text .lumi-rainbow {
-            font-family: 'Space Grotesk', sans-serif;
             background: linear-gradient(90deg, #FF2D78 0%, #D946EF 50%, #04BEFE 100%);
             -webkit-background-clip: text; background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .logo-text .lumi-sparkle {
             color: #F59E0B; -webkit-text-fill-color: #F59E0B;
-            font-size: 1.05rem; line-height: 1;
+            font-size: 14px; line-height: 1;
         }
 
         /* "Dashboard" section label, sits after the logo */
