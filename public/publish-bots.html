@@ -27,6 +27,22 @@
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 34px; height: 34px; }
   .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 19px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+  .lumi-mark {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-left: 12px; padding-left: 12px;
+    border-left: 1px solid rgba(15,15,26,0.12);
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: -0.01em;
+    background: linear-gradient(90deg, #FF2D78 0%, #FFE600 50%, #04BEFE 100%);
+    -webkit-background-clip: text; background-clip: text;
+    -webkit-text-fill-color: transparent;
+    user-select: none;
+  }
+  .lumi-mark .sparkle {
+    color: #FFE600; -webkit-text-fill-color: #FFE600;
+    font-size: 14px; line-height: 1;
+  }
+  @media (max-width: 760px) { .lumi-mark { display: none; } }
   .nav-links { display: flex; gap: 22px; align-items: center; }
   .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; white-space: nowrap; }
   .nav-links a:hover { color: var(--ink); }
@@ -123,9 +139,10 @@
 
 <nav class="site-nav">
   <div class="nav-inner">
-    <a class="brand" href="/">
+    <a class="brand" href="/publish">
       <svg class="brand-mark" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
       <span class="brand-name">Boost Boss</span>
+      <span class="lumi-mark" aria-hidden="true">Lumi SDK<span class="sparkle">✦</span></span>
     </a>
     <div class="nav-links">
       <a href="/publish/mcp">MCP Servers</a>

@@ -251,6 +251,22 @@
             font-size: 1.25rem;
             font-weight: 700;
             color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        /* Rainbow gradient on the "Lumi SDK" wordmark — same treatment as
+           the publisher marketing pages so the dashboard feels native to
+           the same product family. */
+        .logo-text .lumi-rainbow {
+            font-family: 'Space Grotesk', sans-serif;
+            background: linear-gradient(90deg, #FF2D78 0%, #FFE600 50%, #04BEFE 100%);
+            -webkit-background-clip: text; background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .logo-text .lumi-sparkle {
+            color: #FFE600; -webkit-text-fill-color: #FFE600;
+            font-size: 1.05rem; line-height: 1;
         }
 
         /* "Dashboard" section label, sits after the logo */
@@ -1436,7 +1452,7 @@
 <text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></div>
-                    <span class="logo-text">Lumi SDK</span>
+                    <span class="logo-text"><span class="lumi-rainbow">Lumi SDK</span><span class="lumi-sparkle" aria-hidden="true">✦</span></span>
                 </a>
                 <div class="header-title">Dashboard</div>
                 <button class="search-actions-btn" title="Search actions" onclick="openCmdPalette()">

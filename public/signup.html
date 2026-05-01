@@ -45,6 +45,22 @@ nav {
   font-family: 'Space Grotesk', sans-serif; font-size: 20px;
   font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
 }
+.lumi-mark {
+  display: inline-flex; align-items: center; gap: 4px;
+  margin-left: 12px; padding-left: 12px;
+  border-left: 1px solid rgba(15,15,26,0.12);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 13px; font-weight: 700; letter-spacing: -0.01em;
+  background: linear-gradient(90deg, #FF2D78 0%, #FFE600 50%, #04BEFE 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+  user-select: none;
+}
+.lumi-mark .sparkle {
+  color: #FFE600; -webkit-text-fill-color: #FFE600;
+  font-size: 14px; line-height: 1;
+}
+@media (max-width: 760px) { .lumi-mark { display: none; } }
 
 /* ── Layout ── */
 .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: 48px 24px; }
@@ -506,6 +522,16 @@ const sb = window.supabase && window.supabase.createClient
   if (navBrand)     navBrand.setAttribute("href", brand.brandHref);
   if (navBrandMark) navBrandMark.outerHTML = brand.logoSvg;
   if (navBrandName) navBrandName.innerHTML = brand.wordmark;
+
+  // Append the rainbow Lumi SDK mark when this is a publisher route.
+  // Skipped on /ads/* — the advertiser side uses SuperBoost, not Lumi.
+  if (role === "developer" && navBrand && !navBrand.querySelector(".lumi-mark")) {
+    var lm = document.createElement("span");
+    lm.className = "lumi-mark";
+    lm.setAttribute("aria-hidden", "true");
+    lm.innerHTML = 'Lumi SDK<span class="sparkle">✦</span>';
+    navBrand.appendChild(lm);
+  }
 
   // Show the correct panel for this URL
   var isSignin = /\/signin$/.test(path);
