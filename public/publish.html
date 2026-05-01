@@ -100,6 +100,41 @@
   .router-card.waitlist { background: linear-gradient(140deg, rgba(255, 230, 0, 0.10), rgba(4, 190, 254, 0.06)); border-style: dashed; }
   .router-card-icon { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; background: rgba(255, 45, 120, 0.10); }
   .router-card.waitlist .router-card-icon { background: rgba(255, 230, 0, 0.20); }
+  /* Brand-name marks at the top of each door card — replaces the emoji icon
+     with the actual Lumi SDK product name + install target, so a developer
+     reading the card knows exactly what they'll be installing. */
+  .router-card-mark {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px dashed rgba(15,15,26,0.10);
+  }
+  .router-card-mark .mark-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 14.5px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 5px;
+    line-height: 1.25;
+  }
+  .router-card-mark .mark-pkg {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    word-break: break-all;
+  }
+  .router-card-mark .mark-pkg code {
+    background: rgba(15,15,26,0.05);
+    padding: 1px 6px;
+    border-radius: 4px;
+    color: var(--ink);
+  }
+  /* Per-door accent colors on the brand name */
+  .mark-mcp     .mark-name { color: #E01E65; }
+  .mark-snippet .mark-name { color: #0883B5; }
+  .mark-ext     .mark-name { color: #8a6d00; }
+  .mark-bots    .mark-name { color: #7C3AED; }
+  .mark-nocode  .mark-name { color: #8a6d00; }
   .router-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
   .router-card p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 16px; }
   .router-card .arrow { font-size: 14px; font-weight: 600; color: var(--pink-dark); display: inline-flex; align-items: center; gap: 6px; }
@@ -226,32 +261,46 @@
     <p class="router-sub">Each integration is the simplest possible code in that ecosystem's idiom — three lines via Lumi SDK for MCP, one script tag via Lumi SDK script tag, an npm package via Lumi SDK for browser extensions, or a REST call via Lumi API for Bots.</p>
     <div class="router-grid">
       <a class="router-card" href="/publish/mcp">
-        <div class="router-card-icon">⚙️</div>
+        <div class="router-card-mark mark-mcp">
+          <div class="mark-name">Lumi SDK for MCP</div>
+          <div class="mark-pkg"><code>@boostbossai/lumi-mcp</code></div>
+        </div>
         <h3>I built an MCP server</h3>
-        <p>Stripe-MCP, Postgres-MCP, Filesystem-MCP, anything called from Claude Desktop, Cursor, Cline. Use Lumi SDK for MCP — earn per tool call.</p>
+        <p>Stripe-MCP, Postgres-MCP, Filesystem-MCP, anything called from Claude Desktop, Cursor, Cline. Earn per tool call.</p>
         <span class="arrow">For MCP Server Developers </span>
       </a>
       <a class="router-card" href="/publish/ai-apps">
-        <div class="router-card-icon">💬</div>
+        <div class="router-card-mark mark-snippet">
+          <div class="mark-name">Lumi SDK script tag</div>
+          <div class="mark-pkg"><code>cdn.boostboss.ai/lumi.js</code></div>
+        </div>
         <h3>I built an AI app or website</h3>
-        <p>LangChain, Vercel AI SDK, CrewAI, custom OpenAI wrappers, vertical AI tools, AI assistants, AI search. Drop in the Lumi SDK script tag.</p>
+        <p>LangChain, Vercel AI SDK, CrewAI, custom OpenAI wrappers, vertical AI tools, AI assistants, AI search. One async script tag in your <code>&lt;head&gt;</code>.</p>
         <span class="arrow">For AI App Builders </span>
       </a>
       <a class="router-card" href="/publish/extensions">
-        <div class="router-card-icon">🧩</div>
+        <div class="router-card-mark mark-ext">
+          <div class="mark-name">Lumi SDK for browser extensions</div>
+          <div class="mark-pkg"><code>@boostbossai/lumi-sdk</code></div>
+        </div>
         <h3>I built a browser extension</h3>
-        <p>Writing assistants, AI sidebars, summarizers, translators, Gmail copilots — Chrome, Edge, Firefox. Use Lumi SDK for browser extensions — Manifest v3 native, React + Vue bindings.</p>
+        <p>Writing assistants, AI sidebars, summarizers, translators, Gmail copilots — Chrome, Edge, Firefox. Manifest v3 native, React + Vue bindings.</p>
         <span class="arrow">For Browser Extension Developers </span>
       </a>
       <a class="router-card" href="/publish/bots">
-        <div class="router-card-icon">🤖</div>
+        <div class="router-card-mark mark-bots">
+          <div class="mark-name">Lumi SDK for Discord · Telegram · Slack</div>
+          <div class="mark-pkg"><code>@boostbossai/lumi-{discord,telegram,slack}</code></div>
+        </div>
         <h3>I built an AI bot</h3>
-        <p>Discord, Telegram, Slack — research bots, summarization bots, support bots, image-gen bots. Use Lumi API for Bots — one REST call from your handler, optional helper libraries per platform.</p>
+        <p>Research bots, summarization bots, support bots, image-gen bots. One REST call from your handler, optional helper libraries per platform.</p>
         <span class="arrow">For AI Bot Developers </span>
       </a>
       <a class="router-card waitlist" href="/publish/no-code">
-        <div class="router-card-icon">✨</div>
-        <span class="badge">Waitlist · coming soon</span>
+        <div class="router-card-mark mark-nocode">
+          <div class="mark-name">Lumi SDK for no-code</div>
+          <div class="mark-pkg">waitlist · coming soon</div>
+        </div>
         <h3>I built a Custom GPT or no-code AI</h3>
         <p>OpenAI Custom GPTs, Poe bots, Perplexity Pages, Voiceflow / Botpress / Stack AI builds — anywhere you authored the AI but the platform owns the runtime. We're shipping no-code monetization next.</p>
         <span class="arrow">For Custom GPT &amp; No-Code Authors </span>
