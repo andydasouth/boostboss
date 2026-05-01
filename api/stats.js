@@ -346,12 +346,19 @@ async function handleDeveloperStats(devKey, req, res) {
     // / format / status without a second round-trip.
     const placements = await loadPlacementBreakdown(sb, dev.id);
 
+    // Per-integration-method breakdown — feeds the dashboard's "Your
+    // integrations" cards. db/06_integration_method.sql tags each event
+    // with mcp / js-snippet / npm-sdk / rest-api; sandbox traffic is
+    // excluded so cards reflect real production usage.
+    const by_integration_method = await loadIntegrationMethodBreakdown(sb, dev.id);
+
     const totals = rollUpDevTotals(dailyStats);
     return res.json({
       developer: formatDeveloper(dev),
       daily: dailyStats,
       totals,
       placements,
+      by_integration_method,
     });
   }
 
@@ -374,6 +381,9 @@ async function handleDeveloperStats(devKey, req, res) {
   // Demo placement breakdown — derive from the in-memory events we just rolled up.
   const placements = demoPlacementBreakdown(events, devKey);
 
+  // Demo per-integration-method breakdown — same shape as production.
+  const by_integration_method = demoIntegrationMethodBreakdown(events, devKey);
+
   const totals = rollUpDevTotals(dailyStats);
   return res.json({
     developer: {
@@ -387,6 +397,7 @@ async function handleDeveloperStats(devKey, req, res) {
     daily: dailyStats,
     totals,
     placements,
+    by_integration_method,
   });
 }
 
@@ -463,6 +474,72 @@ async function loadPlacementBreakdown(sb, developerId) {
     console.error("[Stats] placement breakdown failed:", e.message);
     return [];
   }
+}
+
+// ── Per-integration-method breakdown ────────────────────────────────────
+// Aggregates the last 7 days of events tagged by integration_method
+// (db/06_integration_method.sql). Powers the dashboard's "Your
+// integrations" cards: one card per door, showing impressions / earnings
+// for the doors the publisher has integrated with, "Not started" state
+// for the ones they haven't. Sandbox events excluded — cards reflect
+// real production usage only.
+async function loadIntegrationMethodBreakdown(sb, developerId) {
+  const empty = {
+    "mcp":        { impressions: 0, clicks: 0, earnings: 0 },
+    "js-snippet": { impressions: 0, clicks: 0, earnings: 0 },
+    "npm-sdk":    { impressions: 0, clicks: 0, earnings: 0 },
+    "rest-api":   { impressions: 0, clicks: 0, earnings: 0 },
+  };
+  try {
+    const sinceISO = new Date(Date.now() - 7 * 86400000).toISOString();
+    const { data: rows, error } = await sb.from("events")
+      .select("integration_method, event_type, developer_payout")
+      .eq("developer_id", developerId)
+      .eq("is_sandbox", false)
+      .gte("created_at", sinceISO);
+    if (error || !rows) return empty;
+
+    for (const r of rows) {
+      const k = r.integration_method;
+      if (!k || !empty[k]) continue;
+      if (r.event_type === "impression") empty[k].impressions += 1;
+      if (r.event_type === "click")      empty[k].clicks      += 1;
+      empty[k].earnings += Number(r.developer_payout || 0);
+    }
+    // Round earnings to 4 dp to match developer_payout precision elsewhere.
+    for (const k of Object.keys(empty)) {
+      empty[k].earnings = +empty[k].earnings.toFixed(4);
+    }
+    return empty;
+  } catch (e) {
+    console.error("[stats] loadIntegrationMethodBreakdown:", e.message);
+    return empty;
+  }
+}
+
+// Demo equivalent — derive per-integration-method metrics from in-memory
+// events. Used only when SUPABASE env is missing. Same shape as
+// loadIntegrationMethodBreakdown so the frontend doesn't branch.
+function demoIntegrationMethodBreakdown(events, devKey) {
+  const empty = {
+    "mcp":        { impressions: 0, clicks: 0, earnings: 0 },
+    "js-snippet": { impressions: 0, clicks: 0, earnings: 0 },
+    "npm-sdk":    { impressions: 0, clicks: 0, earnings: 0 },
+    "rest-api":   { impressions: 0, clicks: 0, earnings: 0 },
+  };
+  for (const ev of events || []) {
+    if (devKey && ev.developer_id !== devKey) continue;
+    if (ev.is_sandbox) continue;
+    const k = ev.integration_method;
+    if (!k || !empty[k]) continue;
+    if (ev.event_type === "impression") empty[k].impressions += 1;
+    if (ev.event_type === "click")      empty[k].clicks      += 1;
+    empty[k].earnings += Number(ev.developer_payout || 0);
+  }
+  for (const k of Object.keys(empty)) {
+    empty[k].earnings = +empty[k].earnings.toFixed(4);
+  }
+  return empty;
 }
 
 // Demo equivalent — derive placement metrics from in-memory events for a

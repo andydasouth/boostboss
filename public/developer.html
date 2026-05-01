@@ -374,6 +374,126 @@
             margin-bottom: 2rem;
         }
 
+        /* Integration cards — "Your integrations" 4-door grid */
+        .integration-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .ic-card {
+            background: #fff;
+            border: 1.5px solid var(--border-light, #E5E7EB);
+            border-radius: 14px;
+            padding: 18px 18px 16px;
+            transition: all 0.18s;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+            position: relative;
+        }
+        .ic-card:hover {
+            border-color: rgba(255, 45, 120, 0.35);
+            box-shadow: 0 6px 20px rgba(255, 45, 120, 0.08);
+            transform: translateY(-1px);
+        }
+        .ic-card.ic-active {
+            border-color: rgba(4, 190, 254, 0.40);
+            background: linear-gradient(180deg, rgba(4, 190, 254, 0.04), #fff 60%);
+        }
+        .ic-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .ic-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0F0F1A;
+            line-height: 1.3;
+        }
+        .ic-badge {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .ic-badge-active {
+            background: rgba(4, 190, 254, 0.12);
+            color: #0290BD;
+        }
+        .ic-badge-inactive {
+            background: #F3F4F6;
+            color: #6B7280;
+        }
+        .ic-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 4px 0 14px;
+            flex: 1;
+        }
+        .ic-stat-label {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #6B7280;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .ic-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0F0F1A;
+            font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+        }
+        .ic-card.ic-inactive .ic-stat-value {
+            color: #D1D5DB;
+        }
+        .ic-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+        }
+        .ic-card.ic-inactive .ic-cta {
+            background: #FF2D78;
+            color: #fff;
+            border-color: #FF2D78;
+        }
+        .ic-card.ic-inactive .ic-cta:hover {
+            background: #E01E65;
+            border-color: #E01E65;
+        }
+        .ic-card.ic-active .ic-cta {
+            background: transparent;
+            color: #0F0F1A;
+            border-color: #E5E7EB;
+        }
+        .ic-card.ic-active .ic-cta:hover {
+            background: #FAFAF7;
+            border-color: #6B7280;
+        }
+        .ic-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+        @media (max-width: 760px) {
+            .integration-cards-grid { grid-template-columns: 1fr; }
+        }
+
         .stat-card {
             background-color: var(--bg-card);
             border: 1px solid var(--border-light);
@@ -1349,6 +1469,18 @@
                     <div class="stat-label">RPM</div>
                     <div class="stat-value default" id="rpmValue">$0.00</div>
                     <div class="stat-trend" id="rpmTrend">↑ 0% from last month</div>
+                </div>
+            </div>
+
+            <!-- Your integrations — 4 doors, state-aware -->
+            <div class="section" id="integrationCardsSection">
+                <div class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
+                    <span>Your integrations</span>
+                    <a href="#integrationGuide" onclick="onboardScrollToGuide(); return false;" style="font-size: 12px; font-weight: 600; color: #FF2D78; text-decoration: none;">Set up another →</a>
+                </div>
+                <p style="color: #6B7280; font-size: 13px; margin: 0 0 16px 0;">One publisher account, four doors. Active doors show last 7 days; "Not started" doors have a one-click setup. <a href="/publish" style="color: #FF2D78; text-decoration: none;">Learn about each door →</a></p>
+                <div class="integration-cards-grid" id="integrationCardsGrid">
+                    <!-- 4 cards rendered by renderIntegrationCards(). Defaults to all "Not started" until stats load. -->
                 </div>
             </div>
 
@@ -2680,6 +2812,94 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             if (ob) ob.style.display = 'none';
         }
 
+        // ── "Your integrations" 4-card section ───────────────────────────
+        // One card per door. Each card derives its state from the backend's
+        // by_integration_method aggregation (api/stats.js, last 7 days,
+        // sandbox excluded). Doors with any traffic in the window are
+        // marked Active; doors with zero traffic show "Not started" and
+        // a CTA that scrolls to the integration guide door-tab.
+        const INTEGRATION_DOORS = [
+            {
+                key:   'mcp',
+                icon:  '⚙️',
+                name:  'Lumi SDK for MCP',
+                blurb: 'For MCP server developers. npm install @boostbossai/lumi-mcp.',
+                docs:  '/docs/mcp',
+            },
+            {
+                key:   'js-snippet',
+                icon:  '💬',
+                name:  'Lumi SDK script tag',
+                blurb: 'For AI apps and websites. <script src="https://boostboss.ai/lumi.js">',
+                docs:  '/docs/js-snippet',
+            },
+            {
+                key:   'npm-sdk',
+                icon:  '🧩',
+                name:  'Lumi SDK for browser extensions',
+                blurb: 'Manifest v3 native, React + Vue. npm install @boostbossai/lumi-sdk.',
+                docs:  '/docs/npm-sdk',
+            },
+            {
+                key:   'rest-api',
+                icon:  '🤖',
+                name:  'Lumi API for Bots',
+                blurb: 'Discord, Telegram, Slack. POST /v1/ad-request + optional helpers.',
+                docs:  '/docs/rest-api',
+            },
+        ];
+        function renderIntegrationCards(byMethod) {
+            const grid = document.getElementById('integrationCardsGrid');
+            if (!grid) return;
+            const data = byMethod || {};
+            const html = INTEGRATION_DOORS.map(d => {
+                const m = data[d.key] || { impressions: 0, clicks: 0, earnings: 0 };
+                const active = (m.impressions || 0) > 0;
+                const stateClass = active ? 'ic-active' : 'ic-inactive';
+                const badge = active
+                    ? '<span class="ic-badge ic-badge-active">● Active</span>'
+                    : '<span class="ic-badge ic-badge-inactive">Not started</span>';
+                const impressions = active ? Number(m.impressions || 0).toLocaleString() : '—';
+                const earnings    = active ? '$' + Number(m.earnings || 0).toFixed(2) : '—';
+                const cta = active
+                    ? `<a class="ic-cta" href="${d.docs}">View docs →</a>`
+                    : `<button class="ic-cta" onclick="dashboardScrollToDoor('${d.key}')">Set up</button>`;
+                return `
+                    <div class="ic-card ${stateClass}" data-door="${d.key}">
+                        <div class="ic-header">
+                            <div>
+                                <span class="ic-icon" aria-hidden="true">${d.icon}</span>
+                                <span class="ic-name">${d.name}</span>
+                            </div>
+                            ${badge}
+                        </div>
+                        <div class="ic-stats">
+                            <div class="ic-stat">
+                                <div class="ic-stat-label">Impressions · 7d</div>
+                                <div class="ic-stat-value" data-metric="impressions">${impressions}</div>
+                            </div>
+                            <div class="ic-stat">
+                                <div class="ic-stat-label">Earnings · 7d</div>
+                                <div class="ic-stat-value" data-metric="earnings">${earnings}</div>
+                            </div>
+                        </div>
+                        ${cta}
+                    </div>`;
+            }).join('');
+            grid.innerHTML = html;
+        }
+
+        // Scroll to the Integration Guide and (when the door-tabs refactor lands
+        // in task #26) pre-select the matching tab. For now, just scrolls.
+        function dashboardScrollToDoor(doorKey) {
+            const el = document.querySelector('.integration-steps')
+                    || document.getElementById('integrationGuide');
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Stash the requested door so the future tab-selector picks it up.
+            try { sessionStorage.setItem('bb_dashboard_target_door', doorKey); } catch (_) {}
+            markOnboardingStepDone(2);
+        }
+
         function updateDashboard(stats) {
             // Update stats cards
             document.getElementById('totalEarnings').textContent = '$' + stats.total_earnings.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
@@ -2689,6 +2909,11 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             document.getElementById('rpmValue').textContent = '$' + stats.rpm.toFixed(2);
             document.getElementById('navAppName').textContent =
                 userProfile.app_name || (userProfile.email ? String(userProfile.email).split('@')[0] : 'Publisher');
+
+            // Render the 4-door "Your integrations" cards. Backend supplies
+            // by_integration_method (api/stats.js loadIntegrationMethodBreakdown);
+            // when missing (older response), every card defaults to "Not started."
+            renderIntegrationCards(stats.by_integration_method || null);
 
             // Update integration guide with real keys
             updateIntegrationGuide();
