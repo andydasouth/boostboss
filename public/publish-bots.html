@@ -130,7 +130,7 @@
   <div class="wrap">
     <span class="eyebrow">For AI Bot Developers</span>
     <h1>Turn your AI bot into a <span class="grad">revenue-generating business</span>.</h1>
-    <p class="sub">One REST call from your bot's response handler. Works with Discord, Telegram, Slack, and any platform your bot lives on. Any LLM. Any framework.</p>
+    <p class="sub">Lumi API for Bots — one REST call from your bot's response handler. Works with Discord, Telegram, Slack, and any platform your bot lives on. Any LLM. Any framework. Optional per-platform helper libraries available.</p>
     <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
   </div>
 </section>
@@ -163,18 +163,21 @@
   <div class="wrap">
     <span class="section-eyebrow">Integration snippet</span>
     <h2 class="section-h">A few lines, your existing handler.</h2>
-<pre class="code-block"><span class="cm">// Inside your Discord bot's response handler:</span>
-<span class="kw">const</span> ad = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://api.boostboss.ai/v1/ad-request'</span>, {
+<pre class="code-block"><span class="cm">// Inside your Discord bot's response handler — Lumi API for Bots:</span>
+<span class="kw">const</span> { ad } = <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'https://boostboss.ai/v1/ad-request'</span>, {
   method: <span class="str">'POST'</span>,
-  headers: { <span class="str">'Authorization'</span>: <span class="str">`Bearer ${API_KEY}`</span> },
-  body: <span class="fn">JSON.stringify</span>({ format: <span class="str">'embed'</span>, context: userQuery })
+  headers: {
+    <span class="str">'Authorization'</span>: <span class="str">`Bearer ${API_KEY}`</span>,
+    <span class="str">'Content-Type'</span>:  <span class="str">'application/json'</span>,
+  },
+  body: <span class="fn">JSON.stringify</span>({ format: <span class="str">'embed'</span>, context: userQuery, platform: <span class="str">'discord'</span> })
 }).<span class="fn">then</span>(r =&gt; r.<span class="fn">json</span>());
 
 message.<span class="fn">reply</span>({
   content: aiResponse,
-  embeds: [ad.<span class="fn">toDiscordEmbed</span>()]
+  embeds: [<span class="fn">toDiscordEmbed</span>(ad)]   <span class="cm">// from optional @boostbossai/lumi-discord</span>
 });</pre>
-    <p class="code-caption">Helper libraries available for Discord, Telegram, and Slack. Same API for all three. <a href="/docs/rest-api">Full docs →</a></p>
+    <p class="code-caption">Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are convenience wrappers around the Lumi API for Bots — they format the ad payload into each platform's native message type. Skip them and roll your own formatting if you'd rather not add a dependency. <a href="/docs/rest-api">Full docs →</a></p>
   </div>
 </section>
 

@@ -45,10 +45,10 @@
     <div class="side-section">
       <h6>Publisher integration</h6>
       <ul>
-        <li><a href="/docs/mcp">MCP JSON-RPC</a></li>
-        <li><a href="/docs/js-snippet">JS Snippet</a></li>
-        <li><a href="/docs/npm-sdk">NPM SDK</a></li>
-        <li><a href="/docs/rest-api">REST API</a></li>
+        <li><a href="/docs/mcp">Lumi SDK for MCP</a></li>
+        <li><a href="/docs/js-snippet">Lumi SDK script tag</a></li>
+        <li><a href="/docs/npm-sdk">Lumi SDK for browser extensions</a></li>
+        <li><a href="/docs/rest-api">Lumi API for Bots</a></li>
       </ul>
     </div>
     <div class="side-section">
@@ -69,26 +69,27 @@
     <p class="lede">Boost Boss has four publisher integration methods, plus a comprehensive API reference for advertisers and integrators. Pick the path that matches what you've built — same backend, same payouts.</p>
 
     <h2>Publisher integration methods</h2>
+    <p>Three SDKs and one API, all under the Lumi family name. Each integration matches a different deployment surface — pick the one(s) that match what you ship.</p>
     <div class="method-grid">
       <a class="method-card" href="/docs/mcp">
-        <span class="method-label">MCP JSON-RPC</span>
-        <h3>For MCP servers</h3>
-        <p>Three lines, one tool handler. Works with Claude Desktop, Cursor, Cline, Continue, Zed, Windsurf — any MCP host.</p>
+        <span class="method-label">Lumi SDK for MCP</span>
+        <h3>For MCP server developers</h3>
+        <p>Three lines, one tool handler. <code>npm install @boostbossai/lumi-mcp</code>. Works with Claude Desktop, Cursor, Cline, Continue, Zed, Windsurf.</p>
       </a>
       <a class="method-card" href="/docs/js-snippet">
-        <span class="method-label">JS snippet</span>
+        <span class="method-label">Lumi SDK script tag</span>
         <h3>For AI apps and websites</h3>
-        <p>One <code>&lt;script&gt;</code> tag, zero backend changes. Async, framework-agnostic, theme-able via CSS variables.</p>
+        <p>One <code>&lt;script&gt;</code> tag, zero backend changes. <code>boostboss.ai/lumi.js</code>. Async, framework-agnostic, theme-able via CSS variables.</p>
       </a>
       <a class="method-card" href="/docs/npm-sdk">
-        <span class="method-label">NPM SDK</span>
-        <h3>For browser extensions</h3>
-        <p>Manifest v3 native, runs in service workers and content scripts. React + Vue components included.</p>
+        <span class="method-label">Lumi SDK for browser extensions</span>
+        <h3>For Chrome / Edge / Firefox extensions, Electron, Tauri</h3>
+        <p>Manifest v3 native, runs in service workers and content scripts. <code>npm install @boostbossai/lumi-sdk</code>. React + Vue subpath bindings included.</p>
       </a>
       <a class="method-card" href="/docs/rest-api">
-        <span class="method-label">REST API</span>
-        <h3>For AI bots</h3>
-        <p>Server-side <code>POST /v1/ad-request</code>. Helper libraries for Discord, Telegram, and Slack message formats.</p>
+        <span class="method-label">Lumi API for Bots</span>
+        <h3>For Discord / Telegram / Slack AI bots</h3>
+        <p>Server-side <code>POST /v1/ad-request</code> + bearer auth. Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) — convenience wrappers, not standalone SDKs.</p>
       </a>
     </div>
 

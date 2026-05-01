@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>REST API integration — Boost Boss Docs</title>
-<meta name="description" content="REST API integration for AI bots. POST /v1/ad-request from your bot's response handler. Helper libraries for Discord, Telegram, Slack message formats.">
-<meta property="og:title" content="REST API integration — Boost Boss Docs">
+<title>Lumi API for Bots — Boost Boss Docs</title>
+<meta name="description" content="Lumi API for Bots — server-side REST integration for Discord, Telegram, and Slack AI bots. POST /v1/ad-request from your bot's response handler. Optional helper libraries (lumi-discord, lumi-telegram, lumi-slack) format the response into each platform's native message type.">
+<meta property="og:title" content="Lumi API for Bots — Boost Boss Docs">
 <meta property="og:url" content="https://boostboss.ai/docs/rest-api">
 <link rel="canonical" href="https://boostboss.ai/docs/rest-api">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
@@ -44,10 +44,10 @@
     <div class="side-section">
       <h6>Publisher integration</h6>
       <ul>
-        <li><a href="/docs/mcp">MCP JSON-RPC</a></li>
-        <li><a href="/docs/js-snippet">JS Snippet</a></li>
-        <li><a href="/docs/npm-sdk">NPM SDK</a></li>
-        <li><a href="/docs/rest-api" class="active">REST API</a></li>
+        <li><a href="/docs/mcp">Lumi SDK for MCP</a></li>
+        <li><a href="/docs/js-snippet">Lumi SDK script tag</a></li>
+        <li><a href="/docs/npm-sdk">Lumi SDK for browser extensions</a></li>
+        <li><a href="/docs/rest-api" class="active">Lumi API for Bots</a></li>
       </ul>
     </div>
     <div class="side-section">
@@ -64,15 +64,15 @@
   <main class="docs-main">
     <div class="breadcrumbs">
       <a href="/docs">Docs</a><span class="sep">/</span>
-      <span>REST API</span>
+      <span>Lumi API for Bots</span>
     </div>
 
-    <h1>REST API integration</h1>
-    <p class="lede">For AI bots running server-side — Discord, Telegram, Slack, or any platform where you can't ship a JS bundle to the user. One <code>POST /v1/ad-request</code> from your bot's response handler. Helper libraries map the response to each platform's native message format.</p>
+    <h1>Lumi API for Bots</h1>
+    <p class="lede">Server-side REST integration for AI bots — Discord, Telegram, Slack, or any platform where you can't ship a JS bundle to the user. One <code>POST /v1/ad-request</code> from your bot's response handler returns an ad payload. Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) format the response into each platform's native message type.</p>
 
     <div class="callout info">
       <strong>v0.1 — beta. Live today.</strong>
-      <p><code>POST https://boostboss.ai/v1/ad-request</code> is publicly bearer-authed and live. All three helper libraries are published on npm: <code>@boostbossai/lumi-discord</code>, <code>@boostbossai/lumi-telegram</code>, <code>@boostbossai/lumi-slack</code>. Try the sandbox flow with bearer <code>sk_test_demo</code> — no signup required to verify integration end-to-end. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
+      <p><code>POST https://boostboss.ai/v1/ad-request</code> is publicly bearer-authed and live. All three optional helper libraries are published on npm: <code>@boostbossai/lumi-discord</code>, <code>@boostbossai/lumi-telegram</code>, <code>@boostbossai/lumi-slack</code> — they're convenience wrappers around the Lumi API for Bots, not standalone SDKs. Try the sandbox flow with bearer <code>sk_test_demo</code> — no signup required to verify integration end-to-end. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="endpoint">The one endpoint you'll call</h2>
@@ -135,8 +135,8 @@ Content-Type: application/json
   <span class="fn">fetch</span>(ad.impression_url).<span class="fn">catch</span>(() =&gt; {});  <span class="cm">// fire-and-forget</span>
 }</pre>
 
-    <h2 id="helpers">Helper libraries</h2>
-    <p>Each helper library is a tiny pure-transform package (~30–50 lines, zero runtime dependencies) that maps the generic <code>ad</code> object to the target platform's native format. Install only the one you need.</p>
+    <h2 id="helpers">Optional helper libraries</h2>
+    <p>Each helper library is a tiny pure-transform <strong>convenience wrapper around the Lumi API for Bots</strong> (~30–50 lines, zero runtime dependencies) that maps the generic <code>ad</code> object to the target platform's native format. They're optional — you can hit the REST endpoint directly with <code>fetch</code> and format the response yourself if you'd rather not add a dependency. Install only the helper that matches your platform.</p>
     <table>
       <thead><tr><th>Package</th><th>Functions</th><th>Install</th></tr></thead>
       <tbody>

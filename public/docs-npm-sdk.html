@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NPM SDK integration — Boost Boss Docs</title>
-<meta name="description" content="NPM SDK integration for browser extensions. Manifest v3 native, runs in service workers and content scripts. React + Vue components included.">
-<meta property="og:title" content="NPM SDK integration — Boost Boss Docs">
+<title>Lumi SDK for browser extensions — Boost Boss Docs</title>
+<meta name="description" content="Lumi SDK for browser extensions, Electron, and Tauri apps. Manifest v3 native, runs in service workers and content scripts. React (LumiSlot, LumiProvider) and Vue (provideLumi, LumiSlot) bindings included.">
+<meta property="og:title" content="Lumi SDK for browser extensions — Boost Boss Docs">
 <meta property="og:url" content="https://boostboss.ai/docs/npm-sdk">
 <link rel="canonical" href="https://boostboss.ai/docs/npm-sdk">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
@@ -44,10 +44,10 @@
     <div class="side-section">
       <h6>Publisher integration</h6>
       <ul>
-        <li><a href="/docs/mcp">MCP JSON-RPC</a></li>
-        <li><a href="/docs/js-snippet">JS Snippet</a></li>
-        <li><a href="/docs/npm-sdk" class="active">NPM SDK</a></li>
-        <li><a href="/docs/rest-api">REST API</a></li>
+        <li><a href="/docs/mcp">Lumi SDK for MCP</a></li>
+        <li><a href="/docs/js-snippet">Lumi SDK script tag</a></li>
+        <li><a href="/docs/npm-sdk" class="active">Lumi SDK for browser extensions</a></li>
+        <li><a href="/docs/rest-api">Lumi API for Bots</a></li>
       </ul>
     </div>
     <div class="side-section">
@@ -64,15 +64,15 @@
   <main class="docs-main">
     <div class="breadcrumbs">
       <a href="/docs">Docs</a><span class="sep">/</span>
-      <span>NPM SDK</span>
+      <span>Lumi SDK for browser extensions</span>
     </div>
 
-    <h1>NPM SDK integration</h1>
-    <p class="lede">For browser extensions, Electron apps, Tauri apps, and any environment where the JS snippet doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React and Vue components included.</p>
+    <h1>Lumi SDK for browser extensions</h1>
+    <p class="lede">For Chrome / Edge / Firefox extensions, Electron apps, Tauri apps, and any environment where the Lumi SDK script tag doesn't fit. Manifest v3 native, runs in service workers and content scripts, with React (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>) and Vue (<code>provideLumi</code> + <code>&lt;LumiSlot /&gt;</code>) bindings included.</p>
 
     <div class="callout info">
-      <strong>v0.1 — beta. Live on npm today.</strong>
-      <p><code>@boostbossai/lumi-sdk@0.1.0</code> is published — <code>npm install @boostbossai/lumi-sdk</code> resolves and works. Three entry points: <code>@boostbossai/lumi-sdk</code> (vanilla <code>Lumi</code> class), <code>@boostbossai/lumi-sdk/react</code> (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>), <code>@boostbossai/lumi-sdk/vue</code> (<code>&lt;LumiSlot /&gt;</code> + <code>provideLumi</code>). Manifest v3 compliant — zero <code>eval</code>, zero remote code execution. Sandbox flow works without signup using <code>publisherId: "pub_test_demo"</code>. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
+      <strong>v1.0.1 — beta. Live on npm today.</strong>
+      <p><code>@boostbossai/lumi-sdk@1.0.1</code> is published — <code>npm install @boostbossai/lumi-sdk</code> resolves and works. Three entry points: <code>@boostbossai/lumi-sdk</code> (vanilla <code>Lumi</code> class), <code>@boostbossai/lumi-sdk/react</code> (<code>&lt;LumiSlot /&gt;</code> + <code>LumiProvider</code>), <code>@boostbossai/lumi-sdk/vue</code> (<code>&lt;LumiSlot /&gt;</code> + <code>provideLumi</code>). Manifest v3 compliant — zero <code>eval</code>, zero remote code execution. Sandbox flow works without signup using <code>publisherId: "pub_test_demo"</code>. Demand-side fill is in early beta; expect lower fill rates than mature ad networks until our Founding Publisher cohort fills out.</p>
     </div>
 
     <h2 id="quick-start">Quick start</h2>

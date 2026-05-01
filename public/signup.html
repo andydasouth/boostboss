@@ -816,7 +816,7 @@ function showWelcome(j) {
   document.getElementById("api-key-val").textContent = key;
   document.getElementById("welcome-msg").textContent =
     role === "developer"
-      ? "Your publisher account is live. Install the Lumi SDK to start earning."
+      ? "Your publisher account is live. Pick which integration to start with — Lumi SDK for MCP, Lumi SDK script tag, Lumi SDK for browser extensions, or Lumi API for Bots."
       : "Your advertiser account is live. Launch your first campaign in SuperBoost.";
   document.getElementById("go-dashboard").href = role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
   document.getElementById("go-dashboard").textContent =
