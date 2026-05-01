@@ -87,6 +87,36 @@
   .router-card:hover .arrow::after { transform: translateX(4px); }
   .router-card .badge { display: inline-block; padding: 3px 9px; background: rgba(255, 230, 0, 0.20); color: #8a6d00; font-size: 11px; font-weight: 700; border-radius: 999px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
 
+  /* Anchor tile — visual summary card filling the 6th grid cell. Different
+     visual language from the door cards: gradient backdrop, illustration,
+     no link/arrow. Communicates "all paths, one account" at a glance. */
+  .router-card.anchor {
+    background: linear-gradient(140deg, rgba(255, 45, 120, 0.04), rgba(4, 190, 254, 0.06));
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    padding: 22px 24px 24px;
+  }
+  .router-card.anchor:hover { border-color: var(--line); transform: none; box-shadow: none; }
+  .router-card.anchor::after { display: none; }
+  .router-card.anchor .anchor-svg { display: block; width: 100%; max-width: 280px; height: auto; margin: 0 auto 14px; }
+  .router-card.anchor h3 { font-size: 18px; line-height: 1.2; margin-bottom: 6px; }
+  .router-card.anchor p { font-size: 14px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 14px; }
+  .router-card.anchor code { background: rgba(15,15,26,0.06); padding: 1px 6px; border-radius: 4px; font-size: 12.5px; font-family: 'JetBrains Mono', monospace; }
+  .router-card.anchor .anchor-stats {
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px;
+    margin-top: auto; padding-top: 14px; border-top: 1px dashed rgba(15,15,26,0.10);
+  }
+  .router-card.anchor .anchor-stat { text-align: center; }
+  .router-card.anchor .anchor-stat strong {
+    display: block; font-family: 'Space Grotesk', sans-serif;
+    font-size: 18px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em;
+  }
+  .router-card.anchor .anchor-stat span {
+    display: block; font-size: 11px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; margin-top: 2px;
+  }
+
   /* WHY BOOST BOSS */
   .why { padding: 80px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
   .why h2 { font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; margin-bottom: 50px; text-align: center; }
@@ -205,6 +235,46 @@
         <p>OpenAI Custom GPTs, Poe bots, Perplexity Pages, Voiceflow / Botpress / Stack AI builds — anywhere you authored the AI but the platform owns the runtime. We're shipping no-code monetization next.</p>
         <span class="arrow">For Custom GPT &amp; No-Code Authors </span>
       </a>
+
+      <!-- Value-prop anchor tile — fills the 6th grid cell with an
+           illustration of the four surfaces converging into one publisher
+           account. Not a door, no link out — just a visual summary of the
+           umbrella story so the bottom row doesn't feel half-empty. -->
+      <div class="router-card anchor" aria-hidden="true">
+        <svg class="anchor-svg" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="hubGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#FF2D78"/>
+              <stop offset="100%" stop-color="#04BEFE"/>
+            </linearGradient>
+          </defs>
+          <!-- Connector lines from the four corner doors to the central hub -->
+          <line x1="50"  y1="50"  x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <line x1="230" y1="50"  x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <line x1="50"  y1="150" x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <line x1="230" y1="150" x2="140" y2="100" stroke="#E5E7EB" stroke-width="1.5" stroke-dasharray="3 3"/>
+          <!-- Door dots: MCP / AI Apps / Extensions / Bots -->
+          <circle cx="50"  cy="50"  r="14" fill="#FFFFFF" stroke="#FF2D78" stroke-width="2"/>
+          <text x="50" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FF2D78" font-weight="700">⚙</text>
+          <circle cx="230" cy="50"  r="14" fill="#FFFFFF" stroke="#04BEFE" stroke-width="2"/>
+          <text x="230" y="54" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE" font-weight="700">💬</text>
+          <circle cx="50"  cy="150" r="14" fill="#FFFFFF" stroke="#FFE600" stroke-width="2"/>
+          <text x="50" y="154" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#8a6d00" font-weight="700">🧩</text>
+          <circle cx="230" cy="150" r="14" fill="#FFFFFF" stroke="#7C3AED" stroke-width="2"/>
+          <text x="230" y="154" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#7C3AED" font-weight="700">🤖</text>
+          <!-- Central hub — Boost Boss -->
+          <circle cx="140" cy="100" r="32" fill="url(#hubGrad)"/>
+          <text x="140" y="98" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" letter-spacing="0.08em">ONE</text>
+          <text x="140" y="112" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF" letter-spacing="0.08em">ACCOUNT</text>
+        </svg>
+        <h3>Every door, one publisher account</h3>
+        <p>One <code>publisher_id</code>, one Stripe Connect account, one weekly payout — across whichever doors you ship through.</p>
+        <div class="anchor-stats">
+          <div class="anchor-stat"><strong>85%</strong><span>revshare</span></div>
+          <div class="anchor-stat"><strong>Weekly</strong><span>payouts</span></div>
+          <div class="anchor-stat"><strong>10 min</strong><span>to live</span></div>
+        </div>
+      </div>
     </div>
   </div>
 </section>
