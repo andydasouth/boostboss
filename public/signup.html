@@ -46,22 +46,31 @@ nav {
   font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
 }
 /* NAV-only Lumi SDK mark — scoped to .brand so the divider/padding don't
-   leak into the body-copy lumi-mark used in "Sign in to your Lumi SDK
-   dashboard" (which has its own animated shimmer rule below). */
+   leak into the body-copy lumi-mark. Same shimmer + blink as the body
+   version (and the marketing pages), so the brand reads identically
+   everywhere it appears. */
 .brand .lumi-mark {
   display: inline-flex; align-items: center; gap: 4px;
   margin-left: 12px; padding-left: 12px;
   border-left: 1px solid rgba(15,15,26,0.12);
   font-family: 'Space Grotesk', sans-serif;
   font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
-  background: linear-gradient(90deg, #FF2D78 0%, #D946EF 50%, #04BEFE 100%);
+  background-image: linear-gradient(90deg, #FF2D78 0%, #D946EF 25%, #04BEFE 50%, #D946EF 75%, #FF2D78 100%);
+  background-size: 220% 100%;
+  background-position: 0% 50%;
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent;
   user-select: none;
+  animation: lumiShimmer 4s linear infinite;
 }
 .brand .lumi-mark .sparkle {
   color: #F59E0B; -webkit-text-fill-color: #F59E0B;
   font-size: 17px; line-height: 1;
+  text-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
+  animation: lumiBlink 1.8s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand .lumi-mark, .brand .lumi-mark .sparkle { animation: none; }
 }
 @media (max-width: 760px) { .lumi-mark { display: none; } }
 
