@@ -44,8 +44,9 @@
     font-size: 14px; line-height: 1;
   }
   @media (max-width: 760px) { .lumi-mark { display: none; } }
-  /* Logged-in pill — replaces nav CTAs when bb_pub_token is set. */
-  .auth-pill { display: inline-flex !important; align-items: center; gap: 8px; padding: 5px 14px 5px 5px !important; }
+  /* Logged-in pill — replaces nav CTAs when bb_pub_token is set. Frameless to match /ads. */
+  .auth-pill { display: inline-flex !important; align-items: center; gap: 8px; padding: 5px 14px 5px 5px !important; border-color: transparent !important; background: transparent !important; }
+  .auth-pill:hover { background: rgba(15,15,26,0.04) !important; border-color: transparent !important; }
   .auth-pill .auth-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #FF2D78, #04BEFE); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; text-transform: uppercase; }
   .auth-pill .auth-name { font-size: 13.5px; font-weight: 600; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .auth-pill .auth-arrow { opacity: 0.5; font-size: 12px; transition: transform 0.15s, opacity 0.15s; }

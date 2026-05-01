@@ -71,12 +71,20 @@
   }
 
   /* Logged-in pill — replaces "Sign in" / "Start earning" when bb_pub_token
-     is set in localStorage. Linked to /publish/dashboard. */
+     is set in localStorage. Linked to /publish/dashboard. Frameless (no
+     border) to match /ads — a logged-in identity should feel lighter than
+     a primary CTA, not heavier. */
   .auth-pill {
     display: inline-flex !important;
     align-items: center;
     gap: 8px;
     padding: 5px 14px 5px 5px !important;
+    border-color: transparent !important;
+    background: transparent !important;
+  }
+  .auth-pill:hover {
+    background: rgba(15,15,26,0.04) !important;
+    border-color: transparent !important;
   }
   .auth-pill .auth-avatar {
     width: 26px; height: 26px;
