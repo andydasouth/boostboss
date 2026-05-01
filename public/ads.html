@@ -91,6 +91,43 @@
   .nav-links a:hover { color: var(--ink); }
   .nav-ctas { display: flex; gap: 10px; align-items: center; }
 
+  /* Logged-in advertiser pill — replaces "Sign in" / "Launch a campaign"
+     when bb_adv_token is set in localStorage. Same shape as the publisher
+     pill on /publish/* so the two sides feel like one product family. */
+  .auth-pill {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 14px 5px 5px !important;
+  }
+  .auth-pill .auth-avatar {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #FF2D78, #04BEFE);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  .auth-pill .auth-name {
+    font-size: 13.5px;
+    font-weight: 600;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .auth-pill .auth-arrow {
+    opacity: 0.5;
+    font-size: 12px;
+    transition: transform 0.15s, opacity 0.15s;
+  }
+  .auth-pill:hover .auth-arrow { opacity: 1; transform: translateX(2px); }
+
   .btn {
     display: inline-flex; align-items: center; justify-content: center;
     font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
@@ -2344,8 +2381,13 @@
             return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
           });
         };
-        ctas.innerHTML = '<a class="btn btn-primary" href="' + dashUrl + '" title="Go to dashboard">' +
-                         esc(name) + ' →</a>';
+        var initial = String(name).trim().charAt(0).toUpperCase() || 'A';
+        ctas.innerHTML =
+          '<a href="' + dashUrl + '" class="btn btn-ghost auth-pill" title="Go to your dashboard">' +
+          '<span class="auth-avatar">' + esc(initial) + '</span>' +
+          '<span class="auth-name">' + esc(name) + '</span>' +
+          '<span class="auth-arrow">→</span>' +
+          '</a>';
       } catch (e) { console.error("[initAuthNav]", e); }
     }
 
