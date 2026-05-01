@@ -3488,11 +3488,17 @@
         // the engine-status stub silently when there's nothing to show yet.
         function renderAuctionSummary(s) {
             if (!s) return;
-            // Allow rendering if there are conversions even when no
-            // intent-tagged impressions yet (legacy / web-only conversions).
+            // Allow rendering when ANY of these signals exist:
+            //   • intent-tagged impressions (Benna §9 score)
+            //   • conversions (legacy / web-only)
+            //   • integration_method-tagged impressions (per-door widget)
+            // Without this, accounts with door-tagged events but no intent
+            // score yet fall back to the static "run a campaign" placeholder
+            // and never see the per-door breakdown widget.
             const hasIntent = s.impressions_with_intent > 0;
             const conv = s.conversions || { count: 0, value: 0, by_type: {}, cvr: null, roas: null, cpa: null };
-            if (!hasIntent && conv.count === 0) return;
+            const hasDoorData = Object.keys(s.by_integration_method || {}).length > 0;
+            if (!hasIntent && conv.count === 0 && !hasDoorData) return;
             // Update the live Benna panel status label with real intent stats
             const label = document.getElementById('bennaStatusLabel');
             if (label && s.avg_intent_match != null) {
