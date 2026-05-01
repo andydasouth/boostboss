@@ -45,7 +45,10 @@ nav {
   font-family: 'Space Grotesk', sans-serif; font-size: 20px;
   font-weight: 700; letter-spacing: -0.5px; color: var(--ink);
 }
-.lumi-mark {
+/* NAV-only Lumi SDK mark — scoped to .brand so the divider/padding don't
+   leak into the body-copy lumi-mark used in "Sign in to your Lumi SDK
+   dashboard" (which has its own animated shimmer rule below). */
+.brand .lumi-mark {
   display: inline-flex; align-items: center; gap: 4px;
   margin-left: 12px; padding-left: 12px;
   border-left: 1px solid rgba(15,15,26,0.12);
@@ -56,7 +59,7 @@ nav {
   -webkit-text-fill-color: transparent;
   user-select: none;
 }
-.lumi-mark .sparkle {
+.brand .lumi-mark .sparkle {
   color: #F59E0B; -webkit-text-fill-color: #F59E0B;
   font-size: 17px; line-height: 1;
 }
