@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>For Publishers — Boost Boss</title>
-<meta name="description" content="Monetize your AI product, your way. The ad network built for AI-native surfaces. One backend, four integration paths — wherever your AI lives, we serve.">
+<meta name="description" content="Monetize your AI product, your way. The ad network built for AI-native surfaces. One backend, four integration paths plus a no-code waitlist — wherever your AI lives, we serve.">
 <meta property="og:title" content="For Publishers — Boost Boss">
-<meta property="og:description" content="The ad network built for AI-native surfaces. MCP, JS snippet, NPM SDK, REST — pick the path that matches your stack.">
+<meta property="og:description" content="The ad network built for AI-native surfaces. MCP, AI Apps, Extensions, Bots, plus a no-code waitlist for Custom GPTs and Poe.">
 <meta property="og:url" content="https://boostboss.ai/publish">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="For Publishers — Boost Boss">
-<meta name="twitter:description" content="Monetize MCP servers, AI apps, browser extensions, and AI bots. 85% revshare. Weekly payouts.">
+<meta name="twitter:description" content="Monetize MCP servers, AI apps, browser extensions, AI bots, and Custom GPTs. 85% revshare. Weekly payouts.">
 <link rel="canonical" href="https://boostboss.ai/publish">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -72,17 +72,20 @@
   .router-eyebrow { display: block; font-size: 13px; font-weight: 600; color: var(--pink-dark); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 14px; }
   .router-h2 { font-size: clamp(28px, 3.5vw, 40px); font-weight: 700; margin-bottom: 18px; max-width: 720px; }
   .router-sub { font-size: 17px; color: var(--ink-soft); max-width: 640px; margin-bottom: 40px; }
-  .router-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .router-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
   .router-card { display: block; padding: 28px 26px 26px; background: #fff; border: 1.5px solid var(--line); border-radius: 16px; transition: all 0.2s; position: relative; overflow: hidden; }
   .router-card:hover { border-color: var(--pink); transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 45, 120, 0.10); }
   .router-card::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: linear-gradient(90deg, var(--pink), var(--cyan)); opacity: 0; transition: opacity 0.2s; }
   .router-card:hover::after { opacity: 1; }
+  .router-card.waitlist { background: linear-gradient(140deg, rgba(255, 230, 0, 0.10), rgba(4, 190, 254, 0.06)); border-style: dashed; }
   .router-card-icon { width: 44px; height: 44px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 18px; background: rgba(255, 45, 120, 0.10); }
+  .router-card.waitlist .router-card-icon { background: rgba(255, 230, 0, 0.20); }
   .router-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
   .router-card p { font-size: 14.5px; color: var(--ink-soft); line-height: 1.5; margin-bottom: 16px; }
   .router-card .arrow { font-size: 14px; font-weight: 600; color: var(--pink-dark); display: inline-flex; align-items: center; gap: 6px; }
   .router-card .arrow::after { content: "→"; transition: transform 0.2s; }
   .router-card:hover .arrow::after { transform: translateX(4px); }
+  .router-card .badge { display: inline-block; padding: 3px 9px; background: rgba(255, 230, 0, 0.20); color: #8a6d00; font-size: 11px; font-weight: 700; border-radius: 999px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
 
   /* WHY BOOST BOSS */
   .why { padding: 80px 0; background: #fff; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
@@ -120,6 +123,9 @@
   .footer-links a:hover { color: var(--ink); }
   .footer-copy { font-size: 13px; color: var(--muted); }
 
+  @media (max-width: 980px) {
+    .router-grid { grid-template-columns: repeat(2, 1fr); }
+  }
   @media (max-width: 760px) {
     .nav-links { display: none; }
     .router-grid { grid-template-columns: 1fr; }
@@ -143,6 +149,7 @@
       <a href="/publish/ai-apps">AI Apps</a>
       <a href="/publish/extensions">Extensions</a>
       <a href="/publish/bots">Bots</a>
+      <a href="/publish/no-code">Custom GPTs</a>
     </div>
     <div class="nav-ctas">
       <a class="btn btn-ghost" href="/publish/signin">Sign in</a>
@@ -155,7 +162,7 @@
 <section class="hero">
   <div class="wrap">
     <h1>Monetize your AI product,<br><span class="grad">your way.</span></h1>
-    <p class="sub">Boost Boss is the ad network built for AI-native surfaces. One backend, four integration paths — wherever your AI lives, we serve.</p>
+    <p class="sub">Boost Boss is the ad network built for AI-native surfaces. One backend, four integration paths plus a no-code waitlist — wherever your AI lives, we serve.</p>
     <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
   </div>
 </section>
@@ -191,6 +198,13 @@
         <p>Discord, Telegram, Slack — research bots, summarization bots, support bots, image-gen bots. Use Lumi API for Bots — one REST call from your handler, optional helper libraries per platform.</p>
         <span class="arrow">For AI Bot Developers </span>
       </a>
+      <a class="router-card waitlist" href="/publish/no-code">
+        <div class="router-card-icon">✨</div>
+        <span class="badge">Waitlist · coming soon</span>
+        <h3>I built a Custom GPT or no-code AI</h3>
+        <p>OpenAI Custom GPTs, Poe bots, Perplexity Pages, Voiceflow / Botpress / Stack AI builds — anywhere you authored the AI but the platform owns the runtime. We're shipping no-code monetization next.</p>
+        <span class="arrow">For Custom GPT &amp; No-Code Authors </span>
+      </a>
     </div>
   </div>
 </section>
@@ -217,8 +231,8 @@
       <div class="why-item">
         <span class="check">✓</span>
         <div>
-          <h4>Three SDKs and one API</h4>
-          <p>Lumi SDK for MCP, Lumi SDK script tag, Lumi SDK for browser extensions, Lumi API for Bots. Pick the door(s) that match your stack — same backend, same publisher account, same payouts.</p>
+          <h4>Three SDKs, one API, plus a no-code path on the way</h4>
+          <p>Lumi SDK for MCP, Lumi SDK script tag, Lumi SDK for browser extensions, Lumi API for Bots — and a no-code integration coming for Custom GPT &amp; Poe authors. Same backend, same publisher account, same payouts across all paths.</p>
         </div>
       </div>
       <div class="why-item">
@@ -277,6 +291,7 @@
       <a href="/publish/ai-apps">AI Apps</a>
       <a href="/publish/extensions">Extensions</a>
       <a href="/publish/bots">Bots</a>
+      <a href="/publish/no-code">Custom GPTs</a>
       <a href="/docs">Docs</a>
       <a href="/trust">Trust</a>
     </div>
