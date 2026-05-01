@@ -102,6 +102,68 @@
   .nav-links a:hover { opacity: 1; color: var(--pink); }
   .nav-ctas { display: flex; gap: 10px; align-items: center; }
 
+  /* Publisher dropdown — hover-revealed sub-menu listing the 5 door pages.
+     Caret ▾ on the parent link signals "menu inside." Bridging zone above
+     the panel prevents flicker when the cursor crosses the gap. */
+  .nav-dropdown { position: relative; display: inline-flex; align-items: center; }
+  .nav-dropdown > a .nav-caret {
+    font-size: 10px; margin-left: 4px;
+    opacity: 0.6; transition: transform 0.15s, opacity 0.15s;
+    display: inline-block;
+  }
+  .nav-dropdown:hover > a .nav-caret { transform: rotate(180deg); opacity: 1; }
+  /* Bridging zone — invisible strip between trigger and panel so the panel
+     stays open while the cursor crosses. */
+  .nav-dropdown::after {
+    content: ""; position: absolute;
+    top: 100%; left: -16px; right: -16px; height: 14px;
+  }
+  .dropdown-panel {
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-6px);
+    background: #fff;
+    border: 1px solid rgba(15, 15, 26, 0.08);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 260px;
+    box-shadow: 0 14px 36px rgba(15, 15, 26, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out, visibility 0s linear 0.18s;
+    z-index: 200;
+  }
+  .nav-dropdown:hover .dropdown-panel,
+  .nav-dropdown:focus-within .dropdown-panel {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out, visibility 0s linear 0s;
+  }
+  .dropdown-panel a {
+    display: block;
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    color: var(--ink) !important;
+    opacity: 1 !important;
+    white-space: nowrap;
+  }
+  .dropdown-panel a:hover {
+    background: rgba(255, 45, 120, 0.06);
+    color: var(--pink) !important;
+  }
+  .dropdown-panel .dp-divider {
+    height: 1px; background: rgba(15, 15, 26, 0.06);
+    margin: 6px 4px;
+  }
+  .dropdown-panel a.dp-overview {
+    font-weight: 700 !important;
+    color: var(--pink) !important;
+  }
+
   /* Language toggle — bordered pill: globe + EN, opens dropdown */
   .nav-lang-wrap { position: relative; }
   .nav-lang {
@@ -920,7 +982,18 @@
     </a>
 
     <div class="nav-links">
-      <a href="/publish" data-i18n="nav.publishers">Publishers</a>
+      <div class="nav-dropdown">
+        <a href="/publish" data-i18n="nav.publishers">Publishers<span class="nav-caret" aria-hidden="true">▾</span></a>
+        <div class="dropdown-panel" role="menu">
+          <a href="/publish/mcp">MCP Server Developers</a>
+          <a href="/publish/ai-apps">AI App Builders</a>
+          <a href="/publish/extensions">Browser Extension Developers</a>
+          <a href="/publish/bots">AI Bot Developers</a>
+          <a href="/publish/no-code">Custom GPT &amp; No-Code Authors</a>
+          <div class="dp-divider"></div>
+          <a class="dp-overview" href="/publish">All publishers · overview →</a>
+        </div>
+      </div>
       <a href="/ads" target="_blank" rel="noopener" data-i18n="nav.superboost_html" data-i18n-html>Super<span style="color: var(--pink);">Boost Ads</span></a>
       <a href="/exchange" data-i18n="nav.bbx">BBX</a>
       <a href="/demo" data-i18n="nav.live_demo">Live Demo ↗</a>
