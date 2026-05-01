@@ -327,19 +327,35 @@ function summariseAuctionRows(rows) {
 async function handleDeveloperStats(devKey, req, res) {
   const sb = supa();
 
+  // Optional filter by integration door (mcp / js-snippet / npm-sdk / rest-api).
+  // Defaults to "all" which leaves the existing global-aggregate behaviour
+  // unchanged. When a specific door is passed, we recompute daily + totals
+  // from the events table directly (daily_stats lacks the column).
+  const VALID_METHODS = ["mcp", "js-snippet", "npm-sdk", "rest-api"];
+  const filterMethod = (req.query && typeof req.query.integration_method === "string"
+    && VALID_METHODS.includes(req.query.integration_method))
+    ? req.query.integration_method : null;
+
   if (sb) {
     const { data: dev, error: dErr } = await sb
       .from("developers").select("*").eq("api_key", devKey).single();
     if (dErr || !dev) return res.status(404).json({ error: "Developer not found", detail: dErr?.message });
 
-    let { data: dailyStats } = await sb.from("daily_stats").select("*")
-      .eq("developer_id", dev.id).order("date", { ascending: true }).limit(60);
-    dailyStats = dailyStats || [];
+    let dailyStats;
+    if (filterMethod) {
+      // Door-specific path: query events directly, group by day. Sandbox
+      // events excluded so the filtered view reflects production traffic only.
+      dailyStats = await loadDailyByIntegrationMethod(sb, dev.id, filterMethod);
+    } else {
+      const r = await sb.from("daily_stats").select("*")
+        .eq("developer_id", dev.id).order("date", { ascending: true }).limit(60);
+      dailyStats = r.data || [];
 
-    // Merge in live events from the last 7 days so brand-new publishers
-    // see their first impressions immediately (not after the nightly
-    // aggregate cron).
-    dailyStats = await mergeLiveEvents(sb, dailyStats, { developerId: dev.id });
+      // Merge in live events from the last 7 days so brand-new publishers
+      // see their first impressions immediately (not after the nightly
+      // aggregate cron).
+      dailyStats = await mergeLiveEvents(sb, dailyStats, { developerId: dev.id });
+    }
 
     // Per-placement breakdown — pulls from the placement_daily_stats view
     // (created by migration 04). Joined with placements so we have surface
@@ -349,7 +365,10 @@ async function handleDeveloperStats(devKey, req, res) {
     // Per-integration-method breakdown — feeds the dashboard's "Your
     // integrations" cards. db/06_integration_method.sql tags each event
     // with mcp / js-snippet / npm-sdk / rest-api; sandbox traffic is
-    // excluded so cards reflect real production usage.
+    // excluded so cards reflect real production usage. Always returns
+    // the global breakdown regardless of the active filter (the cards
+    // need to show all-door state even when the rest of the page is
+    // filtered to one door).
     const by_integration_method = await loadIntegrationMethodBreakdown(sb, dev.id);
 
     const totals = rollUpDevTotals(dailyStats);
@@ -359,6 +378,7 @@ async function handleDeveloperStats(devKey, req, res) {
       totals,
       placements,
       by_integration_method,
+      filter_integration_method: filterMethod,
     });
   }
 
@@ -398,6 +418,7 @@ async function handleDeveloperStats(devKey, req, res) {
     totals,
     placements,
     by_integration_method,
+    filter_integration_method: filterMethod,
   });
 }
 
@@ -472,6 +493,47 @@ async function loadPlacementBreakdown(sb, developerId) {
     }).sort((a, b) => b.publisher_earnings - a.publisher_earnings);
   } catch (e) {
     console.error("[Stats] placement breakdown failed:", e.message);
+    return [];
+  }
+}
+
+// ── Daily aggregation filtered by integration_method ────────────────────
+// Used when the dashboard's filter dropdown is set to a specific door.
+// Reads the events table directly (daily_stats lacks the column) and
+// rolls up impressions / clicks / earnings per day for the last 60
+// days. Sandbox events excluded; format matches what daily_stats
+// returns so the rest of the dashboard pipeline doesn't branch.
+async function loadDailyByIntegrationMethod(sb, developerId, integrationMethod) {
+  try {
+    const sinceISO = new Date(Date.now() - 60 * 86400000).toISOString();
+    const { data: rows, error } = await sb.from("events")
+      .select("event_type, cost, developer_payout, created_at")
+      .eq("developer_id", developerId)
+      .eq("integration_method", integrationMethod)
+      .eq("is_sandbox", false)
+      .gte("created_at", sinceISO);
+    if (error || !rows) return [];
+
+    const byDate = new Map();
+    for (const r of rows) {
+      const d = (r.created_at || "").slice(0, 10);
+      if (!d) continue;
+      if (!byDate.has(d)) {
+        byDate.set(d, {
+          date: d, developer_id: developerId,
+          impressions: 0, clicks: 0,
+          spend: 0, developer_earnings: 0,
+        });
+      }
+      const b = byDate.get(d);
+      if (r.event_type === "impression") b.impressions += 1;
+      if (r.event_type === "click")      b.clicks      += 1;
+      b.spend              += Number(r.cost || 0);
+      b.developer_earnings += Number(r.developer_payout || 0);
+    }
+    return [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date));
+  } catch (e) {
+    console.error("[stats] loadDailyByIntegrationMethod:", e.message);
     return [];
   }
 }

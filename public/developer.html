@@ -1442,8 +1442,26 @@
         <!-- Main Content -->
         <div class="container">
             <!-- Page Header -->
-            <div class="page-header">
-                <h1>Publisher Dashboard</h1>
+            <div class="page-header" style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+                <h1 style="margin: 0;">Publisher Dashboard</h1>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <label for="integrationFilter" style="font-size: 12.5px; font-weight: 600; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">View:</label>
+                    <select id="integrationFilter" onchange="applyIntegrationFilter()" style="
+                        padding: 8px 30px 8px 12px;
+                        font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 600;
+                        color: #0F0F1A; background: #fff;
+                        border: 1.5px solid #E5E7EB; border-radius: 8px;
+                        cursor: pointer; appearance: none;
+                        background-image: url('data:image/svg+xml;utf8,&lt;svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22&gt;&lt;path fill=%22%236B7280%22 d=%22M4.5 6l3.5 4 3.5-4z%22/&gt;&lt;/svg&gt;');
+                        background-repeat: no-repeat; background-position: right 8px center;
+                    ">
+                        <option value="">All integrations</option>
+                        <option value="mcp">Lumi SDK for MCP</option>
+                        <option value="js-snippet">Lumi SDK script tag</option>
+                        <option value="npm-sdk">Lumi SDK for browser extensions</option>
+                        <option value="rest-api">Lumi API for Bots</option>
+                    </select>
+                </div>
             </div>
 
             <!-- Stats Grid -->
@@ -1684,225 +1702,195 @@
                 </div>
             </div>
 
-            <!-- Integration Guide — framework tabs + copy-paste snippets -->
-            <div class="section">
+            <!-- Integration Guide — door tabs + copy-paste snippets -->
+            <div class="section integration-steps" id="integrationGuide">
                 <div class="section-title">Integration Guide</div>
+                <p style="color: #6B7280; font-size: 13px; margin: 0 0 18px 0;">Pick the door that matches what you've built. Each tab is self-contained — install command, code sample, and verify step. You can integrate against more than one door using the same publisher account.</p>
 
-                <!-- Step A: Install -->
-                <div style="margin-bottom: 18px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <div class="step-number">1</div>
-                        <h3 style="margin: 0; font-size: 15px;">Install the SDK</h3>
-                    </div>
-                    <p style="color: #6B7280; margin: 0 0 10px 42px; font-size: 13px;">Zero dependencies, Apache-2.0, 8.5 KB gzipped.</p>
-                    <div class="code-block" style="margin-left: 42px;">
-                        <button class="code-copy-btn" onclick="copyCode(this, 'install-cmd')">Copy</button>
-                        <pre id="install-cmd">npm install @boostbossai/lumi-sdk</pre>
-                    </div>
+                <!-- Door tabs (replaces old framework tabs). Each tab matches one of the four shipped doors. -->
+                <div id="doorTabs" style="display: flex; gap: 6px; border-bottom: 1px solid #E5E7EB; margin-bottom: 18px; flex-wrap: wrap;">
+                    <button class="fw-tab active" data-tab="mcp" onclick="selectDoorTab('mcp')">⚙️ Lumi SDK for MCP</button>
+                    <button class="fw-tab" data-tab="js-snippet" onclick="selectDoorTab('js-snippet')">💬 Lumi SDK script tag</button>
+                    <button class="fw-tab" data-tab="npm-sdk" onclick="selectDoorTab('npm-sdk')">🧩 Lumi SDK for browser extensions</button>
+                    <button class="fw-tab" data-tab="rest-api" onclick="selectDoorTab('rest-api')">🤖 Lumi API for Bots</button>
                 </div>
 
-                <!-- Step B: Add API key to env -->
-                <div style="margin-bottom: 18px;">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <div class="step-number">2</div>
-                        <h3 style="margin: 0; font-size: 15px;">Add your API key to env</h3>
-                    </div>
-                    <p style="color: #6B7280; margin: 0 0 10px 42px; font-size: 13px;">Never commit your key to git. Use your platform's env var system (Vercel Settings → Environment Variables, Netlify, Render, etc.).</p>
-                    <div class="code-block" style="margin-left: 42px;">
-                        <button class="code-copy-btn" onclick="copyCode(this, 'env-var')">Copy</button>
-                        <pre id="env-var">BB_API_KEY=bb_dev_sk_loading</pre>
-                    </div>
-                </div>
-
-                <!-- Step C: Integration code, tabbed per framework -->
-                <div>
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-                        <div class="step-number">3</div>
-                        <h3 style="margin: 0; font-size: 15px;">Wire it into your AI response handler</h3>
-                    </div>
-                    <p style="color: #6B7280; margin: 0 0 10px 42px; font-size: 13px;">Pick the tab for your stack. The snippet runs your AI call and ad fetch in parallel — zero latency impact on the chat response.</p>
-
-                    <div style="margin-left: 42px;">
-                        <!-- Framework tabs -->
-                        <div id="fwTabs" style="display: flex; gap: 6px; border-bottom: 1px solid #E5E7EB; margin-bottom: 12px; flex-wrap: wrap;">
-                            <button class="fw-tab active" data-tab="nextjs" onclick="selectFwTab('nextjs')">Next.js</button>
-                            <button class="fw-tab" data-tab="express" onclick="selectFwTab('express')">Express / Node</button>
-                            <button class="fw-tab" data-tab="mcp" onclick="selectFwTab('mcp')">MCP Server</button>
-                            <button class="fw-tab" data-tab="vanilla" onclick="selectFwTab('vanilla')">Vanilla JS</button>
-                            <button class="fw-tab" data-tab="python" onclick="selectFwTab('python')">Python</button>
+                <!-- Door 1: Lumi SDK for MCP -->
+                <div class="fw-panel" id="fw-mcp">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Install</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp-install')">Copy</button>
+                            <pre id="code-mcp-install">npm install @boostbossai/lumi-mcp</pre>
                         </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Wire it into a tool handler</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp')">Copy</button>
+                            <pre id="code-mcp">// Inside your existing MCP server's tool handler
+import { LumiMCP } from '@boostbossai/lumi-mcp';
 
-                        <!-- Next.js tab -->
-                        <div class="fw-panel" id="fw-nextjs">
-                            <div class="code-block">
-                                <button class="code-copy-btn" onclick="copyCode(this, 'code-nextjs')">Copy</button>
-                                <pre id="code-nextjs">// app/api/chat/route.ts  (Next.js App Router)
-import Anthropic from '@anthropic-ai/sdk'
-import bb from '@boostbossai/lumi-sdk'
+const lumi = new LumiMCP({
+  publisherId: process.env.BB_PUBLISHER_ID,
+  apiKey:      process.env.BB_API_KEY,
+});
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-bb.configure({ apiKey: process.env.BB_API_KEY })
+server.setRequestHandler(CallToolRequestSchema, async (request) =&gt; {
+  const result = await myToolLogic(request.params.arguments);
 
-export async function POST(req: Request) {
-  const { prompt } = await req.json()
-  const host = (req.headers.get('host') || '').split(':')[0]
+  const ad = await lumi.fetchAd({
+    context:  request.params.name,
+    toolName: request.params.name,
+  });
 
-  // Fire Claude + ad in parallel — no latency added
-  const [claude, ad] = await Promise.all([
-    anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-    bb.getSponsoredContent({ context: prompt.slice(0, 300), host, format: 'native' })
-      .catch(() => ({ sponsored: null })),
-  ])
+  return {
+    content: ad
+      ? [...result.content, ad.toMCPBlock()]   // appended, never replaces
+      : result.content,
+  };
+});</pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
+                            <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">toMCPBlock()</code> bakes the disclosure label in. Try sandbox without signup: pass <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">publisherId: "pub_test_demo"</code>. <a href="/docs/mcp" style="color: #FF2D78;">Full reference →</a>
+                        </div>
+                    </div>
+                </div>
 
-  return Response.json({
-    answer:    claude.content[0].text,
-    sponsored: ad.sponsored,   // render this in your chat UI
-  })
+                <!-- Door 2: Lumi SDK script tag -->
+                <div class="fw-panel" id="fw-js-snippet" style="display: none;">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Drop into your &lt;head&gt;</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-tag')">Copy</button>
+                            <pre id="code-snippet-tag">&lt;script async
+  src="https://boostboss.ai/lumi.js"
+  data-publisher-id="bb_dev_sk_loading"&gt;&lt;/script&gt;</pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;">
+                            Async, zero impact on first paint. The publisher ID above is your live key — already filled in.
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Add slot divs where you want ads</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-slot')">Copy</button>
+                            <pre id="code-snippet-slot">&lt;div data-lumi-slot="banner"&gt;&lt;/div&gt;
+&lt;div data-lumi-slot="sidebar" data-lumi-context="checkout flow"&gt;&lt;/div&gt;
+&lt;div data-lumi-slot="inline"&gt;&lt;/div&gt;</pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
+                            Lumi auto-discovers slots and rerenders on SPA route changes via MutationObserver. Theme via CSS variables (<code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-primary</code>, <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">--lumi-radius</code>, etc.). <a href="/docs/js-snippet" style="color: #FF2D78;">Full reference →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Door 3: Lumi SDK for browser extensions -->
+                <div class="fw-panel" id="fw-npm-sdk" style="display: none;">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Install</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-install')">Copy</button>
+                            <pre id="code-ext-install">npm install @boostbossai/lumi-sdk</pre>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Render in your content script / sidepanel</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext')">Copy</button>
+                            <pre id="code-ext">import { Lumi } from '@boostbossai/lumi-sdk';
+
+const lumi = new Lumi({ publisherId: 'bb_dev_sk_loading' });
+
+await lumi.render('#ad-slot', {
+  format:  'sidebar',
+  context: 'user is reading docs',
+});
+
+lumi.on('impression', (e) =&gt; console.log('shown', e.adId));
+lumi.on('error',      (e) =&gt; console.warn(e.code, e.message));</pre>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2b. React or Vue?</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-react')">Copy</button>
+                            <pre id="code-ext-react">// React
+import { LumiProvider, LumiSlot } from '@boostbossai/lumi-sdk/react';
+
+&lt;LumiProvider publisherId="bb_dev_sk_loading"&gt;
+  &lt;LumiSlot format="sidebar" context="user is reading docs" /&gt;
+&lt;/LumiProvider&gt;
+
+// Vue 3
+import { provideLumi, LumiSlot } from '@boostbossai/lumi-sdk/vue';
+provideLumi({ publisherId: 'bb_dev_sk_loading' });
+// &lt;LumiSlot format="sidebar" :context="docTitle" /&gt;</pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
+                            Manifest v3 native — zero <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">eval</code>, zero remote code. Allow <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">https://boostboss.ai</code> in your extension's CSP. <a href="/docs/npm-sdk" style="color: #FF2D78;">Full reference →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Door 4: Lumi API for Bots -->
+                <div class="fw-panel" id="fw-rest-api" style="display: none;">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">1. Add bearer token to env</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')">Copy</button>
+                            <pre id="code-rest-env">BB_API_KEY=bb_dev_sk_loading</pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px;">
+                            Server-side only — never ship the bearer to the browser. Use Vercel / Netlify / Render env-var settings.
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2. Direct REST call (Discord example)</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest')">Copy</button>
+                            <pre id="code-rest">// Inside your Discord bot's response handler:
+const { ad } = await fetch('https://boostboss.ai/v1/ad-request', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${process.env.BB_API_KEY}`,
+    'Content-Type':  'application/json',
+  },
+  body: JSON.stringify({
+    format:   'embed',
+    context:  userQuery,
+    platform: 'discord',
+  }),
+}).then(r =&gt; r.json());
+
+if (ad) {
+  await message.reply({ content: aiResponse, embeds: [/* your formatting */] });
+  fetch(ad.impression_url).catch(() =&gt; {});  // fire-and-forget
 }</pre>
-                            </div>
-                            <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
-                                On the frontend, render <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">response.sponsored</code> — we provide a React component <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">SponsoredCard</code> that auto-styles based on ad.type. Request it and we'll send you the component file.
-                            </div>
                         </div>
+                    </div>
+                    <div>
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">2b. Optional: per-platform helper library</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-helper')">Copy</button>
+                            <pre id="code-rest-helper">// Discord — convenience wrappers around the Lumi API for Bots
+npm install @boostbossai/lumi-discord
+// or:  @boostbossai/lumi-telegram  ·  @boostbossai/lumi-slack
 
-                        <!-- Express tab -->
-                        <div class="fw-panel" id="fw-express" style="display: none;">
-                            <div class="code-block">
-                                <button class="code-copy-btn" onclick="copyCode(this, 'code-express')">Copy</button>
-                                <pre id="code-express">// Express / Node
-const express = require('express')
-const bb = require('@boostbossai/lumi-sdk')
-const Anthropic = require('@anthropic-ai/sdk')
+import { toDiscordEmbed, toDiscordComponents } from '@boostbossai/lumi-discord';
 
-bb.configure({ apiKey: process.env.BB_API_KEY })
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-const app = express()
-app.use(express.json())
-
-app.post('/chat', async (req, res) => {
-  const { prompt } = req.body
-  const host = (req.get('host') || '').split(':')[0]
-
-  const [claude, ad] = await Promise.all([
-    anthropic.messages.create({
-      model: 'claude-sonnet-4-6',
-      max_tokens: 1024,
-      messages: [{ role: 'user', content: prompt }],
-    }),
-    bb.getSponsoredContent({ context: prompt.slice(0, 300), host, format: 'native' })
-      .catch(() => ({ sponsored: null })),
-  ])
-
-  res.json({ answer: claude.content[0].text, sponsored: ad.sponsored })
-})
-
-app.listen(3000)</pre>
-                            </div>
+await message.reply({
+  content:    aiResponse,
+  embeds:     [toDiscordEmbed(ad)],
+  components: [toDiscordComponents(ad)],
+});</pre>
                         </div>
-
-                        <!-- MCP Server tab -->
-                        <div class="fw-panel" id="fw-mcp" style="display: none;">
-                            <div class="code-block">
-                                <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp')">Copy</button>
-                                <pre id="code-mcp">// MCP Server wrapper (easiest integration — ~2 lines)
-// If your product is an MCP server, wrap it with withBoostBoss
-// and sponsored content is auto-injected into tool responses.
-
-import { Server } from '@modelcontextprotocol/sdk/server'
-import { withBoostBoss } from '@boostbossai/lumi-sdk/mcp'
-
-const myServer = new Server({ name: 'my-ai-tool', version: '1.0.0' })
-
-// ... define your tools on myServer normally ...
-
-// One line adds Boost Boss supply:
-export default withBoostBoss(myServer, {
-  apiKey: process.env.BB_API_KEY,
-})</pre>
-                            </div>
-                            <div style="font-size: 12px; color: #6B7280; margin-top: 8px;">
-                                Boost Boss registers itself as a <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">get_sponsored_content</code> tool on your MCP server. When the AI client calls it, you earn the impression automatically.
-                            </div>
-                        </div>
-
-                        <!-- Vanilla JS tab -->
-                        <div class="fw-panel" id="fw-vanilla" style="display: none;">
-                            <div class="code-block">
-                                <button class="code-copy-btn" onclick="copyCode(this, 'code-vanilla')">Copy</button>
-                                <pre id="code-vanilla">// Browser or any plain JS environment
-import bb from '@boostbossai/lumi-sdk'
-
-bb.configure({ apiKey: 'bb_dev_sk_loading' })
-
-async function fetchAd(userPrompt) {
-  const result = await bb.getSponsoredContent({
-    context: userPrompt.slice(0, 300),
-    host:    location.hostname,
-    format:  'native',
-  })
-  if (!result.sponsored) return null
-
-  // Fire impression pixel when card is visible
-  new Image().src = result.sponsored.tracking.impression
-
-  return result.sponsored   // { headline, subtext, cta_url, cta_label, media_url, ... }
-}</pre>
-                            </div>
-                            <div style="font-size: 12px; color: #6B7280; margin-top: 8px;">
-                                ⚠️ For browsers: keep your API key behind a server proxy — don't ship it in client-side JS.
-                            </div>
-                        </div>
-
-                        <!-- Python tab -->
-                        <div class="fw-panel" id="fw-python" style="display: none;">
-                            <div class="code-block">
-                                <button class="code-copy-btn" onclick="copyCode(this, 'code-python')">Copy</button>
-                                <pre id="code-python"># Python — call our HTTP endpoint directly (no Python SDK yet)
-import os, httpx
-
-BB_API_KEY = os.environ["BB_API_KEY"]
-
-def fetch_ad(user_prompt: str, host: str = "your-app.com"):
-    resp = httpx.post(
-        "https://boostboss.ai/api/mcp",
-        json={
-            "jsonrpc": "2.0", "id": 1, "method": "tools/call",
-            "params": {
-                "name": "get_sponsored_content",
-                "arguments": {
-                    "developer_api_key": BB_API_KEY,
-                    "context_summary": user_prompt[:300],
-                    "host": host,
-                    "format": "native",
-                },
-            },
-        },
-        timeout=3.0,
-    )
-    data = resp.json()
-    content = data.get("result", {}).get("content", [{}])[0].get("text", "{}")
-    import json
-    parsed = json.loads(content)
-    return parsed.get("sponsored")
-
-def track_impression(campaign_id: str, developer_id: str):
-    httpx.get(
-        "https://boostboss.ai/api/track",
-        params={"campaign_id": campaign_id, "dev": developer_id, "event": "impression"},
-        timeout=2.0,
-    )</pre>
-                            </div>
-                            <div style="font-size: 12px; color: #6B7280; margin-top: 8px;">
-                                Native Python SDK coming soon. For now this direct HTTP call works reliably.
-                            </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 8px; line-height: 1.5;">
+                            Helper libraries are optional — they format the ad payload into each platform's native message type so you don't have to. <a href="/docs/rest-api" style="color: #FF2D78;">Full reference →</a>
                         </div>
                     </div>
                 </div>
+            </div>
 
                 <!-- Run Test button — scrolls down to the full Test panel and auto-fires it -->
                 <div style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #E5E7EB; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
@@ -2671,7 +2659,12 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
 
             try {
-                const endpoint = `${API_BASE}/api/stats?type=developer&key=${encodeURIComponent(userProfile.api_key)}`;
+                // Honour the integration_method filter dropdown if present.
+                // Empty string = "All integrations" (no filter param sent).
+                const filterEl = document.getElementById('integrationFilter');
+                const filterMethod = filterEl ? (filterEl.value || '').trim() : '';
+                const filterParam = filterMethod ? `&integration_method=${encodeURIComponent(filterMethod)}` : '';
+                const endpoint = `${API_BASE}/api/stats?type=developer&key=${encodeURIComponent(userProfile.api_key)}${filterParam}`;
 
                 const response = await fetch(endpoint, {
                     method: 'GET',
@@ -2889,8 +2882,37 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             grid.innerHTML = html;
         }
 
-        // Scroll to the Integration Guide and (when the door-tabs refactor lands
-        // in task #26) pre-select the matching tab. For now, just scrolls.
+        // Re-fetch stats with the dropdown's current door filter and re-render
+        // the dashboard. The integration cards stay global (always show all-door
+        // 7-day state); the rest of the page (totals + chart + earnings table)
+        // filters to the selected door so multi-surface publishers can compare
+        // per-door performance.
+        async function applyIntegrationFilter() {
+            try {
+                const filterEl = document.getElementById('integrationFilter');
+                const v = filterEl ? filterEl.value : '';
+                // Persist the choice across reloads so it sticks until cleared.
+                if (v) sessionStorage.setItem('bb_dashboard_int_filter', v);
+                else   sessionStorage.removeItem('bb_dashboard_int_filter');
+            } catch (_) {}
+            await loadDashboard();
+        }
+        // On dashboard load, restore filter from sessionStorage if present.
+        function restoreIntegrationFilter() {
+            try {
+                const saved = sessionStorage.getItem('bb_dashboard_int_filter');
+                const filterEl = document.getElementById('integrationFilter');
+                if (saved && filterEl) filterEl.value = saved;
+            } catch (_) {}
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', restoreIntegrationFilter);
+        } else {
+            restoreIntegrationFilter();
+        }
+
+        // Scroll to the Integration Guide and pre-select the matching door tab
+        // (selectDoorTab reads from sessionStorage on load via applyTargetDoorFromSession).
         function dashboardScrollToDoor(doorKey) {
             const el = document.querySelector('.integration-steps')
                     || document.getElementById('integrationGuide');
@@ -3134,14 +3156,39 @@ bb.<span style="color:#FF2D78;">configure</span>({ apiKey: process.env.BB_API_KE
             }
         }
 
-        // Framework tab switcher for the Integration Guide.
-        function selectFwTab(name) {
+        // Door tab switcher for the Integration Guide. Each tab is one of
+        // the four doors (mcp / js-snippet / npm-sdk / rest-api), matching
+        // integration_method values in the events table.
+        function selectDoorTab(name) {
             document.querySelectorAll('.fw-tab').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.tab === name);
             });
             document.querySelectorAll('.fw-panel').forEach(panel => {
                 panel.style.display = panel.id === 'fw-' + name ? '' : 'none';
             });
+            // Remember last-picked door so reload returns the publisher to
+            // their place. Also consumed by dashboardScrollToDoor() after
+            // scroll-to-guide so the right tab is pre-selected.
+            try { sessionStorage.setItem('bb_dashboard_target_door', name); } catch (_) {}
+        }
+        // Backward-compat alias for any older inline handlers that still
+        // reference the previous framework-tab function name.
+        function selectFwTab(name) { selectDoorTab(name); }
+
+        // On dashboard load, honour any door preselected by the integration
+        // cards' "Set up" CTA (which writes to sessionStorage before scrolling).
+        function applyTargetDoorFromSession() {
+            try {
+                const target = sessionStorage.getItem('bb_dashboard_target_door');
+                if (target && document.getElementById('fw-' + target)) {
+                    selectDoorTab(target);
+                }
+            } catch (_) {}
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', applyTargetDoorFromSession);
+        } else {
+            applyTargetDoorFromSession();
         }
 
         function renderChart(dailyStats) {
