@@ -44,21 +44,30 @@
   .brand { display: flex; align-items: center; gap: 10px; }
   .brand-mark { width: 36px; height: 36px; }
   .brand-name { font-family: 'Space Grotesk', sans-serif; font-size: 20px; font-weight: 700; color: var(--ink); letter-spacing: -0.5px; }
+  /* Animated shimmer + blinking sparkle, matches /publish + /publish/signin. */
   .lumi-mark {
     display: inline-flex; align-items: center; gap: 4px;
     margin-left: 12px; padding-left: 12px;
     border-left: 1px solid rgba(15,15,26,0.12);
     font-family: 'Space Grotesk', sans-serif;
     font-size: 16px; font-weight: 700; letter-spacing: -0.01em;
-    background: linear-gradient(90deg, #FF2D78 0%, #D946EF 50%, #04BEFE 100%);
+    background-image: linear-gradient(90deg, #FF2D78 0%, #D946EF 25%, #04BEFE 50%, #D946EF 75%, #FF2D78 100%);
+    background-size: 220% 100%;
+    background-position: 0% 50%;
     -webkit-background-clip: text; background-clip: text;
     -webkit-text-fill-color: transparent;
     user-select: none;
+    animation: lumiShimmer 4s linear infinite;
   }
   .lumi-mark .sparkle {
     color: #F59E0B; -webkit-text-fill-color: #F59E0B;
     font-size: 17px; line-height: 1;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
+    animation: lumiBlink 1.8s ease-in-out infinite;
   }
+  @keyframes lumiShimmer { 0% { background-position: 0% 50%; } 100% { background-position: 220% 50%; } }
+  @keyframes lumiBlink { 0%, 100% { opacity: 0.55; transform: scale(0.95); } 50% { opacity: 1; transform: scale(1.1); } }
+  @media (prefers-reduced-motion: reduce) { .lumi-mark, .lumi-mark .sparkle { animation: none; } }
   @media (max-width: 760px) { .lumi-mark { display: none; } }
   /* Logged-in pill — replaces nav CTAs when bb_pub_token is set. Frameless to match /ads. */
   .auth-pill { display: inline-flex !important; align-items: center; gap: 8px; padding: 5px 14px 5px 5px !important; border-color: transparent !important; background: transparent !important; }
