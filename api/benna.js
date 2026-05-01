@@ -1,23 +1,43 @@
 /**
- * Boost Boss — Benna Inference API (stub)
+ * Boost Boss — Benna Inference API
  *
  *   GET  /api/benna?op=engine-status&advertiser_id=xxx
  *        → aggregate engine metrics, top weighted signals, recent auto-adjustments
  *
  *   POST /api/benna                 (op=predict)
- *        body: { context: { intent, mcp_tool, host, session_len, region, ... },
- *                campaign: { target_cpa, target_roas, goal, format } }
+ *        body: { context: { intent_tokens[], active_tools[], host_app, surface,
+ *                           intent, mcp_tool, host, region, session_len, ... },
+ *                campaign: { target_intent_tokens[], target_active_tools[],
+ *                            target_host_apps[], target_surfaces[],
+ *                            target_keywords[], target_cpa, format } }
  *        → { bid, p_click, p_convert, signal_contributions[], latency_ms, model_version }
  *
- * This is a deterministic stub that simulates the real Benna ranker so the
- * product feels end-to-end without requiring the actual ML infra. Swap out
- * the `scoreBid()` body for the real model once it ships.
+ * scoreBid() scores a request × campaign by computing per-signal match strength
+ * against the campaign's actual targeting columns (target_intent_tokens,
+ * target_active_tools, target_host_apps, target_surfaces). It is NOT a learned
+ * model — it's a deterministic targeting-overlap score with fixed weights.
+ * Once we have outcome data, swap the per-signal weights for a learned table.
+ *
+ * Protocol §9 pricing lives in scorePrice() further down.
  */
 
-const MODEL_VERSION = "benna-rc3-2026.04.14";
+const MODEL_VERSION = "benna-rc4-2026.05.01";
 
-// Signal priors (weights sum to ~1.0). These are what the engine "has learned"
-// as the most predictive MCP signals for conversion across the network.
+// Per-signal weights for scoreBid. These determine how much each targeting
+// dimension contributes to the predicted p_click. Sum is ~1.0 by design so
+// a fully-aligned campaign approaches the p_click ceiling.
+const SCORE_WEIGHTS = {
+  intent:  0.35,   // intent_tokens overlap (Jaccard)
+  tool:    0.25,   // active_tools overlap (proportional)
+  host:    0.18,   // host_app match (binary)
+  surface: 0.12,   // surface match (binary)
+  keyword: 0.10,   // legacy target_keywords overlap (kept for back-compat)
+};
+
+// Engine-status dashboard priors. Illustrative only — these drive the
+// "what the engine has learned" weight bars on the advertiser dashboard.
+// scoreBid() does NOT use these; they're a snapshot of typical winning
+// signals for display purposes until live outcome data lands.
 const SIGNAL_PRIORS = {
   "intent=debug_py":       { w: 0.34, bar: 94 },
   "tool=shell.exec":       { w: 0.22, bar: 61 },
@@ -39,30 +59,156 @@ function currentBucketSeed() {
   return Math.floor(Date.now() / 60000);
 }
 
-// ─── core inference stub ───
+// ── helpers for scoreBid ───────────────────────────────────────────────
+function asTokenSet(arr) {
+  if (!Array.isArray(arr)) return new Set();
+  const out = new Set();
+  for (const t of arr) {
+    if (t == null) continue;
+    const s = String(t).toLowerCase().trim();
+    if (s) out.add(s);
+  }
+  return out;
+}
+
+// Returns { matched: [...], jaccard: 0..1, overlap: count } for two arrays.
+function tokenOverlap(reqArr, targetArr) {
+  const req = asTokenSet(reqArr);
+  const tgt = asTokenSet(targetArr);
+  if (req.size === 0 || tgt.size === 0) {
+    return { matched: [], jaccard: 0, overlap: 0 };
+  }
+  const matched = [];
+  for (const t of tgt) if (req.has(t)) matched.push(t);
+  const overlap = matched.length;
+  const union = req.size + tgt.size - overlap;
+  return { matched, jaccard: union === 0 ? 0 : overlap / union, overlap };
+}
+
+// Promote legacy single-value context fields to token arrays so the same
+// scoring path works for both mcp.js (which passes {intent, mcp_tool, host})
+// and rtb.js (which passes {intent_tokens[], active_tools[], host_app}).
+function normalizeContext(ctx) {
+  const out = { ...ctx };
+  if (!Array.isArray(out.intent_tokens)) {
+    out.intent_tokens = out.intent ? [String(out.intent)] : [];
+  }
+  if (!Array.isArray(out.active_tools)) {
+    out.active_tools = out.mcp_tool ? [String(out.mcp_tool)] : [];
+  }
+  if (!out.host_app && out.host) {
+    const h = String(out.host).toLowerCase();
+    if (h.includes("cursor"))         out.host_app = "cursor";
+    else if (h.includes("claude"))    out.host_app = "claude_desktop";
+    else if (h.includes("vscode"))    out.host_app = "vscode";
+    else if (h.includes("jetbrains")) out.host_app = "jetbrains";
+  }
+  return out;
+}
+
+// Format a "matched X out of Y" signal label for signal_contributions.
+function fmtMatched(prefix, matched) {
+  if (!matched || matched.length === 0) return prefix;
+  const head = matched.slice(0, 3).join(",");
+  return matched.length > 3 ? `${prefix}: ${head},+${matched.length - 3}` : `${prefix}: ${head}`;
+}
+
+// ─── core inference: targeting-overlap score ───
 function scoreBid(context = {}, campaign = {}) {
+  const ctx = normalizeContext(context);
   const rnd = seeded(
-    hash(JSON.stringify(context) + (campaign.target_cpa || "") + currentBucketSeed())
+    hash(JSON.stringify(context) + (campaign.target_cpa || campaign.bid_amount || "") + currentBucketSeed())
   );
 
-  // base p_click ranges 0.4% – 7% depending on signals present
-  let p_click = 0.01;
-  const contributions = [];
+  // Per-signal jitter: ±15% so stable cohorts still show natural variance
+  // across the dashboard's 60-second refresh cycle. Bounded so jitter
+  // can't turn a no-match into a match or vice versa.
+  const jitter = () => 0.85 + rnd() * 0.30;
 
-  for (const [sig, prior] of Object.entries(SIGNAL_PRIORS)) {
-    const [key, val] = sig.split("=");
-    const hasSignal = matchesSignal(context, key, val);
-    if (hasSignal) {
-      const contribution = prior.w * (0.7 + rnd() * 0.6);
-      p_click += contribution * 0.06;
-      contributions.push({
-        signal: sig,
-        weight: +prior.w.toFixed(3),
-        lift: +(contribution * 100).toFixed(1),
-      });
-    }
+  const contributions = [];
+  // Aggregate signal score in [0, 1]. p_click is mapped from this below.
+  let signalScore = 0;
+
+  // ── intent_tokens (Jaccard over ctx.intent_tokens × campaign.target_intent_tokens)
+  const intent = tokenOverlap(ctx.intent_tokens, campaign.target_intent_tokens);
+  if (intent.overlap > 0) {
+    const w = SCORE_WEIGHTS.intent;
+    const strength = intent.jaccard;          // 0..1
+    const lift = w * strength * jitter();
+    signalScore += lift;
+    contributions.push({
+      signal: fmtMatched("intent", intent.matched),
+      weight: +w.toFixed(3),
+      lift: +(lift * 100).toFixed(1),
+    });
   }
-  p_click = Math.min(p_click, 0.12);
+
+  // ── active_tools (proportional overlap)
+  const tool = tokenOverlap(ctx.active_tools, campaign.target_active_tools);
+  if (tool.overlap > 0) {
+    const w = SCORE_WEIGHTS.tool;
+    const tgtSize = (campaign.target_active_tools || []).length || 1;
+    const strength = Math.min(1, tool.overlap / tgtSize);
+    const lift = w * strength * jitter();
+    signalScore += lift;
+    contributions.push({
+      signal: fmtMatched("tool", tool.matched),
+      weight: +w.toFixed(3),
+      lift: +(lift * 100).toFixed(1),
+    });
+  }
+
+  // ── host_app (binary)
+  const targetHosts = asTokenSet(campaign.target_host_apps);
+  if (ctx.host_app && targetHosts.size > 0 && targetHosts.has(String(ctx.host_app).toLowerCase())) {
+    const w = SCORE_WEIGHTS.host;
+    const lift = w * jitter();
+    signalScore += lift;
+    contributions.push({
+      signal: `host=${ctx.host_app}`,
+      weight: +w.toFixed(3),
+      lift: +(lift * 100).toFixed(1),
+    });
+  }
+
+  // ── surface (binary)
+  const targetSurfaces = asTokenSet(campaign.target_surfaces);
+  if (ctx.surface && targetSurfaces.size > 0 && targetSurfaces.has(String(ctx.surface).toLowerCase())) {
+    const w = SCORE_WEIGHTS.surface;
+    const lift = w * jitter();
+    signalScore += lift;
+    contributions.push({
+      signal: `surface=${ctx.surface}`,
+      weight: +w.toFixed(3),
+      lift: +(lift * 100).toFixed(1),
+    });
+  }
+
+  // ── keyword (legacy target_keywords ∩ context_summary tokens / context.keywords)
+  const ctxKeywordTokens = Array.isArray(ctx.keywords)
+    ? ctx.keywords
+    : (typeof ctx.context_summary === "string"
+        ? ctx.context_summary.split(/\s+/).filter(Boolean)
+        : []);
+  const kw = tokenOverlap(ctxKeywordTokens, campaign.target_keywords);
+  if (kw.overlap > 0) {
+    const w = SCORE_WEIGHTS.keyword;
+    const tgtSize = (campaign.target_keywords || []).length || 1;
+    const strength = Math.min(1, kw.overlap / tgtSize);
+    const lift = w * strength * jitter();
+    signalScore += lift;
+    contributions.push({
+      signal: fmtMatched("keyword", kw.matched),
+      weight: +w.toFixed(3),
+      lift: +(lift * 100).toFixed(1),
+    });
+  }
+
+  // Map aggregate signal score → p_click. Floor of 1% (cold-start), ceiling
+  // of 12% (saturation cap). signalScore ∈ [0, ~1.0] when fully aligned.
+  const P_CLICK_FLOOR = 0.01;
+  const P_CLICK_CEIL  = 0.12;
+  const p_click = Math.min(P_CLICK_CEIL, P_CLICK_FLOOR + signalScore * (P_CLICK_CEIL - P_CLICK_FLOOR));
 
   const p_convert = p_click * (0.18 + rnd() * 0.15);
 
@@ -80,17 +226,6 @@ function scoreBid(context = {}, campaign = {}) {
     latency_ms: +(3.4 + rnd() * 1.8).toFixed(1),
     model_version: MODEL_VERSION,
   };
-}
-
-function matchesSignal(ctx, key, expected) {
-  const v = ctx[key];
-  if (v == null) return false;
-  if (key === "session_len") {
-    // expected = ">30m"
-    const mins = parseFloat(String(v));
-    return Number.isFinite(mins) && mins > 30;
-  }
-  return String(v).toLowerCase() === String(expected).toLowerCase();
 }
 
 function hash(str) {

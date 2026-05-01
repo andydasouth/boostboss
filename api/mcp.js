@@ -19,6 +19,7 @@ const benna = require("./benna.js");
 const { mcpTargetingMatch, mintAuctionId } = require("./_lib/mcp_targeting.js");
 const { lookupCachedEmbedding } = require("./_lib/embeddings.js");
 const { isSandboxCredential, buildSandboxResponse } = require("./_lib/sandbox.js");
+const auctionLog = require("./_lib/auction_log.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -267,6 +268,39 @@ module.exports = async function handler(req, res) {
 async function handleGetSponsoredContent(body, args, res) {
   const sessionId = args.session_id || "anon_" + Date.now();
   const auctionId = mintAuctionId();
+  const t0 = Date.now();
+
+  // Auction log scaffold — mutated as the auction progresses, emitted at
+  // every exit point. Logging is fire-and-forget; callers never await.
+  const logCtx = {
+    auction_id: auctionId,
+    surface: "mcp",
+    integration_method: args._integration_method || null,
+    is_sandbox: false,
+    request: {
+      host: args.host,
+      host_app: args.host_app,
+      surface: args.surface,
+      user_region: args.user_region,
+      user_language: args.user_language,
+      intent_tokens: args.intent_tokens,
+      active_tools: args.active_tools,
+      format_preference: args.format_preference,
+      context_summary: args.context_summary,
+      session_id: sessionId,
+      placement_id: args.placement_id,
+    },
+    eligibility: {},
+    candidates: [],
+  };
+  function emitLog(outcome, extras) {
+    auctionLog.recordAuction({
+      ...logCtx,
+      ...(extras || {}),
+      outcome,
+      latency_ms: Date.now() - t0,
+    });
+  }
 
   // ── Sandbox short-circuit ───────────────────────────────────────────
   // pub_test_* / sk_test_* credentials skip the auction entirely and
@@ -278,6 +312,7 @@ async function handleGetSponsoredContent(body, args, res) {
   if (isSandboxCredential(args)) {
     const sandboxAuctionId = "auc_sandbox_" + auctionId.replace(/^auc_/, "");
     const base = (process.env.BOOSTBOSS_BASE_URL || "https://boostboss.ai").replace(/\/$/, "");
+    emitLog("sandbox", { is_sandbox: true, auction_id: sandboxAuctionId });
     return jsonRpc(res, body.id, buildSandboxResponse({
       auctionId: sandboxAuctionId,
       base,
@@ -289,6 +324,7 @@ async function handleGetSponsoredContent(body, args, res) {
   // Rate limit
   const last = sessionCache.get(sessionId);
   if (last && Date.now() - last < RATE_LIMIT_MS) {
+    emitLog("rate_limited", { no_fill_reason: "rate_limited" });
     return jsonRpc(res, body.id, { sponsored: null, reason: "rate_limited", auction_id: auctionId });
   }
 
@@ -319,6 +355,7 @@ async function handleGetSponsoredContent(body, args, res) {
       });
       const seenToday = Number(capRow) || 0;
       if (seenToday >= cap) {
+        emitLog("rate_limited", { no_fill_reason: "frequency_capped" });
         return jsonRpc(res, body.id, {
           sponsored: null,
           reason: "frequency_capped",
@@ -334,12 +371,14 @@ async function handleGetSponsoredContent(body, args, res) {
   if (sb) {
     const { data, error } = await sb.from("campaigns").select("*").eq("status", "active");
     if (error || !data || data.length === 0) {
+      emitLog("no_match", { no_fill_reason: "no_campaigns", eligibility: { pool_size: 0 } });
       return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns", auction_id: auctionId });
     }
     campaigns = data;
   } else {
     campaigns = demoCampaigns();
     if (campaigns.length === 0) {
+      emitLog("no_match", { no_fill_reason: "no_campaigns", eligibility: { pool_size: 0 } });
       return jsonRpc(res, body.id, { sponsored: null, reason: "no_campaigns", auction_id: auctionId });
     }
   }
@@ -421,33 +460,35 @@ async function handleGetSponsoredContent(body, args, res) {
   // Country code for geo_multiplier — Benna expects ISO-3166-1 alpha-2.
   const countryCode = (args.user_region || "").toUpperCase().slice(0, 2) || null;
 
-  const scored = campaigns
-    .filter((c) => eligible(c, region, lang))
-    .filter((c) => {
-      // Publisher format filter: respect the toggles in the developer dashboard.
-      // If developerFormats is null (demo mode or no toggles set), accept all.
-      if (!developerFormats) return true;
-      const fmt = c.format || "native";
-      // Explicit false = off; missing/undefined/true = on (generous default).
-      return developerFormats[fmt] !== false;
-    })
-    // Placement format gate: campaign format must match placement.format.
-    .filter((c) => !placement || (c.format || "native") === placement.format)
-    // Placement brand-safety: publisher's per-placement category / advertiser blocklists.
-    // (Also enforced as safety_multiplier=0 inside scorePrice; we filter early
-    // to skip the cost of a model call on doomed candidates.)
-    .filter((c) => !overlapsArr(c.iab_cat, excludedCats))
-    .filter((c) => !overlapsArr(c.adomain, excludedAdv))
-    // MCP-native targeting: surface, host_app, active_tools.
-    .filter((c) => mcpTargetingMatch(c, mcpCtx))
-    .map((c) => {
-      // Keep the legacy signal-based prediction for the dashboard's
-      // p_click / p_convert / signal_contributions readout — but use the
-      // protocol §9 price model (scorePrice) for the actual auction.
+  // Per-stage eligibility filtering — each step's count is captured into
+  // logCtx.eligibility so the dashboard can answer "which filter dropped
+  // my campaign?" without re-running the auction. Identical semantics to
+  // the original chained filters; just split for instrumentation.
+  const afterEligible        = campaigns.filter((c) => eligible(c, region, lang));
+  const afterFormatToggle    = afterEligible.filter((c) => {
+    if (!developerFormats) return true;
+    const fmt = c.format || "native";
+    return developerFormats[fmt] !== false;
+  });
+  const afterPlacementFormat = afterFormatToggle.filter((c) => !placement || (c.format || "native") === placement.format);
+  const afterBlocklistCat    = afterPlacementFormat.filter((c) => !overlapsArr(c.iab_cat, excludedCats));
+  const afterBlocklistAdv    = afterBlocklistCat.filter((c) => !overlapsArr(c.adomain, excludedAdv));
+  const afterMcp             = afterBlocklistAdv.filter((c) => mcpTargetingMatch(c, mcpCtx));
+
+  const candidatesScored = afterMcp.map((c) => {
+      // p_click / p_convert / signal_contributions for the dashboard
+      // "Why did this win" panel. scoreBid() reads the campaign's actual
+      // target_* columns to compute per-signal contributions; scorePrice()
+      // (below) handles the §9 auction pricing.
       const prediction = benna.scoreBid(bennaCtx, {
         target_cpa: c.target_cpa || c.bid_amount || 4.5,
         goal: c.optimization_goal || "target_cpa",
         format: c.format,
+        target_intent_tokens: c.target_intent_tokens || [],
+        target_active_tools: c.target_active_tools || [],
+        target_host_apps:    c.target_host_apps    || [],
+        target_surfaces:     c.target_surfaces     || [],
+        target_keywords:     c.target_keywords     || [],
       });
       const priced = benna.scorePrice({
         placement: scorePlacement,
@@ -476,9 +517,11 @@ async function handleGetSponsoredContent(body, args, res) {
       const effective_price_cpm = priced.price_cpm * (1 + kwBoost * 0.15);
       const selfPromote = publisherHost && campaignMatchesHost(c, publisherHost);
       return { c, prediction, priced, kwBoost, effective_price_cpm, selfPromote };
-    })
-    // Floor enforcement: drop bids that didn't clear the placement floor.
-    // Self-promote bypasses the floor (house ad always allowed to fill).
+    });
+
+  // Floor enforcement: drop bids that didn't clear the placement floor.
+  // Self-promote bypasses the floor (house ad always allowed to fill).
+  const scored = candidatesScored
     .filter((x) => x.effective_price_cpm > 0 && (x.selfPromote || x.effective_price_cpm >= effectiveFloor))
     // Self-promoted campaigns win first; among the rest, highest CPM wins.
     .sort((a, b) => {
@@ -486,8 +529,47 @@ async function handleGetSponsoredContent(body, args, res) {
       return b.effective_price_cpm - a.effective_price_cpm;
     });
 
+  // Materialize eligibility breakdown + candidates snapshot for the log.
+  const winnerObj = scored[0] || null;
+  logCtx.eligibility = {
+    pool_size:              campaigns.length,
+    after_eligible:         afterEligible.length,
+    after_format_toggle:    afterFormatToggle.length,
+    after_placement_format: afterPlacementFormat.length,
+    after_blocklist_cat:    afterBlocklistCat.length,
+    after_blocklist_adv:    afterBlocklistAdv.length,
+    after_mcp:              afterMcp.length,
+    after_floor:            scored.length,
+    drop_reasons: {
+      eligible:         campaigns.length            - afterEligible.length,
+      format_toggle:    afterEligible.length        - afterFormatToggle.length,
+      placement_format: afterFormatToggle.length    - afterPlacementFormat.length,
+      blocklist_cat:    afterPlacementFormat.length - afterBlocklistCat.length,
+      blocklist_adv:    afterBlocklistCat.length    - afterBlocklistAdv.length,
+      mcp:              afterBlocklistAdv.length    - afterMcp.length,
+      floor:            candidatesScored.length     - scored.length,
+    },
+  };
+  logCtx.candidates = candidatesScored.map((x) => ({
+    campaign_id:         x.c.id,
+    campaign_name:       x.c.name,
+    p_click:             x.prediction.p_click,
+    p_convert:           x.prediction.p_convert,
+    signal_contributions: x.prediction.signal_contributions,
+    price_cpm:           x.priced.price_cpm,
+    factors:             x.priced.factors,
+    kw_boost:            x.kwBoost,
+    effective_price_cpm: x.effective_price_cpm,
+    self_promote:        x.selfPromote,
+    won:                 winnerObj === x,
+  }));
+  // Resolve publisher fields for the log (best-effort; never block auction)
+  logCtx.publisher_id = developerId || null;
+  logCtx.publisher_domain = publisherHost || null;
+
   if (scored.length === 0) {
     const reason = effectiveFloor > 0 ? "below_floor" : "no_match";
+    emitLog(reason === "below_floor" ? "below_floor" : "no_match", { no_fill_reason: reason });
     return jsonRpc(res, body.id, { sponsored: null, reason, auction_id: auctionId });
   }
 
@@ -532,6 +614,11 @@ async function handleGetSponsoredContent(body, args, res) {
   let ctaUrl = w.cta_url || "";
   ctaUrl = appendQuery(ctaUrl, "bbx_auc", auctionId);
   ctaUrl = appendQuery(ctaUrl, "bbx_cmp", String(w.id));
+
+  emitLog("won", {
+    winner_campaign_id: String(w.id),
+    winning_price_cpm: +winner.effective_price_cpm.toFixed(4),
+  });
 
   return jsonRpc(res, body.id, {
     sponsored: {

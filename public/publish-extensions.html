@@ -97,6 +97,20 @@
   .footer-links a:hover { color: var(--ink); }
   .footer-copy { font-size: 13px; color: var(--muted); }
 
+  /* PRODUCT SHOT */
+  .product-shot { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 28px; max-width: 880px; margin: 28px auto 0; box-shadow: 0 2px 24px -8px rgba(15,15,26,0.10); }
+  .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
+  .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
+
+  /* SEE-IT (animated) section */
+  .see-it { padding: 40px 0 70px; }
+  .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
+  .see-it svg { display: block; width: 100%; height: auto; max-width: 760px; margin: 0 auto; }
+  .see-it .stage-caption { font-size: 14.5px; color: var(--ink-soft); text-align: center; margin-top: 20px; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .see-it h2.section-h { text-align: center; }
+  .see-it .section-eyebrow { display: block; text-align: center; }
+  .see-it .section-sub { text-align: center; max-width: 660px; margin-left: auto; margin-right: auto; }
+
   @media (max-width: 760px) {
     .nav-links { display: none; }
     .how-grid { grid-template-columns: 1fr; }
@@ -132,6 +146,104 @@
     <h1>Real revenue for AI extensions. <span class="grad">No surveillance, no malware.</span></h1>
     <p class="sub">Most extension monetization options are sketchy. Boost Boss is built for AI-native extensions — clean SDK, contextual ads, transparent reporting.</p>
     <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
+  </div>
+</section>
+
+<!-- SEE IT APPEAR -->
+<section class="see-it">
+  <div class="wrap">
+    <span class="section-eyebrow">See it appear</span>
+    <h2 class="section-h">Lives in your side panel.<br>Renders contextually with the page.</h2>
+    <p class="section-sub">Manifest v3 native. Service-worker safe. Targets from on-page context — never user surveillance.</p>
+    <div class="stage" aria-label="Animation: a sponsored block fades into the bottom of an extension side panel">
+      <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <style>
+          .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
+          @keyframes bb-rise {
+            0%, 30%   { opacity: 0; transform: translate(0, 22px); }
+            46%, 92%  { opacity: 1; transform: translate(0, 0); }
+            100%      { opacity: 0; transform: translate(0, 22px); }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .ad-block { animation: none; opacity: 1; transform: translate(0, 0); }
+          }
+        </style>
+
+        <!-- Laptop bezel + base -->
+        <rect x="32" y="22" width="696" height="382" rx="14" fill="#1F1F2E"/>
+        <rect x="44" y="34" width="672" height="358" rx="6" fill="#FFFFFF"/>
+        <rect x="14" y="404" width="732" height="14" rx="3" fill="#15151F"/>
+        <rect x="14" y="404" width="732" height="6" fill="#2A2A3A"/>
+        <circle cx="380" cy="29" r="2.3" fill="#0A0A14"/>
+
+        <!-- Browser chrome -->
+        <rect x="44" y="34" width="672" height="32" fill="#F1F1ED"/>
+        <circle cx="60" cy="50" r="5" fill="#FF5F57"/>
+        <circle cx="76" cy="50" r="5" fill="#FEBC2E"/>
+        <circle cx="92" cy="50" r="5" fill="#28C840"/>
+        <rect x="120" y="42" width="318" height="18" rx="9" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="132" y="55" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">🔒 nytimes.com/2026/04/29/article</text>
+        <rect x="450" y="42" width="20" height="20" rx="4" fill="#FF2D78"/>
+        <rect x="455" y="48" width="4" height="8" fill="#FFFFFF"/>
+        <rect x="461" y="48" width="4" height="8" fill="#FFFFFF"/>
+
+        <!-- Page content (left of side panel) -->
+        <rect x="44" y="66" width="424" height="326" fill="#FAFAF7"/>
+        <text x="64" y="100" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">The shifting landscape of AI</text>
+        <text x="64" y="118" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">infrastructure spend</text>
+        <text x="64" y="136" font-family="Inter, sans-serif" font-size="10" fill="#6B7280">Staff writers · April 29, 2026</text>
+        <rect x="64" y="148" width="384" height="92" rx="6" fill="#E5E4DD"/>
+        <text x="256" y="200" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="#9CA3AF">[ article hero image ]</text>
+        <text x="64" y="262" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">Demand for hosted AI services has tripled in</text>
+        <text x="64" y="278" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">the past year, but the bottleneck has shifted</text>
+        <text x="64" y="294" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">from raw compute to deployment surface area.</text>
+        <text x="64" y="310" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">Companies that once raced to buy GPUs are now</text>
+        <text x="64" y="326" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">racing to ship the right interface to use them.</text>
+        <text x="64" y="354" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">"It's no longer about model size," said one VP</text>
+        <text x="64" y="370" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">at a major cloud provider.</text>
+
+        <!-- Side panel (right) -->
+        <rect x="468" y="66" width="248" height="326" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <rect x="468" y="66" width="248" height="34" fill="#0F0F1A"/>
+        <circle cx="486" cy="83" r="9" fill="#FF2D78"/>
+        <text x="486" y="87" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">A</text>
+        <text x="503" y="87" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF">Article AI · Summarizer</text>
+        <text x="704" y="87" font-family="Inter, sans-serif" font-size="14" fill="#9CA3AF" text-anchor="end">×</text>
+
+        <!-- Tab bar -->
+        <rect x="468" y="100" width="248" height="28" fill="#F4F3EE"/>
+        <rect x="476" y="105" width="64" height="18" rx="5" fill="#FFFFFF"/>
+        <text x="508" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#0F0F1A">Summary</text>
+        <text x="560" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Q&amp;A</text>
+        <text x="608" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Sources</text>
+        <text x="676" y="118" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Notes</text>
+
+        <!-- AI summary content -->
+        <text x="484" y="152" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">KEY POINTS</text>
+        <text x="484" y="172" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">▸ AI infra demand tripled YoY</text>
+        <text x="484" y="190" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">▸ Bottleneck shifted from</text>
+        <text x="494" y="206" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">compute to deployment</text>
+        <text x="484" y="224" font-family="Inter, sans-serif" font-size="11" fill="#0F0F1A">▸ Integration is the new lever</text>
+
+        <text x="484" y="252" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">RELATED</text>
+        <text x="484" y="270" font-family="Inter, sans-serif" font-size="10.5" fill="#04BEFE">→ Why Vercel won deploys (TC)</text>
+        <text x="484" y="286" font-family="Inter, sans-serif" font-size="10.5" fill="#04BEFE">→ Replit's pivot to agents</text>
+
+        <!-- Sponsored block at bottom of side panel (animated) -->
+        <g class="ad-block">
+          <rect x="476" y="304" width="232" height="80" rx="10" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+          <text x="488" y="322" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
+          <rect x="488" y="332" width="36" height="36" rx="8" fill="#0F0F1A"/>
+          <text x="506" y="356" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">▲</text>
+          <text x="532" y="346" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds.</text>
+          <text x="532" y="360" font-family="Inter, sans-serif" font-size="10" fill="#4B4B5E">Free hobby · global edge</text>
+          <rect x="488" y="372" width="64" height="20" rx="5" fill="#0F0F1A"/>
+          <text x="520" y="386" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Try Free →</text>
+          <text x="556" y="386" font-family="Inter, sans-serif" font-size="9.5" fill="#9CA3AF">vercel.com</text>
+        </g>
+      </svg>
+      <div class="stage-caption">The sponsored block sits at the bottom of your panel, contextual to whatever the user is reading. Targeting comes from page DOM context — clean, surveillance-free.</div>
+    </div>
   </div>
 </section>
 
@@ -171,6 +283,84 @@
 });
 lumi.<span class="fn">render</span>(<span class="str">'#ad-slot'</span>);</pre>
     <p class="code-caption">Manifest v3 compatible. Works in service workers, content scripts, sidepanel, and popups. <a href="/docs/npm-sdk">Full docs →</a></p>
+
+    <!-- PRODUCT SHOT: Chrome side panel with AI extension and sponsored block -->
+    <div class="product-shot" aria-label="Sponsored block rendered inside a Chrome extension side panel">
+      <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <!-- Browser chrome -->
+        <rect x="0" y="0" width="720" height="440" fill="#FFFFFF"/>
+        <rect x="0" y="0" width="720" height="40" fill="#F1F1ED"/>
+        <circle cx="18" cy="20" r="6" fill="#FF5F57"/>
+        <circle cx="38" cy="20" r="6" fill="#FEBC2E"/>
+        <circle cx="58" cy="20" r="6" fill="#28C840"/>
+        <rect x="86" y="9" width="350" height="22" rx="11" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="98" y="24" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">🔒 nytimes.com/2026/04/29/article</text>
+        <!-- Side panel toggle icon -->
+        <rect x="448" y="9" width="22" height="22" rx="4" fill="#FF2D78"/>
+        <rect x="453" y="14" width="6" height="12" fill="#FFFFFF"/>
+        <rect x="461" y="14" width="6" height="12" fill="#FFFFFF"/>
+
+        <!-- Page content (left) -->
+        <rect x="0" y="40" width="430" height="400" fill="#FAFAF7"/>
+        <text x="24" y="78" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700" fill="#0F0F1A">The shifting landscape of AI</text>
+        <text x="24" y="98" font-family="Space Grotesk, sans-serif" font-size="16" font-weight="700" fill="#0F0F1A">infrastructure spend</text>
+        <text x="24" y="118" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">By staff writers · April 29, 2026 · 8 min read</text>
+
+        <rect x="24" y="138" width="382" height="120" rx="6" fill="#E5E4DD"/>
+        <text x="215" y="202" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" fill="#9CA3AF">[ article hero image ]</text>
+
+        <text x="24" y="284" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Demand for hosted AI services has tripled in</text>
+        <text x="24" y="302" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">the past year, but the bottleneck has shifted</text>
+        <text x="24" y="320" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">from raw compute to deployment surface area.</text>
+        <text x="24" y="338" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Companies that once raced to buy GPUs are now</text>
+        <text x="24" y="356" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">racing to ship the right interface to use them.</text>
+        <text x="24" y="384" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">"It's no longer about model size," said one</text>
+        <text x="24" y="402" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">VP at a major cloud provider. "The lever now</text>
+        <text x="24" y="420" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">is integration, not raw inference."</text>
+
+        <!-- Side panel (right) — the extension -->
+        <rect x="440" y="40" width="280" height="400" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <rect x="440" y="40" width="280" height="36" fill="#0F0F1A"/>
+        <circle cx="458" cy="58" r="9" fill="#FF2D78"/>
+        <text x="458" y="62" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">A</text>
+        <text x="476" y="62" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">Article AI · Summarizer</text>
+        <text x="704" y="62" font-family="Inter, sans-serif" font-size="14" fill="#9CA3AF" text-anchor="end">×</text>
+
+        <!-- Tab bar -->
+        <rect x="440" y="76" width="280" height="32" fill="#F4F3EE"/>
+        <rect x="448" y="82" width="68" height="20" rx="5" fill="#FFFFFF"/>
+        <text x="482" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" font-weight="600" fill="#0F0F1A">Summary</text>
+        <text x="540" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Q&amp;A</text>
+        <text x="592" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Sources</text>
+        <text x="668" y="96" text-anchor="middle" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">Notes</text>
+
+        <!-- AI summary content -->
+        <text x="456" y="132" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">KEY POINTS</text>
+        <text x="456" y="154" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">▸ AI infra demand tripled YoY</text>
+        <text x="456" y="174" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">▸ Bottleneck shifted from</text>
+        <text x="466" y="190" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">compute to deployment surface</text>
+        <text x="456" y="210" font-family="Inter, sans-serif" font-size="11.5" fill="#0F0F1A">▸ Integration is the new lever</text>
+
+        <text x="456" y="240" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">RELATED</text>
+        <text x="456" y="260" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE">→ Why Vercel won deploys (TC)</text>
+        <text x="456" y="278" font-family="Inter, sans-serif" font-size="11" fill="#04BEFE">→ Replit's pivot to agents</text>
+
+        <!-- Sponsored block at bottom of side panel (the star) -->
+        <rect x="448" y="298" width="264" height="120" rx="10" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+        <text x="460" y="316" font-family="Inter, sans-serif" font-size="9.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
+
+        <rect x="460" y="328" width="44" height="44" rx="9" fill="#0F0F1A"/>
+        <text x="482" y="358" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">▲</text>
+
+        <text x="514" y="342" font-family="Space Grotesk, sans-serif" font-size="12" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds.</text>
+        <text x="514" y="358" font-family="Inter, sans-serif" font-size="11" fill="#4B4B5E">Free hobby · global edge</text>
+
+        <rect x="460" y="386" width="84" height="22" rx="6" fill="#0F0F1A"/>
+        <text x="502" y="402" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">Try Free →</text>
+        <text x="556" y="402" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF">vercel.com</text>
+      </svg>
+      <div class="shot-caption">Side panel format. The extension owns the chrome — Lumi only renders the bordered card.</div>
+    </div>
   </div>
 </section>
 

@@ -19,6 +19,7 @@ const benna = require("./benna.js");
 const ledger = require("./_lib/ledger.js");
 const seats = require("./_lib/seats.js");
 const { mcpTargetingMatch } = require("./_lib/mcp_targeting.js");
+const auctionLog = require("./_lib/auction_log.js");
 
 // Verbose auction logging — on by default in non-production, opt-in via
 // BBX_DEBUG=1 in production. Errors always log; routine WIN/LOSS/NO_BID
@@ -501,26 +502,78 @@ module.exports = async function handler(req, res) {
     const seatbidBids = [];
     const persistOps = [];
     for (const imp of bidReq.imp) {
+      const impT0 = Date.now();
+      const auctionLogId = "auclog_" + String(bidReq.id) + ":" + String(imp.id || "0");
+      const pubDomainForLog = (bidReq.site && bidReq.site.domain) || (bidReq.app && bidReq.app.bundle) || null;
+      const impLogCtx = {
+        auction_id: auctionLogId,
+        surface: "rtb",
+        publisher_domain: pubDomainForLog,
+        publisher_id: (bidReq.ext && bidReq.ext.developer_id) || null,
+        integration_method: null, // OpenRTB path; integration_method is for SDK requests
+        is_sandbox: false,
+        request: {
+          bid_request_id: String(bidReq.id),
+          host: pubDomainForLog,
+          country: (bidReq.device && bidReq.device.geo && (bidReq.device.geo.country || "")) || null,
+          floor_cpm: Number(imp.bidfloor) || 0,
+          intent_tokens: [],
+          active_tools: [],
+        },
+      };
       const pool = filterEligible(campaigns, bidReq, imp, imp.bidfloor || 0);
-      if (pool.length === 0) continue;
+      if (pool.length === 0) {
+        auctionLog.recordAuction({
+          ...impLogCtx, outcome: "no_match", no_fill_reason: "no_eligible",
+          eligibility: { pool_size: campaigns.length, after_eligible: 0 },
+          latency_ms: Date.now() - impT0,
+        });
+        continue;
+      }
 
       const mcpCtx = contextFromBidRequest(bidReq, imp);
+      // Promote real intent/tools to log
+      impLogCtx.request.intent_tokens = mcpCtx.intent_tokens || [];
+      impLogCtx.request.active_tools  = mcpCtx.active_tools  || [];
+      impLogCtx.request.host_app      = mcpCtx.host_app      || null;
+      impLogCtx.request.surface       = mcpCtx.surface       || null;
 
       // Layer MCP-native targeting on top of OpenRTB-level eligibility.
       // Mirrors the JSON-RPC path in api/mcp.js so both auction surfaces
       // accept identical campaign targeting (target_active_tools, etc.).
       const mcpPool = pool.filter((c) => mcpTargetingMatch(c, mcpCtx));
-      if (mcpPool.length === 0) continue;
+      if (mcpPool.length === 0) {
+        auctionLog.recordAuction({
+          ...impLogCtx, outcome: "no_match", no_fill_reason: "no_mcp_match",
+          eligibility: {
+            pool_size: campaigns.length,
+            after_eligible: pool.length,
+            after_mcp: 0,
+            drop_reasons: { eligible: campaigns.length - pool.length, mcp: pool.length },
+          },
+          latency_ms: Date.now() - impT0,
+        });
+        continue;
+      }
 
       // Surface inference for protocol §9 (OpenRTB carries it in mcpCtx.surface)
       const surface = mcpCtx.surface || (imp.native ? "chat" : (imp.video ? "web" : "web"));
       // Country code for geo_multiplier (ISO-3166-1 alpha-2)
       const country = (bidReq.device && bidReq.device.geo && (bidReq.device.geo.country || "").toUpperCase().slice(0, 2)) || null;
 
+      // Capture each scored candidate for the auction log
+      const impCandidates = [];
       let best = null;
       for (const c of mcpPool) {
-        // Keep legacy signal-based scoring for the dashboard's signal_contributions
-        const score = benna.scoreBid(mcpCtx, { target_cpa: c.target_cpa, goal: "target_cpa", format: c.format });
+        // Targeting-overlap scoring for the dashboard's signal_contributions
+        const score = benna.scoreBid(mcpCtx, {
+          target_cpa: c.target_cpa, goal: "target_cpa", format: c.format,
+          target_intent_tokens: c.target_intent_tokens || [],
+          target_active_tools: c.target_active_tools || [],
+          target_host_apps:    c.target_host_apps    || [],
+          target_surfaces:     c.target_surfaces     || [],
+          target_keywords:     c.target_keywords     || [],
+        });
         // Protocol §9 price model — placement-aware, with floor
         const priced = benna.scorePrice({
           placement: {
@@ -546,16 +599,62 @@ module.exports = async function handler(req, res) {
             adomain: c.adomain || [],
           },
         });
+        impCandidates.push({
+          campaign_id: String(c.id),
+          campaign_name: c.name,
+          p_click: score.p_click,
+          p_convert: score.p_convert,
+          signal_contributions: score.signal_contributions,
+          price_cpm: priced.price_cpm,
+          factors: priced.factors,
+          self_promote: false,
+          won: false,
+          cleared_floor: priced.cleared_floor,
+        });
         if (!priced.cleared_floor) continue;
         if (!best || priced.price_cpm > best.priced.price_cpm) {
           best = { campaign: c, score, priced, effectiveBidUsd: priced.price_cpm / 1000 };
         }
       }
-      if (!best) continue;
+
+      const elig = {
+        pool_size:      campaigns.length,
+        after_eligible: pool.length,
+        after_mcp:      mcpPool.length,
+        after_floor:    impCandidates.filter((x) => x.cleared_floor).length,
+        drop_reasons: {
+          eligible: campaigns.length - pool.length,
+          mcp:      pool.length      - mcpPool.length,
+          floor:    impCandidates.length - impCandidates.filter((x) => x.cleared_floor).length,
+        },
+      };
+
+      if (!best) {
+        auctionLog.recordAuction({
+          ...impLogCtx, outcome: "below_floor", no_fill_reason: "below_floor",
+          eligibility: elig,
+          candidates: impCandidates,
+          latency_ms: Date.now() - impT0,
+        });
+        continue;
+      }
       const bid = buildBid(imp, best.campaign, best.score, bidReq);
+      // Mark the winner in the candidate list
+      const winnerCid = String(best.campaign.id);
+      for (const cand of impCandidates) if (cand.campaign_id === winnerCid) cand.won = true;
+
+      auctionLog.recordAuction({
+        ...impLogCtx, outcome: "won",
+        winner_campaign_id: winnerCid,
+        winning_price_cpm: +best.priced.price_cpm.toFixed(4),
+        eligibility: elig,
+        candidates: impCandidates,
+        latency_ms: Date.now() - impT0,
+      });
+
       seatbidBids.push(bid);
       // Persist asynchronously — don't make the auction wait on disk
-      const pubDomain = (bidReq.site && bidReq.site.domain) || (bidReq.app && bidReq.app.bundle) || null;
+      const pubDomain = pubDomainForLog;
       persistOps.push(ledger.recordBid(bidReq.id, bid, best.campaign.id, auth.seat.seat_id, {
         developer_id: (bidReq.ext && bidReq.ext.developer_id) || null,
         developer_domain: pubDomain,

@@ -97,6 +97,20 @@
   .footer-links a:hover { color: var(--ink); }
   .footer-copy { font-size: 13px; color: var(--muted); }
 
+  /* PRODUCT SHOT */
+  .product-shot { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 28px; max-width: 880px; margin: 28px auto 0; box-shadow: 0 2px 24px -8px rgba(15,15,26,0.10); }
+  .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
+  .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
+
+  /* SEE-IT (animated) section */
+  .see-it { padding: 40px 0 70px; }
+  .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
+  .see-it svg { display: block; width: 100%; height: auto; max-width: 760px; margin: 0 auto; }
+  .see-it .stage-caption { font-size: 14.5px; color: var(--ink-soft); text-align: center; margin-top: 20px; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .see-it h2.section-h { text-align: center; }
+  .see-it .section-eyebrow { display: block; text-align: center; }
+  .see-it .section-sub { text-align: center; max-width: 660px; margin-left: auto; margin-right: auto; }
+
   @media (max-width: 760px) {
     .nav-links { display: none; }
     .how-grid { grid-template-columns: 1fr; }
@@ -132,6 +146,125 @@
     <h1>Turn your AI bot into a <span class="grad">revenue-generating business</span>.</h1>
     <p class="sub">Lumi API for Bots — one REST call from your bot's response handler. Works with Discord, Telegram, Slack, and any platform your bot lives on. Any LLM. Any framework. Optional per-platform helper libraries available.</p>
     <a class="btn btn-primary btn-lg" href="/publish/signup">Start as a publisher →</a>
+  </div>
+</section>
+
+<!-- SEE IT APPEAR -->
+<section class="see-it">
+  <div class="wrap">
+    <span class="section-eyebrow">See it appear</span>
+    <h2 class="section-h">Your bot replies first.<br>The sponsored message arrives right after.</h2>
+    <p class="section-sub">Same campaign renders natively on Discord, Telegram, and Slack — embed, card, or attachment, depending on the platform. Helper libs handle the formatting.</p>
+    <div class="stage" aria-label="Animation: a sponsored card slides up after a bot reply on a Telegram phone screen">
+      <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <style>
+          .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
+          @keyframes bb-rise {
+            0%, 32%   { opacity: 0; transform: translate(0, 28px); }
+            48%, 92%  { opacity: 1; transform: translate(0, 0); }
+            100%      { opacity: 0; transform: translate(0, 28px); }
+          }
+          .typing { animation: bb-typing 5.2s ease-in-out infinite; }
+          @keyframes bb-typing {
+            0%, 18% { opacity: 1; }
+            28%, 100% { opacity: 0; }
+          }
+          .reply { animation: bb-reply 5.2s ease-in-out infinite; }
+          @keyframes bb-reply {
+            0%, 18% { opacity: 0; }
+            28%, 100% { opacity: 1; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .ad-block, .reply { animation: none; opacity: 1; transform: translate(0, 0); }
+            .typing { animation: none; opacity: 0; }
+          }
+        </style>
+
+        <!-- Backdrop pattern -->
+        <rect x="0" y="0" width="760" height="440" fill="#FAFAF7"/>
+
+        <!-- Phone frame (centered) -->
+        <rect x="290" y="20" width="220" height="406" rx="32" fill="#1F1F2E"/>
+        <rect x="298" y="28" width="204" height="390" rx="26" fill="#FFFFFF"/>
+        <!-- Notch -->
+        <rect x="370" y="34" width="60" height="14" rx="7" fill="#1F1F2E"/>
+
+        <!-- Telegram chat header -->
+        <rect x="298" y="58" width="204" height="36" fill="#5288C1"/>
+        <text x="318" y="80" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF">←</text>
+        <circle cx="338" cy="76" r="11" fill="#FFFFFF"/>
+        <text x="338" y="80" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#5288C1">D</text>
+        <text x="356" y="74" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">DocBot</text>
+        <text x="356" y="86" font-family="Inter, sans-serif" font-size="9" fill="#D6E5F2">@docbot · online</text>
+
+        <!-- Chat backdrop pattern (subtle) -->
+        <rect x="298" y="94" width="204" height="296" fill="#E7EBF0"/>
+
+        <!-- User message bubble (right) -->
+        <rect x="370" y="108" width="124" height="40" rx="10" fill="#EFFDDE"/>
+        <text x="380" y="125" font-family="Inter, sans-serif" font-size="10" fill="#0F0F1A">How do I deploy a</text>
+        <text x="380" y="139" font-family="Inter, sans-serif" font-size="10" fill="#0F0F1A">Python app?</text>
+        <text x="486" y="148" text-anchor="end" font-family="Inter, sans-serif" font-size="7" fill="#9CA3AF">10:24 ✓✓</text>
+
+        <!-- Typing indicator (visible 0-18%) -->
+        <g class="typing">
+          <rect x="306" y="158" width="60" height="22" rx="10" fill="#FFFFFF"/>
+          <circle cx="320" cy="169" r="2.6" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="330" cy="169" r="2.6" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="340" cy="169" r="2.6" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.4s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Bot reply bubble (visible 18-100%) -->
+        <g class="reply">
+          <rect x="306" y="158" width="172" height="50" rx="10" fill="#FFFFFF"/>
+          <text x="316" y="175" font-family="Inter, sans-serif" font-size="10" fill="#0F0F1A">Railway and Fly.io are</text>
+          <text x="316" y="189" font-family="Inter, sans-serif" font-size="10" fill="#0F0F1A">both solid options.</text>
+          <text x="470" y="204" text-anchor="end" font-family="Inter, sans-serif" font-size="7" fill="#9CA3AF">10:24</text>
+        </g>
+
+        <!-- Sponsored attachment card (animated reveal) -->
+        <g class="ad-block">
+          <rect x="306" y="218" width="186" height="156" rx="10" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+          <rect x="306" y="218" width="186" height="56" rx="10" fill="#0F0F1A"/>
+          <rect x="306" y="258" width="186" height="16" fill="#0F0F1A"/>
+          <text x="399" y="252" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
+          <text x="316" y="290" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
+          <text x="316" y="306" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
+          <text x="316" y="322" font-family="Inter, sans-serif" font-size="9.5" fill="#4B4B5E">Free hobby plan, git-push</text>
+          <text x="316" y="334" font-family="Inter, sans-serif" font-size="9.5" fill="#4B4B5E">to deploy, global edge.</text>
+          <rect x="316" y="344" width="74" height="22" rx="5" fill="#5288C1"/>
+          <text x="353" y="359" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Try Free</text>
+          <text x="396" y="358" font-family="Inter, sans-serif" font-size="8.5" fill="#9CA3AF">vercel.com</text>
+        </g>
+
+        <!-- Composer -->
+        <rect x="298" y="390" width="204" height="28" fill="#F4F3EE"/>
+        <rect x="306" y="395" width="160" height="18" rx="9" fill="#FFFFFF"/>
+        <text x="316" y="408" font-family="Inter, sans-serif" font-size="9" fill="#9CA3AF">Message…</text>
+        <circle cx="482" cy="404" r="9" fill="#5288C1"/>
+        <text x="482" y="408" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#FFFFFF">→</text>
+
+        <!-- Side label -->
+        <text x="160" y="220" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Discord</text>
+        <text x="160" y="240" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#5288C1">Telegram</text>
+        <text x="160" y="260" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Slack</text>
+        <text x="160" y="284" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">One campaign. Three</text>
+        <text x="160" y="298" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">native message types.</text>
+
+        <text x="600" y="220" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#0F0F1A">→ Embed</text>
+        <text x="600" y="240" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#0F0F1A">→ Card</text>
+        <text x="600" y="260" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#0F0F1A">→ Attachment</text>
+        <text x="600" y="284" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">Helper libs format</text>
+        <text x="600" y="298" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">per platform.</text>
+      </svg>
+      <div class="stage-caption">Phone-shaped Telegram preview shown here. The same Lumi API for Bots response can be formatted as a Discord embed, Slack attachment, or Telegram card — see the static preview below for all three side-by-side.</div>
+    </div>
   </div>
 </section>
 
@@ -178,6 +311,113 @@ message.<span class="fn">reply</span>({
   embeds: [<span class="fn">toDiscordEmbed</span>(ad)]   <span class="cm">// from optional @boostbossai/lumi-discord</span>
 });</pre>
     <p class="code-caption">Optional helper libraries (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) are convenience wrappers around the Lumi API for Bots — they format the ad payload into each platform's native message type. Skip them and roll your own formatting if you'd rather not add a dependency. <a href="/docs/rest-api">Full docs →</a></p>
+
+    <!-- PRODUCT SHOT: Discord / Telegram / Slack message previews side by side -->
+    <div class="product-shot" aria-label="Sponsored block rendered on Discord, Telegram, and Slack">
+      <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <rect x="0" y="0" width="720" height="440" fill="#FAFAF7"/>
+
+        <!-- Column 1: DISCORD -->
+        <rect x="16" y="16" width="220" height="408" rx="10" fill="#36393F"/>
+        <rect x="16" y="16" width="220" height="32" rx="10" fill="#2F3136"/>
+        <rect x="16" y="40" width="220" height="8" fill="#2F3136"/>
+        <text x="32" y="36" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#DCDDDE"># general</text>
+        <!-- User msg -->
+        <circle cx="40" cy="74" r="13" fill="#5865F2"/>
+        <text x="40" y="78" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">U</text>
+        <text x="60" y="69" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">user</text>
+        <text x="60" y="86" font-family="Inter, sans-serif" font-size="11" fill="#DCDDDE">/ask How do I deploy a Python app?</text>
+        <!-- Bot reply -->
+        <circle cx="40" cy="124" r="13" fill="#FF2D78"/>
+        <text x="40" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">B</text>
+        <text x="60" y="119" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">DocBot</text>
+        <rect x="60" y="129" width="14" height="11" rx="2" fill="#5865F2"/>
+        <text x="67" y="138" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#FFFFFF">APP</text>
+        <text x="60" y="156" font-family="Inter, sans-serif" font-size="10.5" fill="#DCDDDE">Railway and Fly.io are the</text>
+        <text x="60" y="171" font-family="Inter, sans-serif" font-size="10.5" fill="#DCDDDE">two fastest options.</text>
+        <!-- Embed (sponsored) -->
+        <rect x="60" y="184" width="160" height="200" fill="#2F3136" stroke="#FF2D78" stroke-width="2"/>
+        <rect x="60" y="184" width="4" height="200" fill="#FF2D78"/>
+        <text x="72" y="202" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#FF6FA8" letter-spacing="0.4">SPONSORED · Vercel</text>
+        <text x="72" y="222" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">Deploy in seconds.</text>
+        <text x="72" y="237" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">Scale forever.</text>
+        <text x="72" y="259" font-family="Inter, sans-serif" font-size="10" fill="#B9BBBE">Free hobby plan, git-push</text>
+        <text x="72" y="273" font-family="Inter, sans-serif" font-size="10" fill="#B9BBBE">to deploy, global edge.</text>
+        <rect x="72" y="290" width="136" height="62" rx="4" fill="#000000"/>
+        <text x="140" y="326" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
+        <text x="72" y="370" font-family="Inter, sans-serif" font-size="9.5" fill="#04BEFE">vercel.com</text>
+        <text x="200" y="370" text-anchor="end" font-family="Inter, sans-serif" font-size="9.5" fill="#72767D">Try Free →</text>
+
+        <text x="126" y="412" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#9CA3AF" letter-spacing="0.4">DISCORD</text>
+
+        <!-- Column 2: TELEGRAM -->
+        <rect x="252" y="16" width="220" height="408" rx="10" fill="#E7EBF0"/>
+        <rect x="252" y="16" width="220" height="36" rx="10" fill="#5288C1"/>
+        <rect x="252" y="44" width="220" height="8" fill="#5288C1"/>
+        <text x="364" y="38" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF">DocBot · @docbot</text>
+        <!-- User msg (right) -->
+        <rect x="320" y="64" width="140" height="40" rx="10" fill="#EFFDDE"/>
+        <text x="332" y="84" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">How do I deploy a</text>
+        <text x="332" y="98" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">Python app?</text>
+        <!-- Bot reply (left) — answer + sponsored card -->
+        <rect x="264" y="118" width="184" height="44" rx="10" fill="#FFFFFF"/>
+        <text x="276" y="138" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">Railway and Fly.io are</text>
+        <text x="276" y="152" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">both solid options.</text>
+        <!-- Sponsored card (sent right after) -->
+        <rect x="264" y="174" width="200" height="210" rx="10" fill="#FFFFFF" stroke="#FF2D78" stroke-width="2"/>
+        <rect x="264" y="174" width="200" height="64" rx="10" fill="#0F0F1A"/>
+        <rect x="264" y="220" width="200" height="20" fill="#0F0F1A"/>
+        <text x="364" y="212" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
+        <text x="276" y="258" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
+        <text x="276" y="278" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#0F0F1A">Deploy in seconds.</text>
+        <text x="276" y="294" font-family="Inter, sans-serif" font-size="10.5" fill="#4B4B5E">Free hobby plan,</text>
+        <text x="276" y="308" font-family="Inter, sans-serif" font-size="10.5" fill="#4B4B5E">git-push to deploy.</text>
+        <rect x="276" y="320" width="80" height="22" rx="5" fill="#5288C1"/>
+        <text x="316" y="335" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#FFFFFF">Try Free</text>
+        <text x="276" y="358" font-family="Inter, sans-serif" font-size="9.5" fill="#9CA3AF">vercel.com</text>
+        <!-- Composer -->
+        <rect x="264" y="394" width="200" height="22" rx="11" fill="#FFFFFF"/>
+        <text x="276" y="409" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF">Message…</text>
+
+        <text x="362" y="428" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#9CA3AF" letter-spacing="0.4">TELEGRAM</text>
+
+        <!-- Column 3: SLACK -->
+        <rect x="488" y="16" width="216" height="408" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <rect x="488" y="16" width="216" height="32" rx="10" fill="#350D36"/>
+        <rect x="488" y="40" width="216" height="8" fill="#350D36"/>
+        <text x="504" y="36" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#FFFFFF"># engineering</text>
+        <!-- User msg -->
+        <rect x="500" y="62" width="22" height="22" rx="4" fill="#36C5F0"/>
+        <text x="500" y="80" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#0F0F1A">user</text>
+        <text x="540" y="79" font-family="Inter, sans-serif" font-size="9" fill="#9CA3AF">10:24 AM</text>
+        <text x="500" y="98" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">@docbot how do I deploy?</text>
+        <!-- Bot reply -->
+        <rect x="500" y="116" width="22" height="22" rx="4" fill="#FF2D78"/>
+        <text x="511" y="132" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#FFFFFF">D</text>
+        <text x="528" y="129" font-family="Inter, sans-serif" font-size="11" font-weight="700" fill="#0F0F1A">DocBot</text>
+        <rect x="566" y="119" width="20" height="11" rx="2" fill="#1264A3"/>
+        <text x="576" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="8" font-weight="700" fill="#FFFFFF">APP</text>
+        <text x="624" y="129" font-family="Inter, sans-serif" font-size="9" fill="#9CA3AF">10:24 AM</text>
+        <text x="500" y="148" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">Railway and Fly.io are both</text>
+        <text x="500" y="162" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">solid choices for Python.</text>
+
+        <!-- Slack attachment style (vertical bar on left) -->
+        <rect x="500" y="180" width="190" height="208" fill="#FFFFFF"/>
+        <rect x="500" y="180" width="3" height="208" fill="#FF2D78"/>
+        <text x="510" y="198" font-family="Inter, sans-serif" font-size="9" font-weight="700" fill="#E01E65" letter-spacing="0.4">SPONSORED · Vercel</text>
+        <text x="510" y="218" font-family="Inter, sans-serif" font-size="11.5" font-weight="700" fill="#1264A3">Vercel — Deploy in seconds</text>
+        <text x="510" y="236" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">Free hobby plan, git-push</text>
+        <text x="510" y="250" font-family="Inter, sans-serif" font-size="10.5" fill="#0F0F1A">to deploy, global edge.</text>
+        <rect x="510" y="262" width="170" height="80" rx="6" fill="#0F0F1A"/>
+        <text x="595" y="312" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">▲ Vercel</text>
+        <rect x="510" y="354" width="68" height="22" rx="4" fill="#FFFFFF" stroke="#1264A3" stroke-width="1"/>
+        <text x="544" y="369" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="600" fill="#1264A3">Try Free</text>
+        <text x="588" y="369" font-family="Inter, sans-serif" font-size="9.5" fill="#9CA3AF">vercel.com</text>
+
+        <text x="596" y="412" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#9CA3AF" letter-spacing="0.4">SLACK</text>
+      </svg>
+      <div class="shot-caption">Same campaign, three native message formats. The helper libs (<code>lumi-discord</code>, <code>lumi-telegram</code>, <code>lumi-slack</code>) handle the platform-specific formatting.</div>
+    </div>
   </div>
 </section>
 

@@ -103,6 +103,20 @@
   .footer-links a:hover { color: var(--ink); }
   .footer-copy { font-size: 13px; color: var(--muted); }
 
+  /* PRODUCT SHOT */
+  .product-shot { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 28px; max-width: 880px; margin: 28px auto 0; box-shadow: 0 2px 24px -8px rgba(15,15,26,0.10); }
+  .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
+  .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
+
+  /* SEE-IT (animated) section */
+  .see-it { padding: 40px 0 70px; }
+  .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
+  .see-it svg { display: block; width: 100%; height: auto; max-width: 760px; margin: 0 auto; }
+  .see-it .stage-caption { font-size: 14.5px; color: var(--ink-soft); text-align: center; margin-top: 20px; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .see-it h2.section-h { text-align: center; }
+  .see-it .section-eyebrow { display: block; text-align: center; }
+  .see-it .section-sub { text-align: center; max-width: 660px; margin-left: auto; margin-right: auto; }
+
   @media (max-width: 760px) {
     .nav-links { display: none; }
     .how-grid { grid-template-columns: 1fr; }
@@ -141,6 +155,112 @@
   </div>
 </section>
 
+<!-- SEE IT APPEAR -->
+<section class="see-it">
+  <div class="wrap">
+    <span class="section-eyebrow">See it appear</span>
+    <h2 class="section-h">Drop a slot. Watch the ad render in.<br>Style stays yours.</h2>
+    <p class="section-sub">A <code>&lt;div data-lumi-slot&gt;</code> placed wherever you want it. Lumi only renders the inner card — your typography, spacing, and chrome carry through.</p>
+    <div class="stage" aria-label="Animation: a sponsored card slides into a web AI chat conversation">
+      <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <style>
+          .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
+          @keyframes bb-rise {
+            0%, 28%   { opacity: 0; transform: translate(0, 26px); }
+            44%, 92%  { opacity: 1; transform: translate(0, 0); }
+            100%      { opacity: 0; transform: translate(0, 26px); }
+          }
+          .typing { animation: bb-typing 5.2s ease-in-out infinite; }
+          @keyframes bb-typing {
+            0%, 22% { opacity: 1; }
+            32%, 100% { opacity: 0; }
+          }
+          .answer { animation: bb-answer 5.2s ease-in-out infinite; transform-box: fill-box; }
+          @keyframes bb-answer {
+            0%, 18% { opacity: 0; }
+            32%, 100% { opacity: 1; }
+          }
+          @media (prefers-reduced-motion: reduce) {
+            .ad-block, .answer { animation: none; opacity: 1; transform: translate(0, 0); }
+            .typing { animation: none; opacity: 0; }
+          }
+        </style>
+
+        <!-- Laptop bezel + base -->
+        <rect x="32" y="22" width="696" height="382" rx="14" fill="#1F1F2E"/>
+        <rect x="44" y="34" width="672" height="358" rx="6" fill="#FFFFFF"/>
+        <rect x="14" y="404" width="732" height="14" rx="3" fill="#15151F"/>
+        <rect x="14" y="404" width="732" height="6" fill="#2A2A3A"/>
+        <circle cx="380" cy="29" r="2.3" fill="#0A0A14"/>
+
+        <!-- Browser chrome -->
+        <rect x="44" y="34" width="672" height="32" fill="#F1F1ED"/>
+        <circle cx="60" cy="50" r="5" fill="#FF5F57"/>
+        <circle cx="76" cy="50" r="5" fill="#FEBC2E"/>
+        <circle cx="92" cy="50" r="5" fill="#28C840"/>
+        <rect x="142" y="42" width="448" height="18" rx="9" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="154" y="55" font-family="Inter, sans-serif" font-size="10.5" fill="#6B7280">🔒 chat.myaiapp.com/c/abc123</text>
+
+        <!-- App sidebar -->
+        <rect x="44" y="66" width="156" height="326" fill="#0F0F1A"/>
+        <text x="60" y="90" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">MyAI</text>
+        <rect x="58" y="104" width="128" height="26" rx="7" fill="#FF2D78"/>
+        <text x="66" y="121" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">+ New chat</text>
+        <text x="60" y="152" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">TODAY</text>
+        <rect x="58" y="162" width="128" height="22" rx="6" fill="#1F1F2E"/>
+        <text x="66" y="177" font-family="Inter, sans-serif" font-size="10.5" fill="#E5E7EB">Python deploy options</text>
+        <text x="66" y="200" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Refactor my router</text>
+        <text x="66" y="220" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Bug in checkout</text>
+
+        <!-- User msg -->
+        <rect x="436" y="86" width="272" height="36" rx="12" fill="#0F0F1A"/>
+        <text x="450" y="109" font-family="Inter, sans-serif" font-size="12" fill="#FFFFFF">What's the fastest way to deploy?</text>
+
+        <!-- Typing indicator (visible 0-22% of loop) -->
+        <g class="typing">
+          <text x="220" y="156" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
+          <circle cx="220" cy="180" r="3.5" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="232" cy="180" r="3.5" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle cx="244" cy="180" r="3.5" fill="#9CA3AF">
+            <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" begin="0.4s" repeatCount="indefinite"/>
+          </circle>
+        </g>
+
+        <!-- Answer (fades in at 18-32%) -->
+        <g class="answer">
+          <text x="220" y="156" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
+          <text x="220" y="178" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">For Python apps, Railway and Fly.io are both</text>
+          <text x="220" y="195" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">solid choices. Railway has zero-config git push;</text>
+          <text x="220" y="212" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Fly.io gives you global edge regions.</text>
+        </g>
+
+        <!-- Sponsored slot rendered by Lumi (animated reveal) -->
+        <g class="ad-block">
+          <rect x="220" y="232" width="488" height="118" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+          <text x="232" y="251" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
+          <text x="696" y="251" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+          <rect x="232" y="264" width="64" height="74" rx="10" fill="#0F0F1A"/>
+          <text x="264" y="308" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="30" font-weight="700" fill="#FFFFFF">▲</text>
+          <text x="308" y="280" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
+          <text x="308" y="298" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
+          <rect x="308" y="310" width="92" height="26" rx="7" fill="#0F0F1A"/>
+          <text x="354" y="328" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+          <text x="414" y="328" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">vercel.com</text>
+        </g>
+
+        <!-- Composer at bottom -->
+        <rect x="220" y="366" width="488" height="26" rx="13" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="232" y="383" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Send a message…</text>
+      </svg>
+      <div class="stage-caption">The card renders inline with your chat layout. You control the slot position, the surrounding spacing, and what comes after — Lumi just fills in the bordered card with the sponsored content.</div>
+    </div>
+  </div>
+</section>
+
 <section>
   <div class="wrap">
     <span class="section-eyebrow">How it works</span>
@@ -176,6 +296,71 @@
 
 <span class="tag">&lt;div</span> <span class="attr">data-lumi-slot</span>=<span class="str">"banner"</span><span class="tag">&gt;&lt;/div&gt;</span></pre>
     <p class="code-caption">That's the entire integration. Same snippet for OpenAI, Anthropic, Gemini, LangChain, Vercel AI SDK, CrewAI — Lumi works at the rendering surface, not the agent logic. <a href="/docs/js-snippet">Full docs →</a></p>
+
+    <!-- PRODUCT SHOT: AI app with sidebar + inline sponsored card -->
+    <div class="product-shot" aria-label="Sponsored card rendered inline in a web AI chat app">
+      <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <!-- Browser chrome -->
+        <rect x="0" y="0" width="720" height="440" fill="#FFFFFF"/>
+        <rect x="0" y="0" width="720" height="40" fill="#F1F1ED"/>
+        <circle cx="18" cy="20" r="6" fill="#FF5F57"/>
+        <circle cx="38" cy="20" r="6" fill="#FEBC2E"/>
+        <circle cx="58" cy="20" r="6" fill="#28C840"/>
+        <rect x="86" y="11" width="22" height="18" rx="4" fill="#E5E4DD"/>
+        <rect x="114" y="11" width="22" height="18" rx="4" fill="#E5E4DD"/>
+        <rect x="148" y="9" width="468" height="22" rx="11" fill="#FFFFFF" stroke="#D8D7CF" stroke-width="1"/>
+        <text x="160" y="24" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">🔒 chat.myaiapp.com/c/abc123</text>
+
+        <!-- Left sidebar (AI app's own UI) -->
+        <rect x="0" y="40" width="160" height="400" fill="#0F0F1A"/>
+        <text x="16" y="64" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#FFFFFF">MyAI</text>
+        <rect x="14" y="78" width="132" height="28" rx="7" fill="#FF2D78"/>
+        <text x="22" y="96" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#FFFFFF">+ New chat</text>
+        <text x="16" y="128" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">TODAY</text>
+        <rect x="14" y="138" width="132" height="22" rx="6" fill="#1F1F2E"/>
+        <text x="22" y="153" font-family="Inter, sans-serif" font-size="10.5" fill="#E5E7EB">Python deploy options</text>
+        <text x="22" y="178" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Refactor my router</text>
+        <text x="22" y="198" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Bug in checkout</text>
+        <text x="16" y="226" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#6B7280" letter-spacing="0.6">YESTERDAY</text>
+        <text x="22" y="244" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Postgres index plan</text>
+        <text x="22" y="264" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF">Stripe webhook flow</text>
+
+        <!-- Main chat area -->
+        <!-- User message -->
+        <rect x="436" y="60" width="248" height="36" rx="12" fill="#0F0F1A"/>
+        <text x="450" y="83" font-family="Inter, sans-serif" font-size="12" fill="#FFFFFF">What's the fastest way to deploy?</text>
+
+        <!-- Assistant response -->
+        <text x="184" y="128" font-family="Space Grotesk, sans-serif" font-size="11" font-weight="700" fill="#9CA3AF" letter-spacing="0.6">ASSISTANT</text>
+        <text x="184" y="148" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">For Python apps, Railway and Fly.io are both</text>
+        <text x="184" y="166" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">solid choices. Railway has zero-config git push;</text>
+        <text x="184" y="184" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Fly.io gives you global edge regions.</text>
+
+        <!-- Sponsored slot rendered by Lumi (the star) -->
+        <rect x="184" y="204" width="500" height="120" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+        <text x="196" y="223" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
+        <text x="672" y="223" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+
+        <rect x="196" y="236" width="68" height="76" rx="10" fill="#0F0F1A"/>
+        <text x="230" y="282" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="32" font-weight="700" fill="#FFFFFF">▲</text>
+
+        <text x="276" y="252" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
+        <text x="276" y="270" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
+        <rect x="276" y="282" width="92" height="26" rx="7" fill="#0F0F1A"/>
+        <text x="322" y="300" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+        <text x="382" y="300" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">vercel.com</text>
+
+        <!-- Continued reply -->
+        <text x="184" y="346" font-family="Inter, sans-serif" font-size="12" fill="#0F0F1A">Want me to walk through Railway's deploy flow?</text>
+
+        <!-- Composer -->
+        <rect x="184" y="384" width="500" height="36" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="196" y="406" font-family="Inter, sans-serif" font-size="12" fill="#9CA3AF">Send a message…</text>
+        <circle cx="668" cy="402" r="11" fill="#FF2D78"/>
+        <text x="668" y="406" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="700" fill="#FFFFFF">↑</text>
+      </svg>
+      <div class="shot-caption">A <code>&lt;div data-lumi-slot&gt;</code> placed below an answer. Style it to match your app — Lumi only renders the inner card.</div>
+    </div>
   </div>
 </section>
 

@@ -108,6 +108,20 @@
   .faq-item h4 { font-size: 17px; font-weight: 700; margin-bottom: 8px; color: var(--ink); }
   .faq-item p { font-size: 15.5px; color: var(--ink-soft); line-height: 1.55; }
 
+  /* PRODUCT SHOT */
+  .product-shot { background: #fff; border: 1.5px solid var(--line); border-radius: 18px; padding: 26px 28px; max-width: 880px; margin: 28px auto 0; box-shadow: 0 2px 24px -8px rgba(15,15,26,0.10); }
+  .product-shot .shot-caption { font-size: 14px; color: var(--ink-soft); text-align: center; margin-top: 16px; }
+  .product-shot svg { display: block; width: 100%; height: auto; max-width: 720px; margin: 0 auto; border-radius: 10px; overflow: hidden; }
+
+  /* SEE-IT (animated) section */
+  .see-it { padding: 40px 0 70px; }
+  .see-it .stage { background: linear-gradient(140deg, rgba(255,45,120,0.05), rgba(4,190,254,0.05)); border: 1.5px solid var(--line); border-radius: 22px; padding: 32px 28px 28px; max-width: 940px; margin: 32px auto 0; }
+  .see-it svg { display: block; width: 100%; height: auto; max-width: 760px; margin: 0 auto; }
+  .see-it .stage-caption { font-size: 14.5px; color: var(--ink-soft); text-align: center; margin-top: 20px; max-width: 680px; margin-left: auto; margin-right: auto; }
+  .see-it h2.section-h { text-align: center; }
+  .see-it .section-eyebrow { display: block; text-align: center; }
+  .see-it .section-sub { text-align: center; max-width: 660px; margin-left: auto; margin-right: auto; }
+
   /* CTA FOOTER */
   .cta-footer { padding: 90px 0 110px; text-align: center; }
   .cta-footer h2 { font-size: clamp(28px, 4vw, 42px); font-weight: 700; margin-bottom: 14px; }
@@ -165,6 +179,98 @@
   </div>
 </section>
 
+<!-- SEE IT APPEAR -->
+<section class="see-it">
+  <div class="wrap">
+    <span class="section-eyebrow">See it appear</span>
+    <h2 class="section-h">When your tool runs, your output renders first.<br>The sponsored block slides in after.</h2>
+    <p class="section-sub">No interruption. No latency. The user always gets your tool result before they see the ad.</p>
+    <div class="stage" aria-label="Animation: a sponsored block slides into a Claude Desktop tool response">
+      <svg viewBox="0 0 760 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <style>
+          .ad-block { animation: bb-rise 5.2s ease-in-out infinite; transform-box: fill-box; }
+          @keyframes bb-rise {
+            0%, 28%   { opacity: 0; transform: translate(0, 26px); }
+            44%, 92%  { opacity: 1; transform: translate(0, 0); }
+            100%      { opacity: 0; transform: translate(0, 26px); }
+          }
+          .dot { animation: bb-pulse 1.4s ease-in-out infinite; opacity: 0.35; }
+          .dot:nth-of-type(2) { animation-delay: 0.18s; }
+          .dot:nth-of-type(3) { animation-delay: 0.36s; }
+          @keyframes bb-pulse { 0%, 60%, 100% { opacity: 0.35; } 30% { opacity: 1; } }
+          @media (prefers-reduced-motion: reduce) {
+            .ad-block { animation: none; opacity: 1; transform: translate(0, 0); }
+            .dot { animation: none; opacity: 0.6; }
+          }
+        </style>
+
+        <!-- Laptop bezel + base -->
+        <rect x="32" y="22" width="696" height="382" rx="14" fill="#1F1F2E"/>
+        <rect x="44" y="34" width="672" height="358" rx="6" fill="#FAFAF7"/>
+        <rect x="14" y="404" width="732" height="14" rx="3" fill="#15151F"/>
+        <rect x="14" y="404" width="732" height="6" fill="#2A2A3A"/>
+        <circle cx="380" cy="29" r="2.3" fill="#0A0A14"/>
+
+        <!-- Window chrome -->
+        <rect x="44" y="34" width="672" height="30" fill="#EFEEE9"/>
+        <circle cx="60" cy="49" r="5" fill="#FF5F57"/>
+        <circle cx="76" cy="49" r="5" fill="#FEBC2E"/>
+        <circle cx="92" cy="49" r="5" fill="#28C840"/>
+        <text x="380" y="53" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">Claude Desktop · MCP host</text>
+
+        <!-- Sidebar -->
+        <rect x="44" y="64" width="120" height="328" fill="#F4F3EE"/>
+        <rect x="58" y="80" width="92" height="22" rx="6" fill="#E5E4DD"/>
+        <rect x="58" y="112" width="76" height="9" rx="3" fill="#D8D7CF"/>
+        <rect x="58" y="128" width="92" height="9" rx="3" fill="#D8D7CF"/>
+        <rect x="58" y="144" width="60" height="9" rx="3" fill="#D8D7CF"/>
+        <text x="58" y="180" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#9CA3AF" letter-spacing="0.6">RECENT</text>
+        <rect x="58" y="190" width="92" height="8" rx="3" fill="#E5E4DD"/>
+        <rect x="58" y="204" width="68" height="8" rx="3" fill="#E5E4DD"/>
+        <rect x="58" y="218" width="80" height="8" rx="3" fill="#E5E4DD"/>
+
+        <!-- Chat: user msg -->
+        <rect x="320" y="86" width="380" height="38" rx="13" fill="#0F0F1A"/>
+        <text x="334" y="110" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF">How do I deploy my FastAPI app?</text>
+
+        <!-- Assistant intro -->
+        <circle cx="192" cy="148" r="10" fill="#D97757"/>
+        <text x="192" y="152" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">C</text>
+        <text x="210" y="152" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Looking up deployment options…</text>
+
+        <!-- Tool call indicator -->
+        <rect x="192" y="170" width="244" height="22" rx="6" fill="#EEF6FF" stroke="#BAD7F2" stroke-width="1"/>
+        <text x="200" y="185" font-family="JetBrains Mono, monospace" font-size="11" fill="#1B5FB6">⚙ deploy_helper.lookup_options</text>
+
+        <!-- Tool result block (always visible) -->
+        <rect x="192" y="204" width="500" height="86" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="204" y="224" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.4">TOOL RESULT</text>
+        <text x="204" y="244" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Best options for FastAPI deployment:</text>
+        <text x="204" y="262" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Railway — git push deploys, $5/mo hobby tier</text>
+        <text x="204" y="278" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Fly.io — global edge, Docker-based, free tier</text>
+
+        <!-- Sponsored block (the animated one) -->
+        <g class="ad-block">
+          <rect x="192" y="304" width="500" height="76" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+          <rect x="192" y="304" width="500" height="20" rx="12" fill="#FFE6F0"/>
+          <rect x="192" y="314" width="500" height="10" fill="#FFE6F0"/>
+          <text x="204" y="318" font-family="Inter, sans-serif" font-size="10" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
+          <text x="680" y="318" font-family="Inter, sans-serif" font-size="10" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+
+          <rect x="204" y="334" width="40" height="40" rx="9" fill="#0F0F1A"/>
+          <text x="224" y="361" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="18" font-weight="700" fill="#FFFFFF">▲</text>
+
+          <text x="256" y="349" font-family="Space Grotesk, sans-serif" font-size="13" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
+          <text x="256" y="365" font-family="Inter, sans-serif" font-size="11.5" fill="#4B4B5E">Free hobby plan · git push to deploy · global edge</text>
+          <rect x="608" y="340" width="76" height="26" rx="7" fill="#0F0F1A"/>
+          <text x="646" y="357" text-anchor="middle" font-family="Inter, sans-serif" font-size="11.5" font-weight="600" fill="#FFFFFF">Try Free →</text>
+        </g>
+      </svg>
+      <div class="stage-caption">The sponsored block is a structured payload Boost Boss returns alongside your tool result. The host (Claude Desktop, Cursor, Cline) renders it natively — same chrome as the rest of the response, with a clear sponsorship label.</div>
+    </div>
+  </div>
+</section>
+
 <!-- HOW IT WORKS -->
 <section>
   <div class="wrap">
@@ -202,6 +308,77 @@
 <span class="kw">const</span> ad = <span class="kw">await</span> lumi.<span class="fn">fetchAd</span>({ context: request.params.name });
 <span class="kw">return</span> { content: [...result, ad.<span class="fn">toMCPBlock</span>()] };</pre>
     <p class="code-caption">That's it. The MCP host renders the ad payload natively. <a href="/docs/mcp">Full docs →</a></p>
+
+    <!-- PRODUCT SHOT: Claude Desktop with sponsored block in tool response -->
+    <div class="product-shot" aria-label="Sponsored block rendered inside a Claude Desktop tool response">
+      <svg viewBox="0 0 720 440" xmlns="http://www.w3.org/2000/svg" role="img">
+        <!-- Window chrome -->
+        <rect x="0" y="0" width="720" height="440" fill="#FAFAF7"/>
+        <rect x="0" y="0" width="720" height="36" fill="#EFEEE9"/>
+        <circle cx="18" cy="18" r="6" fill="#FF5F57"/>
+        <circle cx="38" cy="18" r="6" fill="#FEBC2E"/>
+        <circle cx="58" cy="18" r="6" fill="#28C840"/>
+        <text x="360" y="22" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#6B7280">Claude Desktop · MCP host</text>
+
+        <!-- Sidebar -->
+        <rect x="0" y="36" width="120" height="404" fill="#F4F3EE"/>
+        <rect x="14" y="54" width="92" height="22" rx="6" fill="#E5E4DD"/>
+        <rect x="14" y="86" width="76" height="10" rx="3" fill="#D8D7CF"/>
+        <rect x="14" y="106" width="92" height="10" rx="3" fill="#D8D7CF"/>
+        <rect x="14" y="126" width="60" height="10" rx="3" fill="#D8D7CF"/>
+        <rect x="14" y="146" width="84" height="10" rx="3" fill="#D8D7CF"/>
+        <text x="14" y="186" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#9CA3AF" letter-spacing="0.6">RECENT</text>
+        <rect x="14" y="194" width="92" height="9" rx="3" fill="#E5E4DD"/>
+        <rect x="14" y="208" width="68" height="9" rx="3" fill="#E5E4DD"/>
+        <rect x="14" y="222" width="80" height="9" rx="3" fill="#E5E4DD"/>
+
+        <!-- Chat area -->
+        <!-- User message -->
+        <rect x="280" y="58" width="320" height="40" rx="14" fill="#0F0F1A"/>
+        <text x="296" y="83" font-family="Inter, sans-serif" font-size="13" fill="#FFFFFF">How do I deploy my FastAPI app?</text>
+
+        <!-- Claude response intro -->
+        <circle cx="148" cy="124" r="10" fill="#D97757"/>
+        <text x="148" y="128" text-anchor="middle" font-family="Inter, sans-serif" font-size="11" fill="#FFFFFF" font-weight="700">C</text>
+        <text x="166" y="128" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">I'll check deployment options for FastAPI…</text>
+
+        <!-- Tool call indicator -->
+        <rect x="148" y="146" width="240" height="22" rx="6" fill="#EEF6FF" stroke="#BAD7F2" stroke-width="1"/>
+        <text x="156" y="161" font-family="JetBrains Mono, monospace" font-size="11" fill="#1B5FB6">⚙ deploy_helper.lookup_options</text>
+
+        <!-- Tool result block -->
+        <rect x="148" y="180" width="544" height="84" rx="10" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="160" y="200" font-family="Inter, sans-serif" font-size="11" font-weight="600" fill="#6B7280" letter-spacing="0.4">TOOL RESULT</text>
+        <text x="160" y="220" font-family="Inter, sans-serif" font-size="13" fill="#0F0F1A">Best options for FastAPI deployment:</text>
+        <text x="160" y="238" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Railway — git push deploys, auto-scaling, $5/mo hobby tier</text>
+        <text x="160" y="254" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">• Fly.io — global edge, Docker-based, generous free tier</text>
+
+        <!-- Sponsored block (the star) -->
+        <rect x="148" y="278" width="544" height="118" rx="12" fill="#FFFFFF" stroke="#FF2D78" stroke-width="1.5"/>
+        <rect x="148" y="278" width="544" height="22" rx="12" fill="#FFE6F0"/>
+        <rect x="148" y="290" width="544" height="10" fill="#FFE6F0"/>
+        <text x="160" y="293" font-family="Inter, sans-serif" font-size="10.5" font-weight="700" fill="#E01E65" letter-spacing="0.6">SPONSORED · paid for by Vercel</text>
+        <text x="612" y="293" font-family="Inter, sans-serif" font-size="10.5" fill="#9CA3AF" text-anchor="end">Why am I seeing this?</text>
+
+        <!-- Sponsored content -->
+        <rect x="160" y="312" width="48" height="48" rx="10" fill="#0F0F1A"/>
+        <text x="184" y="343" text-anchor="middle" font-family="Space Grotesk, sans-serif" font-size="20" font-weight="700" fill="#FFFFFF">▲</text>
+
+        <text x="220" y="328" font-family="Space Grotesk, sans-serif" font-size="14" font-weight="700" fill="#0F0F1A">Vercel — Deploy in seconds. Scale forever.</text>
+        <text x="220" y="346" font-family="Inter, sans-serif" font-size="12" fill="#4B4B5E">Free hobby plan · Auto-deploy from GitHub · Built-in observability</text>
+
+        <rect x="220" y="362" width="100" height="26" rx="7" fill="#0F0F1A"/>
+        <text x="270" y="380" text-anchor="middle" font-family="Inter, sans-serif" font-size="12" font-weight="600" fill="#FFFFFF">Try Vercel Free</text>
+
+        <text x="220" y="384" font-family="Inter, sans-serif" font-size="0" fill="#FFFFFF"></text>
+        <text x="334" y="380" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">vercel.com</text>
+
+        <!-- Composer -->
+        <rect x="148" y="408" width="544" height="22" rx="11" fill="#FFFFFF" stroke="#E5E7EB" stroke-width="1"/>
+        <text x="160" y="423" font-family="Inter, sans-serif" font-size="11" fill="#9CA3AF">Reply to Claude…</text>
+      </svg>
+      <div class="shot-caption">Real render. The sponsored block ships as a structured payload — the host (Claude Desktop, Cursor, Cline) draws the chrome.</div>
+    </div>
   </div>
 </section>
 
