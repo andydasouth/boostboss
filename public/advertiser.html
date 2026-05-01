@@ -1366,6 +1366,127 @@
         }
 
         /* ───────────── BENNA ENGINE LIVE PANEL ───────────── */
+        /* PERFORMANCE GROUP — wraps Benna engine + auction intelligence
+           so they read as one section instead of two parallel cards. */
+        .performance-group {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 2px rgba(15, 15, 26, 0.04);
+        }
+        .performance-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.875rem;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        .performance-group-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111;
+            letter-spacing: -0.01em;
+        }
+        .performance-group-sub {
+            font-size: 12px;
+            color: #9CA3AF;
+            font-weight: 500;
+        }
+        .performance-group .benna-engine {
+            margin-bottom: 1.25rem;
+            box-shadow: none;
+        }
+        .performance-data { padding-top: 0.25rem; }
+        .performance-subhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .performance-subhead-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #111;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+        .performance-subhead-sub {
+            font-size: 11px;
+            color: #9CA3AF;
+        }
+
+        /* SETUP GROUP — Conversion pixel + Automated rules
+           consolidated under one card with two columns inside. */
+        .setup-group {
+            background: #fff;
+            border: 1px solid #E5E7EB;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 2px rgba(15, 15, 26, 0.04);
+        }
+        .setup-group-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.875rem;
+            border-bottom: 1px solid #E5E7EB;
+        }
+        .setup-group-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #111;
+            letter-spacing: -0.01em;
+        }
+        .setup-group-sub {
+            font-size: 12px;
+            color: #9CA3AF;
+        }
+        .setup-group-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.25rem;
+        }
+        .setup-card {
+            background: #FAFAFA;
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 1rem 1.125rem 1.125rem;
+        }
+        .setup-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            gap: 8px;
+        }
+        .setup-card-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #111;
+        }
+        .setup-card-pill {
+            font-size: 11px;
+            color: #059669;
+            background: #ECFDF5;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+        @media (max-width: 760px) {
+            .setup-group-grid { grid-template-columns: 1fr; }
+        }
+
         .benna-engine {
             background: #0A0A14;
             color: #F5F5F7;
@@ -1912,7 +2033,16 @@
                 </div>
             </div>
 
-            <!-- Benna Engine — live panel -->
+            <!-- PERFORMANCE GROUP — Benna Engine (dark, live status) +
+                 Auction Intelligence (white, data view). One outer wrapper
+                 so they read as one section instead of two parallel cards. -->
+            <section class="performance-group" aria-label="Performance">
+              <div class="performance-group-header">
+                <div class="performance-group-title">Performance</div>
+                <div class="performance-group-sub">Engine status and auction signal · last 7 days</div>
+              </div>
+
+            <!-- Benna Engine — live panel (status strip at top of group) -->
             <section class="benna-engine" id="bennaEnginePanel">
                 <div class="benna-engine-head">
                     <div class="benna-engine-brand">
@@ -2017,20 +2147,21 @@
                 </div>
             </section>
 
-            <!-- BBX Auction Summary — populated by renderAuctionSummary() from real
-                 stats.auction_summary data when the advertiser has impressions w/
-                 intent_match_score. Hidden until the panel has content. -->
-            <section class="campaigns-section" id="bbxAuctionSummaryWrap" style="margin-top:0;">
-                <div class="campaigns-header" style="margin-bottom:12px;">
-                    <div class="campaigns-title">Auction intelligence</div>
-                    <div style="font-size:11px;color:#9CA3AF;">Last 7 days · live BBX auction signal</div>
+            <!-- Auction intelligence — data view nested under Performance.
+                 Subheader instead of standalone section. Populated by
+                 renderAuctionSummary() from stats.auction_summary. -->
+            <div class="performance-data" id="bbxAuctionSummaryWrap">
+                <div class="performance-subhead">
+                    <span class="performance-subhead-title">Auction intelligence</span>
+                    <span class="performance-subhead-sub">intent histogram · top surfaces · per-door spend · recent impressions</span>
                 </div>
                 <div id="bbxAuctionSummary" style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;padding:18px;">
                     <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:14px 0;">
                         Run a campaign to populate this panel — surfaces, intent-match histogram, and recent impressions appear here automatically.
                     </div>
                 </div>
-            </section>
+            </div>
+            </section> <!-- /.performance-group -->
 
             <!-- Performance Chart -->
             <div class="chart-section">
@@ -2143,80 +2274,74 @@
                 </table>
             </div>
 
-            <!-- Conversion Pixel -->
-            <div class="campaigns-section" id="pixelSection" style="margin-top: 0;">
-                <div class="campaigns-header">
-                    <div class="campaigns-title">Conversion Tracking</div>
+            <!-- SETUP GROUP — Conversion Pixel + Automated Rules.
+                 Both are one-time configuration tasks; consolidated under
+                 a single "Setup" header with two columns inside. -->
+            <section class="setup-group" aria-label="Setup">
+                <div class="setup-group-header">
+                    <div class="setup-group-title">Setup</div>
+                    <div class="setup-group-sub">One-time configuration · pixel and rules</div>
                 </div>
-                <div style="
-                    background: #FAFAFA; border-radius: 12px; padding: 24px;
-                    border: 1px dashed #E5E7EB;
-                ">
-                    <div style="display: flex; gap: 20px; align-items: flex-start;">
+                <div class="setup-group-grid">
+                    <!-- Conversion Tracking column -->
+                    <div class="setup-card" id="pixelSection">
+                        <div class="setup-card-header">
+                            <div class="setup-card-title">Conversion tracking</div>
+                            <span class="setup-card-pill" id="pixelStatus">Not detected yet</span>
+                        </div>
+                        <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
+                            Track conversions on your site to unlock Benna's CPA and ROAS optimization. Add this snippet before the closing <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> tag on your conversion page.
+                        </p>
                         <div style="
-                            width: 48px; height: 48px; border-radius: 12px;
-                            background: linear-gradient(135deg, #FF2D78 0%, #FF6B9D 100%);
-                            display: flex; align-items: center; justify-content: center;
-                            font-size: 22px; flex-shrink: 0;
-                        ">📊</div>
-                        <div style="flex: 1;">
-                            <h4 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Install the Boost Boss Pixel</h4>
-                            <p style="font-size: 13px; color: #6B7280; margin-bottom: 14px; line-height: 1.5;">
-                                Track conversions on your site to unlock Benna's CPA and ROAS optimization.
-                                Add this snippet before the closing <code style="background: #F3F4F6; padding: 2px 6px; border-radius: 4px; font-size: 12px;">&lt;/head&gt;</code> tag on your conversion page.
-                            </p>
-                            <div style="
-                                background: #0A0A14; border-radius: 10px; padding: 16px; position: relative;
-                                font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px;
-                                color: #B0B0C7; line-height: 1.6; overflow-x: auto;
-                            ">
-                                <button id="copyPixelBtn" style="
-                                    position: absolute; top: 10px; right: 10px;
-                                    background: rgba(255,255,255,0.1); border: none;
-                                    padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
-                                    font-size: 11px; cursor: pointer; font-family: inherit;
-                                ">Copy</button>
-                                <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script async src="https://boostboss.ai/pixel.js"
+                            background: #0A0A14; border-radius: 10px; padding: 14px; position: relative;
+                            font-family: 'SFMono-Regular', Consolas, monospace; font-size: 12px;
+                            color: #B0B0C7; line-height: 1.55; overflow-x: auto;
+                        ">
+                            <button id="copyPixelBtn" style="
+                                position: absolute; top: 8px; right: 8px;
+                                background: rgba(255,255,255,0.1); border: none;
+                                padding: 4px 10px; border-radius: 6px; color: #B0B0C7;
+                                font-size: 11px; cursor: pointer; font-family: inherit;
+                            ">Copy</button>
+                            <pre id="pixelCode" style="margin: 0; white-space: pre-wrap;">&lt;script async src="https://boostboss.ai/pixel.js"
   data-advertiser-id="<span id="pixelAdvId" style="color: #FF2D78;">YOUR_ADVERTISER_ID</span>"&gt;&lt;/script&gt;
 &lt;script&gt;
   window.bbq = window.bbq || [];
   bbq.push(['track', 'signup', { value: 29.99, currency: 'USD' }]);
 &lt;/script&gt;</pre>
+                        </div>
+                        <div style="margin-top: 10px; font-size: 12px; color: #6B7280;">
+                            Test end-to-end: <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
+                        </div>
+                    </div>
+
+                    <!-- Automated Rules column -->
+                    <div class="setup-card">
+                        <div class="setup-card-header">
+                            <div class="setup-card-title">Automated rules</div>
+                            <button id="addRuleBtn" style="
+                                padding: 6px 12px; background: var(--accent-primary); color: #fff;
+                                border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
+                                cursor: pointer; font-family: inherit;
+                            ">+ Add rule</button>
+                        </div>
+                        <p style="font-size: 13px; color: #6B7280; margin-bottom: 12px; line-height: 1.5;">
+                            Trigger actions automatically when performance crosses thresholds — pause campaigns, shift budget, raise bids on winning audiences.
+                        </p>
+                        <div id="rulesContainer">
+                            <div id="rulesEmpty" style="
+                                text-align: center; padding: 28px 16px; color: #9CA3AF;
+                                background: #FAFAFA; border-radius: 10px; border: 1px dashed #E5E7EB;
+                            ">
+                                <div style="font-size: 28px; margin-bottom: 6px;">🤖</div>
+                                <div style="font-size: 13px; font-weight: 600; color: #6B7280; margin-bottom: 4px;">No rules yet</div>
+                                <div style="font-size: 12px;">Automate campaign actions based on performance</div>
                             </div>
-                            <div style="margin-top: 12px; display: flex; gap: 10px;">
-                                <div style="
-                                    font-size: 12px; color: #059669; background: #ECFDF5;
-                                    padding: 6px 12px; border-radius: 100px; font-weight: 500;
-                                " id="pixelStatus">Not detected yet</div>
-                                <div style="font-size: 12px; color: #6B7280; padding: 6px 0;">
-                                    Test the integration end-to-end: <a href="/pixel-test.html?bbx_auc=ach_demo&bbx_cmp=cam_demo" target="_blank" style="color:#FF2D78;font-weight:600;">/pixel-test.html →</a>
-                                </div>
-                            </div>
+                            <div id="rulesList"></div>
                         </div>
                     </div>
                 </div>
-            </div>
-            <!-- Automated Rules -->
-            <div class="campaigns-section" style="margin-top: 0;">
-                <div class="campaigns-header">
-                    <div class="campaigns-title">Automated Rules</div>
-                    <button id="addRuleBtn" style="
-                        padding: 8px 16px; background: var(--accent-primary); color: #fff;
-                        border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
-                        cursor: pointer; font-family: inherit;
-                    ">+ Add Rule</button>
-                </div>
-                <div id="rulesContainer">
-                    <div id="rulesEmpty" style="
-                        text-align: center; padding: 40px 20px; color: #9CA3AF;
-                    ">
-                        <div style="font-size: 32px; margin-bottom: 8px;">🤖</div>
-                        <div style="font-size: 14px; font-weight: 600; color: #6B7280; margin-bottom: 4px;">No rules yet</div>
-                        <div style="font-size: 13px;">Automate campaign actions based on performance thresholds</div>
-                    </div>
-                    <div id="rulesList"></div>
-                </div>
-            </div>
+            </section>
 
             <!-- Add Rule Modal -->
             <div id="ruleModal" style="
