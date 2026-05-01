@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SuperBoost — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
@@ -213,26 +216,32 @@
             gap: 1.5rem;
         }
 
+        /* Top-left logo — mirrors /ads marketing nav exactly so the brand
+           chrome doesn't change shape between the public page and the
+           logged-in dashboard. */
         .logo {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 10px;
             text-decoration: none;
             color: var(--text);
         }
 
         .logo-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         .logo-icon svg { width: 100%; height: 100%; }
 
         .logo-text {
-            font-size: 1.25rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
             font-weight: 700;
+            letter-spacing: -0.5px;
             color: var(--text);
         }
 
