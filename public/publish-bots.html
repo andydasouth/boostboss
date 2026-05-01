@@ -44,6 +44,12 @@
     font-size: 14px; line-height: 1;
   }
   @media (max-width: 760px) { .lumi-mark { display: none; } }
+  /* Logged-in pill — replaces nav CTAs when bb_pub_token is set. */
+  .auth-pill { display: inline-flex !important; align-items: center; gap: 8px; padding: 5px 14px 5px 5px !important; }
+  .auth-pill .auth-avatar { width: 26px; height: 26px; border-radius: 50%; background: linear-gradient(135deg, #FF2D78, #04BEFE); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; text-transform: uppercase; }
+  .auth-pill .auth-name { font-size: 13.5px; font-weight: 600; max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .auth-pill .auth-arrow { opacity: 0.5; font-size: 12px; transition: transform 0.15s, opacity 0.15s; }
+  .auth-pill:hover .auth-arrow { opacity: 1; transform: translateX(2px); }
   .nav-links { display: flex; gap: 22px; align-items: center; }
   .nav-links a { font-size: 14px; font-weight: 500; color: var(--ink-soft); transition: color 0.15s; white-space: nowrap; }
   .nav-links a:hover { color: var(--ink); }
@@ -531,6 +537,27 @@ message.<span class="fn">reply</span>({
     var on = function(){ nav.classList.toggle('scrolled', window.scrollY > 8); };
     document.addEventListener('scroll', on, { passive: true });
     on();
+  })();
+  (function(){
+    var token = localStorage.getItem('bb_pub_token');
+    if (!token) return;
+    var profile = {}, user = {};
+    try { profile = JSON.parse(localStorage.getItem('bb_pub_profile') || '{}') || {}; } catch (_) {}
+    try { user    = JSON.parse(localStorage.getItem('bb_pub_user')    || '{}') || {}; } catch (_) {}
+    var name = profile.app_name
+            || (user.email && String(user.email).split('@')[0])
+            || (profile.email && String(profile.email).split('@')[0])
+            || 'Dashboard';
+    var initial = String(name).trim().charAt(0).toUpperCase() || 'P';
+    var ctas = document.querySelector('.nav-ctas');
+    if (!ctas) return;
+    var esc = function(s){ return String(s).replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]); }); };
+    ctas.innerHTML =
+      '<a href="/publish/dashboard" class="btn btn-ghost auth-pill" title="Go to your dashboard">' +
+      '<span class="auth-avatar">' + esc(initial) + '</span>' +
+      '<span class="auth-name">' + esc(name) + '</span>' +
+      '<span class="auth-arrow">→</span>' +
+      '</a>';
   })();
 </script>
 </body>
