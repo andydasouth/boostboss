@@ -435,10 +435,18 @@ async function handleDeveloperStats(devKey, req, res) {
     const by_integration_method = await loadIntegrationMethodBreakdown(sb, dev.id);
 
     const totals = rollUpDevTotals(dailyStats);
+
+    // Real supply/fill from auction_logs: how many auctions this publisher's
+    // inventory ran and how many filled (outcome='won'), sandbox excluded.
+    // This is the honest, BBX-only fill picture — one demand source, no
+    // external mediation. Null fill_rate when there's no traffic yet.
+    const supply = await loadPublisherFill(sb, dev.id);
+
     return res.json({
       developer: formatDeveloper(dev),
       daily: dailyStats,
       totals,
+      supply,
       placements,
       by_integration_method,
       filter_integration_method: filterMethod,
@@ -468,6 +476,9 @@ async function handleDeveloperStats(devKey, req, res) {
   const by_integration_method = demoIntegrationMethodBreakdown(events, devKey);
 
   const totals = rollUpDevTotals(dailyStats);
+  // Demo fill: derive from in-memory ledger auctions for this developer when
+  // available; otherwise a clean "no traffic yet" shape. Same contract as prod.
+  const supply = demoPublisherFill(devKey);
   return res.json({
     developer: {
       id: devKey,
@@ -479,10 +490,49 @@ async function handleDeveloperStats(devKey, req, res) {
     },
     daily: dailyStats,
     totals,
+    supply,
     placements,
     by_integration_method,
     filter_integration_method: filterMethod,
   });
+}
+
+// ── Publisher supply / fill ───────────────────────────────────────────
+// Honest BBX-only fill: count this publisher's auctions and how many filled
+// (outcome='won') over the last 30 days, sandbox excluded. auction_logs is
+// denormalized with publisher_id + an index on (publisher_id, ts), so these
+// are two cheap head-count queries. Returns null fill_rate when there is no
+// traffic yet (brand-new publisher) so the UI can show a clean empty state.
+async function loadPublisherFill(sb, developerId) {
+  const empty = { window_days: 30, auctions: 0, filled: 0, fill_rate: null };
+  try {
+    const sinceIso = new Date(Date.now() - 30 * 86400000).toISOString();
+    const [{ count: auctions }, { count: won }] = await Promise.all([
+      sb.from("auction_logs").select("*", { count: "exact", head: true })
+        .eq("publisher_id", developerId).eq("is_sandbox", false).gte("ts", sinceIso),
+      sb.from("auction_logs").select("*", { count: "exact", head: true })
+        .eq("publisher_id", developerId).eq("is_sandbox", false)
+        .eq("outcome", "won").gte("ts", sinceIso),
+    ]);
+    const a = auctions || 0, w = won || 0;
+    return { window_days: 30, auctions: a, filled: w, fill_rate: a > 0 ? +(w / a).toFixed(4) : null };
+  } catch (e) {
+    console.error("[stats] loadPublisherFill failed:", e.message);
+    return empty;
+  }
+}
+
+// Demo equivalent — best-effort from the in-memory ledger. Never throws.
+function demoPublisherFill(devKey) {
+  const empty = { window_days: 30, auctions: 0, filled: 0, fill_rate: null };
+  try {
+    const led = demoLedger();
+    const auctions = Array.isArray(led.auctions) ? led.auctions : [];
+    const mine = auctions.filter(a => !devKey || a.publisher_id === devKey || a.developer_id === devKey);
+    if (mine.length === 0) return empty;
+    const won = mine.filter(a => a.outcome === "won" || a.won === true).length;
+    return { window_days: 30, auctions: mine.length, filled: won, fill_rate: +(won / mine.length).toFixed(4) };
+  } catch (_) { return empty; }
 }
 
 // ── Placement breakdown helpers ───────────────────────────────────────
