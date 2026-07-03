@@ -9,6 +9,7 @@
          /ads/signin?expired=1. MUST load before any other script
          that might issue an authed fetch (no defer attribute). -->
     <script src="/auth-guard.js"></script>
+    <script src="/bb-modal.js"></script>
     <title>SuperBoost — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13357,7 +13358,7 @@ function pfParseScreenshots(text) {
                 if (archBtn) archBtn.addEventListener('click', async () => {
                     const id = archBtn.dataset.productId;
                     if (!id) return;
-                    if (!confirm('Archive this product?\n\nIt disappears from the affiliate marketplace and new buyers can\'t purchase. Existing voucher holders are unaffected. Use this if you want to change pricing or content — then Duplicate as new.')) return;
+                    if (!(await bbConfirm('Archive this product?\n\nIt disappears from the affiliate marketplace and new buyers can\'t purchase. Existing voucher holders are unaffected. Use this if you want to change pricing or content — then Duplicate as new.', {danger:true}))) return;
                     archBtn.disabled = true;
                     archBtn.textContent = 'Archiving…';
                     try {
@@ -13377,12 +13378,12 @@ function pfParseScreenshots(text) {
                     }
                 });
 
-                if (dupBtn) dupBtn.addEventListener('click', () => {
+                if (dupBtn) dupBtn.addEventListener('click', async () => {
                     const id = dupBtn.dataset.productId;
                     if (!id) return;
                     const src = productsCache.find((p) => p.id === id);
                     if (!src) { alert('Source product not found in cache'); return; }
-                    if (!confirm('Duplicate as new?\n\nA new product will open pre-filled with all marketing + identity values. Pricing plans don\'t carry over — re-add them in the Pricing & Affiliate tab once the new product is saved. The new product goes through a fresh audit.')) return;
+                    if (!(await bbConfirm('Duplicate as new?\n\nA new product will open pre-filled with all marketing + identity values. Pricing plans don\'t carry over — re-add them in the Pricing & Affiliate tab once the new product is saved. The new product goes through a fresh audit.'))) return;
                     // Build a clone — keep all marketing/identity values but BLANK the
                     // proof-bearing fields so the new product re-attests its pricing
                     // claim. Name gets a " (v2)" suffix as a hint.
@@ -13405,7 +13406,7 @@ function pfParseScreenshots(text) {
                 submitBtn.addEventListener('click', async () => {
                     const id = submitBtn.dataset.productId;
                     if (!id) return;
-                    if (!confirm('Submit this product page for audit?\n\nAndy will review your marketing content, pricing tiers, and proof URLs. Buyers can\'t purchase until approved.')) return;
+                    if (!(await bbConfirm('Submit this product page for audit?\n\nAndy will review your marketing content, pricing tiers, and proof URLs. Buyers can\'t purchase until approved.'))) return;
                     submitBtn.disabled = true;
                     const orig = submitBtn.textContent;
                     submitBtn.textContent = 'Submitting…';
@@ -14176,8 +14177,8 @@ function pfParseScreenshots(text) {
                     });
             }
 
-            function revokeKey() {
-                if (!window.confirm('Revoke this API key? Any integrations using it will stop working immediately.')) return;
+            async function revokeKey() {
+                if (!(await bbConfirm('Revoke this API key? Any integrations using it will stop working immediately.', {danger:true}))) return;
                 var status = el('apiKeyStatus');
                 if (status) { status.style.display = 'block'; status.textContent = 'Revoking…'; }
                 fetch(API_BASE + '/api/api-keys?action=revoke', { method: 'POST', headers: authHeaders(true), body: '{}' })
@@ -14220,8 +14221,8 @@ function pfParseScreenshots(text) {
                 var gen = el('apiKeyGenerate');
                 if (gen) gen.addEventListener('click', createKey);
                 var regen = el('apiKeyRegenerate');
-                if (regen) regen.addEventListener('click', function () {
-                    if (!window.confirm('Regenerate your API key? The current key stops working immediately and the new secret is shown only once.')) return;
+                if (regen) regen.addEventListener('click', async function () {
+                    if (!(await bbConfirm('Regenerate your API key? The current key stops working immediately and the new secret is shown only once.', {danger:true}))) return;
                     createKey();
                 });
                 var rev = el('apiKeyRevoke');
@@ -14691,7 +14692,7 @@ function pfParseScreenshots(text) {
                         const voucherId   = btn.dataset.voucherId;
                         const voucherCode = btn.dataset.voucherCode;
                         if (!voucherId) return;
-                        if (!confirm('Revoke voucher ' + voucherCode + '?\n\nThis prevents the buyer from redeeming it. Does NOT trigger a refund — use PayPal for that.')) return;
+                        if (!(await bbConfirm('Revoke voucher ' + voucherCode + '?\n\nThis prevents the buyer from redeeming it. Does NOT trigger a refund — use PayPal for that.', {danger:true}))) return;
                         btn.disabled = true;
                         btn.textContent = 'Revoking…';
                         try {
@@ -14710,7 +14711,7 @@ function pfParseScreenshots(text) {
                 if (archBtn) {
                     archBtn.addEventListener('click', async () => {
                         if (!currentProductId) return;
-                        if (!confirm('Archive this product?\n\nIt disappears from the affiliate marketplace and new share links won\'t be mintable. Existing share links keep working so in-flight buyers still get vouchers. Reversible from the Products list (Restore).')) return;
+                        if (!(await bbConfirm('Archive this product?\n\nIt disappears from the affiliate marketplace and new share links won\'t be mintable. Existing share links keep working so in-flight buyers still get vouchers. Reversible from the Products list (Restore).', {danger:true}))) return;
                         archBtn.disabled = true;
                         archBtn.textContent = 'Archiving…';
                         try {
@@ -14974,7 +14975,7 @@ function pfParseScreenshots(text) {
             }
 
             async function deletePlan(id) {
-                if (!confirm('Delete this plan?\n\nIf it has historical orders, it will be deactivated instead of hard-deleted.')) return;
+                if (!(await bbConfirm('Delete this plan?\n\nIf it has historical orders, it will be deactivated instead of hard-deleted.', {danger:true}))) return;
                 try {
                     const r = await api('POST', 'delete', null, { plan_id: id });
                     if (r.soft_deleted) alert('Plan has historical orders, so it was deactivated rather than deleted.');

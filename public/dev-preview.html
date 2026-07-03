@@ -9,6 +9,7 @@
          /publish/signin?expired=1. MUST load before any other script
          that might issue an authed fetch (no defer attribute). -->
     <script></script>
+    <script src="/bb-modal.js"></script>
     <title>Lumi SDK — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -5547,7 +5548,8 @@ class MyApp : Application() {
         }
 
         function regenerateKey() {
-            if (confirm('Are you sure you want to regenerate your API key? This will invalidate the current key.')) {
+            bbConfirm('Are you sure you want to regenerate your API key? This will invalidate the current key.', {danger:true}).then(function(ok){
+                if (!ok) return;
                 const newKey = 'bb_dev_sk_' + Math.random().toString(36).substr(2, 18);
                 userProfile.api_key = newKey;
 
@@ -5560,7 +5562,7 @@ class MyApp : Application() {
                 updateIntegrationGuide();
 
                 showToast('API key regenerated! Update your integration code.', 'success');
-            }
+            });
         }
 
         // ───────────── TOAST NOTIFICATIONS ─────────────
@@ -6119,8 +6121,8 @@ class MyApp : Application() {
             });
         }
 
-        function handleLogout() {
-            if (confirm('Are you sure you want to log out?')) {
+        async function handleLogout() {
+            if (!(await bbConfirm('Are you sure you want to log out?', {danger:true}))) return;
                 localStorage.removeItem('bb_dev_session');
                 localStorage.removeItem('bb_dev_data');
                 // Clear the publisher-scoped signup keys. Advertiser
@@ -6175,7 +6177,6 @@ class MyApp : Application() {
                 // nav pill there will revert to "Sign in / Start earning"
                 // now that bb_pub_* is gone.
                 window.location.href = '/publish';
-            }
         }
 
         // ───────────── NOTIFICATIONS (bell dropdown) ─────────────

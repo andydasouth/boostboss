@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="/bb-modal.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boost Boss Affiliate</title>
@@ -3617,7 +3618,7 @@ document.addEventListener('click', async (e) => {
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || affT('errors.mint_failed'));
     await navigator.clipboard.writeText(j.url).catch(() => {
-      window.prompt(affT('toast.copy_prompt'), j.url);
+      window.bbPrompt(affT('toast.copy_prompt'), {default: j.url, title: 'Copy link', okText: 'Done'});
     });
     showToast(affT('toast.share_link_copied_prefix') + ' ' + j.url, 'success');
   } catch (err) {
@@ -3785,7 +3786,7 @@ async function copyShareLink(savedAdId, btn) {
       showToast(affT('toast.share_link_copied'), 'success');
     } catch (clipErr) {
       // Fallback: drop the URL into a prompt so the user can copy manually.
-      window.prompt(affT('toast.copy_prompt'), url);
+      window.bbPrompt(affT('toast.copy_prompt'), {default: url, title: 'Copy link', okText: 'Done'});
     }
   } catch (e) {
     showToast(e.message || affT('errors.could_not_generate'), 'error');
@@ -3877,13 +3878,13 @@ async function copyLinkFromTable(url, btn) {
     setTimeout(() => { btn.textContent = affT('common.copy'); }, 1800);
     showToast(affT('toast.url_copied'), 'success');
   } catch (e) {
-    window.prompt(affT('toast.copy_prompt'), url);
+    window.bbPrompt(affT('toast.copy_prompt'), {default: url, title: 'Copy link', okText: 'Done'});
   }
 }
 
 // Revoke a share link (sets revoked_at; clicks redirect to home thereafter).
 async function revokeShareLink(linkId, btn) {
-  if (!confirm(affT('links.revoke_confirm'))) return;
+  if (!(await bbConfirm(affT('links.revoke_confirm'), {danger:true}))) return;
   const session = getSession();
   if (!session || !session.token) return;
   if (btn) { btn.disabled = true; btn.textContent = affT('links.revoking'); }
