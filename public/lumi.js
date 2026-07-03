@@ -74,9 +74,26 @@
   // ── Placement taxonomy ─────────────────────────────────────────────
   // The five placements the Web door owns. Legacy slot names from the
   // pre-matrix taxonomy still resolve so existing integrations don't break.
-  const CORE_FORMATS   = ["corner", "card", "loading", "citation", "chip"];
-  const LEGACY_FORMATS = { banner: "card", sidebar: "card", inline: "citation", interstitial: "corner" };
-  const FORMAT_PREF    = { corner: "corner", card: "native", loading: "native", citation: "native", chip: "native" };
+  // Core render formats lumi.js paints natively. 2026-07 audit closed the gap:
+  // image (banner/native-image), interstitial (full-page overlay), and video
+  // (pre-roll + rewarded) are now real renderers, so every one of the 37
+  // placements resolves to a true render path on the web door.
+  const CORE_FORMATS   = ["corner", "card", "loading", "citation", "chip",
+                          "image", "interstitial", "video", "rewarded"];
+  // Alias map — surface/marketing slot names → a core render format.
+  const LEGACY_FORMATS = {
+    banner: "image", sidebar: "card", inline: "citation",
+    native_banner: "image", bottom_banner: "image", "bottom-banner": "image",
+    takeover: "interstitial", newtab: "interstitial", "new-tab": "interstitial",
+    splash: "interstitial", "splash-sponsor": "interstitial",
+    preroll: "video", "pre-roll": "video", pre_roll: "video",
+    rewarded_video: "rewarded", "rewarded-video": "rewarded",
+  };
+  // What creative the server should price/serve for each render format.
+  const FORMAT_PREF    = {
+    corner: "corner", card: "native", loading: "native", citation: "native", chip: "native",
+    image: "image", interstitial: "image", video: "video", rewarded: "video",
+  };
   function normalizeFormat(raw) {
     const f = String(raw || "").toLowerCase().trim();
     if (CORE_FORMATS.indexOf(f) >= 0) return f;
@@ -277,6 +294,76 @@
 @media (max-width: 480px) {
   .lumi-corner-anchor { left: 12px; right: 12px; width: auto; }
 }
+
+/* ── image — real banner/native-image ad ── */
+.lumi-image {
+  --_p: var(--lumi-primary, #FF2D78); --_m: var(--lumi-muted, #6B7280);
+  --_b: var(--lumi-border, #E5E7EB); --_r: var(--lumi-radius, 12px);
+  position: relative; display: block; border: 1px solid var(--_b);
+  border-radius: var(--_r); overflow: hidden; text-decoration: none;
+  font-family: var(--lumi-font, -apple-system, BlinkMacSystemFont, "Inter", sans-serif);
+}
+.lumi-image__img { display: block; width: 100%; height: auto; }
+.lumi-image__tag {
+  position: absolute; top: 8px; left: 8px; font-size: 9px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em; color: #fff;
+  background: rgba(0,0,0,0.55); padding: 3px 7px; border-radius: 6px;
+}
+.lumi-image__cap {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 9px 12px; background: var(--lumi-bg, #fff);
+}
+.lumi-image__h { font-size: 13px; font-weight: 600; color: var(--lumi-text,#0F0F1A); margin: 0; }
+
+/* ── interstitial / takeover — full-page overlay ── */
+.lumi-inter-backdrop {
+  position: fixed; inset: 0; z-index: 2147482000; display: flex;
+  align-items: center; justify-content: center; padding: 20px;
+  background: rgba(6,6,12,0.72); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  font-family: var(--lumi-font, -apple-system, BlinkMacSystemFont, "Inter", sans-serif);
+}
+.lumi-inter {
+  position: relative; width: 100%; max-width: 460px; background: var(--lumi-bg,#fff);
+  border-radius: 16px; overflow: hidden; box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+}
+.lumi-inter__img { display: block; width: 100%; height: auto; max-height: 60vh; object-fit: cover; }
+.lumi-inter__body { padding: 18px 20px 20px; }
+.lumi-inter__h { font-size: 19px; font-weight: 700; color: var(--lumi-text,#0F0F1A); margin: 0 0 6px; }
+.lumi-inter__sub { font-size: 14px; color: var(--lumi-muted,#6B7280); margin: 0 0 16px; line-height: 1.5; }
+.lumi-inter__x {
+  position: absolute; top: 10px; right: 12px; width: 30px; height: 30px; z-index: 2;
+  border: none; border-radius: 50%; background: rgba(0,0,0,0.45); color: #fff;
+  font-size: 18px; line-height: 1; cursor: pointer;
+}
+.lumi-inter__x[disabled] { opacity: 0.5; cursor: default; }
+
+/* ── video — pre-roll + rewarded ── */
+.lumi-video-backdrop {
+  position: fixed; inset: 0; z-index: 2147482000; display: flex;
+  align-items: center; justify-content: center; padding: 16px;
+  background: rgba(0,0,0,0.9);
+  font-family: var(--lumi-font, -apple-system, BlinkMacSystemFont, "Inter", sans-serif);
+}
+.lumi-video-wrap { position: relative; width: 100%; max-width: 720px; }
+.lumi-video-wrap video { display: block; width: 100%; border-radius: 10px; background: #000; }
+.lumi-video__skip {
+  position: absolute; bottom: 14px; right: 14px; z-index: 2;
+  background: rgba(0,0,0,0.65); color: #fff; border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 8px; padding: 7px 13px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.lumi-video__skip[disabled] { opacity: 0.6; cursor: default; }
+.lumi-video__optin {
+  width: 100%; max-width: 420px; background: var(--lumi-bg,#fff); border-radius: 16px;
+  padding: 24px; text-align: center; box-shadow: 0 24px 70px rgba(0,0,0,0.5);
+}
+.lumi-video__optin h3 { margin: 0 0 6px; font-size: 18px; color: var(--lumi-text,#0F0F1A); }
+.lumi-video__optin p { margin: 0 0 18px; font-size: 14px; color: var(--lumi-muted,#6B7280); }
+.lumi-video__endcard {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 12px; text-align: center;
+  background: rgba(8,8,14,0.82); border-radius: 10px; padding: 24px; color: #fff;
+}
+.lumi-video__endcard h3 { margin: 0; font-size: 20px; }
     `;
     document.head.appendChild(style);
   }
@@ -394,6 +481,7 @@
       headline:     payload.sponsored.headline || "",
       subtext:      payload.sponsored.subtext || "",
       mediaUrl:     payload.sponsored.media_url || null,
+      posterUrl:    payload.sponsored.poster_url || null,
       ctaLabel:     payload.sponsored.cta_label || "Learn more",
       ctaUrl:       payload.sponsored.cta_url || "#",
       disclosure:   payload.sponsored.disclosure_label || "Sponsored",
@@ -961,14 +1049,207 @@
     el.appendChild(chip);
   }
 
+  // image — a real image/banner ad. The whole unit is the click target.
+  // Falls back to a card if the creative shipped no media (honest degrade).
+  function renderImage(el, ad) {
+    if (!ad.mediaUrl) return renderCard(el, ad);
+    el.innerHTML = "";
+    const a = document.createElement("a");
+    a.className = "lumi-image";
+    a.href = ad.ctaUrl; a.target = "_blank"; a.rel = "noopener sponsored";
+    const img = document.createElement("img");
+    img.className = "lumi-image__img";
+    img.src = ad.mediaUrl; img.alt = ad.headline || "";
+    // If the image itself fails, degrade to a card rather than show a broken unit.
+    img.onerror = function () { renderCard(el, ad); };
+    a.appendChild(img);
+    const tag = document.createElement("span");
+    tag.className = "lumi-image__tag"; tag.textContent = "Ad";
+    a.appendChild(tag);
+    if (ad.headline) {
+      const cap = document.createElement("div");
+      cap.className = "lumi-image__cap";
+      const h = document.createElement("p");
+      h.className = "lumi-image__h"; h.textContent = ad.headline;
+      cap.appendChild(h);
+      const cta = document.createElement("span");
+      cta.className = "lumi-cta"; cta.textContent = ad.ctaLabel;
+      cap.appendChild(cta);
+      a.appendChild(cap);
+    }
+    a.addEventListener("click", function () {
+      beacon(ad.tracking && ad.tracking.click);
+      dispatch("click", { adId: ad.adId, auctionId: ad.auctionId, slot: el });
+    });
+    el.appendChild(a);
+  }
+
+  // interstitial / takeover / splash — full-page overlay mounted to <body>.
+  // Close is gated for `delayMs` so the ad gets a beat of visibility.
+  function renderInterstitial(el, ad) {
+    el.style.display = "none";
+    const backdrop = document.createElement("div");
+    backdrop.className = "lumi-inter-backdrop";
+    const card = document.createElement("div");
+    card.className = "lumi-inter";
+
+    const x = document.createElement("button");
+    x.className = "lumi-inter__x"; x.type = "button"; x.textContent = "✕";
+    x.setAttribute("aria-label", "Close ad"); x.disabled = true;
+    function teardown(reason) {
+      beacon(ad.tracking && ad.tracking.close);
+      dispatch(reason || "close", { adId: ad.adId, auctionId: ad.auctionId });
+      if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+    }
+    x.addEventListener("click", function () { teardown("close"); });
+    card.appendChild(x);
+
+    if (ad.mediaUrl) {
+      const img = document.createElement("img");
+      img.className = "lumi-inter__img"; img.src = ad.mediaUrl; img.alt = "";
+      img.onerror = function () { img.remove(); };
+      card.appendChild(img);
+    }
+    const body = document.createElement("div");
+    body.className = "lumi-inter__body";
+    body.appendChild(makeDisclosure(ad));
+    const h = document.createElement("p");
+    h.className = "lumi-inter__h"; h.textContent = ad.headline;
+    body.appendChild(h);
+    if (ad.subtext) {
+      const s = document.createElement("p");
+      s.className = "lumi-inter__sub"; s.textContent = ad.subtext;
+      body.appendChild(s);
+    }
+    var voucherI = makeVoucher(ad);
+    if (voucherI) body.appendChild(voucherI);
+    body.appendChild(buildCta(ad, el));
+    card.appendChild(body);
+    backdrop.appendChild(card);
+    document.body.appendChild(backdrop);
+
+    // Enable close after a short delay (skippable interstitial).
+    setTimeout(function () { x.disabled = false; }, 4000);
+    const slot = slots.get(el);
+    if (slot) slot.backdrop = backdrop;
+  }
+
+  // video — pre-roll (autoplay muted, skippable) and rewarded (opt-in,
+  // watch-to-complete → onReward). Poster/card fallback if media is missing
+  // or fails. Mounts a full-screen player to <body>.
+  function renderVideo(el, ad, rewarded) {
+    if (!ad.mediaUrl) return renderCard(el, ad);   // no video creative → degrade
+    el.style.display = "none";
+    const backdrop = document.createElement("div");
+    backdrop.className = "lumi-video-backdrop";
+
+    function cleanup() { if (backdrop.parentNode) backdrop.parentNode.removeChild(backdrop); }
+    function fireComplete() {
+      beacon(ad.tracking && ad.tracking.complete);
+      dispatch("complete", { adId: ad.adId, auctionId: ad.auctionId, rewarded: !!rewarded });
+      if (rewarded) dispatch("reward", { adId: ad.adId, auctionId: ad.auctionId });
+    }
+    function endcard(withReward) {
+      const ec = document.createElement("div");
+      ec.className = "lumi-video__endcard";
+      const h = document.createElement("h3");
+      h.textContent = withReward ? "Reward unlocked" : (ad.headline || "Thanks for watching");
+      ec.appendChild(h);
+      ec.appendChild(buildCta(ad, el));
+      const done = document.createElement("button");
+      done.className = "lumi-video__skip"; done.style.position = "static";
+      done.textContent = "Close";
+      done.addEventListener("click", function () {
+        dispatch("close", { adId: ad.adId, auctionId: ad.auctionId }); cleanup();
+      });
+      ec.appendChild(done);
+      return ec;
+    }
+
+    function playPlayer() {
+      const wrap = document.createElement("div");
+      wrap.className = "lumi-video-wrap";
+      const video = document.createElement("video");
+      video.src = ad.mediaUrl;
+      if (ad.posterUrl) video.poster = ad.posterUrl;
+      video.playsInline = true; video.muted = !rewarded; video.autoplay = true;
+      video.controls = false;
+      video.onerror = function () {
+        // Media failed: show poster as a static image ad, else degrade to card.
+        cleanup();
+        if (ad.posterUrl) { ad.mediaUrl = ad.posterUrl; el.style.display = ""; renderImage(el, ad); }
+        else { el.style.display = ""; renderCard(el, ad); }
+      };
+      wrap.appendChild(video);
+
+      // Skip — pre-roll only, after 5s. Rewarded has no skip (watch to earn).
+      let skipBtn;
+      if (!rewarded) {
+        skipBtn = document.createElement("button");
+        skipBtn.className = "lumi-video__skip"; skipBtn.disabled = true;
+        skipBtn.textContent = "Skip in 5";
+        let remain = 5;
+        const iv = setInterval(function () {
+          remain -= 1;
+          skipBtn.textContent = remain > 0 ? ("Skip in " + remain) : "Skip ▸";
+          if (remain <= 0) { skipBtn.disabled = false; clearInterval(iv); }
+        }, 1000);
+        skipBtn.addEventListener("click", function () {
+          if (skipBtn.disabled) return;
+          beacon(ad.tracking && ad.tracking.skip);
+          dispatch("skip", { adId: ad.adId, auctionId: ad.auctionId }); cleanup();
+        });
+        wrap.appendChild(skipBtn);
+      }
+
+      video.addEventListener("ended", function () {
+        fireComplete();
+        wrap.appendChild(endcard(!!rewarded));
+        if (skipBtn) skipBtn.remove();
+      });
+      backdrop.innerHTML = ""; backdrop.appendChild(wrap);
+      const p = video.play(); if (p && p.catch) p.catch(function () {});
+    }
+
+    if (rewarded) {
+      // Opt-in gate first — the rewarded contract (user chooses to watch).
+      const optin = document.createElement("div");
+      optin.className = "lumi-video__optin";
+      const h = document.createElement("h3"); h.textContent = ad.headline || "Watch to earn your reward";
+      const p = document.createElement("p"); p.textContent = ad.subtext || "Watch a short video to continue.";
+      const go = document.createElement("button");
+      go.className = "lumi-cta"; go.textContent = ad.ctaLabel && /watch/i.test(ad.ctaLabel) ? ad.ctaLabel : "Watch & earn";
+      go.addEventListener("click", playPlayer);
+      const no = document.createElement("button");
+      no.className = "lumi-video__skip"; no.style.position = "static"; no.style.marginLeft = "8px";
+      no.textContent = "No thanks";
+      no.addEventListener("click", function () {
+        dispatch("close", { adId: ad.adId, auctionId: ad.auctionId }); cleanup();
+      });
+      optin.appendChild(makeDisclosure(ad));
+      optin.appendChild(h); optin.appendChild(p); optin.appendChild(go); optin.appendChild(no);
+      backdrop.appendChild(optin);
+    } else {
+      backdrop.appendChild(document.createElement("div")); // placeholder; playPlayer fills it
+    }
+    document.body.appendChild(backdrop);
+    if (!rewarded) playPlayer();
+    const slot = slots.get(el);
+    if (slot) slot.backdrop = backdrop;
+  }
+
   function renderAdIntoSlot(el, ad) {
     const format = normalizeFormat(el.getAttribute("data-lumi-slot"));
     injectStyles();
-    if (format === "corner")        renderCorner(el, ad);
-    else if (format === "loading")  renderLoading(el, ad);
-    else if (format === "citation") renderCitation(el, ad);
-    else if (format === "chip")     renderChip(el, ad);
-    else                            renderCard(el, ad);   // card is the default
+    if (format === "corner")            renderCorner(el, ad);
+    else if (format === "loading")      renderLoading(el, ad);
+    else if (format === "citation")     renderCitation(el, ad);
+    else if (format === "chip")         renderChip(el, ad);
+    else if (format === "image")        renderImage(el, ad);
+    else if (format === "interstitial") renderInterstitial(el, ad);
+    else if (format === "video")        renderVideo(el, ad, false);
+    else if (format === "rewarded")     renderVideo(el, ad, true);
+    else                                renderCard(el, ad);   // card is the default
 
     beacon(ad.tracking && ad.tracking.impression);
     dispatch("impression", {
