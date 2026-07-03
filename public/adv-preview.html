@@ -3048,7 +3048,7 @@
               <span class="shell-account-caret" aria-hidden="true" style="margin-left:auto;">⌄</span>
             </button>
             <div class="shell-account-submenu" id="shellAccountSubmenu" role="group" hidden>
-              <button class="shell-nav-subitem" type="button" onclick="if(typeof openSettingsModal==='function')openSettingsModal();"><span class="shell-nav-subitem__label" data-t="shell.nav.settings">Settings</span></button>
+              <button class="shell-nav-subitem" type="button" onclick="if(typeof openSettingsModal==='function'){openSettingsModal();}else if(typeof openSettingsTo==='function'){openSettingsTo('account');}"><span class="shell-nav-subitem__label" data-t="shell.nav.settings">Settings</span></button>
               <button class="shell-nav-subitem shell-nav-subitem--logout" type="button" onclick="if(typeof handleLogout==='function')handleLogout();"><span class="shell-nav-subitem__label" data-t="shell.nav.logout">Logout</span></button>
             </div>
           </div>
