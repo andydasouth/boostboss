@@ -1251,7 +1251,9 @@ async function handleReembed(req, res) {
 // Same handlers as before — drain misses, batch-call Voyage, promote.
 // Routed via /api/campaigns?action=embed_stats|embed_drain|embed_seed.
 const VOYAGE_ENDPOINT       = "https://api.voyageai.com/v1/embeddings";
-const VOYAGE_MODEL          = "voyage-3-lite";
+// Kept in lockstep with api/_lib/embeddings.js MODEL/DIMS — request-side and
+// campaign-side vectors must share the same model + dims or cosine is invalid.
+const VOYAGE_MODEL          = "voyage-3.5-lite";
 const VOYAGE_DIMS           = 512;
 const EMBED_MAX_PER_RUN     = 500;
 const EMBED_BATCH_SIZE      = 128;
@@ -1273,7 +1275,7 @@ async function _voyageBatchEmbed(tokens) {
       "Content-Type":  "application/json",
       "Authorization": "Bearer " + process.env.VOYAGE_API_KEY,
     },
-    body: JSON.stringify({ model: VOYAGE_MODEL, input: tokens }),
+    body: JSON.stringify({ model: VOYAGE_MODEL, input: tokens, output_dimension: VOYAGE_DIMS }),
   });
   if (!r.ok) throw new Error("Voyage " + r.status + ": " + (await r.text().catch(() => "")).slice(0, 300));
   const j = await r.json();
