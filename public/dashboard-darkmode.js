@@ -54,6 +54,27 @@
       var tl = lum(cs.color);
       if (tl >= 0 && tl < 105) el.style.setProperty('color', INK, 'important');
       else if (tl >= 105 && tl < 150) el.style.setProperty('color', MUTED, 'important');
+
+      // --- define card frames: a card-sized rounded panel with a dark fill
+      //     but no visible border melts into the dark page — give it a subtle
+      //     border so the frame reads. Once per element. ---
+      if (!el.dataset.bbFr) {
+        var rad = parseFloat(cs.borderTopLeftRadius) || 0;
+        if (rad >= 9) {
+          var bgl = lum(cs.backgroundColor);
+          if (bgl >= 0 && bgl < 70) { // has a dark fill = a panel (not transparent)
+            var rr = el.getBoundingClientRect();
+            if (rr.width >= 200 && rr.height >= 56) {
+              var bw = parseFloat(cs.borderTopWidth) || 0;
+              var bcl = lum(cs.borderTopColor); // -1 if transparent
+              if (bw < 1 || bcl < 30) { // no border, or too faint/dark to read
+                el.style.setProperty('border', '1px solid rgba(255,255,255,0.12)', 'important');
+              }
+              el.dataset.bbFr = '1';
+            }
+          }
+        }
+      }
     }
   }
 
