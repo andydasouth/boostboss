@@ -42,6 +42,9 @@
  *   Lumi.refresh(selector?)  — re-fetch + re-render. No arg refreshes all.
  *   Lumi.destroy()           — tear down all rendered ads + observers.
  *   Lumi.render(el, opts)    — manual mount for a slot not auto-discovered.
+ *   Lumi.show(format, opts)  — create + mount an ad from code (e.g. an
+ *                              interstitial/video overlay). Returns the element.
+ *   Lumi.on(event, handler)  — subscribe to lifecycle events; returns unsub fn.
  *   Lumi.trackConversion(o)  — fire a publisher-side conversion event.
  *   Lumi.getLastError()      — last error object or null.
  *   Lumi.setDebug(bool)      — toggle debug logging at runtime.
@@ -1392,6 +1395,52 @@
       if (opts && opts.context) el.setAttribute("data-lumi-context", opts.context);
       if (slots.has(el)) unmountSlot(el);
       mountSlot(el);
+    },
+
+    /**
+     * Programmatically create + mount an ad of a given format, without a
+     * pre-existing slot element. Ideal for overlay formats (interstitial,
+     * video, rewarded) triggered from code — e.g. Lumi.show('interstitial').
+     * For inline formats (card/image/citation/chip) pass opts.container so
+     * the unit has somewhere visible to render.
+     *
+     * @param {string} format   'interstitial' | 'video' | 'rewarded' | 'card' | 'image' | 'corner' | ...
+     * @param {Object} [opts]   { context, container (selector|Element), frequency }
+     * @returns {Element} the mounted slot element (removable with Lumi.destroy or el.remove()).
+     */
+    show: function (format, opts) {
+      opts = opts || {};
+      var fmt = String(format || opts.format || "card");
+      var el = document.createElement("div");
+      el.setAttribute("data-lumi-slot", fmt);
+      if (opts.context) el.setAttribute("data-lumi-context", opts.context);
+      if (opts.frequency) el.setAttribute("data-lumi-frequency", opts.frequency);
+      var container = null;
+      if (opts.container) {
+        container = (typeof opts.container === "string")
+          ? document.querySelector(opts.container) : opts.container;
+      }
+      // Overlay formats mount themselves to <body>; inline formats render in
+      // place, so they need a visible container (falls back to <body>).
+      (container || document.body).appendChild(el);
+      mountSlot(el);
+      return el;
+    },
+
+    /**
+     * Subscribe to Lumi lifecycle events (impression, click, close, no_fill,
+     * complete, skip, reward, conversion, error, affiliate_save). The handler
+     * receives the event detail. Returns an unsubscribe function.
+     *
+     *   const off = Lumi.on('impression', d => console.log('shown', d.adId));
+     *   // ...later: off();
+     */
+    on: function (event, handler) {
+      if (typeof handler !== "function") return function () {};
+      var type = "lumi:" + String(event || "");
+      var wrapped = function (e) { try { handler(e.detail, e); } catch (_) {} };
+      window.addEventListener(type, wrapped);
+      return function () { window.removeEventListener(type, wrapped); };
     },
 
     /**
