@@ -26,6 +26,7 @@ const crypto = require("crypto");
 const { verifyJwt } = require("./auth.js");
 const { embedTokens } = require("./_lib/embeddings.js");
 const { resolveAdvertiser } = require("./_lib/advertiser_auth.js");
+const { deliverWebhook } = require("./_lib/webhook_delivery.js");
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -669,6 +670,7 @@ async function handleCreate(req, res) {
       }
     }
 
+    await deliverWebhook(sbAuth, authedAdvertiserId, "campaign.created", { campaign: data });
     return res.status(201).json({ campaign: data, policy, auto_approved: autoApproved });
   }
   DEMO_CAMPAIGNS.set(row.id, row);
@@ -926,6 +928,7 @@ async function handlePauseResume(req, res, targetStatus) {
     if (error || !data) {
       return res.status(400).json({ error: `Campaign not found or cannot ${targetStatus === "paused" ? "pause" : "resume"} from current status` });
     }
+    await deliverWebhook(sb, authedAdvertiserId, targetStatus === "paused" ? "campaign.paused" : "campaign.resumed", { campaign: data });
     return res.json({ campaign: data, action: targetStatus === "paused" ? "paused" : "resumed" });
   }
 
@@ -959,6 +962,7 @@ async function handleReview(req, res) {
       .eq("status", "in_review") // can only review campaigns that are pending
       .select().single();
     if (error || !data) return res.status(400).json({ error: "Campaign not found or not in_review" });
+    await deliverWebhook(sb, data.advertiser_id, decision === "approve" ? "campaign.approved" : "campaign.rejected", { campaign: data });
     return res.json({ campaign: data, decision });
   }
   const c = DEMO_CAMPAIGNS.get(id);

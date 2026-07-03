@@ -4982,6 +4982,59 @@
                     Your key carries only the scopes shown above and cannot move money.
                 </div>
             </div>
+            <!-- ═══ Connect an agent (demand-side MCP) ═══ -->
+            <div class="section">
+                <div class="section-title">Connect an agent · MCP</div>
+                <div style="font-size:13px;color:#C7C9D1;margin-bottom:12px;">
+                    Point Claude, Cursor, or any MCP-capable agent at Boost Boss to drive campaigns in natural language — list, create, pause, and update campaigns, read performance, manage products &amp; creatives, and check your balance. Authenticate with your API key above.
+                </div>
+                <div style="font-size:12px;font-weight:600;color:#7C7E8F;margin-bottom:6px;">MCP server URL</div>
+                <pre style="background:#0B0B12;border:1px solid rgba(255,255,255,0.08);color:#E2E8F0;border-radius:10px;padding:12px 14px;font-size:12.5px;font-family:monospace;overflow-x:auto;margin:0 0 14px;">https://boostboss.ai/api/mcp-advertiser</pre>
+
+                <div style="font-size:12px;font-weight:600;color:#7C7E8F;margin-bottom:6px;">Claude Desktop / Cursor config</div>
+                <pre style="background:#0B0B12;border:1px solid rgba(255,255,255,0.08);color:#E2E8F0;border-radius:10px;padding:14px 16px;font-size:12.5px;font-family:monospace;overflow-x:auto;margin:0 0 8px;line-height:1.55;"><code>{
+  "mcpServers": {
+    "boostboss": {
+      "url": "https://boostboss.ai/api/mcp-advertiser",
+      "headers": { "Authorization": "Bearer bb_live_…" }
+    }
+  }
+}</code></pre>
+                <div style="font-size:12px;color:#7C7E8F;">Tools: <code style="font-family:monospace;color:#C7C9D1;">list_campaigns · create_campaign · pause_campaign · resume_campaign · update_campaign · get_stats · list_products · create_product · get_creative_library · set_creative_assets · get_account</code></div>
+            </div>
+
+            <!-- ═══ Apps & webhooks (event push) ═══ -->
+            <div class="section">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:4px;">
+                    <div class="section-title" style="margin:0;">Apps &amp; webhooks</div>
+                    <button id="whNewBtn" style="padding:8px 14px;background:var(--accent-primary);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;">+ Create app</button>
+                </div>
+                <div style="font-size:13px;color:#C7C9D1;margin-bottom:14px;">
+                    Register a URL to receive HMAC-signed push events (campaign approved, paused, budget exhausted, conversions) instead of polling. Verify with the <code style="font-family:monospace;color:#C7C9D1;">X-BoostBoss-Signature</code> header.
+                </div>
+
+                <!-- Create form (hidden until +Create app) -->
+                <div id="whForm" style="display:none;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;margin-bottom:14px;">
+                    <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:10px;margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#7C7E8F;display:block;margin-bottom:5px;">App name</label>
+                            <input id="whName" type="text" placeholder="My agent" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.16);border-radius:8px;padding:9px 12px;color:#F0F0F8;font-size:13px;font-family:inherit;">
+                        </div>
+                        <div>
+                            <label style="font-size:12px;font-weight:600;color:#7C7E8F;display:block;margin-bottom:5px;">Webhook URL (https)</label>
+                            <input id="whUrl" type="text" placeholder="https://your-app.com/boostboss/webhook" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.16);border-radius:8px;padding:9px 12px;color:#F0F0F8;font-size:13px;font-family:monospace;">
+                        </div>
+                    </div>
+                    <div style="font-size:12px;font-weight:600;color:#7C7E8F;margin-bottom:8px;">Events</div>
+                    <div id="whEvents" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;"></div>
+                    <div style="display:flex;gap:8px;justify-content:flex-end;">
+                        <button id="whCancel" style="padding:9px 15px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;">Cancel</button>
+                        <button id="whCreate" style="padding:9px 15px;background:var(--accent-primary);color:#fff;border:none;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;">Create webhook</button>
+                    </div>
+                </div>
+
+                <div id="whList" style="font-size:13px;color:#7C7E8F;">Loading…</div>
+            </div>
             </div><!-- /[data-shell-route="api"] -->
 
             <!-- ROUTE: promote — RETIRED 2026-06-25.
@@ -14251,6 +14304,110 @@ function pfParseScreenshots(text) {
             }, 400);
             setTimeout(function () { clearInterval(apiAuthPoll); }, 15000);
             setTimeout(maybeLoad, 100);
+        })();
+    </script>
+
+<!-- ═════════════════════════════════════════════════════════════════
+         Apps & webhooks (demand-side event push) — API route.
+         API: /api/webhooks (GET list / POST create / POST ?action=toggle|delete)
+         Owns: #whNewBtn/#whForm/#whName/#whUrl/#whEvents/#whCreate/#whCancel/#whList
+         Auth header uses currentUser.token, same as the API-key loader above.
+         ═════════════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            'use strict';
+            var loaded = false;
+            var EVENTS = ['campaign.created','campaign.approved','campaign.rejected','campaign.paused','campaign.resumed','campaign.budget_exhausted','conversion.recorded'];
+            function el(id) { return document.getElementById(id); }
+            function tok() { return (typeof currentUser !== 'undefined' && currentUser && currentUser.token) ? currentUser.token : null; }
+            function esc(s) { return String(s == null ? '' : s).replace(/[<>&"]/g, function (c) { return { '<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;' }[c]; }); }
+            function hdrs(json) { var h = { 'Authorization': 'Bearer ' + tok() }; if (json) h['Content-Type'] = 'application/json'; return h; }
+
+            function renderEventChecks() {
+                var box = el('whEvents'); if (!box) return;
+                box.innerHTML = EVENTS.map(function (e) {
+                    return '<label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#C7C9D1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.12);border-radius:8px;padding:6px 10px;cursor:pointer;">' +
+                        '<input type="checkbox" class="wh-ev" value="' + e + '" style="accent-color:#FF2D78;"> ' + e + '</label>';
+                }).join('');
+            }
+            function badge(active) {
+                return active
+                    ? '<span style="font-size:10.5px;font-weight:700;color:#34D399;background:rgba(16,185,129,0.15);padding:2px 8px;border-radius:99px;">ACTIVE</span>'
+                    : '<span style="font-size:10.5px;font-weight:700;color:#9DA3A6;background:rgba(255,255,255,0.08);padding:2px 8px;border-radius:99px;">PAUSED</span>';
+            }
+            function renderList(hooks) {
+                var host = el('whList'); if (!host) return;
+                if (!hooks || hooks.length === 0) { host.innerHTML = '<div style="color:#7C7E8F;padding:6px 0;">No apps yet · create one to receive push events.</div>'; return; }
+                host.innerHTML = hooks.map(function (w) {
+                    return '<div style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:10px;margin-bottom:8px;flex-wrap:wrap;">' +
+                        '<div style="flex:1;min-width:200px;">' +
+                            '<div style="font-weight:600;color:#F0F0F8;font-size:13px;">' + esc(w.name || 'Unnamed app') + ' ' + badge(w.active) + '</div>' +
+                            '<div style="font-size:12px;color:#7C7E8F;font-family:monospace;word-break:break-all;">' + esc(w.url) + '</div>' +
+                            '<div style="font-size:11px;color:#7C7E8F;margin-top:3px;">' + esc((w.events || []).join(' · ')) + '</div>' +
+                        '</div>' +
+                        '<button data-wh-toggle="' + w.id + '" data-active="' + (w.active ? '1' : '0') + '" style="padding:7px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">' + (w.active ? 'Pause' : 'Resume') + '</button>' +
+                        '<button data-wh-del="' + w.id + '" style="padding:7px 12px;background:transparent;border:1px solid rgba(244,33,46,0.35);color:#FCA5A5;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">Delete</button>' +
+                    '</div>';
+                }).join('');
+                host.querySelectorAll('[data-wh-toggle]').forEach(function (b) {
+                    b.addEventListener('click', function () { toggle(b.getAttribute('data-wh-toggle'), b.getAttribute('data-active') !== '1'); });
+                });
+                host.querySelectorAll('[data-wh-del]').forEach(function (b) {
+                    b.addEventListener('click', function () { del(b.getAttribute('data-wh-del')); });
+                });
+            }
+            function load() {
+                if (!tok()) return;
+                var host = el('whList'); if (host) host.textContent = 'Loading…';
+                fetch(API_BASE + '/api/webhooks', { headers: hdrs(false) })
+                    .then(function (r) { return r.json(); })
+                    .then(function (j) { renderList(j.webhooks || []); })
+                    .catch(function () { if (host) host.textContent = 'Could not load webhooks.'; });
+            }
+            function create() {
+                var url = (el('whUrl').value || '').trim();
+                var name = (el('whName').value || '').trim();
+                var events = Array.prototype.slice.call(document.querySelectorAll('.wh-ev:checked')).map(function (c) { return c.value; });
+                if (!/^https?:\/\//i.test(url)) { if (window.bbAlert) bbAlert('Enter a valid https URL.'); return; }
+                if (events.length === 0) { if (window.bbAlert) bbAlert('Select at least one event.'); return; }
+                var btn = el('whCreate'); if (btn) { btn.disabled = true; btn.textContent = 'Creating…'; }
+                fetch(API_BASE + '/api/webhooks', { method: 'POST', headers: hdrs(true), body: JSON.stringify({ name: name, url: url, events: events }) })
+                    .then(function (r) { return r.json(); })
+                    .then(function (j) {
+                        if (btn) { btn.disabled = false; btn.textContent = 'Create webhook'; }
+                        if (!j.ok) { if (window.bbAlert) bbAlert(j.error || 'Could not create.'); return; }
+                        el('whForm').style.display = 'none';
+                        el('whUrl').value = ''; el('whName').value = '';
+                        if (window.bbAlert) bbAlert('Signing secret (shown once — store it now):\n\n' + j.secret, { title: 'Webhook created' });
+                        load();
+                    })
+                    .catch(function () { if (btn) { btn.disabled = false; btn.textContent = 'Create webhook'; } if (window.bbAlert) bbAlert('Network error.'); });
+            }
+            function toggle(id, active) {
+                fetch(API_BASE + '/api/webhooks?action=toggle', { method: 'POST', headers: hdrs(true), body: JSON.stringify({ id: id, active: active }) }).then(function () { load(); });
+            }
+            function del(id) {
+                var go = function () { fetch(API_BASE + '/api/webhooks?action=delete', { method: 'POST', headers: hdrs(true), body: JSON.stringify({ id: id }) }).then(function () { load(); }); };
+                if (window.bbConfirm) { bbConfirm('Delete this webhook? Events will stop being delivered.', { danger: true, okText: 'Delete' }).then(function (ok) { if (ok) go(); }); }
+                else go();
+            }
+            function wire() {
+                var nb = el('whNewBtn'); if (nb && !nb._w) { nb._w = 1; nb.addEventListener('click', function () { var f = el('whForm'); f.style.display = (f.style.display === 'none') ? 'block' : 'none'; }); }
+                var cc = el('whCancel'); if (cc && !cc._w) { cc._w = 1; cc.addEventListener('click', function () { el('whForm').style.display = 'none'; }); }
+                var cr = el('whCreate'); if (cr && !cr._w) { cr._w = 1; cr.addEventListener('click', create); }
+                renderEventChecks();
+            }
+            function activeRoute() { var w = document.querySelector('[data-shell-active-route]'); return w && w.getAttribute('data-shell-active-route'); }
+            function maybeLoad() {
+                if (activeRoute() !== 'api') return;
+                if (!tok()) return;
+                if (!loaded) { loaded = true; wire(); }
+                load();
+            }
+            window.addEventListener('hashchange', maybeLoad);
+            var whAuthPoll = setInterval(function () { if (tok()) { clearInterval(whAuthPoll); maybeLoad(); } }, 400);
+            setTimeout(function () { clearInterval(whAuthPoll); }, 15000);
+            setTimeout(maybeLoad, 120);
         })();
     </script>
 
