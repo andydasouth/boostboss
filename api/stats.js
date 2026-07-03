@@ -170,6 +170,15 @@ module.exports = async function handler(req, res) {
       return await handleAuctionInspect(req, res);
     }
 
+    // ── Publisher health (per-publisher root-cause drill-down) ──
+    // Rolls up ONE publisher's auction_logs by outcome (fill + no-fill
+    // reasons) + eCPM/earnings/intent, and returns a diagnosis: dominant
+    // reason → likely cause → suggested action. Admin-gated. Powers the
+    // Top-Publishers drill-down in /admin.
+    if (type === "publisher_health" && req.method === "GET") {
+      return await handlePublisherHealth(req, res);
+    }
+
     return res.status(400).json({ error: "Missing type (advertiser|developer) and id/key params" });
 
   } catch (err) {
@@ -533,6 +542,107 @@ function demoPublisherFill(devKey) {
     const won = mine.filter(a => a.outcome === "won" || a.won === true).length;
     return { window_days: 30, auctions: mine.length, filled: won, fill_rate: +(won / mine.length).toFixed(4) };
   } catch (_) { return empty; }
+}
+
+// ── Per-publisher health / root-cause (admin) ─────────────────────────
+// Turns a publisher's auction_logs into a "why are they under-earning"
+// diagnosis. Each auction has an outcome (won / no_match / below_floor /
+// rate_limited / error); the dominant no-fill reason maps to a likely
+// cause + a suggested action. Powers the Top-Publishers drill-down.
+function diagnosePublisher({ auctions, fill_rate, outcomes, ecpm, avg_intent }) {
+  if (!auctions) {
+    return { status: "critical", dominant_reason: "no_traffic",
+      cause: "No auctions in the window — the SDK isn't firing (missing or broken install).",
+      action: "Check the integration verify badges; walk the publisher through installation." };
+  }
+  const fr = fill_rate == null ? 0 : fill_rate;
+  if (fr >= 0.7 && (ecpm == null || ecpm >= 1)) {
+    return { status: "healthy", dominant_reason: null, cause: "Filling well.", action: "—" };
+  }
+  const nofills = {
+    no_match:     outcomes.no_match     || 0,
+    below_floor:  outcomes.below_floor  || 0,
+    rate_limited: outcomes.rate_limited || 0,
+    error:        outcomes.error        || 0,
+  };
+  const map = {
+    no_match:     { cause: "Most auctions find no matching advertiser demand.",
+                    action: "Demand-side: recruit advertisers or broaden campaign targeting — not the publisher's fault." },
+    below_floor:  { cause: "Bids exist but don't clear this publisher's price floor.",
+                    action: "Lower the placement floor_cpm to match current demand." },
+    rate_limited: { cause: "Auctions are being frequency / rate capped.",
+                    action: "Review the frequency caps — they may be too aggressive for this surface." },
+    error:        { cause: "Auctions are erroring out.",
+                    action: "Investigate server logs (bbx:* errors) for this publisher." },
+  };
+  const dom = Object.entries(nofills).sort((a, b) => b[1] - a[1])[0];
+  const domReason = dom && dom[1] > 0 ? dom[0] : null;
+  if (domReason) {
+    return Object.assign({ status: fr < 0.3 ? "critical" : "warning", dominant_reason: domReason }, map[domReason]);
+  }
+  if (ecpm != null && ecpm < 1 && (avg_intent == null || avg_intent < 0.7)) {
+    return { status: "warning", dominant_reason: "low_intent",
+      cause: "Filling, but low eCPM — weak intent match (thin context or empty intent tokens).",
+      action: "Improve context capture (data-lumi-context / intent_tokens) so cosine can match." };
+  }
+  return { status: "warning", dominant_reason: null,
+    cause: "Under-performing for mixed reasons.",
+    action: "Open the Auction Inspector filtered to this publisher for per-auction detail." };
+}
+
+async function handlePublisherHealth(req, res) {
+  if (!_liveActivityAdminAuth(req)) return res.status(401).json({ error: "Unauthorized" });
+  const pubId = (req.query && req.query.id) || "";
+  const WINDOW_DAYS = 7;
+
+  const sb = supa();
+  if (!sb) {
+    return res.status(200).json({
+      demo: true, publisher_id: pubId, window_days: WINDOW_DAYS,
+      auctions: 0, filled: 0, fill_rate: null,
+      outcomes: { won: 0, no_match: 0, below_floor: 0, rate_limited: 0, error: 0 },
+      impressions: 0, earnings: 0, ecpm: null, avg_intent_match: null,
+      diagnosis: { status: "no_data", dominant_reason: null, cause: "Demo mode (no Supabase).", action: "—" },
+    });
+  }
+  if (!pubId) return res.status(400).json({ error: "id (publisher) required" });
+
+  const sinceIso = new Date(Date.now() - WINDOW_DAYS * 86400000).toISOString();
+  const outcomes = { won: 0, no_match: 0, below_floor: 0, rate_limited: 0, error: 0 };
+  try {
+    const { data: rows } = await sb.from("auction_logs")
+      .select("outcome")
+      .eq("publisher_id", pubId).eq("is_sandbox", false).gte("ts", sinceIso)
+      .limit(20000);
+    for (const r of (rows || [])) { if (outcomes[r.outcome] != null) outcomes[r.outcome]++; }
+  } catch (e) { console.error("[publisher_health] outcomes:", e.message); }
+
+  const auctions = Object.values(outcomes).reduce((a, b) => a + b, 0);
+  const filled = outcomes.won;
+  const fill_rate = auctions > 0 ? +(filled / auctions).toFixed(4) : null;
+
+  // Earnings / eCPM / intent from the placement breakdown (last 30d view).
+  let impressions = 0, earnings = 0, gross = 0, iSum = 0, iN = 0;
+  try {
+    const placements = await loadPlacementBreakdown(sb, pubId);
+    for (const p of placements) {
+      impressions += p.impressions || 0;
+      earnings    += p.publisher_earnings || 0;
+      gross       += p.gross_spend || 0;
+      if (p.avg_intent_match != null && p.impressions > 0) { iSum += p.avg_intent_match * p.impressions; iN += p.impressions; }
+    }
+  } catch (e) { console.error("[publisher_health] placements:", e.message); }
+  const ecpm = impressions > 0 ? +((gross / impressions) * 1000).toFixed(2) : null;
+  const avg_intent = iN > 0 ? +(iSum / iN).toFixed(2) : null;
+
+  const diagnosis = diagnosePublisher({ auctions, fill_rate, outcomes, ecpm, avg_intent });
+
+  return res.json({
+    publisher_id: pubId, window_days: WINDOW_DAYS,
+    auctions, filled, fill_rate, outcomes,
+    impressions, earnings: +earnings.toFixed(2), ecpm, avg_intent_match: avg_intent,
+    diagnosis,
+  });
 }
 
 // ── Placement breakdown helpers ───────────────────────────────────────

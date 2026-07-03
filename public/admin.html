@@ -229,6 +229,17 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
   </div>
 </div>
 
+<!-- Publisher health drill-down -->
+<div class="search-overlay" id="healthOverlay" onclick="if(event.target===this)closeHealth()" style="padding-top:8vh;">
+  <div class="search-modal" style="max-width:560px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line);">
+      <div><div id="ph-title" style="font-weight:700;font-size:15px;">Publisher health</div><div id="ph-sub" style="font-size:12px;color:var(--muted);">—</div></div>
+      <button onclick="closeHealth()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;">✕</button>
+    </div>
+    <div id="ph-body" style="padding:18px;max-height:70vh;overflow:auto;">Loading…</div>
+  </div>
+</div>
+
 <!-- Mobile Toggle -->
 <button class="mobile-toggle" id="mobileToggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
 
@@ -1284,6 +1295,57 @@ function _fmtN(n) { return (Number(n) || 0).toLocaleString('en-US'); }
 function _fmtPct(r) { return r == null ? '—' : (r * 100).toFixed(0) + '%'; }
 function _fmtMoney(n) { return '$' + (Number(n) || 0).toFixed(2); }
 
+// ── Publisher health drill-down (root-cause per publisher) ──────────
+const _PH_STATUS = {
+  healthy:  { c:'#34D399', bg:'rgba(16,185,129,0.15)', t:'HEALTHY' },
+  warning:  { c:'#FCD34D', bg:'rgba(245,158,11,0.15)', t:'WARNING' },
+  critical: { c:'#FCA5A5', bg:'rgba(244,33,46,0.15)',  t:'CRITICAL' },
+  no_data:  { c:'#9DA3A6', bg:'rgba(255,255,255,0.08)', t:'NO DATA' },
+};
+function closeHealth() { const o = document.getElementById('healthOverlay'); if (o) o.classList.remove('open'); }
+async function openPublisherHealth(id, label) {
+  const o = document.getElementById('healthOverlay'); if (!o) return;
+  document.getElementById('ph-title').textContent = label || id || 'Publisher';
+  document.getElementById('ph-sub').textContent = id || '';
+  document.getElementById('ph-body').innerHTML = 'Loading…';
+  o.classList.add('open');
+  try {
+    const r = await fetch(`${API}/api/stats?type=publisher_health&id=${encodeURIComponent(id)}`, { headers: { 'Authorization': 'Bearer ' + (token || '') } });
+    const j = await r.json();
+    if (!r.ok) { document.getElementById('ph-body').innerHTML = '<div style="color:var(--muted)">' + (j.error || 'Failed to load') + '</div>'; return; }
+    renderPublisherHealth(j);
+  } catch (e) { document.getElementById('ph-body').innerHTML = '<div style="color:var(--muted)">Network error</div>'; }
+}
+function renderPublisherHealth(j) {
+  const st = _PH_STATUS[(j.diagnosis && j.diagnosis.status) || 'no_data'] || _PH_STATUS.no_data;
+  const o = j.outcomes || {}; const total = j.auctions || 0; const d = j.diagnosis || {};
+  const metric = (label, val) => `<div style="background:var(--bg-soft);border:1px solid var(--line);border-radius:10px;padding:12px 14px;"><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;">${label}</div><div style="font-size:20px;font-weight:700;margin-top:4px;">${val}</div></div>`;
+  const bar = (name, count, color) => { const pct = total > 0 ? Math.round(count / total * 100) : 0; return `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:12px;"><div style="width:96px;color:var(--muted);">${name}</div><div style="flex:1;height:8px;background:var(--bg-soft);border-radius:99px;overflow:hidden;"><div style="width:${pct}%;height:100%;background:${color};"></div></div><div style="width:70px;text-align:right;" class="mono">${_fmtN(count)} · ${pct}%</div></div>`; };
+  document.getElementById('ph-body').innerHTML =
+    `<div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+       <span style="font-size:11px;font-weight:700;color:${st.c};background:${st.bg};padding:3px 10px;border-radius:99px;">${st.t}</span>
+       <span style="font-size:12px;color:var(--muted);">last ${j.window_days || 7} days</span>
+     </div>
+     <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:16px;">
+       ${metric('Fill rate', _fmtPct(j.fill_rate))}
+       ${metric('eCPM', j.ecpm == null ? '—' : '$' + j.ecpm)}
+       ${metric('Impressions', _fmtN(j.impressions))}
+       ${metric('Earnings', _fmtMoney(j.earnings))}
+     </div>
+     <div style="background:${st.bg};border:1px solid ${st.c}55;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+       <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px;">Root cause${d.dominant_reason ? ' · ' + d.dominant_reason : ''}</div>
+       <div style="font-size:14px;font-weight:600;margin-bottom:8px;">${d.cause || '—'}</div>
+       <div style="font-size:12px;color:var(--muted);"><strong style="color:#E7E9EA;">Suggested action:</strong> ${d.action || '—'}</div>
+     </div>
+     <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px;">Auction outcomes (${_fmtN(total)})</div>
+     ${bar('won', o.won || 0, '#34D399')}
+     ${bar('no_match', o.no_match || 0, '#9DA3A6')}
+     ${bar('below_floor', o.below_floor || 0, '#FCD34D')}
+     ${bar('rate_limited', o.rate_limited || 0, '#93C5FD')}
+     ${bar('error', o.error || 0, '#FCA5A5')}
+     <div style="margin-top:16px;"><a href="#" onclick="closeHealth();switchPanel('inspector');return false;" style="color:var(--pink);font-size:13px;">Open in Auction Inspector →</a></div>`;
+}
+
 function renderLiveActivity(j) {
   if (!j) return;
   // Health card
@@ -1318,13 +1380,17 @@ function renderLiveActivity(j) {
   if (!j.top_publishers || j.top_publishers.length === 0) {
     pubBody.innerHTML = '<tr><td colspan="3" class="empty-state">No publisher activity yet.</td></tr>';
   } else {
-    pubBody.innerHTML = j.top_publishers.map(p => `
-      <tr>
-        <td>${(p.email || p.app_name || p.developer_id || '').toString().replace(/</g,'&lt;')}</td>
+    pubBody.innerHTML = j.top_publishers.map(p => {
+      const label = (p.email || p.app_name || p.developer_id || '').toString().replace(/</g,'&lt;');
+      const id = (p.developer_id || '').toString().replace(/'/g,'');
+      const safeLabel = label.replace(/'/g,'');
+      return `
+      <tr style="cursor:pointer;" onclick="openPublisherHealth('${id}','${safeLabel}')" title="View health & root cause">
+        <td>${label} <span style="color:var(--muted);">›</span></td>
         <td style="text-align:right;" class="mono">${_fmtN(p.impressions_24h)}</td>
         <td style="text-align:right;" class="mono">${_fmtMoney(p.earnings_24h)}</td>
-      </tr>
-    `).join('');
+      </tr>`;
+    }).join('');
   }
 
   // Top campaigns
