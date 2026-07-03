@@ -898,6 +898,18 @@ select:not(.form-select):not(.ncw-input):focus-visible {
   background: #13131E !important;
   border-color: rgba(255,255,255,0.08) !important;
 }
+/* Card-style sections on API & Billing routes — these routes stack bare
+   .section bands (no radius/padding/border), so they read as flat full-bleed
+   strips instead of cards. Give the top-level route sections real card
+   treatment to match the Creatives / Campaigns reference (#1B1D22 panels). */
+[data-shell-route="api"] > .section,
+[data-shell-route="billing"] > .section {
+  background: #1B1D22 !important;
+  border: 1px solid rgba(255,255,255,0.10) !important;
+  border-radius: 16px !important;
+  padding: 22px 24px !important;
+  margin-bottom: 16px !important;
+}
 .chart-title,
 .section-title,
 .campaigns-title {
