@@ -547,7 +547,10 @@
     display: none;
 }
 .shell-wrap[data-shell-active-route="home"]            [data-shell-route="home"],
-/* performance route retired 2026-06-25 — merged into 'home'. */
+/* performance retired on the advertiser (merged into 'home') but is a live,
+   distinct route on the publisher dashboard (Mediation & Waterfall). Keep it
+   in the allowlist — inert where no such section exists. */
+.shell-wrap[data-shell-active-route="performance"]     [data-shell-route="performance"],
 .shell-wrap[data-shell-active-route="pilot"]           [data-shell-route="pilot"],
 .shell-wrap[data-shell-active-route="campaigns"]       [data-shell-route="campaigns"],
 .shell-wrap[data-shell-active-route="products"]        [data-shell-route="products"],
