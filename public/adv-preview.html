@@ -2908,6 +2908,12 @@
     </style>
 </head>
 <body>
+    <div id="bbBootLoader" style="position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;background:#111111;transition:opacity .45s ease;">
+      <img src="/design-system/assets/rocket-logo.svg" alt="Boost Boss" style="width:64px;height:64px;animation:bbBootFloat 2.4s ease-in-out infinite;filter:drop-shadow(0 8px 24px rgba(255,45,120,.35))">
+      <div style="font-family:var(--font-display,'Space Grotesk',sans-serif);font-size:22px;font-weight:700;color:#fff;letter-spacing:-.01em;">Boost&nbsp;Boss</div>
+      <div style="width:180px;height:3px;border-radius:3px;background:rgba(255,255,255,.12);overflow:hidden;"><div style="width:40%;height:100%;border-radius:3px;background:linear-gradient(90deg,#FF2D78,#00FFE0);animation:bbBootBar 1.2s ease-in-out infinite;"></div></div>
+      <div style="font-size:12.5px;color:rgba(231,233,234,.55);font-family:inherit;">Loading…</div>
+    </div>
     <!-- Auth Container -->
     <div id="authContainer" class="auth-container">
         <div class="auth-form-wrapper">
@@ -3030,8 +3036,8 @@
               <span class="shell-nav-item__label" data-t="shell.nav.api">API &amp; Automation</span>
             </button>
             <span class="shell-nav-section-label">Account</span>
-            <!-- Account — flat nav item, logout icon on right -->
-            <button class="shell-nav-item shell-nav-item--account" id="shellAccountNavItem" onclick="if(typeof openSettingsModal==='function')openSettingsModal();">
+            <!-- Account — click to expand Settings + Logout submenu -->
+            <button class="shell-nav-item shell-nav-item--account" id="shellAccountNavItem" type="button" aria-expanded="false" aria-controls="shellAccountSubmenu">
               <span class="shell-nav-item__icon">
                 <div class="shell-sidebar__user-avatar" id="shellUserAvatar" style="width:18px;height:18px;font-size:9px;">·</div>
               </span>
@@ -3039,10 +3045,12 @@
                 <span class="shell-user-name" id="companyDisplayName" data-t="chrome.account">Account</span>
                 <span class="shell-user-role" style="display:block;font-size:10.5px;font-weight:400;" data-t="shell.role.advertiser">Advertiser</span>
               </span>
-              <button class="shell-account-logout-btn" id="logoutBtn" title="Logout" onclick="event.stopPropagation();if(typeof handleLogout==='function')handleLogout();" style="margin-left:auto;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-              </button>
+              <span class="shell-account-caret" aria-hidden="true" style="margin-left:auto;">⌄</span>
             </button>
+            <div class="shell-account-submenu" id="shellAccountSubmenu" role="group" hidden>
+              <button class="shell-nav-subitem" type="button" onclick="if(typeof openSettingsModal==='function')openSettingsModal();"><span class="shell-nav-subitem__label" data-t="shell.nav.settings">Settings</span></button>
+              <button class="shell-nav-subitem shell-nav-subitem--logout" type="button" onclick="if(typeof handleLogout==='function')handleLogout();"><span class="shell-nav-subitem__label" data-t="shell.nav.logout">Logout</span></button>
+            </div>
           </div>
 
           <div class="shell-sidebar__foot" style="display:none;"></div>
@@ -7853,6 +7861,7 @@
         }
 
         function showDashboard() {
+            if (window.__bbHideBoot) window.__bbHideBoot();
             authContainer.style.display = 'none';
             dashboardContainer.classList.add('active');
             companyDisplayName.textContent = currentUserData.company_name || 'Advertiser';
@@ -18128,6 +18137,26 @@ function pfParseScreenshots(text) {
   });
   document.addEventListener('click', function(){ drop.style.display = 'none'; btn.setAttribute('aria-expanded','false'); });
 })();
+</script>
+<style>
+  .shell-account-caret{transition:transform .18s ease;opacity:.6;font-size:12px}
+  .shell-nav-item--account[aria-expanded="true"] .shell-account-caret{transform:rotate(180deg)}
+  .shell-account-submenu[hidden]{display:none}
+  .shell-account-submenu{display:flex;flex-direction:column;margin:2px 0 4px 20px;padding-left:12px;border-left:1px solid rgba(255,255,255,0.12)}
+  .shell-nav-subitem{display:flex;align-items:center;gap:8px;background:none;border:none;cursor:pointer;font-family:inherit;font-size:13.5px;font-weight:600;color:#E7E9EA;padding:8px 10px;border-radius:8px;text-align:left;width:100%}
+  .shell-nav-subitem:hover{background:rgba(255,255,255,0.06)}
+  .shell-nav-subitem--logout{color:#F4212E}
+  .shell-nav-subitem--logout:hover{background:rgba(244,33,46,0.10)}
+  @keyframes bbBootFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+  @keyframes bbBootBar{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+  #bbBootLoader.bb-hide{opacity:0;pointer-events:none}
+</style>
+<script>
+  (function(){var b=document.getElementById('shellAccountNavItem'),m=document.getElementById('shellAccountSubmenu');if(!b||!m)return;b.addEventListener('click',function(){var open=!m.hasAttribute('hidden');if(open){m.setAttribute('hidden','');b.setAttribute('aria-expanded','false');}else{m.removeAttribute('hidden');b.setAttribute('aria-expanded','true');}});})();
+  (function(){function hide(){var el=document.getElementById('bbBootLoader');if(!el)return;el.classList.add('bb-hide');setTimeout(function(){if(el&&el.parentNode)el.parentNode.removeChild(el);},500);}
+   window.__bbHideBoot=hide;
+   if(document.readyState==='complete')setTimeout(hide,400);else window.addEventListener('load',function(){setTimeout(hide,400);});
+   setTimeout(hide,8000);})();
 </script>
 </body>
 </html>
