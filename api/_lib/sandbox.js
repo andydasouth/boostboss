@@ -77,6 +77,20 @@ const SANDBOX_CREATIVES = [
     cta_url: "https://boostboss.ai/docs/mcp",
     disclosure_label: "Sponsored · TEST",
   },
+  {
+    campaign_id: "cmp_sandbox_video",
+    advertiser_name: "Boost Boss Sandbox",
+    type: "video",
+    headline: "[Sandbox] Acme Studio — prompt-to-video in one click",
+    subtext: "Watch the 15-second demo.",
+    // Small, stable public sample MP4 so publishers can smoke-test pre-roll /
+    // rewarded rendering end-to-end without an advertiser video creative.
+    media_url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    poster_url: "https://placehold.co/1280x720/0F0F1A/FFE600?text=SANDBOX+VIDEO",
+    cta_label: "Try Acme Studio",
+    cta_url: "https://boostboss.ai/sandbox-click?creative=video",
+    disclosure_label: "Sponsored · TEST",
+  },
 ];
 
 function isSandboxCredential(args) {
