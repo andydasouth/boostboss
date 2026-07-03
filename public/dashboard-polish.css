@@ -1655,3 +1655,64 @@ div[style*="Updated just now"] * {
 .shell-account-settings-btn:hover { background: rgba(255,255,255,0.07); color: #E7E9EA; }
 .shell-account-logout-btn { color: #4E5256; }
 .shell-account-logout-btn:hover { background: rgba(239,68,68,0.10); color: #F87171; }
+
+/* ══════════════════════════════════════════════════════════════════════
+   THEME COMPLETION (2026-07-03) — dark-ify content surfaces the shell
+   re-theme missed. Scoped to .shell-main. Ad-preview / wireframe / placement
+   mockups stay light on purpose (they simulate real ads), so those classes
+   are excluded from the background overrides. Covers every light color format
+   the JS-rendered content uses: #fff, #ffffff, white, rgb(255,255,255), and
+   the light-grey greys.
+   ══════════════════════════════════════════════════════════════════════ */
+/* --- light card / panel / empty-state backgrounds → dark surface --- */
+.shell-main [style*="background:#fff"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background: #fff"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background:#ffffff" i]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background: #ffffff" i]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background:white"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background: white"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background:rgb(255, 255, 255)"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background: rgb(255, 255, 255)"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background:rgb(255,255,255)"]:not([class*="preview"]):not([class*="ad-"]):not([class*="mock"]):not([class*="sponsor"]):not([class*="wf-"]):not([class*="pl-"]),
+.shell-main [style*="background:#fafafa" i], .shell-main [style*="background: #fafafa" i],
+.shell-main [style*="background:#f9fafb" i], .shell-main [style*="background: #f9fafb" i],
+.shell-main [style*="background:#f3f4f6" i], .shell-main [style*="background: #f3f4f6" i],
+.shell-main [style*="background:#f8f9fa" i], .shell-main [style*="background: #f8f9fa" i]{
+  background:#1B1D22 !important;
+}
+/* --- light-grey borders → subtle dark border --- */
+.shell-main [style*="#E5E7EB" i], .shell-main [style*="rgb(229, 231, 235)"],
+.shell-main [style*="#E2E8F0" i], .shell-main [style*="#EEEEEE" i]{ border-color:rgba(255,255,255,.10) !important; }
+/* --- known advertiser content classes --- */
+.ca-section,.ca-summary,.ca-variant-row,.draft-row,.door-card,.tier-option,
+.ftg-group,.ftg-head,.b-chip,.target-pill,.ncw-affiliate-row,.pilot-cs-toggle{
+  background:#1B1D22 !important; border-color:rgba(255,255,255,.10) !important; color:#E7E9EA !important;
+}
+/* --- form fields --- */
+.shell-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+.shell-main select, .shell-main textarea,
+.ca-input,.ca-image-add,.ca-upload-btn,.ncw-radio,.wf-input{
+  background:#1E2024 !important; color:#E7E9EA !important; border-color:rgba(255,255,255,.10) !important;
+}
+.shell-main input::placeholder, .shell-main textarea::placeholder{ color:#9DA3A6 !important; }
+.shell-main select option{ background:#16181C; color:#E7E9EA; }
+/* --- SVG chart plot backgrounds that render white --- */
+.shell-main svg rect[fill="#fff"], .shell-main svg rect[fill="#ffffff"],
+.shell-main svg rect[fill="#FFFFFF"], .shell-main svg rect[fill="#FAFAFA"]{ fill:transparent !important; }
+/* --- dark-on-white text now on dark → lighten (all common dark greys) --- */
+.shell-main [style*="color:#0F0F1A" i],.shell-main [style*="color: #0F0F1A" i],
+.shell-main [style*="color:#111111" i],.shell-main [style*="color: #111111" i],
+.shell-main [style*="color:#111827" i],.shell-main [style*="color: #111827" i],
+.shell-main [style*="color:#0F172A" i],.shell-main [style*="color: #0F172A" i],
+.shell-main [style*="color:#1F2937" i],.shell-main [style*="color: #1F2937" i],
+.shell-main [style*="color:#030712" i],.shell-main [style*="color:#18181B" i],
+.shell-main [style*="color:#0B0B14" i],.shell-main [style*="color:#1A1A2E" i],
+.shell-main [style*="color:#000000" i],.shell-main [style*="color:#000;" i],
+.shell-main [style*="color: #000;" i],.shell-main [style*="color:#1E293B" i]{ color:#E7E9EA !important; }
+/* --- stragglers: add/variant buttons, status badges, progress tracks --- */
+.ca-variant-add, .ca-add, .ca-chip{ background:#1E2024 !important; color:#E7E9EA !important; border-color:rgba(255,255,255,.10) !important; }
+.shell-main [style*="#FEE2E2" i], .shell-main [style*="#FEF2F2" i]{ background:rgba(244,33,46,.14) !important; color:#F87171 !important; }
+.shell-main [style*="#DCFCE7" i], .shell-main [style*="#D1FAE5" i]{ background:rgba(52,211,153,.14) !important; color:#34D399 !important; }
+.shell-main [style*="#FEF3C7" i], .shell-main [style*="#FEF9C3" i], .shell-main [style*="#FFFBEB" i]{ background:rgba(251,191,36,.16) !important; color:#FBBF24 !important; }
+.shell-main [style*="#DBEAFE" i], .shell-main [style*="#EFF6FF" i]{ background:rgba(96,165,250,.14) !important; color:#93C5FD !important; }
+.shell-main [class*="progress"]:not([class*="fill"]):not([class*="__fill"]){ background:rgba(255,255,255,.08) !important; }
