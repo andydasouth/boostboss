@@ -3460,10 +3460,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
               <span class="shell-nav-item__label">Install</span>
             </button>
-            <span class="shell-nav-section-label">Data</span>
+            <span class="shell-nav-section-label">Performance</span>
             <button class="shell-nav-item" data-shell-section="performance">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg></span>
-              <span class="shell-nav-item__label">Earn</span>
+              <span class="shell-nav-item__label">Analytics</span>
             </button>
             <button class="shell-nav-item" data-shell-section="boosts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg></span>
@@ -3471,7 +3471,7 @@
             </button>
             <button class="shell-nav-item" data-shell-section="payouts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-              <span class="shell-nav-item__label">Money</span>
+              <span class="shell-nav-item__label">Payouts</span>
             </button>
             <span class="shell-nav-section-label">Developer</span>
             <button class="shell-nav-item" data-shell-section="api">
@@ -5192,7 +5192,7 @@
               <div class="shell-page-head">
                 <div>
                   <h1 class="shell-page-title" data-t="page.payouts.title">Payouts</h1>
-                  <div class="shell-page-sub" data-t="page.payouts.sub">Money Boost Boss owes you from MoR captures. Sellers settle biweekly Friday via PayPal.</div>
+                  <div class="shell-page-sub">What you've earned, and when it lands in your PayPal — settled biweekly on Fridays.</div>
                 </div>
               </div>
 
@@ -5200,8 +5200,10 @@
                    Moved here from the retired /promote route 2026-06-25.
                    IDs preserved (promoteBalance, promoteAdCredit, etc.) so
                    the existing wireOnce(), openConvertModal(), and balance
-                   refresh handlers keep working unchanged. -->
-              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-bottom:18px;">
+                   refresh handlers keep working unchanged.
+                   Hidden 2026-07-04 — "convert to ad credit / create campaign" is the
+                   retired advertiser machinery; kept in DOM so the wiring never null-refs. -->
+              <div style="display:none;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:16px;margin-bottom:18px;">
 
                 <!-- MoR earnings (cashable / convertible) -->
                 <div style="background:linear-gradient(135deg,#FFF5F8 0%,#F5FBFF 100%);border:1.5px solid #E5E7EB;border-radius:14px;padding:22px 24px;">
@@ -5440,8 +5442,8 @@
 
             <div class="shell-page-head">
                 <div>
-                    <h1 class="shell-page-title">Earn</h1>
-                    <div class="shell-page-sub">What your contribution earns — hosted impressions, Boosts, and yield</div>
+                    <h1 class="shell-page-title">Analytics</h1>
+                    <div class="shell-page-sub">How your hosted ads perform, and how far your product reached</div>
                 </div>
             </div>
 
