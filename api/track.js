@@ -27,6 +27,7 @@ const TAKE_RATE    = Number(process.env.BBX_TAKE_RATE)
 // keeps cold-start cost minimal when balance isn't wired (e.g. legacy
 // callers exclusively in demo mode).
 const publisherBalance = require("./_lib/publisher_balance.js");
+const boostCredits = require("./_lib/boost_credits.js");
 
 // Rate limiting: prevent abuse by limiting events per IP per minute
 const RATE_LIMIT_WINDOW_MS = 60 * 1000;
@@ -456,6 +457,16 @@ module.exports = async function handler(req, res) {
       // developer_payout is 0 for sandbox events and creditPublisherBalance
       // no-ops on amount<=0 anyway — but we belt-and-suspenders the gate
       // here to keep the closed loop obvious to future readers).
+      // ── Boost mint (free launch network) ──────────────────────────────
+      // Every VERIFIED, non-sandbox impression the host serves mints +1 Boost
+      // to the host — even for free (credit-funded) ads. This is the
+      // "show one, get one shown" reciprocity that bootstraps the network.
+      // Non-critical + deduped per (account, auction); never breaks track.
+      if (record.event_type === "impression" && record.developer_id && !record.is_sandbox) {
+        try { await boostCredits.mintBoost(sb, record.developer_id, 1, "serve", record.auction_id || null); }
+        catch (_) { /* boosts are additive; never break the billing artery */ }
+      }
+
       if (record.developer_payout > 0 && record.developer_id && !record.is_sandbox) {
         try {
           const credit = await publisherBalance.creditPublisherBalance(

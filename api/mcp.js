@@ -799,9 +799,15 @@ async function handleGetSponsoredContent(body, args, res) {
   // Self-promote bypasses the floor (house ad always allowed to fill).
   const scored = candidatesScored
     .filter((x) => x.effective_price_cpm > 0 && (x.selfPromote || x.effective_price_cpm >= effectiveFloor))
-    // Self-promoted campaigns win first; among the rest, highest CPM wins.
+    // Ranking: (1) self-promote (house ad) first, (2) CASH-funded promotions
+    // outrank free CREDIT/Boost-funded ones — paying cash is the amplification
+    // tier of the free launch network; free credit promos fill the remainder,
+    // (3) among equals, highest effective CPM wins.
     .sort((a, b) => {
       if (a.selfPromote !== b.selfPromote) return a.selfPromote ? -1 : 1;
+      const aCash = !(a.c && a.c.credit_funded === true);
+      const bCash = !(b.c && b.c.credit_funded === true);
+      if (aCash !== bCash) return aCash ? -1 : 1;
       return b.effective_price_cpm - a.effective_price_cpm;
     });
 
