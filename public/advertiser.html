@@ -2930,6 +2930,13 @@
         .shell-topbar__brand-name .bb-console-suffix { font-size: 12px; font-weight: 600; color: #9DA3A6; }
         .shell-wrap[data-shell-sidebar="collapsed"] .shell-topbar__brand-name { width: 0; }
 
+        /* Reusable in-page sub-tabs (X/Voyage style). One bar + N panels as direct
+           children of a route div; bbSubtab() toggles. */
+        .bb-subtabs { display:flex; gap:2px; border-bottom:1px solid rgba(255,255,255,0.10); margin:2px 0 22px; flex-wrap:wrap; }
+        .bb-subtab { background:none; border:none; color:#9DA3AE; font-size:14px; font-weight:600; padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; font-family:inherit; transition:color .12s; }
+        .bb-subtab:hover { color:#E7E9EA; }
+        .bb-subtab.is-active { color:#F0F0F8; border-bottom-color:#FF2D78; }
+
         /* Payouts + Creatives shipped with a light card palette (white cards, dark
            text). Force the console's standard dark cards + readable text so they
            match every other tab (Andy 2026-07-04). */
@@ -5267,6 +5274,12 @@
               </div>
 
               <!-- Top stat cards: available + lifetime + next payout date -->
+              <div class="bb-subtabs" role="tablist">
+                <button class="bb-subtab is-active" data-subtab="overview" onclick="bbSubtab(this)">Overview</button>
+                <button class="bb-subtab" data-subtab="method" onclick="bbSubtab(this)">Payout method</button>
+                <button class="bb-subtab" data-subtab="history" onclick="bbSubtab(this)">History</button>
+              </div>
+              <div class="bb-subpanel" data-subpanel="overview">
               <div id="payoutsStats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:18px;">
                 <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:18px 20px;">
                   <div style="font-size:11px;font-weight:700;color:#6B7280;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;" data-t="page.payouts.stat_available">Available for next payout</div>
@@ -5294,7 +5307,9 @@
               <div id="poHoldBanner" style="display:none;background:#FEF3C7;border:1px solid #FCD34D;border-radius:12px;padding:14px 18px;margin-bottom:18px;color:#92400E;">
                 <strong data-t="page.payouts.hold_banner_strong">⚠ Add your PayPal email below to receive payouts.</strong> <span data-t="page.payouts.hold_banner_body">Until you do, captured sales stay held in Boost Boss's account. Your funds aren't lost — they release the next payout cycle after you save your details.</span>
               </div>
+              </div><!-- /overview subpanel -->
 
+              <div class="bb-subpanel" data-subpanel="method" hidden>
               <!-- Payout method form -->
               <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
                 <div style="font-size:15px;font-weight:700;color:#111827;margin-bottom:4px;" data-t="page.payouts.method_h">Payout method</div>
@@ -5317,7 +5332,9 @@
                 <div id="poMethodErr" style="display:none;margin-top:10px;padding:9px 12px;background:#FEF2F2;border:1px solid #FECACA;color:#991B1B;border-radius:8px;font-size:12.5px;"></div>
                 <div id="poMethodOk" style="display:none;margin-top:10px;padding:9px 12px;background:#ECFDF5;border:1px solid #A7F3D0;color:#065F46;border-radius:8px;font-size:12.5px;" data-t="page.payouts.method_ok">✓ Payout method saved</div>
               </div>
+              </div><!-- /method subpanel -->
 
+              <div class="bb-subpanel" data-subpanel="history" hidden>
               <!-- Upcoming line items — what's in the next payout -->
               <div style="background:#fff;border-radius:12px;border:1px solid #E5E7EB;padding:20px 24px;margin-bottom:18px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
@@ -5340,6 +5357,7 @@
                   <div style="padding:24px 0;text-align:center;color:#9CA3AF;font-size:13px;" data-t="page.payouts.loading">Loading…</div>
                 </div>
               </div>
+              </div><!-- /history subpanel -->
             </div><!-- /[data-shell-route="payouts"] -->
 
             <!-- ═══════ ROUTE: billing (advertiser — preview, mirrors publisher) ═══════
@@ -9059,6 +9077,16 @@ class MyApp : Application() {
         // missing element or fetch failure is swallowed so the route can
         // never blank the dashboard.
         let _boostsLoaded = false;
+        // Reusable in-page sub-tab switcher. Buttons carry data-subtab; panels
+        // (siblings, direct children of the same route div) carry data-subpanel.
+        function bbSubtab(btn) {
+            var bar = btn.closest('.bb-subtabs'); if (!bar) return;
+            var wrap = bar.parentElement;
+            var key = btn.getAttribute('data-subtab');
+            bar.querySelectorAll('.bb-subtab').forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+            wrap.querySelectorAll('.bb-subpanel').forEach(function (p) { p.hidden = (p.getAttribute('data-subpanel') !== key); });
+        }
+
         async function loadBoosts() {
             const fmt = (n) => { try { return formatNumber(Number(n) || 0); } catch (_) { return String(Number(n) || 0); } };
             try {
