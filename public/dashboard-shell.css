@@ -556,6 +556,7 @@
 .shell-wrap[data-shell-active-route="products"]        [data-shell-route="products"],
 .shell-wrap[data-shell-active-route="product-orders"]  [data-shell-route="product-orders"],
 .shell-wrap[data-shell-active-route="creatives"]       [data-shell-route="creatives"],
+.shell-wrap[data-shell-active-route="boosts"]          [data-shell-route="boosts"],
 .shell-wrap[data-shell-active-route="billing"]         [data-shell-route="billing"],
 .shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],
 /* setup route retired 2026-06-25 — pixel moved into Settings,

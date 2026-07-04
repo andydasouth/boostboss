@@ -51,4 +51,21 @@ async function getBoostBalance(sb, accountId) {
   } catch (_) { return 0; }
 }
 
-module.exports = { mintBoost, spendBoost, getBoostBalance, grantStarterOnce };
+// Split the ledger into lifetime earned (sum of +deltas) and spent (abs sum of
+// −deltas). balance === earned − spent. Never throws; returns zeros on error.
+async function getBoostBreakdown(sb, accountId) {
+  const zero = { balance: 0, earned: 0, spent: 0 };
+  if (!sb || !accountId) return zero;
+  try {
+    const { data, error } = await sb.from("boost_credit_ledger").select("delta").eq("account_id", accountId);
+    if (error) return zero;
+    let earned = 0, spent = 0;
+    (data || []).forEach((r) => {
+      const d = Number(r.delta) || 0;
+      if (d > 0) earned += d; else spent += -d;
+    });
+    return { balance: earned - spent, earned, spent };
+  } catch (_) { return zero; }
+}
+
+module.exports = { mintBoost, spendBoost, getBoostBalance, getBoostBreakdown, grantStarterOnce };

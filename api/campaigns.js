@@ -295,8 +295,8 @@ module.exports = async function handler(req, res) {
       if (!sbB) return res.json({ boosts: 0, demo: true });
       const auth = await resolveAdvertiser(req, sbB);
       if (auth.error) return res.status(auth.status).json({ error: auth.error });
-      const boosts = await boostCredits.getBoostBalance(sbB, auth.advertiserId);
-      return res.json({ boosts });
+      const bd = await boostCredits.getBoostBreakdown(sbB, auth.advertiserId);
+      return res.json({ boosts: bd.balance, earned: bd.earned, spent: bd.spent });
     }
     // Single campaign by id
     if (req.method === "GET" && action === "get") {

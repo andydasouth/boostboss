@@ -3024,6 +3024,10 @@
               <span class="shell-nav-item__label" data-t="shell.nav.products">Products</span>
             </button>
             <span class="shell-nav-section-label">Money</span>
+            <button class="shell-nav-item" data-shell-section="boosts">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg></span>
+              <span class="shell-nav-item__label">Boosts</span>
+            </button>
             <button class="shell-nav-item" data-shell-section="payouts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.payouts">Billing</span>
@@ -4873,6 +4877,75 @@
                 <div style="font-size:13px;color:#7C7E8F;padding:8px 0;">No transactions yet · every credit is itemized.</div>
             </div>
             </div><!-- /[data-shell-route="billing"] -->
+
+            <!-- ═════════════════════════════════════════════════════════════
+                 ROUTE: boosts — the free-launch-network currency hero.
+                 Hash: #/boosts. Nav item data-shell-section="boosts".
+                 VALID_ROUTES + dashboard-shell.css allowlist both carry 'boosts'.
+                 Balance from GET /api/campaigns?action=boosts → { boosts }.
+                 ═════════════════════════════════════════════════════════════ -->
+            <div data-shell-route="boosts">
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title">Boosts</h1>
+                    <div class="shell-page-sub">Your launch-network currency — earn by hosting ads, spend to get discovered.</div>
+                </div>
+            </div>
+
+            <!-- Hero balance card -->
+            <div style="background:linear-gradient(135deg,#1A1226 0%,#13131E 60%);border:1px solid rgba(255,45,120,0.28);border-radius:16px;padding:22px 24px;margin-bottom:16px;">
+                <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                    <div>
+                        <div style="font-size:13px;color:#B98BC4;letter-spacing:.04em;text-transform:uppercase;">Boost balance</div>
+                        <div style="display:flex;align-items:baseline;gap:8px;margin:6px 0 2px;">
+                            <span id="bb-boost-balance" style="font-size:40px;font-weight:700;color:#F0F0F8;line-height:1;">—</span>
+                            <span style="font-size:15px;color:#7C7E8F;font-weight:500;">Boosts</span>
+                        </div>
+                        <div style="font-size:12px;color:#7C7E8F;">1 Boost = 1 impression of your product, shown across the network.</div>
+                    </div>
+                    <button type="button" onclick="location.hash='#/pilot';" style="background:#FF2D78;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">Promote free with Boosts →</button>
+                </div>
+            </div>
+
+            <!-- Earned / Spent split -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:16px;">
+                <div style="background:#13131E;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:14px 16px;">
+                    <div style="font-size:13px;color:#7C7E8F;">Earned by hosting</div>
+                    <div id="bb-boost-earned" style="font-size:24px;font-weight:600;margin:4px 0 2px;color:#3FD07A;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">+1 per ad you serve on your surface</div>
+                </div>
+                <div style="background:#13131E;border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:14px 16px;">
+                    <div style="font-size:13px;color:#7C7E8F;">Spent promoting</div>
+                    <div id="bb-boost-spent" style="font-size:24px;font-weight:600;margin:4px 0 2px;color:#F0F0F8;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">−1 per impression of your product</div>
+                </div>
+            </div>
+
+            <!-- The flywheel — how Boosts work -->
+            <div class="section">
+                <div class="section-title">How Boosts work</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:6px;">
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <span style="flex:none;width:26px;height:26px;border-radius:7px;background:rgba(63,208,122,0.14);color:#3FD07A;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">1</span>
+                        <div><div style="font-size:14px;color:#F0F0F8;font-weight:600;">Host ads → earn Boosts</div><div style="font-size:12px;color:#7C7E8F;margin-top:2px;">Every impression you serve on your app or agent mints 1 Boost.</div></div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <span style="flex:none;width:26px;height:26px;border-radius:7px;background:rgba(255,45,120,0.14);color:#FF2D78;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">2</span>
+                        <div><div style="font-size:14px;color:#F0F0F8;font-weight:600;">Spend Boosts → get discovered</div><div style="font-size:12px;color:#7C7E8F;margin-top:2px;">Fund a promotion with Boosts and your product shows across the network — free.</div></div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:flex-start;">
+                        <span style="flex:none;width:26px;height:26px;border-radius:7px;background:rgba(124,126,143,0.18);color:#C7C9D1;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;">3</span>
+                        <div><div style="font-size:14px;color:#F0F0F8;font-weight:600;">Add cash → amplify</div><div style="font-size:12px;color:#7C7E8F;margin-top:2px;">Cash-funded promotions outrank Boost-funded ones in the auction for priority reach.</div></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Boost activity -->
+            <div class="section">
+                <div class="section-title">Recent Boost activity</div>
+                <div id="bb-boost-activity" style="font-size:13px;color:#7C7E8F;padding:8px 0;">No Boost activity yet · earn your first Boost by serving an ad.</div>
+            </div>
+            </div><!-- /[data-shell-route="boosts"] -->
 
             <!-- ═════════════════════════════════════════════════════════════
                  ROUTE: api — "API & Automation" developer page.
@@ -6873,7 +6946,7 @@
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'payouts', 'billing', 'api'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'boosts', 'payouts', 'billing', 'api'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -7948,6 +8021,37 @@
                 console.warn('Balance load failed:', e.message);
             }
         }
+
+        // ── Boosts (free launch network currency) ───────────────────
+        // GET /api/campaigns?action=boosts → { boosts, earned, spent }.
+        // Loaded lazily when the #/boosts route is opened. Defensive: any
+        // missing element or fetch failure is swallowed so the route can
+        // never blank the dashboard.
+        let _boostsLoaded = false;
+        async function loadBoosts() {
+            const fmt = (n) => { try { return formatNumber(Number(n) || 0); } catch (_) { return String(Number(n) || 0); } };
+            try {
+                const r = await fetch(`${API_BASE}/api/campaigns?action=boosts`, {
+                    headers: { 'Authorization': `Bearer ${currentUser && currentUser.token}` }
+                });
+                const j = r.ok ? await r.json() : {};
+                const bal = document.getElementById('bb-boost-balance');
+                const earned = document.getElementById('bb-boost-earned');
+                const spent = document.getElementById('bb-boost-spent');
+                if (bal) bal.textContent = fmt(j.boosts);
+                if (earned) earned.textContent = '+' + fmt(j.earned);
+                if (spent) spent.textContent = '−' + fmt(j.spent);
+                _boostsLoaded = true;
+            } catch (e) {
+                console.warn('Boosts load failed:', e && e.message);
+            }
+        }
+        // Lazy-load on first entry to #/boosts (and refresh on re-entry).
+        function _maybeLoadBoosts() {
+            if ((window.location.hash || '').indexOf('#/boosts') === 0) loadBoosts();
+        }
+        window.addEventListener('hashchange', _maybeLoadBoosts);
+        _maybeLoadBoosts();
 
         // Deposit modal
         const depositModal = document.getElementById('depositModal');
