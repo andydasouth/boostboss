@@ -7580,14 +7580,19 @@ class MyApp : Application() {
             // Bridge from /ads/signup page tokens. Prefer the advertiser-scoped
             // session keys (bb_adv_*) set by the new /ads/signup + /ads/signin
             // flow; fall back to legacy generic keys for older clients.
-            if (!token && (localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_token'))) {
-                const signupToken   = localStorage.getItem('bb_adv_token')   || localStorage.getItem('bb_token');
-                const signupUser    = JSON.parse(localStorage.getItem('bb_adv_user')    || localStorage.getItem('bb_user')    || '{}');
-                const signupProfile = JSON.parse(localStorage.getItem('bb_adv_profile') || localStorage.getItem('bb_profile') || '{}');
+            // Unified dashboard: accept EITHER an advertiser-scoped session
+            // (bb_adv_*) OR a publisher-scoped one (bb_pub_*), plus the legacy
+            // generic keys. Same auth user backs both roles, so a publisher who
+            // signed in via /publish must land here authenticated — never
+            // bounced to /ads/signin.
+            if (!token && (localStorage.getItem('bb_adv_token') || localStorage.getItem('bb_pub_token') || localStorage.getItem('bb_token'))) {
+                const signupToken   = localStorage.getItem('bb_adv_token')   || localStorage.getItem('bb_pub_token')   || localStorage.getItem('bb_token');
+                const signupUser    = JSON.parse(localStorage.getItem('bb_adv_user')    || localStorage.getItem('bb_pub_user')    || localStorage.getItem('bb_user')    || '{}');
+                const signupProfile = JSON.parse(localStorage.getItem('bb_adv_profile') || localStorage.getItem('bb_pub_profile') || localStorage.getItem('bb_profile') || '{}');
                 if (signupToken && signupUser.id) {
                     currentUser = { token: signupToken, user_id: signupUser.id };
                     currentUserData = {
-                        company_name: signupProfile.company_name || signupUser.email?.split('@')[0] || 'Advertiser',
+                        company_name: signupProfile.company_name || signupProfile.app_name || signupUser.email?.split('@')[0] || 'there',
                         email: signupUser.email,
                         user_id: signupUser.id,
                     };

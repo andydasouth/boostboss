@@ -1105,7 +1105,7 @@ document.getElementById("login-form").addEventListener("submit", async e => {
     saveSession(j);
     showToast('Signed in! Redirecting...', 'success');
     // Redirect straight to dashboard
-    const dest = j.user?.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+    const dest = j.user?.role === "developer" ? "/console" : "/console";
     setTimeout(() => window.location.href = dest, 600);
   } catch (err) {
     showError("login-error", err.message);
@@ -1214,7 +1214,7 @@ document.getElementById('crmSubmitBtn').addEventListener('click', async () => {
     } catch (_) {}
 
     showToast('All set — opening your dashboard', 'success');
-    const dest = role === 'developer' ? '/publish/dashboard' : '/ads/dashboard';
+    const dest = role === 'developer' ? '/console' : '/console';
     setTimeout(() => window.location.href = dest, 500);
   } catch (e) {
     showToast(e.message || 'Setup failed', 'error');
@@ -1347,7 +1347,7 @@ document.getElementById("login-google-btn").addEventListener("click", () => sign
       if (!r.ok || j.error) throw new Error(j.error || "OAuth sync failed");
 
       saveSession(j);
-      const dest = j.user?.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+      const dest = j.user?.role === "developer" ? "/console" : "/console";
       // Fast handoff — no toast delay, the overlay already signals what's happening.
       window.location.replace(dest);
     } catch (err) {
@@ -1404,7 +1404,7 @@ function showWelcome(j) {
     role === "developer"
       ? "Your publisher account is live. Pick which integration to start with — Lumi SDK for MCP, Lumi SDK script tag, Lumi SDK for browser extensions, or Lumi API for Bots."
       : "Your advertiser account is live. Launch your first campaign in SuperBoost.";
-  document.getElementById("go-dashboard").href = role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+  document.getElementById("go-dashboard").href = role === "developer" ? "/console" : "/console";
   document.getElementById("go-dashboard").textContent =
     role === "developer" ? "Go to Publisher Dashboard →" : "Go to Advertiser Dashboard →";
 }
@@ -1484,7 +1484,7 @@ function copyKey() {
       headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
     }).then(r => {
       if (r.ok) {
-        const dest = u.role === "developer" ? "/publish/dashboard" : "/ads/dashboard";
+        const dest = u.role === "developer" ? "/console" : "/console";
         window.location.href = dest;
       } else {
         // Token expired — clear scoped + legacy keys and show the form.
