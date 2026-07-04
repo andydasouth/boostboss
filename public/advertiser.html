@@ -2922,6 +2922,14 @@
            route markup (matches the existing #/performance route, which also
            uses these class names). Dark values to blend with the advertiser
            shell. */
+        /* Fit the longer "Boost Boss Developer Console" wordmark: let the
+           brand cell grow into the topbar's empty space instead of clipping,
+           and render the "Developer Console" descriptor smaller/muted. */
+        .shell-topbar__brand { width: auto; overflow: visible; padding-right: 22px; }
+        .shell-topbar__brand-name { font-size: 15px; overflow: visible; text-overflow: clip; }
+        .shell-topbar__brand-name .bb-console-suffix { font-size: 12px; font-weight: 600; color: #9DA3A6; }
+        .shell-wrap[data-shell-sidebar="collapsed"] .shell-topbar__brand-name { width: 0; }
+
         /* Scoped to the two ported Earn routes ONLY — a global .section /
            .section-title rule would regress Campaigns/Creatives/Products and
            the already-shipped Billing/Boosts/Performance section titles. */
@@ -3518,7 +3526,7 @@
           <!-- Brand cell — full logo + name, no divider, no collapse btn -->
           <a href="/ads" class="shell-topbar__brand" title="Back to Boost Boss" data-t-title="chrome.back">
             <img src="/design-system/assets/rocket-logo.svg" class="shell-topbar__brand-logo" alt="Boost Boss" width="34" height="34">
-            <span class="shell-topbar__brand-name">Boost <span style="color:#FF2D78;">Boss</span> <span style="font-weight:600;color:#9DA3A6;">Developer Console</span></span>
+            <span class="shell-topbar__brand-name">Boost <span style="color:#FF2D78;">Boss</span> <span class="bb-console-suffix">Developer Console</span></span>
           </a>
 
           <!-- breadcrumb hidden — logo is the only brand in topbar -->
