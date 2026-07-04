@@ -35,6 +35,13 @@ async function spendBoost(sb, accountId, n, reason, ref) {
   return _entry(sb, accountId, -Math.abs(Number(n) || 0), reason || "promote_spend", ref);
 }
 
+// Grant the one-time starter Boosts to an account, if it hasn't had one.
+// Idempotent via the unique index on (account_id) where reason='starter_grant'
+// — a second call hits 23505 and is swallowed as { ok:true, dedup:true }.
+async function grantStarterOnce(sb, accountId, amount) {
+  return _entry(sb, accountId, Math.abs(Number(amount) || 0), "starter_grant", "starter:" + accountId);
+}
+
 async function getBoostBalance(sb, accountId) {
   if (!sb || !accountId) return 0;
   try {
@@ -44,4 +51,4 @@ async function getBoostBalance(sb, accountId) {
   } catch (_) { return 0; }
 }
 
-module.exports = { mintBoost, spendBoost, getBoostBalance };
+module.exports = { mintBoost, spendBoost, getBoostBalance, grantStarterOnce };

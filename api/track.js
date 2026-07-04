@@ -353,6 +353,7 @@ module.exports = async function handler(req, res) {
     // only proves traffic and counts toward graduation. Default status 'live' (and a
     // missing column / unapplied migration) leaves all existing billing behavior unchanged.
     let calibrating = false;
+    let _boostFunded = null;   // stashed campaign row if this is a free Boost promo
     if (!isSandbox && !(inheritedSandbox === true) && billable && developerId) {
       const { data: _dev } = await sb.from("developers")
         .select("calibration_status, impressions_calibrated, calibration_threshold")
@@ -370,9 +371,13 @@ module.exports = async function handler(req, res) {
     }
     if (!isSandbox && !(inheritedSandbox === true) && billable && !calibrating) {
       const { data: campaign } = await sb.from("campaigns")
-        .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget, conversion_event_types")
+        .select("billing_model, bid_amount, spent_today, spent_total, daily_budget, total_budget, conversion_event_types, boost_funded, advertiser_id, boost_budget, boost_spent")
         .eq("id", campaignId).single();
-      if (campaign) {
+      if (campaign && campaign.boost_funded) {
+        // Free (Boost) promotion — never charge cash. Stash the row; the actual
+        // Boost debit happens post-insert (once, only on a clean impression).
+        _boostFunded = campaign;
+      } else if (campaign) {
         // For CPA / CPI, the conversion_type must be in the campaign's
         // allowlist (or the allowlist is empty — meaning "any conversion
         // counts"). CPI defaults to {"install"} when no allowlist is set.
@@ -465,6 +470,20 @@ module.exports = async function handler(req, res) {
       if (record.event_type === "impression" && record.developer_id && !record.is_sandbox) {
         try { await boostCredits.mintBoost(sb, record.developer_id, 1, "serve", record.auction_id || null); }
         catch (_) { /* boosts are additive; never break the billing artery */ }
+      }
+
+      // Boost SPEND — a free (Boost-funded) promotion debits 1 Boost from the
+      // promoter per impression served. Pause the campaign when the promoter is
+      // out of Boosts or the boost_budget is hit. Runs once per clean impression.
+      if (_boostFunded && record.event_type === "impression" && _boostFunded.advertiser_id) {
+        try {
+          await boostCredits.spendBoost(sb, _boostFunded.advertiser_id, 1, "promote_spend", record.auction_id || null);
+          const spent = (_boostFunded.boost_spent || 0) + 1;
+          const bal = await boostCredits.getBoostBalance(sb, _boostFunded.advertiser_id);
+          const exhausted = (_boostFunded.boost_budget != null && spent >= _boostFunded.boost_budget) || bal <= 0;
+          await sb.from("campaigns").update({ boost_spent: spent, ...(exhausted ? { status: "paused" } : {}) })
+            .eq("id", record.campaign_id);
+        } catch (_) { /* never break the artery on a boost debit */ }
       }
 
       if (record.developer_payout > 0 && record.developer_id && !record.is_sandbox) {

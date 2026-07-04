@@ -27,6 +27,11 @@ const { verifyJwt } = require("./auth.js");
 const { embedTokens } = require("./_lib/embeddings.js");
 const { resolveAdvertiser } = require("./_lib/advertiser_auth.js");
 const { deliverWebhook } = require("./_lib/webhook_delivery.js");
+const boostCredits = require("./_lib/boost_credits.js");
+// Free launch network: one-time starter Boosts granted on first Boost-funded
+// promote (so a pre-launch dev with no traffic can still promote). Generous by
+// design — network size beats monetization at this stage.
+const STARTER_BOOSTS = 1000;
 
 const HAS_SUPABASE = !!(
   process.env.SUPABASE_URL &&
@@ -284,6 +289,15 @@ module.exports = async function handler(req, res) {
       if (!requireAdmin(req)) return res.status(401).json({ error: "Admin authentication required" });
       return await handleReviewQueue(req, res);
     }
+    // Boost balance for the authed account (free launch network currency).
+    if (req.method === "GET" && action === "boosts") {
+      const sbB = supa();
+      if (!sbB) return res.json({ boosts: 0, demo: true });
+      const auth = await resolveAdvertiser(req, sbB);
+      if (auth.error) return res.status(auth.status).json({ error: auth.error });
+      const boosts = await boostCredits.getBoostBalance(sbB, auth.advertiserId);
+      return res.json({ boosts });
+    }
     // Single campaign by id
     if (req.method === "GET" && action === "get") {
       return await handleGet(req, res);
@@ -485,6 +499,27 @@ async function handleCreate(req, res) {
     }
   }
 
+  // ── Boost funding (free launch network) ──────────────────────────────
+  // funding:'boosts' → a FREE promotion paid with Boosts (1 per impression),
+  // never cash. Auto-grants the one-time starter Boosts if the account has none
+  // yet, then requires a positive balance. Stamped boost_funded on the row.
+  let useBoosts = b.funding === "boosts" || !!b.use_boosts;
+  let boostBudget = null;
+  if (useBoosts) {
+    const sbB = supa();
+    if (!sbB) return res.status(503).json({ error: "Boost funding requires Supabase mode", code: "demo_mode" });
+    await boostCredits.grantStarterOnce(sbB, authedAdvertiserId, STARTER_BOOSTS);
+    const boosts = await boostCredits.getBoostBalance(sbB, authedAdvertiserId);
+    if (boosts <= 0) {
+      return res.status(402).json({
+        error: "No Boosts available. Serve ads on your surface to earn Boosts (1 per impression), or buy Boosts.",
+        code: "no_boosts", boosts: 0,
+      });
+    }
+    const wanted = Number.isFinite(Number(b.boost_budget)) ? Math.max(1, Math.floor(Number(b.boost_budget))) : boosts;
+    boostBudget = Math.min(wanted, boosts);
+  }
+
   const now = new Date().toISOString();
   const row = {
     // UUID required — Supabase campaigns.id is a UUID column. The old
@@ -587,8 +622,13 @@ async function handleCreate(req, res) {
     // Ad-credit funding marker (Phase 3 of Promote flow). When true, this
     // campaign's total_budget was pre-funded from advertiser_credit_spend
     // — no PayPal charge for the budget itself.
-    credit_funded:        useAdCredit,
+    // Boost-funded promotions are also credit_funded=true so the auction ranks
+    // them below cash-funded ones (increment 2).
+    credit_funded:        useAdCredit || useBoosts,
     credit_funded_amount: useAdCredit ? totalBudget : 0,
+    // Boost columns only spread in when actually Boost-funded, so a code deploy
+    // ahead of db/37 doesn't break normal (cash) campaign creates.
+    ...(useBoosts ? { boost_funded: true, boost_budget: boostBudget, boost_spent: 0 } : {}),
     created_at: now, updated_at: now,
   };
 
