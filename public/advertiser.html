@@ -3379,7 +3379,7 @@
 <text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></div>
-                <div class="auth-logo-text">Boost Boss <span style="font-size:11px;font-weight:500;color:#6B7280;font-style:italic;margin-left:4px;">Powered by <em style="color:#9D7AFF;font-style:italic;font-weight:600;">Benna</em></span></div>
+                <div class="auth-logo-text">Boost Boss</div>
                 <div class="auth-subtitle">Dashboard · Launch and manage campaigns</div>
             </div>
 
@@ -3433,7 +3433,6 @@
             </a>
             <span class="shell-sidebar__product">
               <span class="product-name">Super<span class="accent">Boost Ads</span></span>
-              <span class="powered-by">Powered by <em>Benna</em></span>
             </span>
             <!-- Sidebar collapse toggle, moved here from .shell-sidebar__foot
                  2026-06-06 to match the publisher dashboard. Panel-left icon
@@ -3883,7 +3882,10 @@
                  picture sits on one scrollable page. Section header below
                  separates this from the chart; "Benna Engine" naming per Andy
                  since this whole block is Benna's live cockpit. -->
-            <div data-shell-route="home">
+            <!-- Hidden 2026-07-04 — the console is a light product dashboard now.
+                 The optimization engine runs silently; users don't meet it. Kept
+                 in the DOM (display:none) so the live-status loader never null-refs. -->
+            <div data-shell-route="home" style="display:none;">
 
             <!-- Section header (in-page) above the Benna group. Mirrors the
                  .shell-page-head visual but uses an h2 so the page only has
@@ -5497,7 +5499,7 @@
             <!-- How your inventory fills — honest two-tier model -->
             <div class="section">
                 <div class="section-title">How your inventory fills</div>
-                <div style="font-size:12.5px;color:#7C7E8F;margin-bottom:14px;line-height:1.5;">One demand source — Boost Boss. Every impression is a live first-price auction, and Benna serves the best-matching ad. No external networks, no waterfall.</div>
+                <div style="font-size:12.5px;color:#7C7E8F;margin-bottom:14px;line-height:1.5;">One demand source — Boost Boss. Every impression is a live first-price auction, and the best-matching ad is served automatically. No external networks, no waterfall.</div>
 
                 <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;">
                     <div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#04BEFE,#7C3AED);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:13px;flex-shrink:0;">BBX</div>
@@ -5529,11 +5531,8 @@
                 </div>
             </div>
 
-            <!-- Benna — accurate framing -->
-            <div class="section">
-                <div class="section-title">Benna optimization</div>
-                <div style="font-size:12.5px;color:#7C7E8F;line-height:1.5;">Benna scores every impression's intent — the user's goal, the tool, and the host app — then serves the single best-fitting Boost Boss ad. One source, optimized per impression; not network re-ranking. Your intent-match, clicks, and CTR are in the grid above.</div>
-            </div>
+            <!-- "Benna optimization" section removed 2026-07-04 — engine runs
+                 silently; intent-match / clicks / CTR live in the grid above. -->
 
             <!-- By placement — real per-placement breakdown -->
             <div class="section">
