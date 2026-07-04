@@ -3591,8 +3591,8 @@
                  built-in space-between layout. -->
             <div class="shell-page-head">
                 <div>
-                    <h1 class="shell-page-title" data-t="page.home.title">Overview</h1>
-                    <div class="shell-page-sub" data-t="page.home.sub">Account performance and balance</div>
+                    <h1 class="shell-page-title">Your growth</h1>
+                    <div class="shell-page-sub">Reach, Boosts, and earnings — at a glance</div>
                 </div>
                 <div style="display: flex; gap: 6px; align-items: center;" id="dateRangePicker">
                     <button class="date-range-btn active" data-range="7d" style="
@@ -3627,6 +3627,39 @@
                         font-size: 12px; font-family: inherit; color: #F0F0F8;
                         background: #1E1E2E; color-scheme: dark;
                     ">
+                </div>
+            </div>
+
+            <!-- Growth hero — the loop made visible: earn by hosting, spend to reach.
+                 Boosts-led per strategy. Populated by loadBoosts() (home-boosts-* IDs). -->
+            <div style="background:linear-gradient(135deg,#1A1226 0%,#13131E 60%);border:1px solid rgba(255,45,120,0.22);border-radius:16px;padding:20px 24px;margin-bottom:16px;">
+                <div style="display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+                    <div style="display:flex;align-items:center;gap:24px;flex-wrap:wrap;">
+                        <div>
+                            <div style="font-size:11px;color:#B98BC4;letter-spacing:.05em;text-transform:uppercase;font-weight:700;">Boosts earned</div>
+                            <div style="font-size:32px;font-weight:700;color:#F0F0F8;line-height:1.1;margin-top:2px;"><span id="home-boosts-earned">—</span></div>
+                            <div style="font-size:12px;color:#7C7E8F;">by hosting ads on your surface</div>
+                        </div>
+                        <div style="font-size:22px;color:#4A4C5E;">→</div>
+                        <div>
+                            <div style="font-size:11px;color:#7C7E8F;letter-spacing:.05em;text-transform:uppercase;font-weight:700;">Spent to reach</div>
+                            <div style="font-size:32px;font-weight:700;color:#F0F0F8;line-height:1.1;margin-top:2px;"><span id="home-boosts-spent">—</span></div>
+                            <div style="font-size:12px;color:#7C7E8F;">impressions of your product</div>
+                        </div>
+                        <div style="font-size:22px;color:#4A4C5E;">·</div>
+                        <div>
+                            <div style="font-size:11px;color:#7C7E8F;letter-spacing:.05em;text-transform:uppercase;font-weight:700;">Balance</div>
+                            <div style="font-size:32px;font-weight:700;color:#3FD07A;line-height:1.1;margin-top:2px;"><span id="home-boosts-balance">—</span></div>
+                            <div style="font-size:12px;color:#7C7E8F;">Boosts to spend</div>
+                        </div>
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:8px;">
+                        <button type="button" onclick="location.hash='#/integrations';" style="background:#FF2D78;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Install SDK — unlock 37 placements + earn →</button>
+                        <button type="button" onclick="location.hash='#/pilot';" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Boost your product →</button>
+                    </div>
+                </div>
+                <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);font-size:12.5px;color:#9DA3A6;line-height:1.55;">
+                    <strong style="color:#C7C9D1;">The loop:</strong> host ads to earn Boosts → spend Boosts to put your product in front of people already using AI tools → add cash to amplify. Every impression you host mints 1 Boost.
                 </div>
             </div>
 
@@ -3785,9 +3818,9 @@
                 <div class="dash-notif-banner" id="advNotifBanner">
                   <button class="dash-notif-banner__dismiss" onclick="document.getElementById('advNotifBanner').style.display='none'" title="Dismiss">×</button>
                   <div class="dash-notif-banner__kicker">Recommended</div>
-                  <div class="dash-notif-banner__title">Enable auto-reload for your balance</div>
-                  <div class="dash-notif-banner__body">Keep campaigns running 24/7. Auto-reload tops up your balance when it drops below your threshold — no manual top-ups.</div>
-                  <button class="dash-notif-banner__cta" onclick="document.querySelector('[data-shell-section=payouts]').click()">Set up auto-reload →</button>
+                  <div class="dash-notif-banner__title">Unlock all 37 placements</div>
+                  <div class="dash-notif-banner__body">Install the Lumi SDK to host ads on your own surface — you earn Boosts, and your product unlocks every AI-native placement across the network. Free.</div>
+                  <button class="dash-notif-banner__cta" onclick="location.hash='#/integrations'">Install the SDK →</button>
                 </div>
 
                 <!-- Quick actions -->
@@ -3796,24 +3829,24 @@
                   <button class="dash-quick-action" onclick="document.querySelector('[data-shell-section=pilot]').click()">
                     <span class="dash-quick-action__icon" style="background:rgba(255,45,120,0.12);">🚀</span>
                     <span class="dash-quick-action__text">
-                      <span class="dash-quick-action__label">Launch Boost Ad</span>
-                      <span class="dash-quick-action__sub">One-click product campaign</span>
+                      <span class="dash-quick-action__label">Boost your product</span>
+                      <span class="dash-quick-action__sub">Get in front of people using AI</span>
                     </span>
                     <span class="dash-quick-action__chevron">›</span>
                   </button>
-                  <button class="dash-quick-action" onclick="document.querySelector('[data-shell-section=campaigns]').click()">
-                    <span class="dash-quick-action__icon" style="background:rgba(4,190,254,0.12);">📢</span>
+                  <button class="dash-quick-action" onclick="location.hash='#/integrations'">
+                    <span class="dash-quick-action__icon" style="background:rgba(4,190,254,0.12);">🔌</span>
                     <span class="dash-quick-action__text">
-                      <span class="dash-quick-action__label">Create campaign</span>
-                      <span class="dash-quick-action__sub">Full targeting + bidding control</span>
+                      <span class="dash-quick-action__label">Install the SDK</span>
+                      <span class="dash-quick-action__sub">Host ads → earn Boosts</span>
                     </span>
                     <span class="dash-quick-action__chevron">›</span>
                   </button>
                   <button class="dash-quick-action" onclick="document.querySelector('[data-shell-section=creatives]').click()">
                     <span class="dash-quick-action__icon" style="background:rgba(157,122,255,0.12);">🎨</span>
                     <span class="dash-quick-action__text">
-                      <span class="dash-quick-action__label">Upload creatives</span>
-                      <span class="dash-quick-action__sub">Brand kit, images &amp; copy</span>
+                      <span class="dash-quick-action__label">Add creative</span>
+                      <span class="dash-quick-action__sub">Unlock more placements</span>
                     </span>
                     <span class="dash-quick-action__chevron">›</span>
                   </button>
@@ -9009,6 +9042,13 @@ class MyApp : Application() {
                 if (bal) bal.textContent = fmt(j.boosts);
                 if (earned) earned.textContent = '+' + fmt(j.earned);
                 if (spent) spent.textContent = '−' + fmt(j.spent);
+                // Home growth hero uses the same numbers (Boosts-led loop).
+                const hEarned = document.getElementById('home-boosts-earned');
+                const hSpent  = document.getElementById('home-boosts-spent');
+                const hBal    = document.getElementById('home-boosts-balance');
+                if (hEarned) hEarned.textContent = fmt(j.earned);
+                if (hSpent)  hSpent.textContent  = fmt(j.spent);
+                if (hBal)    hBal.textContent    = fmt(j.boosts);
                 _boostsLoaded = true;
             } catch (e) {
                 console.warn('Boosts load failed:', e && e.message);
@@ -9016,7 +9056,10 @@ class MyApp : Application() {
         }
         // Lazy-load on first entry to #/boosts (and refresh on re-entry).
         function _maybeLoadBoosts() {
-            if ((window.location.hash || '').indexOf('#/boosts') === 0) loadBoosts();
+            const h = window.location.hash || '';
+            // Fire on the Boosts tab AND on Home (the growth hero) AND on the
+            // default landing route (empty hash resolves to home).
+            if (h.indexOf('#/boosts') === 0 || h.indexOf('#/home') === 0 || h === '' || h === '#/') loadBoosts();
         }
         window.addEventListener('hashchange', _maybeLoadBoosts);
         _maybeLoadBoosts();
