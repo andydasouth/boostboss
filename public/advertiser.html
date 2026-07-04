@@ -5440,32 +5440,54 @@
 
             <div class="shell-page-head">
                 <div>
-                    <h1 class="shell-page-title">Performance</h1>
-                    <div class="shell-page-sub">Your Boost Boss demand, fill, and yield — live</div>
+                    <h1 class="shell-page-title">Earn</h1>
+                    <div class="shell-page-sub">What your contribution earns — hosted impressions, Boosts, and yield</div>
                 </div>
             </div>
 
-            <!-- Headline metrics (live) -->
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">
-                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
-                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">RPM · 30d</div>
-                    <div id="perfRpm" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
-                    <div style="font-size:12px;color:#7C7E8F;">revenue per 1,000 impressions</div>
+            <!-- X-style metric grid: contribution → earning, Boosts-led. Big number
+                 + optional green/red delta chip (populated by renderPerformance when
+                 period-over-period data exists; empty and clean at zero). -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px;">
+                <div style="background:linear-gradient(135deg,#1A1226,#13131E);border:1px solid rgba(255,45,120,0.22);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#B98BC4;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Boosts earned</div>
+                    <div style="display:flex;align-items:baseline;gap:7px;margin:6px 0 2px;"><span id="perfBoostsEarned" style="font-size:26px;font-weight:700;color:#F0F0F8;">—</span><span id="perfBoostsEarnedDelta" style="font-size:12px;font-weight:700;"></span></div>
+                    <div style="font-size:12px;color:#7C7E8F;">+1 per impression you host</div>
                 </div>
                 <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
-                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Impressions · 30d</div>
-                    <div id="perfImps" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
-                    <div style="font-size:12px;color:#7C7E8F;">served from Boost Boss demand</div>
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Impressions hosted</div>
+                    <div style="display:flex;align-items:baseline;gap:7px;margin:6px 0 2px;"><span id="perfImps" style="font-size:26px;font-weight:700;color:#F0F0F8;">—</span><span id="perfImpsDelta" style="font-size:12px;font-weight:700;"></span></div>
+                    <div style="font-size:12px;color:#7C7E8F;">served on your surface</div>
                 </div>
                 <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
-                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Earnings · 30d</div>
-                    <div id="perfEarn" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Cash earnings</div>
+                    <div style="display:flex;align-items:baseline;gap:7px;margin:6px 0 2px;"><span id="perfEarn" style="font-size:26px;font-weight:700;color:#3FD07A;">—</span><span id="perfEarnDelta" style="font-size:12px;font-weight:700;"></span></div>
                     <div style="font-size:12px;color:#7C7E8F;">your share of cleared spend</div>
                 </div>
                 <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
-                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Fill rate · 30d</div>
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">RPM</div>
+                    <div style="display:flex;align-items:baseline;gap:7px;margin:6px 0 2px;"><span id="perfRpm" style="font-size:26px;font-weight:700;color:#F0F0F8;">—</span><span id="perfRpmDelta" style="font-size:12px;font-weight:700;"></span></div>
+                    <div style="font-size:12px;color:#7C7E8F;">revenue per 1,000</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Fill rate</div>
                     <div id="perfFill" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
                     <div style="font-size:12px;color:#7C7E8F;">auctions that filled</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Intent match</div>
+                    <div id="perfIntent" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">avg match quality</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Clicks</div>
+                    <div id="perfClicks" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">from served ads</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">CTR</div>
+                    <div id="perfCtr" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">click-through rate</div>
                 </div>
             </div>
 
@@ -5507,21 +5529,7 @@
             <!-- Benna — accurate framing -->
             <div class="section">
                 <div class="section-title">Benna optimization</div>
-                <div style="font-size:12.5px;color:#7C7E8F;line-height:1.5;">Benna scores every impression's intent — the user's goal, the tool, and the host app — then serves the single best-fitting Boost Boss ad. One source, optimized per impression; not network re-ranking.</div>
-                <div style="display:flex;gap:28px;margin-top:16px;flex-wrap:wrap;">
-                    <div>
-                        <div id="perfIntent" style="font-size:22px;font-weight:700;color:#F0F0F8;">—</div>
-                        <div style="font-size:12px;color:#7C7E8F;">avg intent match · 30d</div>
-                    </div>
-                    <div>
-                        <div id="perfClicks" style="font-size:22px;font-weight:700;color:#F0F0F8;">—</div>
-                        <div style="font-size:12px;color:#7C7E8F;">clicks · 30d</div>
-                    </div>
-                    <div>
-                        <div id="perfCtr" style="font-size:22px;font-weight:700;color:#F0F0F8;">—</div>
-                        <div style="font-size:12px;color:#7C7E8F;">CTR · 30d</div>
-                    </div>
-                </div>
+                <div style="font-size:12.5px;color:#7C7E8F;line-height:1.5;">Benna scores every impression's intent — the user's goal, the tool, and the host app — then serves the single best-fitting Boost Boss ad. One source, optimized per impression; not network re-ranking. Your intent-match, clicks, and CTR are in the grid above.</div>
             </div>
 
             <!-- By placement — real per-placement breakdown -->
@@ -9049,6 +9057,9 @@ class MyApp : Application() {
                 if (hEarned) hEarned.textContent = fmt(j.earned);
                 if (hSpent)  hSpent.textContent  = fmt(j.spent);
                 if (hBal)    hBal.textContent    = fmt(j.boosts);
+                // Earn tab's Boosts-earned hero card (X-style grid).
+                const pEarned = document.getElementById('perfBoostsEarned');
+                if (pEarned) pEarned.textContent = fmt(j.earned);
                 _boostsLoaded = true;
             } catch (e) {
                 console.warn('Boosts load failed:', e && e.message);
@@ -9059,7 +9070,7 @@ class MyApp : Application() {
             const h = window.location.hash || '';
             // Fire on the Boosts tab AND on Home (the growth hero) AND on the
             // default landing route (empty hash resolves to home).
-            if (h.indexOf('#/boosts') === 0 || h.indexOf('#/home') === 0 || h === '' || h === '#/') loadBoosts();
+            if (h.indexOf('#/boosts') === 0 || h.indexOf('#/home') === 0 || h.indexOf('#/performance') === 0 || h === '' || h === '#/') loadBoosts();
         }
         window.addEventListener('hashchange', _maybeLoadBoosts);
         _maybeLoadBoosts();
