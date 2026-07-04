@@ -3023,6 +3023,11 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
               <span class="shell-nav-item__label" data-t="shell.nav.products">Products</span>
             </button>
+            <span class="shell-nav-section-label">Earn</span>
+            <button class="shell-nav-item" data-shell-section="performance">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg></span>
+              <span class="shell-nav-item__label">Performance</span>
+            </button>
             <span class="shell-nav-section-label">Money</span>
             <button class="shell-nav-item" data-shell-section="boosts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg></span>
@@ -4946,6 +4951,109 @@
                 <div id="bb-boost-activity" style="font-size:13px;color:#7C7E8F;padding:8px 0;">No Boost activity yet · earn your first Boost by serving an ad.</div>
             </div>
             </div><!-- /[data-shell-route="boosts"] -->
+
+            <!-- ═════════════════════════════════════════════════════════════
+                 ROUTE: performance — EARN-side serving/fill/yield (BBX-only).
+                 Hash: #/performance. Ported from the publisher dashboard.
+                 Live-wired to GET /api/stats?type=developer (JWT-resolved) via
+                 loadEarnPerformance() → renderPerformance(). VALID_ROUTES +
+                 dashboard-shell.css allowlist both carry 'performance'.
+                 ═════════════════════════════════════════════════════════════ -->
+            <div data-shell-route="performance">
+
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title">Performance</h1>
+                    <div class="shell-page-sub">Your Boost Boss demand, fill, and yield — live</div>
+                </div>
+            </div>
+
+            <!-- Headline metrics (live) -->
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:16px;">
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">RPM · 30d</div>
+                    <div id="perfRpm" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">revenue per 1,000 impressions</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Impressions · 30d</div>
+                    <div id="perfImps" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">served from Boost Boss demand</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Earnings · 30d</div>
+                    <div id="perfEarn" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">your share of cleared spend</div>
+                </div>
+                <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;padding:16px 18px;">
+                    <div style="font-size:11px;color:#7C7E8F;text-transform:uppercase;letter-spacing:0.05em;font-weight:700;">Fill rate · 30d</div>
+                    <div id="perfFill" style="font-size:26px;font-weight:700;color:#F0F0F8;margin:6px 0 2px;">—</div>
+                    <div style="font-size:12px;color:#7C7E8F;">auctions that filled</div>
+                </div>
+            </div>
+
+            <!-- How your inventory fills — honest two-tier model -->
+            <div class="section">
+                <div class="section-title">How your inventory fills</div>
+                <div style="font-size:12.5px;color:#7C7E8F;margin-bottom:14px;line-height:1.5;">One demand source — Boost Boss. Every impression is a live first-price auction, and Benna serves the best-matching ad. No external networks, no waterfall.</div>
+
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;">
+                    <div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#04BEFE,#7C3AED);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;font-size:13px;flex-shrink:0;">BBX</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:#F0F0F8;font-size:14px;">Boost Boss Exchange</div>
+                        <div style="font-size:12px;color:#7C7E8F;">paid advertiser demand · real-time first-price</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div id="perfBbxImps" style="font-weight:700;color:#F0F0F8;font-size:15px;">—</div>
+                        <div style="font-size:11px;color:#7C7E8F;">filled impressions</div>
+                    </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:14px;padding:14px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.10);border-radius:12px;margin-top:10px;">
+                    <div style="width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,#FFE600,#FFB800);display:flex;align-items:center;justify-content:center;font-weight:800;color:#1A1A2E;font-size:12px;flex-shrink:0;">YOU</div>
+                    <div style="flex:1;min-width:0;">
+                        <div style="font-weight:700;color:#F0F0F8;font-size:14px;">Your own promotions</div>
+                        <div style="font-size:12px;color:#7C7E8F;">self-promote · your Boost Boss campaigns are prioritized on your own surface</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div id="perfSelfState" style="font-weight:700;color:#9DA3A6;font-size:13px;">Optional</div>
+                        <div style="font-size:11px;color:#7C7E8F;">self-serve</div>
+                    </div>
+                </div>
+
+                <div style="margin-top:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                    <div style="font-size:12.5px;color:#9DA3A6;max-width:640px;">Below your price floor, an impression goes <strong style="color:#C7C9D1;">unfilled</strong> rather than served cheap. Floors are set per placement.</div>
+                    <button onclick="var _el=document.querySelector('[data-shell-section=placements]'); if(_el){_el.click();}else{location.hash='#/placements';}" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;font-size:12px;font-weight:600;padding:8px 14px;border-radius:9px;cursor:pointer;font-family:inherit;white-space:nowrap;">Manage floors →</button>
+                </div>
+            </div>
+
+            <!-- Benna — accurate framing -->
+            <div class="section">
+                <div class="section-title">Benna optimization</div>
+                <div style="font-size:12.5px;color:#7C7E8F;line-height:1.5;">Benna scores every impression's intent — the user's goal, the tool, and the host app — then serves the single best-fitting Boost Boss ad. One source, optimized per impression; not network re-ranking.</div>
+                <div style="display:flex;gap:28px;margin-top:16px;flex-wrap:wrap;">
+                    <div>
+                        <div id="perfIntent" style="font-size:22px;font-weight:700;color:#F0F0F8;">—</div>
+                        <div style="font-size:12px;color:#7C7E8F;">avg intent match · 30d</div>
+                    </div>
+                    <div>
+                        <div id="perfClicks" style="font-size:22px;font-weight:700;color:#F0F0F8;">—</div>
+                        <div style="font-size:12px;color:#7C7E8F;">clicks · 30d</div>
+                    </div>
+                    <div>
+                        <div id="perfCtr" style="font-size:22px;font-weight:700;color:#F0F0F8;">—</div>
+                        <div style="font-size:12px;color:#7C7E8F;">CTR · 30d</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- By placement — real per-placement breakdown -->
+            <div class="section">
+                <div class="section-title">By placement</div>
+                <div id="perfPlacements" style="font-size:13px;color:#7C7E8F;">Loading…</div>
+            </div>
+
+            </div><!-- /[data-shell-route="performance"] -->
 
             <!-- ═════════════════════════════════════════════════════════════
                  ROUTE: api — "API & Automation" developer page.
@@ -6946,7 +7054,7 @@
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'boosts', 'payouts', 'billing', 'api'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -8052,6 +8160,90 @@
         }
         window.addEventListener('hashchange', _maybeLoadBoosts);
         _maybeLoadBoosts();
+
+        // ── Earn · Performance (BBX-only serving/fill/yield) ─────────
+        // Ported from the publisher dashboard. Live-wired to
+        // GET /api/stats?type=developer, resolved from the session JWT
+        // (developers.id === auth.users.id). Honest empty state when the
+        // account has no developer profile yet (no_developer:true).
+        function renderPerformance(stats) {
+            if (!stats) return;
+            const money = n => '$' + (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+            const int = n => (Number(n)||0).toLocaleString('en-US');
+            const set = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+            const imps = Number(stats.total_impressions)||0;
+            const earn = Number(stats.total_earnings)||0;
+            const rpm  = Number(stats.rpm)||0;
+            set('perfRpm', money(rpm));
+            set('perfImps', int(imps));
+            set('perfEarn', money(earn));
+            const sup = stats.supply || null;
+            if (sup && sup.fill_rate != null) set('perfFill', (sup.fill_rate*100).toFixed(1)+'%');
+            else set('perfFill', imps>0 ? '—' : 'No traffic yet');
+            set('perfBbxImps', (sup && sup.filled) ? int(sup.filled) : int(imps));
+            const daily = Array.isArray(stats.daily) ? stats.daily : [];
+            const clicks = daily.reduce((a,d)=>a+(Number(d.clicks)||0),0);
+            set('perfClicks', int(clicks));
+            set('perfCtr', imps>0 ? ((clicks/imps)*100).toFixed(2)+'%' : '—');
+            const pls = Array.isArray(stats.placements) ? stats.placements : [];
+            let iw=0, iwn=0;
+            pls.forEach(p => { if (p.avg_intent_match!=null && p.impressions>0) { iw+=Number(p.avg_intent_match)*p.impressions; iwn+=p.impressions; } });
+            set('perfIntent', iwn>0 ? (iw/iwn).toFixed(2) : 'Gathering');
+            renderPerfPlacements(pls);
+        }
+        function renderPerfPlacements(pls) {
+            const host = document.getElementById('perfPlacements');
+            if (!host) return;
+            const esc = (typeof escapeHtml === 'function') ? escapeHtml : (s => String(s==null?'':s));
+            if (!pls || pls.length === 0) {
+                host.innerHTML = '<div style="color:#7C7E8F;padding:6px 0;">No placements serving yet · install a door and accept a format to start filling.</div>';
+                return;
+            }
+            const th='padding:8px 10px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:#7C7E8F;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.08);';
+            const td='padding:10px;font-size:13px;color:#C7C9D1;border-bottom:1px solid rgba(255,255,255,0.05);';
+            const money=n=>'$'+(Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+            const int=n=>(Number(n)||0).toLocaleString('en-US');
+            const rows = pls.map(p => {
+                const floor = p.floor_cpm!=null ? money(p.floor_cpm) : '—';
+                const intent = p.avg_intent_match!=null ? Number(p.avg_intent_match).toFixed(2) : '—';
+                return '<tr>'
+                    + '<td style="'+td+'"><div style="color:#F0F0F8;font-weight:600;">'+esc(p.name||p.placement_id)+'</div><div style="font-size:11px;color:#7C7E8F;">'+esc((p.surface||'')+' · '+(p.format||''))+'</div></td>'
+                    + '<td style="'+td+'text-align:right;">'+int(p.impressions)+'</td>'
+                    + '<td style="'+td+'text-align:right;">'+money(p.ecpm)+'</td>'
+                    + '<td style="'+td+'text-align:right;">'+floor+'</td>'
+                    + '<td style="'+td+'text-align:right;">'+intent+'</td>'
+                    + '<td style="'+td+'text-align:right;color:#F0F0F8;font-weight:600;">'+money(p.publisher_earnings)+'</td>'
+                    + '</tr>';
+            }).join('');
+            host.innerHTML = '<div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;">'
+                + '<thead><tr>'
+                + '<th style="'+th+'">Placement</th>'
+                + '<th style="'+th+'text-align:right;">Impr.</th>'
+                + '<th style="'+th+'text-align:right;">eCPM</th>'
+                + '<th style="'+th+'text-align:right;">Floor</th>'
+                + '<th style="'+th+'text-align:right;">Intent</th>'
+                + '<th style="'+th+'text-align:right;">Earnings</th>'
+                + '</tr></thead><tbody>'+rows+'</tbody></table></div>';
+        }
+        let _earnPerfLoaded = false;
+        async function loadEarnPerformance() {
+            try {
+                const r = await fetch(`${API_BASE}/api/stats?type=developer`, {
+                    headers: { 'Authorization': `Bearer ${currentUser && currentUser.token}` }
+                });
+                const stats = r.ok ? await r.json() : {};
+                renderPerformance(stats);
+                _earnPerfLoaded = true;
+            } catch (e) {
+                console.warn('Earn performance load failed:', e && e.message);
+                renderPerformance({});
+            }
+        }
+        function _maybeLoadEarnPerf() {
+            if ((window.location.hash || '').indexOf('#/performance') === 0) loadEarnPerformance();
+        }
+        window.addEventListener('hashchange', _maybeLoadEarnPerf);
+        _maybeLoadEarnPerf();
 
         // Deposit modal
         const depositModal = document.getElementById('depositModal');

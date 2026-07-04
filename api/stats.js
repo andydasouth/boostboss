@@ -123,8 +123,23 @@ module.exports = async function handler(req, res) {
     }
 
     // ── Developer Stats ──
-    if (type === "developer" && devKey) {
-      return await handleDeveloperStats(devKey, req, res);
+    // Two identity paths:
+    //   • ?key=<api_key>           — the SDK / standalone calls (legacy)
+    //   • Authorization: Bearer JWT — the unified dashboard's Earn tabs
+    // For the unified account, developers.id === auth.users.id (see
+    // api/auth.js), so we resolve the row from the session and hand its
+    // api_key to the same handler — no raw key juggling in the client.
+    if (type === "developer") {
+      let key = devKey;
+      if (!key) key = await resolveDeveloperKeyFromSession(req);
+      if (key) return await handleDeveloperStats(key, req, res);
+      // No developer identity yet (e.g. an advertiser-primary account that
+      // hasn't installed a door). Return an honest empty Earn state — never
+      // a 401/404 that would blank the Performance tab in the merged UI.
+      return res.json({
+        total_earnings: 0, total_impressions: 0, revenue_share: 0,
+        rpm: 0, daily: [], placements: [], supply: null, no_developer: true,
+      });
     }
 
     // ── Daily Stats ETL ── (POST /api/stats?type=aggregate)
@@ -396,6 +411,28 @@ function summariseAuctionRows(rows) {
 }
 
 // ── Developer stats ───────────────────────────────────────────────────
+// Unified-account bridge: resolve the authed user's developer api_key from
+// their Supabase session JWT. developers.id === auth.users.id (api/auth.js),
+// so one auth user maps to at most one developer row. Returns the api_key
+// string, or null when the user has no developer profile yet (or the bearer
+// isn't a session). Never throws.
+async function resolveDeveloperKeyFromSession(req) {
+  try {
+    const authHeader = (req.headers && req.headers.authorization) || "";
+    const bearer = authHeader.replace(/^Bearer\s+/i, "").trim();
+    // An API-key bearer (bb_live_/bb_test_) is not a session — skip the
+    // pointless getUser round-trip and let the ?key= path handle it.
+    if (!bearer || /^bb_(live|test)_/.test(bearer)) return null;
+    const sb = supa();
+    if (!sb) return null;
+    const { data: u, error } = await sb.auth.getUser(bearer);
+    if (error || !u || !u.user) return null;
+    const { data: dev } = await sb
+      .from("developers").select("api_key").eq("id", u.user.id).maybeSingle();
+    return (dev && dev.api_key) || null;
+  } catch (_) { return null; }
+}
+
 async function handleDeveloperStats(devKey, req, res) {
   const sb = supa();
 
