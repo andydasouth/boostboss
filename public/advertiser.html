@@ -2426,7 +2426,7 @@
         .ca-progress {
             margin-top: 8px;
             height: 5px;
-            background: #F3F4F6;
+            background: rgba(255,255,255,0.08);
             border-radius: 999px;
             overflow: hidden;
             position: relative;
@@ -2443,14 +2443,14 @@
         .ca-progress__label {
             font-size: 10.5px;
             font-weight: 700;
-            color: #6B7280;
+            color: #9DA3AE;
             letter-spacing: 0.04em;
             text-transform: uppercase;
             margin-top: 4px;
         }
-        .ca-progress__label.is-ready { color: #047857; }
-        .ca-progress__label.is-partial { color: #B45309; }
-        .ca-progress__label.is-empty { color: #B91C1C; }
+        .ca-progress__label.is-ready { color: #3FD07A; }
+        .ca-progress__label.is-partial { color: #FBBF24; }
+        .ca-progress__label.is-empty { color: #F87171; }
 
         /* ─── Pilot Creatives sub-tab — inheritance preview + override pattern.
               Per-section block with read-only display by default, swaps into
@@ -2926,8 +2926,8 @@
            brand cell grow into the topbar's empty space instead of clipping,
            and render the "Developer Console" descriptor smaller/muted. */
         .shell-topbar__brand { width: auto; overflow: visible; padding-right: 22px; }
-        .shell-topbar__brand-name { font-size: 15px; overflow: visible; text-overflow: clip; }
-        .shell-topbar__brand-name .bb-console-suffix { font-size: 12px; font-weight: 600; color: #9DA3A6; }
+        .shell-topbar__brand-name { font-size: 17px; font-weight: 700; overflow: visible; text-overflow: clip; letter-spacing: -0.2px; }
+        .shell-topbar__brand-name .bb-console-suffix { font-size: 13px; font-weight: 500; color: #9AA0AE; margin-left: 5px; letter-spacing: 0; }
         .shell-wrap[data-shell-sidebar="collapsed"] .shell-topbar__brand-name { width: 0; }
 
         /* Reusable in-page sub-tabs (X/Voyage style). One bar + N panels as direct
@@ -3005,21 +3005,21 @@
         .verify-badge {
             display: flex; align-items: center; gap: 8px;
             padding: 10px 12px; border-radius: 10px;
-            background: #FAFAFA; border: 1px solid #E5E7EB;
-            font-size: 12px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.10);
+            font-size: 12px; color: #C7C9D1;
             transition: all 0.18s;
         }
         .verify-badge.active {
-            background: #ECFDF5; border-color: #6EE7B7;
+            background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.40); color: #3FD07A;
         }
         .verify-badge.detecting {
-            background: #FEF3C7; border-color: #FCD34D;
+            background: rgba(245,158,11,0.13); border-color: rgba(245,158,11,0.32); color: #FBBF24;
         }
         .verify-badge.test-only {
-            background: #FFFBEB; border-color: #FCD34D;
+            background: rgba(245,158,11,0.13); border-color: rgba(245,158,11,0.32); color: #FBBF24;
         }
-        .verify-badge.test-only .verify-icon { color: #B45309; }
-        .verify-badge.test-only .verify-status { color: #92400E; }
+        .verify-badge.test-only .verify-icon { color: #FBBF24; }
+        .verify-badge.test-only .verify-status { color: #FBBF24; }
 
         /* Ad Format showcase — placement cards (renamed from .format-* to
            .bb-fmt-* to avoid collision with the existing advertiser
@@ -14839,7 +14839,7 @@ function updateCreativeReadiness() {
         badge.style.background = '#ECFDF5';
         badge.style.border = '1px solid #A7F3D0';
         badge.style.color = '#065F46';
-        badge.innerHTML = `<strong>✓ Ready for Benna.</strong> ${headCount} headlines, ${imgCount} image variant${imgCount === 1 ? '' : 's'}, ${ctaCount} CTA label${ctaCount === 1 ? '' : 's'}. Benna's bandit has room to test.`;
+        badge.innerHTML = `<strong>✓ Ready.</strong> ${headCount} headlines, ${imgCount} image variant${imgCount === 1 ? '' : 's'}, ${ctaCount} CTA label${ctaCount === 1 ? '' : 's'} — enough variants to A/B test.`;
     } else if (headCount > 0 || imgCount > 0) {
         const need = [];
         if (headCount < 3) need.push(`${3 - headCount} more headline${(3 - headCount) === 1 ? '' : 's'}`);
@@ -14848,7 +14848,7 @@ function updateCreativeReadiness() {
         badge.style.background = '#FFFBEB';
         badge.style.border = '1px solid #FDE68A';
         badge.style.color = '#92400E';
-        badge.innerHTML = `<strong>Almost there.</strong> Add ${need.join(' and ')} so Benna can run a meaningful bandit test.`;
+        badge.innerHTML = `<strong>Almost there.</strong> Add ${need.join(' and ')} so we can A/B test what converts.`;
     } else {
         badge.style.display = 'none';
     }

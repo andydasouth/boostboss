@@ -1694,6 +1694,11 @@ div[style*="Updated just now"] * {
 .shell-main [style*="background:#f8f9fa" i], .shell-main [style*="background: #f8f9fa" i]{
   background:#13131E !important;
 }
+/* --- amber/cream callouts (Library %, readiness, warnings) → dark amber chip --- */
+.shell-main [style*="rgb(255, 251, 235)"], .shell-main [style*="background:#fffbeb" i], .shell-main [style*="background: #fffbeb" i],
+.shell-main [style*="#fef3c7" i], .shell-main [style*="rgb(254, 243, 199)"]{
+  background:rgba(245,158,11,0.13) !important; border-color:rgba(245,158,11,0.32) !important; color:#FBBF24 !important;
+}
 /* --- light-grey borders → subtle dark border --- */
 .shell-main [style*="#E5E7EB" i], .shell-main [style*="rgb(229, 231, 235)"],
 .shell-main [style*="#E2E8F0" i], .shell-main [style*="#EEEEEE" i]{ border-color:rgba(255,255,255,.10) !important; }
