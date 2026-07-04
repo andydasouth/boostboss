@@ -3446,33 +3446,25 @@
             <!-- 'Home' renamed to 'Performance' 2026-06-25 — the route slug
                  stays 'home' (preserves any saved bookmarks pointing at #/home)
                  but the label + icon reflect what the page now actually shows. -->
-            <span class="shell-nav-section-label">Grow</span>
+            <span class="shell-nav-section-label">Overview</span>
             <button class="shell-nav-item is-active" data-shell-section="home">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
               <span class="shell-nav-item__label">Home</span>
             </button>
-            <button class="shell-nav-item" data-shell-section="products">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
-              <span class="shell-nav-item__label">My Product</span>
-            </button>
+            <span class="shell-nav-section-label">Set up</span>
             <button class="shell-nav-item" data-shell-section="creatives">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
               <span class="shell-nav-item__label">Creatives</span>
-            </button>
-            <button class="shell-nav-item" data-shell-section="pilot">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="12 2 15 9 22 12 15 15 12 22 9 15 2 12 9 9 12 2"/></svg></span>
-              <span class="shell-nav-item__label">Reach</span>
-            </button>
-            <span class="shell-nav-section-label">Earn</span>
-            <button class="shell-nav-item" data-shell-section="performance">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg></span>
-              <span class="shell-nav-item__label">Earn</span>
             </button>
             <button class="shell-nav-item" data-shell-section="integrations">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
               <span class="shell-nav-item__label">Install</span>
             </button>
-            <span class="shell-nav-section-label">Money</span>
+            <span class="shell-nav-section-label">Data</span>
+            <button class="shell-nav-item" data-shell-section="performance">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg></span>
+              <span class="shell-nav-item__label">Earn</span>
+            </button>
             <button class="shell-nav-item" data-shell-section="boosts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg></span>
               <span class="shell-nav-item__label">Boosts</span>
@@ -3486,9 +3478,12 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
               <span class="shell-nav-item__label">Developer</span>
             </button>
-            <!-- Secondary routes — still reachable via deep links / in-page buttons,
-                 removed from the primary growth-console nav. display:none keeps them
-                 in the DOM so any JS that clicks them (e.g. Manage floors) still works. -->
+            <!-- No advertiser side. My Product (affiliate) + Reach (campaign builder)
+                 retired from nav — the loop needs only Creatives + Install; everything
+                 else is data. Kept in DOM (display:none) so routes + any JS referencing
+                 them still resolve. -->
+            <button class="shell-nav-item" data-shell-section="products" style="display:none;"><span class="shell-nav-item__label">My Product</span></button>
+            <button class="shell-nav-item" data-shell-section="pilot" style="display:none;"><span class="shell-nav-item__label">Reach</span></button>
             <button class="shell-nav-item" data-shell-section="campaigns" style="display:none;"><span class="shell-nav-item__label">Campaigns</span></button>
             <button class="shell-nav-item" data-shell-section="placements" style="display:none;"><span class="shell-nav-item__label">Placements</span></button>
             <button class="shell-nav-item" data-shell-section="billing" style="display:none;"><span class="shell-nav-item__label">Usage</span></button>
@@ -3657,7 +3652,7 @@
                     </div>
                     <div style="display:flex;flex-direction:column;gap:8px;">
                         <button type="button" onclick="location.hash='#/integrations';" style="background:#FF2D78;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Install SDK — unlock 37 placements + earn →</button>
-                        <button type="button" onclick="location.hash='#/pilot';" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Boost your product →</button>
+                        <button type="button" onclick="location.hash='#/creatives';" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Upload your creatives →</button>
                     </div>
                 </div>
                 <div style="margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);font-size:12.5px;color:#9DA3A6;line-height:1.55;">
@@ -3828,11 +3823,11 @@
                 <!-- Quick actions -->
                 <div class="dash-quick-actions">
                   <div class="dash-quick-actions__head">Quick actions</div>
-                  <button class="dash-quick-action" onclick="document.querySelector('[data-shell-section=pilot]').click()">
-                    <span class="dash-quick-action__icon" style="background:rgba(255,45,120,0.12);">🚀</span>
+                  <button class="dash-quick-action" onclick="location.hash='#/performance'">
+                    <span class="dash-quick-action__icon" style="background:rgba(255,45,120,0.12);">📊</span>
                     <span class="dash-quick-action__text">
-                      <span class="dash-quick-action__label">Boost your product</span>
-                      <span class="dash-quick-action__sub">Get in front of people using AI</span>
+                      <span class="dash-quick-action__label">See your earnings</span>
+                      <span class="dash-quick-action__sub">Payouts from what you host</span>
                     </span>
                     <span class="dash-quick-action__chevron">›</span>
                   </button>
@@ -5390,7 +5385,7 @@
                         </div>
                         <div style="font-size:12px;color:#7C7E8F;">1 Boost = 1 impression of your product, shown across the network.</div>
                     </div>
-                    <button type="button" onclick="location.hash='#/pilot';" style="background:#FF2D78;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">Promote free with Boosts →</button>
+                    <button type="button" onclick="location.hash='#/creatives';" style="background:#FF2D78;color:#fff;border:none;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">Upload creatives to promote free →</button>
                 </div>
             </div>
 
