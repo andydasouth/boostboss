@@ -1692,7 +1692,7 @@ div[style*="Updated just now"] * {
 .shell-main [style*="background:#f9fafb" i], .shell-main [style*="background: #f9fafb" i],
 .shell-main [style*="background:#f3f4f6" i], .shell-main [style*="background: #f3f4f6" i],
 .shell-main [style*="background:#f8f9fa" i], .shell-main [style*="background: #f8f9fa" i]{
-  background:#1B1D22 !important;
+  background:#13131E !important;
 }
 /* --- light-grey borders → subtle dark border --- */
 .shell-main [style*="#E5E7EB" i], .shell-main [style*="rgb(229, 231, 235)"],
@@ -1700,7 +1700,7 @@ div[style*="Updated just now"] * {
 /* --- known advertiser content classes --- */
 .ca-section,.ca-summary,.ca-variant-row,.draft-row,.door-card,.tier-option,
 .ftg-group,.ftg-head,.b-chip,.target-pill,.ncw-affiliate-row,.pilot-cs-toggle{
-  background:#1B1D22 !important; border-color:rgba(255,255,255,.10) !important; color:#E7E9EA !important;
+  background:#13131E !important; border-color:rgba(255,255,255,.10) !important; color:#E7E9EA !important;
 }
 /* --- form fields --- */
 .shell-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
