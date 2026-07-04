@@ -1734,4 +1734,4 @@ div[style*="Updated just now"] * {
 .shell-main [style*="#DCFCE7" i], .shell-main [style*="#D1FAE5" i]{ background:rgba(52,211,153,.14) !important; color:#34D399 !important; }
 .shell-main [style*="#FEF3C7" i], .shell-main [style*="#FEF9C3" i], .shell-main [style*="#FFFBEB" i]{ background:rgba(251,191,36,.16) !important; color:#FBBF24 !important; }
 .shell-main [style*="#DBEAFE" i], .shell-main [style*="#EFF6FF" i]{ background:rgba(96,165,250,.14) !important; color:#93C5FD !important; }
-.shell-main [class*="progress"]:not([class*="fill"]):not([class*="__fill"]){ background:rgba(255,255,255,.08) !important; }
+.shell-main [class*="progress"]:not([class*="fill"]):not([class*="__fill"]):not([class*="label"]):not([class*="__label"]){ background:rgba(255,255,255,.08) !important; }
