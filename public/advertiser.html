@@ -2907,6 +2907,444 @@
             .new-campaign-btn { width: 100%; text-align: center; }
             .chart-container { height: 80px; }
         }
+
+        /* ═══════════════════════════════════════════════════════════════════
+           EARN · Integrations + Placements route styles.
+           Ported additively from public/developer.html for the unified
+           "Promote + Earn" dashboard merge. All rules below are NEW to
+           advertiser.html (grepped before adding). The placement-card family
+           was renamed .format-* → .bb-fmt-* to avoid colliding with the
+           existing advertiser .format-card (creative-selection cards). The
+           ported JS (renderAdPlacements/formatMockup) uses the renamed
+           classes. Do not modify existing rules — this block is append-only.
+           ═══════════════════════════════════════════════════════════════════ */
+        /* .section / .section-title — used by the Integrations + Placements
+           route markup (matches the existing #/performance route, which also
+           uses these class names). Dark values to blend with the advertiser
+           shell. */
+        /* Scoped to the two ported Earn routes ONLY — a global .section /
+           .section-title rule would regress Campaigns/Creatives/Products and
+           the already-shipped Billing/Boosts/Performance section titles. */
+        [data-shell-route="integrations"] .section,
+        [data-shell-route="placements"] .section {
+            background-color: #13131E;
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.30);
+        }
+        [data-shell-route="integrations"] .section-title,
+        [data-shell-route="placements"] .section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.09);
+            color: #E7E9EA;
+        }
+
+        /* Integration cards — "Your integrations" 4-door grid */
+        .integration-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 14px;
+        }
+        .ic-card {
+            background: #13131E;
+            border: 1.5px solid rgba(255,255,255,0.09);
+            border-radius: 14px;
+            padding: 18px 18px 16px;
+            transition: all 0.18s;
+            display: flex;
+            flex-direction: column;
+            min-height: 160px;
+            position: relative;
+            cursor: pointer;
+        }
+        /* Phase F — verify badges */
+        .verify-badge {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 12px; border-radius: 10px;
+            background: #FAFAFA; border: 1px solid #E5E7EB;
+            font-size: 12px;
+            transition: all 0.18s;
+        }
+        .verify-badge.active {
+            background: #ECFDF5; border-color: #6EE7B7;
+        }
+        .verify-badge.detecting {
+            background: #FEF3C7; border-color: #FCD34D;
+        }
+        .verify-badge.test-only {
+            background: #FFFBEB; border-color: #FCD34D;
+        }
+        .verify-badge.test-only .verify-icon { color: #B45309; }
+        .verify-badge.test-only .verify-status { color: #92400E; }
+
+        /* Ad Format showcase — placement cards (renamed from .format-* to
+           .bb-fmt-* to avoid collision with the existing advertiser
+           .format-card creative cards). */
+        .bb-fmt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+        }
+        .bb-fmt-card {
+            border: 1.5px solid #E5E7EB;
+            border-radius: 12px;
+            padding: 14px;
+            background: #fff;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+        }
+        .bb-fmt-card.fmt-enabled {
+            border-color: rgba(16, 185, 129, 0.5);
+            box-shadow: 0 2px 12px rgba(16, 185, 129, 0.08);
+        }
+        .bb-fmt-card.fmt-disabled { opacity: 0.6; }
+        .bb-fmt-card-head {
+            display: flex; justify-content: space-between;
+            align-items: baseline; gap: 8px;
+        }
+        .bb-fmt-card-name { font-size: 13px; font-weight: 700; color: #1A1A2E; }
+        .bb-fmt-card-rpm {
+            font-size: 10px; font-weight: 700; color: #FF2D78;
+            background: #FFF0F5; padding: 2px 6px; border-radius: 4px;
+            white-space: nowrap;
+        }
+        .bb-fmt-card-preview {
+            background: #F8F9FA; border-radius: 8px; padding: 14px;
+            min-height: 132px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .bb-fmt-card-desc { font-size: 11px; color: #6B7280; line-height: 1.45; }
+        /* Per-format visual mockup primitives. All read --lumi-* theme vars. */
+        .fmt-mock { width: 100%; font-family: var(--lumi-font, 'Inter', sans-serif); }
+        .fmt-mock-card {
+            background: #fff; border: 1px solid #E5E7EB;
+            border-left: 3px solid var(--lumi-primary, #FF2D78);
+            border-radius: var(--lumi-radius, 10px); padding: 10px;
+        }
+        .fmt-mock-disclosure {
+            font-size: 7px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--lumi-primary, #FF2D78);
+            margin-bottom: 5px;
+        }
+        .fmt-mock-image {
+            height: 38px; border-radius: 4px; margin-bottom: 6px;
+            background: repeating-linear-gradient(45deg, #EEF0F2 0 6px, #E2E5E9 6px 12px);
+        }
+        .fmt-mock-headline {
+            font-size: 9px; font-weight: 700; color: #1A1A2E;
+            line-height: 1.3; margin-bottom: 3px;
+        }
+        .fmt-mock-sub { font-size: 7.5px; color: #6B7280; margin-bottom: 6px; }
+        .fmt-mock-cta {
+            display: inline-block; background: var(--lumi-primary, #FF2D78);
+            color: #fff; font-size: 7.5px; font-weight: 700;
+            padding: 3px 8px; border-radius: 4px;
+        }
+        .fmt-mock-window {
+            width: 100%; height: 104px; background: #fff;
+            border: 1px solid #E5E7EB; border-radius: 6px;
+            position: relative; overflow: hidden;
+        }
+        .fmt-mock-window::before {
+            content: ""; position: absolute;
+            top: 12px; left: 10px; right: 10px; height: 6px;
+            background: #EEF0F2; border-radius: 3px;
+            box-shadow: 0 13px 0 #EEF0F2, 0 26px 0 #F1F3F5, 0 39px 0 #F1F3F5;
+        }
+        .fmt-mock-corner {
+            position: absolute; bottom: 8px; right: 8px; width: 92px;
+            background: #fff; border: 1px solid #E5E7EB;
+            border-left: 3px solid var(--lumi-primary, #FF2D78);
+            border-radius: var(--lumi-radius, 8px); padding: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.14);
+        }
+        .verify-badge .verify-icon {
+            font-size: 16px; line-height: 1; width: 20px;
+            display: inline-flex; align-items: center; justify-content: center;
+            color: #9CA3AF;
+        }
+        .verify-badge.active .verify-icon { color: #10B981; }
+        .verify-badge.detecting .verify-icon { color: #F59E0B; }
+        .verify-badge .verify-name {
+            font-weight: 700; color: #1A1A2E;
+            margin-right: auto;
+        }
+        .verify-badge .verify-status {
+            color: #6B7280;
+            font-variant-numeric: tabular-nums;
+        }
+        .verify-badge.active .verify-status { color: #065F46; }
+        .verify-badge.detecting .verify-status { color: #92400E; }
+        @keyframes verify-pulse {
+            0%, 100% { opacity: 0.5; }
+            50%      { opacity: 1; }
+        }
+        .verify-badge.detecting .verify-icon { animation: verify-pulse 1.4s ease-in-out infinite; }
+        .ic-card:hover {
+            border-color: rgba(255, 45, 120, 0.35);
+            box-shadow: 0 6px 20px rgba(255, 45, 120, 0.08);
+            transform: translateY(-1px);
+        }
+        .ic-card.ic-active {
+            border-color: rgba(4, 190, 254, 0.40);
+            background: linear-gradient(180deg, rgba(4, 190, 254, 0.08), #13131E 60%);
+        }
+        .ic-card.ic-selected {
+            outline: 2px solid #FF2D78;
+            outline-offset: -2px;
+            box-shadow: 0 8px 24px rgba(255, 45, 120, 0.14);
+            background: linear-gradient(180deg, rgba(255, 45, 120, 0.03), #fff 40%);
+        }
+        .ic-selected-marker { display: none !important; }
+        .ic-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .ic-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #F0F0F8;
+            line-height: 1.3;
+        }
+        .ic-badge {
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            padding: 3px 8px;
+            border-radius: 999px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .ic-badge-active {
+            background: rgba(4, 190, 254, 0.12);
+            color: #0290BD;
+        }
+        .ic-badge-inactive {
+            background: rgba(255,255,255,0.07);
+            color: #7C7E8F;
+        }
+        .ic-badge-recommend {
+            background: linear-gradient(90deg, rgba(255, 230, 0, 0.22), rgba(4, 190, 254, 0.18));
+            color: #6B4F00;
+            border: 1px solid rgba(255, 230, 0, 0.55);
+        }
+        .ic-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 4px 0 14px;
+            flex: 1;
+        }
+        .ic-stat-label {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #7C7E8F;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+        .ic-stat-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #F0F0F8;
+            font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+        }
+        .ic-card.ic-inactive .ic-stat-value {
+            color: rgba(255,255,255,0.18);
+        }
+        .ic-cta {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12.5px;
+            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+        }
+        .ic-card.ic-inactive .ic-cta {
+            background: #FF2D78;
+            color: #fff;
+            border-color: #FF2D78;
+        }
+        .ic-card.ic-inactive .ic-cta:hover {
+            background: #E01E65;
+            border-color: #E01E65;
+        }
+        .ic-card.ic-active .ic-cta {
+            background: transparent;
+            color: #F0F0F8;
+            border-color: rgba(255,255,255,0.15);
+        }
+        .ic-card.ic-active .ic-cta:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.25);
+        }
+        .ic-icon {
+            font-size: 18px;
+            line-height: 1;
+        }
+        @media (max-width: 760px) {
+            .integration-cards-grid { grid-template-columns: 1fr; }
+        }
+
+        /* Framework tabs for integration guide */
+        .fw-tab {
+            background: none;
+            border: none;
+            padding: 8px 14px;
+            font-family: inherit;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #6B7280;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: all 0.15s ease;
+            border-radius: 6px 6px 0 0;
+        }
+        .fw-tab:hover {
+            color: #1A1A2E;
+            background: #F9FAFB;
+        }
+        .fw-tab.active {
+            color: #FF2D78;
+            border-bottom-color: #FF2D78;
+            background: #FFF0F5;
+        }
+
+        /* Placements page — 4-door navigator tabs */
+        .placement-door-tab {
+            flex: 1 1 auto;
+            min-width: 100px;
+            padding: 10px 14px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 600;
+            color: #4B5563;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+            text-align: center;
+        }
+        .placement-door-tab:hover {
+            background: #F9FAFB;
+            color: #1A1A2E;
+        }
+        .placement-door-tab.is-active {
+            background: #FFF0F5;
+            border-color: #FFD7E5;
+            color: #FF2D78;
+        }
+        .placement-door-tab.is-active .placement-door-tab__label {
+            font-weight: 700;
+        }
+        @media (max-width: 720px) {
+            .placement-door-tab { min-width: 0; padding: 9px 10px; font-size: 12.5px; }
+        }
+
+        /* Code blocks (install snippets) */
+        .code-block {
+            background-color: #1A1A2E;
+            border: 1px solid #2A2A3E;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin: 1rem 0;
+            position: relative;
+            overflow-x: auto;
+        }
+        .code-block pre {
+            color: #E5E7EB;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 0;
+            white-space: pre;
+            word-break: normal;
+            overflow-x: auto;
+            max-width: 100%;
+        }
+        .code-block code {
+            color: #E5E7EB;
+        }
+        .code-copy-btn {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: #FF2D78;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s;
+        }
+        .code-copy-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255,45,120,0.3);
+        }
+        .code-copy-btn.copied {
+            background: #10B981;
+            color: white;
+        }
+
+        /* Integration Steps — three-component grid layout */
+        .integration-steps {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            grid-template-areas:
+                "header  header"
+                "intro   intro"
+                "sidebar main"
+                "verify  verify";
+            gap: 18px 28px;
+            align-items: start;
+        }
+        .integration-steps > .section-title { grid-area: header; }
+        .integration-steps > p              { grid-area: intro;  }
+        .integration-steps > #integrationCardsGrid { grid-area: sidebar; }
+        .integration-steps > .fw-panel      { grid-area: main; align-self: start; min-width: 0; overflow: hidden; }
+        .integration-steps > #integrationVerifyPanel { grid-area: verify; }
+        .fw-panel {
+            min-height: 950px;
+            min-width: 0;
+            overflow: hidden;
+        }
+        @media (min-width: 901px) {
+            .integration-steps > #integrationCardsGrid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 900px) {
+            .integration-steps {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "header"
+                    "intro"
+                    "sidebar"
+                    "main"
+                    "verify";
+            }
+            .fw-panel { min-height: 0; }
+        }
     </style>
 </head>
 <body>
@@ -3027,6 +3465,14 @@
             <button class="shell-nav-item" data-shell-section="performance">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg></span>
               <span class="shell-nav-item__label">Performance</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="integrations">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
+              <span class="shell-nav-item__label">Integrations</span>
+            </button>
+            <button class="shell-nav-item" data-shell-section="placements">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+              <span class="shell-nav-item__label">Placements</span>
             </button>
             <span class="shell-nav-section-label">Money</span>
             <button class="shell-nav-item" data-shell-section="boosts">
@@ -5056,6 +5502,405 @@
             </div><!-- /[data-shell-route="performance"] -->
 
             <!-- ═════════════════════════════════════════════════════════════
+                 ROUTE: integrations — publisher four-door install guide.
+                 Hash: #/integrations. Nav item data-shell-section="integrations".
+                 Ported additively from public/developer.html (lines 2421-2752)
+                 for the unified "Promote + Earn" dashboard merge. VALID_ROUTES +
+                 dashboard-shell.css allowlist both carry 'integrations'. Loader
+                 (selectDoorTab / token injection / verify poll) lives in a
+                 dedicated <script> after the Placements section.
+                 ═════════════════════════════════════════════════════════════ -->
+            <div data-shell-route="integrations">
+
+            <!-- Route page header — banner for the integrations page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.integ.title">Integrations</h1>
+                    <div class="shell-page-sub" data-t="page.integ.sub">Four doors, one publisher account — pick your install</div>
+                </div>
+            </div>
+
+            <!-- Integrations — unified section: state-aware cards as tab selectors + per-door install/code panels -->
+            <div class="section integration-steps" id="integrationGuide">
+                <div class="section-title" data-t="integ.title">Integrations</div>
+                <p style="color: #6B7280; font-size: 13px; margin: 0 0 16px 0;"><span data-t="integ.intro">One publisher account, four doors. Click the door you're setting up — the install + code sample appears below. Active doors show last 7 days; "Not started" doors are ready to set up.</span> <a href="/publish" style="color: #FF2D78; text-decoration: none;" data-t="integ.about_link">About each door →</a></p>
+
+                <!-- Cards-as-tabs: 4 cards carry state AND act as the tab UI. -->
+                <div class="integration-cards-grid" id="integrationCardsGrid" style="margin-bottom: 22px;">
+                    <!-- Static fallback cards — JS overwrites these on login with live stats.
+                         Shows correct UI immediately without requiring a user session. -->
+                    <div class="ic-card ic-inactive ic-selected" data-door="mcp" onclick="selectDoorTab('mcp')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDoorTab('mcp')}">
+                        <span class="ic-selected-marker" aria-hidden="true"></span>
+                        <div class="ic-header">
+                            <div><span class="ic-icon" aria-hidden="true">🖥️</span><span class="ic-name">Lumi for Computer App</span></div>
+                            <span class="ic-badge ic-badge-inactive">Not started</span>
+                        </div>
+                        <div class="ic-stats">
+                            <div class="ic-stat"><div class="ic-stat-label">Impressions · 7d</div><div class="ic-stat-value">—</div></div>
+                            <div class="ic-stat"><div class="ic-stat-label">Earnings · 7d</div><div class="ic-stat-value">—</div></div>
+                        </div>
+                        <div class="ic-cta" style="pointer-events:none;">✓ Selected · install + code →</div>
+                    </div>
+                    <div class="ic-card ic-inactive" data-door="js-snippet" onclick="selectDoorTab('js-snippet')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDoorTab('js-snippet')}">
+                        <span class="ic-selected-marker" aria-hidden="true"></span>
+                        <div class="ic-header">
+                            <div><span class="ic-icon" aria-hidden="true">🌐</span><span class="ic-name">Lumi for Browser App</span></div>
+                            <span class="ic-badge ic-badge-inactive">Not started</span>
+                        </div>
+                        <div class="ic-stats">
+                            <div class="ic-stat"><div class="ic-stat-label">Impressions · 7d</div><div class="ic-stat-value">—</div></div>
+                            <div class="ic-stat"><div class="ic-stat-label">Earnings · 7d</div><div class="ic-stat-value">—</div></div>
+                        </div>
+                        <div class="ic-cta" style="pointer-events:none;">View install code</div>
+                    </div>
+                    <div class="ic-card ic-inactive" data-door="npm-sdk" onclick="selectDoorTab('npm-sdk')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDoorTab('npm-sdk')}">
+                        <span class="ic-selected-marker" aria-hidden="true"></span>
+                        <div class="ic-header">
+                            <div><span class="ic-icon" aria-hidden="true">🧩</span><span class="ic-name">Lumi for Browser Extension App</span></div>
+                            <span class="ic-badge ic-badge-inactive">Not started</span>
+                        </div>
+                        <div class="ic-stats">
+                            <div class="ic-stat"><div class="ic-stat-label">Impressions · 7d</div><div class="ic-stat-value">—</div></div>
+                            <div class="ic-stat"><div class="ic-stat-label">Earnings · 7d</div><div class="ic-stat-value">—</div></div>
+                        </div>
+                        <div class="ic-cta" style="pointer-events:none;">View install code</div>
+                    </div>
+                    <div class="ic-card ic-inactive" data-door="rest-api" onclick="selectDoorTab('rest-api')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectDoorTab('rest-api')}">
+                        <span class="ic-selected-marker" aria-hidden="true"></span>
+                        <div class="ic-header">
+                            <div><span class="ic-icon" aria-hidden="true">📱</span><span class="ic-name">Lumi for Mobile App</span></div>
+                            <span class="ic-badge ic-badge-inactive">Not started</span>
+                        </div>
+                        <div class="ic-stats">
+                            <div class="ic-stat"><div class="ic-stat-label">Impressions · 7d</div><div class="ic-stat-value">—</div></div>
+                            <div class="ic-stat"><div class="ic-stat-label">Earnings · 7d</div><div class="ic-stat-value">—</div></div>
+                        </div>
+                        <div class="ic-cta" style="pointer-events:none;">View install code</div>
+                    </div>
+                </div>
+
+                <!-- Door 1: Lumi for Computer App (Electron/Tauri/native desktop) -->
+                <div class="fw-panel" id="fw-mcp">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Run this in your project directory — that's the whole install</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-mcp-install')" data-t="common.copy">Copy</button>
+                            <pre id="code-mcp-install">npx @boostbossai/install-desktop <span id="mcp-pub-token-inline">pub_abc</span></pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One command. The CLI detects Electron or Tauri, patches your renderer HTML to add the Lumi script tag, and prints a banner showing all 10 placements that auto-enabled. Restart your app — the <strong>Computer App</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. To uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-desktop --uninstall</code>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🪟 Electron</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">CLI patches your renderer's <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">index.html</code>. No code edits needed.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🦀 Tauri</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Manual integration in v1.2. See <a href="/docs/computer#tauri" style="color:#04BEFE;text-decoration:underline;">/docs/computer#tauri</a>.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🎥 Sound + video</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Desktop apps escape browser autoplay rules. Pre-roll video with sound is fully supported.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Door 2: Lumi for Browser App — one script tag in <head>. -->
+                <div class="fw-panel" id="fw-js-snippet" style="display: none;">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Paste this in your &lt;head&gt; — that's the whole install</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-snippet-tag')" data-t="common.copy">Copy</button>
+                            <pre id="code-snippet-tag">&lt;script async src="https://boostboss.ai/lumi/v1.js#<span id="js-pub-token-inline">pub_abc</span>"&gt;&lt;/script&gt;</pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One paste. Refresh your site — the <strong>Browser App</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 30 seconds. All 8 placements auto-enable. No npm install, no <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">init()</code>, no slot tags.
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🔒 Privacy posture</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Lumi reads only what's visible on the active tab. Nothing is persisted to cookies, localStorage, or IndexedDB. Page URL + impression context is all that leaves the page.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🛡 Strict CSP?</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Add <code style="font-family:'JetBrains Mono',monospace;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;">boostboss.ai</code> to your <code style="font-family:'JetBrains Mono',monospace;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;">script-src</code> and <code style="font-family:'JetBrains Mono',monospace;background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;">connect-src</code> directives. One line each. <a href="/docs/browser#csp" style="color:#04BEFE;text-decoration:underline;">Reference →</a></div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">⚛ React / Next.js?</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">12-line wrapper for component-style integration. <a href="/docs/browser/react" style="color:#FF2D78;text-decoration:underline;">/docs/browser/react →</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Door 3: Lumi for Browser Extension App (Manifest v3) -->
+                <div class="fw-panel" id="fw-npm-sdk" style="display: none;">
+                    <div style="margin-bottom: 14px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 6px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Run this in your extension directory — that's the whole install</h4>
+                        <div class="code-block">
+                            <button class="code-copy-btn" onclick="copyCode(this, 'code-ext-install')" data-t="common.copy">Copy</button>
+                            <pre id="code-ext-install">npx @boostbossai/install-extension <span id="ext-pub-token-inline">pub_abc</span></pre>
+                        </div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                            One command. The CLI installs the runtime, patches your <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">manifest.json</code> (permissions + host), drops the SDK into your service worker, and wires popup + sidepanel + new-tab pages if they exist. Reload your extension in <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">chrome://extensions</code> — the <strong>Browser Extension</strong> verify badge below flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. Uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-extension --uninstall</code>
+                        </div>
+                    </div>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FFB020;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🧩 Manifest V3</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Chrome / Edge / Brave / Opera. Zero <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">eval</code>, zero remote code. Bundled into <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">node_modules</code> at install.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">⚡ Premium placement</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">New-tab takeover at $16 RPM — auto-enables when your manifest declares a new-tab override.</div>
+                        </div>
+                        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                            <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🔧 Firefox / Safari</div>
+                            <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">v1.2 supports Chrome MV3 only. Firefox / Safari ports follow in v1.3. <a href="/docs/extension" style="color:#FF2D78;text-decoration:underline;">Track progress →</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Door 4: Lumi for Mobile App (iOS / Android / React Native) -->
+                <div class="fw-panel" id="fw-rest-api" style="display: none;">
+                    <div style="margin-bottom: 10px;">
+                        <h4 style="font-size: 13px; font-weight: 700; margin: 0 0 4px; color: #6B7280; letter-spacing: 0.04em; text-transform: uppercase;">Mobile App — pick your stack</h4>
+                        <div style="font-size:12px;color:#6B7280;line-height:1.55;margin-bottom:10px;">
+                            React Native covers most AI mobile apps. If your app is native iOS (Swift / Obj-C) or native Android (Kotlin / Java), use those tabs instead — the underlying SDK is the same, just packaged for each ecosystem's native package manager.
+                        </div>
+                        <div id="mobile-flavor-tabs" style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;">
+                            <button type="button" class="mobile-flavor-tab" data-flavor="rn" style="background:#FF2D78;color:#fff;border:0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;cursor:pointer;">React Native (recommended)</button>
+                            <button type="button" class="mobile-flavor-tab" data-flavor="ios" style="background:#F3F4F6;color:#374151;border:0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Native iOS</button>
+                            <button type="button" class="mobile-flavor-tab" data-flavor="android" style="background:#F3F4F6;color:#374151;border:0;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;cursor:pointer;">Native Android</button>
+                        </div>
+                    </div>
+
+                    <!-- React Native flavor (default visible) -->
+                    <div class="mobile-flavor-panel" data-flavor="rn">
+                        <div style="margin-bottom: 14px;">
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-rest-env')" data-t="common.copy">Copy</button>
+                                <pre id="code-rest-env">npx @boostbossai/install-mobile <span id="rest-pub-token-inline">pub_abc</span></pre>
+                            </div>
+                            <div style="font-size: 12px; color: #6B7280; margin-top: 6px; line-height:1.55;">
+                                One command. The CLI detects Expo vs bare React Native, installs the runtime, wraps your <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">App.tsx</code> root with <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">&lt;LumiProvider&gt;</code>, and runs <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">pod install</code> on Mac. Rebuild — the <strong>Mobile App</strong> verify badge flips to <strong style="color:#059669;">Connected</strong> within 60 seconds. Uninstall: <code style="font-family:'JetBrains Mono',monospace;background:#F3F4F6;padding:1px 5px;border-radius:4px;">npx @boostbossai/install-mobile --uninstall</code>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:14px;">
+                            <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                                <div style="font-size:10.5px;font-weight:700;color:#FF2D78;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🏆 Rewarded video</div>
+                                <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Highest-CPM format in adtech ($25–50 CPM). User opts in, you grant them a reward. Drop in: <code style="background:#fff;padding:1px 4px;border-radius:3px;border:1px solid #E5E7EB;font-family:'JetBrains Mono',monospace;">&lt;RewardedVideo onReward={fn} /&gt;</code></div>
+                            </div>
+                            <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                                <div style="font-size:10.5px;font-weight:700;color:#04BEFE;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">📱 Expo + Bare RN</div>
+                                <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">CLI auto-detects and patches the right entry point. Expo SDK 50+ or React Native 0.74+.</div>
+                            </div>
+                            <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:11px 13px;">
+                                <div style="font-size:10.5px;font-weight:700;color:#9D7AFF;letter-spacing:0.05em;text-transform:uppercase;margin-bottom:4px;">🎵 Sound + video</div>
+                                <div style="font-size:11.5px;color:#4B5563;line-height:1.5;">Native apps escape browser autoplay rules. Pre-roll, rewarded, full-screen — all sound-on, App Store / Play Store compliant.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Native iOS flavor -->
+                    <div class="mobile-flavor-panel" data-flavor="ios" style="display:none;">
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size:11.5px;color:#0369A1;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.5;">
+                                <strong>v0.1.1-alpha</strong> · all 10 placements ship in the SDK. 2 auto-mount on launch (BottomBanner, SplashSponsor). 5 are embedded by you in your layout (InlineNativeBanner, InlineSponsoredCard, SponsoredCitation, SuggestedChip, LoadingStateAd). 3 are event-driven by you per Apple App Store rules (RewardedVideo, Interstitial, PreRollVideo). SKAdNetwork install attribution ships in v0.2.
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:8px 0 6px;">Swift Package Manager (recommended)</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-spm')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-spm"># Xcode → File → Add Package Dependencies
+https://github.com/BoostBoss-AI/lumi-mobile-ios</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">Or — CocoaPods</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-podfile')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-podfile"># Podfile
+pod 'BoostBossLumi', :git =&gt; 'https://github.com/BoostBoss-AI/lumi-mobile-ios', :tag =&gt; '0.1.1-alpha'</pre>
+                            </div>
+                            <div class="code-block" style="margin-top:6px;">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-pod-install')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-pod-install">pod install</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">Then in AppDelegate</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-ios-init')" data-t="common.copy">Copy</button>
+                                <pre id="code-ios-init">import BoostBossLumi
+
+LumiSDK.configure(publisherId: "<span id="ios-pub-token-inline">pub_abc</span>")</pre>
+                            </div>
+                            <div style="font-size:12px;color:#6B7280;margin-top:8px;line-height:1.55;">
+                                iOS 14+ · Swift 5.5+ · arm64 (device) + arm64/x86_64 (simulator). Per <a href="/publisher-agreement#section-4" style="color:#FF2D78;text-decoration:underline;">Publisher Agreement §4.1</a>, <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">configure(publisherId:)</code> auto-mounts the BottomBanner + SplashSponsor placements on first launch. Suppress individually with <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">LumiSDK.shared.suppress(.splashSponsor)</code>.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Native Android flavor -->
+                    <div class="mobile-flavor-panel" data-flavor="android" style="display:none;">
+                        <div style="margin-bottom: 14px;">
+                            <div style="font-size:11.5px;color:#0369A1;background:#E0F2FE;border:1px solid #BAE6FD;border-radius:8px;padding:8px 12px;margin-bottom:12px;line-height:1.5;">
+                                <strong>v0.1.1-alpha</strong> · all 10 placements ship in the SDK. 2 auto-mount on launch (BottomBanner, SplashSponsor). 5 are embedded by you in your layout (InlineNativeBanner, InlineSponsoredCard, SponsoredCitation, SuggestedChip, LoadingStateAd). 3 are event-driven by you (RewardedVideo, Interstitial, PreRollVideo). Play Install Referrer attribution ships in v0.2.
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:8px 0 6px;">settings.gradle.kts (root)</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-android-settings')" data-t="common.copy">Copy</button>
+                                <pre id="code-android-settings">dependencyResolutionManagement {
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">build.gradle.kts (app module)</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-android-gradle')" data-t="common.copy">Copy</button>
+                                <pre id="code-android-gradle">dependencies {
+    implementation("com.github.BoostBoss-AI:lumi-mobile-android:0.1.1-alpha.5")
+}</pre>
+                            </div>
+                            <h5 style="font-size:11px;font-weight:700;color:#6B7280;letter-spacing:0.04em;text-transform:uppercase;margin:14px 0 6px;">Then in Application.kt</h5>
+                            <div class="code-block">
+                                <button class="code-copy-btn" onclick="copyCode(this, 'code-android-init')" data-t="common.copy">Copy</button>
+                                <pre id="code-android-init">import ai.boostboss.lumi.LumiSDK
+
+class MyApp : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        LumiSDK.configure(this, "<span id="android-pub-token-inline">pub_abc</span>")
+    }
+}</pre>
+                            </div>
+                            <div style="font-size:12px;color:#6B7280;margin-top:8px;line-height:1.55;">
+                                Android 6.0+ (API 23) · Kotlin 1.9+ / Java 17 · arm64-v8a + armeabi-v7a + x86_64. Per <a href="/publisher-agreement#section-4" style="color:#FF2D78;text-decoration:underline;">Publisher Agreement §4.1</a>, <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">configure(context, publisherId)</code> auto-mounts BottomBanner + SplashSponsor on every activity resume. Suppress with <code style="background:#F3F4F6;padding:1px 4px;border-radius:3px;font-family:'JetBrains Mono',monospace;">LumiSDK.suppress(Placement.SPLASH_SPONSOR)</code>.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verify your integration (component #3, full-width row). -->
+                <div id="integrationVerifyPanel" style="margin-top: 24px; padding-top: 18px; border-top: 1px dashed #E5E7EB;">
+                    <div style="margin-bottom: 14px;">
+                        <div style="font-weight: 700; font-size: 14px; color: #1A1A2E;" data-t="verify.title">Verify your integration</div>
+                        <div style="font-size: 12px; color: #6B7280; margin-top: 2px;" data-t="verify.subtitle">
+                            We watch every door automatically. The moment a real ad request arrives from any of your Lumi installs, that door switches from "Not started" to "Connected" — like a cable clicking into place. No manual test needed.
+                        </div>
+                    </div>
+
+                    <!-- Per-door verification badges. Updated by pollIntegrationVerify() every 30s. -->
+                    <div id="verifyBadgesGrid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px;margin-bottom:0;">
+                        <div class="verify-badge" data-door="mcp">
+                            <span class="verify-icon">○</span>
+                            <span class="verify-name">Computer App</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
+                        </div>
+                        <div class="verify-badge" data-door="js-snippet">
+                            <span class="verify-icon">○</span>
+                            <span class="verify-name">Browser App</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
+                        </div>
+                        <div class="verify-badge" data-door="npm-sdk">
+                            <span class="verify-icon">○</span>
+                            <span class="verify-name">Browser Extension</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
+                        </div>
+                        <div class="verify-badge" data-door="rest-api">
+                            <span class="verify-icon">○</span>
+                            <span class="verify-name">Mobile App</span>
+                            <span class="verify-status" data-t="verify.not_started">Not started</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            </div><!-- /[data-shell-route="integrations"] -->
+
+            <!-- ═════════════════════════════════════════════════════════════
+                 ROUTE: placements — publisher ad slots + per-slot economics.
+                 Hash: #/placements. Nav item data-shell-section="placements".
+                 Ported additively from public/developer.html (lines 2755-2837).
+                 VALID_ROUTES + dashboard-shell.css allowlist both carry
+                 'placements'. Populated by renderAdPlacements() (bundle grid)
+                 and renderEarnPlacements() (live per-door traffic).
+                 ═════════════════════════════════════════════════════════════ -->
+            <div data-shell-route="placements">
+
+            <!-- Route page header — banner for the placements page. -->
+            <div class="shell-page-head">
+                <div>
+                    <h1 class="shell-page-title" data-t="page.placements.title">Placements</h1>
+                    <div class="shell-page-sub" data-t="page.placements.sub">Ad slots and per-slot economics</div>
+                </div>
+            </div>
+
+            <!-- 4-door navigator — wired to the same selectDoorTab() source of truth. -->
+            <div id="placementsDoorNav" style="
+                display: flex;
+                gap: 8px;
+                background: #fff;
+                border: 1px solid #E5E7EB;
+                border-radius: 12px;
+                padding: 6px;
+                margin-bottom: 16px;
+                overflow-x: auto;
+            " role="tablist" aria-label="Switch integration door">
+                <button class="placement-door-tab" data-door="mcp"        type="button" role="tab" onclick="selectDoorTab('mcp')">
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_mcp">Lumi for Computer App</span>
+                </button>
+                <button class="placement-door-tab" data-door="js-snippet" type="button" role="tab" onclick="selectDoorTab('js-snippet')">
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_web">Lumi for Browser App</span>
+                </button>
+                <button class="placement-door-tab" data-door="npm-sdk"    type="button" role="tab" onclick="selectDoorTab('npm-sdk')">
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_ext">Lumi for Browser Extension App</span>
+                </button>
+                <button class="placement-door-tab" data-door="rest-api"   type="button" role="tab" onclick="selectDoorTab('rest-api')">
+                    <span class="placement-door-tab__label" data-t="page.placements.tab_bot">Lumi for Mobile App</span>
+                </button>
+            </div>
+
+            <!-- Ad Placements — read-only showcase of the selected door's fixed bundle. -->
+            <div class="section">
+                <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                    <div class="section-title" style="margin-bottom: 0;" data-t="ap.title">Ad Placements</div>
+                    <div style="font-size: 12px; color: #6B7280;">
+                        <span data-t="ap.est_income">Est. monthly income:</span> <span id="fmtIncomeEstimate" style="color: #FF2D78; font-weight: 700;">—</span>
+                        <span style="color: #9CA3AF; font-size: 11px;" data-t="ap.at_current_volume">&nbsp;(at current volume)</span>
+                    </div>
+                </div>
+                <div style="font-size: 12px; color: #6B7280; margin-bottom: 16px; line-height: 1.5;" data-t="ap.intro">
+                    Each door ships with a curated placement bundle that auto-enables on install. Use the door tabs above to view a different door's placements.
+                </div>
+                <div id="adPlacementsContainer">
+                    <!-- Dynamically populated — the selected door's read-only placement cards -->
+                </div>
+            </div>
+
+            <!-- Live per-door placement analytics — 4 doors in parallel. -->
+            <div class="section" data-panel="earnings">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; gap: 10px; flex-wrap: wrap;">
+                    <div class="section-title" style="margin-bottom: 0;" data-t="placements.title">Live placement traffic</div>
+                    <div style="font-size: 12px; color: #6B7280;">
+                        <span data-t="placements.last_30_simple">Last 30 days · by door</span>
+                    </div>
+                </div>
+                <div style="font-size: 12.5px; color: #6B7280; margin-bottom: 14px; line-height: 1.5;" data-t="placements.subtitle">
+                    Each panel below is one of your installed Lumi doors. If you ship across multiple surfaces (e.g. Computer App + Mobile App), all of them stream traffic in parallel here. Doors you haven't installed yet show what placements they'd unlock.
+                </div>
+                <div id="placementsContainer" style="overflow:visible;">
+                    <div style="padding:24px;text-align:center;color:#9CA3AF;font-size:13px;background:#fff;border:1px solid #E5E7EB;border-radius:12px;" data-t="common.loading">Loading…</div>
+                </div>
+                <div style="font-size: 11px; color: #9CA3AF; margin-top: 12px; line-height: 1.5;">
+                    <strong data-t="placements.intent">Intent</strong> <span data-t="placements.hint_d">means Benna is matching the right ads to that placement's context. 1.5 = perfect overlap, 0.7 = decent, 0.4 = cold start. Higher Intent → higher eCPM.</span>
+                </div>
+            </div>
+
+            </div><!-- /[data-shell-route="placements"] -->
+
+            <!-- ═════════════════════════════════════════════════════════════
                  ROUTE: api — "API & Automation" developer page.
                  Hash: #/api. Nav item data-shell-section="api".
                  VALID_ROUTES + dashboard-shell.css allowlist both carry 'api'.
@@ -7066,7 +7911,7 @@
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api', 'integrations', 'placements'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -8256,6 +9101,486 @@
         }
         window.addEventListener('hashchange', _maybeLoadEarnPerf);
         _maybeLoadEarnPerf();
+
+        // ════════════════════════════════════════════════════════════════
+        // EARN · Integrations + Placements routes.
+        // Ported additively from public/developer.html for the unified
+        // "Promote + Earn" dashboard merge. Lives inside the main <script>
+        // so it shares API_BASE / currentUser / showToast / escapeHtml.
+        // Data constants are EARN_-prefixed to avoid any collision with the
+        // advertiser-side (function-local) DOOR_LABELS. Placement showcase
+        // uses the renamed .bb-fmt-* CSS classes (see <style> block).
+        // ════════════════════════════════════════════════════════════════
+
+        // Placement category metadata — drives the format badge + RPM band.
+        const EARN_PLACEMENT_CATS = [
+            { key: 'ai-native', label: 'AI-native',  labelKey: 'page.placements.cat_ai_h',       rpmBand: '$4–5 RPM',   color: '#1D9E75', bg: '#E1F5EE' },
+            { key: 'display',   label: 'Display',    labelKey: 'page.placements.cat_display_h',  rpmBand: '$6–9 RPM',   color: '#1D4ED8', bg: '#EFF6FF' },
+            { key: 'video',     label: 'Video',      labelKey: 'page.placements.cat_video_h',    rpmBand: '$9–12 RPM',  color: '#7C3AED', bg: '#F3E8FF' },
+            { key: 'premium',   label: 'Premium',    labelKey: 'page.placements.cat_premium_h',  rpmBand: '$15–25 RPM', color: '#B45309', bg: '#FEF3C7' },
+            { key: 'rewarded',  label: 'Rewarded',   labelKey: 'page.placements.cat_rewarded_h', rpmBand: '$25–50 RPM', color: '#BE185D', bg: '#FCE7F3' },
+        ];
+        // Per-format visual mockup — renders a sample ad using --lumi-* theme vars.
+        function formatMockup(key) {
+            const HEAD = 'DevTools Pro — ship 3× faster';
+            const SUB  = '14-day free trial · no card';
+            const CTA  = 'Try free →';
+            if (key === 'native') {
+                return `<div class="fmt-mock"><div class="fmt-mock-card">
+                    <div class="fmt-mock-disclosure">— Sponsored —</div>
+                    <div class="fmt-mock-headline">${HEAD}</div>
+                    <div class="fmt-mock-sub">${SUB}</div>
+                    <span class="fmt-mock-cta">${CTA}</span>
+                </div></div>`;
+            }
+            if (key === 'image') {
+                return `<div class="fmt-mock"><div class="fmt-mock-card">
+                    <div class="fmt-mock-disclosure">— Sponsored —</div>
+                    <div class="fmt-mock-image"></div>
+                    <div class="fmt-mock-headline">${HEAD}</div>
+                    <span class="fmt-mock-cta">${CTA}</span>
+                </div></div>`;
+            }
+            if (key === 'corner') {
+                return `<div class="fmt-mock"><div class="fmt-mock-window">
+                    <div class="fmt-mock-corner">
+                        <div class="fmt-mock-disclosure">Sponsored</div>
+                        <div class="fmt-mock-headline">DevTools Pro</div>
+                        <span class="fmt-mock-cta">Try →</span>
+                    </div>
+                </div></div>`;
+            }
+            return '';
+        }
+        const EARN_DOOR_LABELS = {
+            'mcp': 'Lumi for Computer App', 'js-snippet': 'Lumi for Browser App',
+            'npm-sdk': 'Lumi for Browser Extension App', 'rest-api': 'Lumi for Mobile App',
+        };
+        const EARN_DOOR_SURFACE_PREFIX = { 'mcp': 'mcp', 'js-snippet': 'web', 'npm-sdk': 'ext', 'rest-api': 'bot' };
+        // Per-door fixed placement bundles.
+        const EARN_DOOR_PLACEMENTS = {
+            'mcp': [
+                { key: 'citation',     cat: 'ai-native', name: 'Sponsored citation',      rpm: 4.50,  mock: 'native', desc: 'A sponsored source / citation inside the AI answer.' },
+                { key: 'chip',         cat: 'ai-native', name: 'Suggested chip',          rpm: 4.50,  mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+                { key: 'card',         cat: 'display',   name: 'Inline sponsored card',   rpm: 6.50,  mock: 'image',  desc: 'A sponsored card block appended to the tool response.' },
+                { key: 'loading',      cat: 'display',   name: 'Loading-state ad',        rpm: 7.00,  mock: 'native', desc: 'Shown while your AI is generating its response.' },
+                { key: 'preroll',      cat: 'video',     name: 'Pre-roll video',          rpm: 10.00, mock: 'image',  desc: 'A short video before a heavy generation or export action.' },
+                { key: 'window_banner',cat: 'display',   name: 'Window banner',           rpm: 7.50,  mock: 'image',  desc: 'A persistent banner along the top or bottom of the app window.' },
+                { key: 'sidebar',      cat: 'display',   name: 'Sidebar slot',            rpm: 7.00,  mock: 'image',  desc: 'A card anchored in your app sidebar / inspector.' },
+                { key: 'modal',        cat: 'premium',   name: 'Modal interstitial',      rpm: 18.00, mock: 'image',  desc: 'Full-modal sponsor between major flow steps.' },
+                { key: 'empty_state',  cat: 'display',   name: 'Empty-state hero',        rpm: 8.50,  mock: 'image',  desc: 'A hero sponsor shown when a view has no content yet.' },
+                { key: 'notification', cat: 'ai-native', name: 'System notification',     rpm: 5.00,  mock: 'native', desc: 'A native OS notification — sponsored content only when relevant.' },
+            ],
+            'js-snippet': [
+                { key: 'citation',     cat: 'ai-native', name: 'Sponsored citation',      rpm: 4.50,  mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
+                { key: 'chip',         cat: 'ai-native', name: 'Suggested chip',          rpm: 4.50,  mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+                { key: 'card',         cat: 'display',   name: 'Inline sponsored card',   rpm: 6.50,  mock: 'image',  desc: 'Sponsored card rendered inline in your page flow.' },
+                { key: 'loading',      cat: 'display',   name: 'Loading-state ad',        rpm: 7.00,  mock: 'native', desc: 'Shown while your AI is generating its response.' },
+                { key: 'corner',       cat: 'display',   name: 'Corner unit',             rpm: 8.50,  mock: 'corner', desc: 'Sticky dismissable card anchored to a screen corner.' },
+                { key: 'interstitial', cat: 'premium',   name: 'Page interstitial',       rpm: 17.00, mock: 'image',  desc: 'Full-page sponsor between two route navigations.' },
+                { key: 'empty_state',  cat: 'display',   name: 'Empty-state hero',        rpm: 8.00,  mock: 'image',  desc: 'A hero sponsor when a page has no content yet.' },
+                { key: 'settings_slot',cat: 'display',   name: 'Settings page slot',      rpm: 6.00,  mock: 'image',  desc: 'A modest sponsor card on your settings / account page.' },
+            ],
+            'npm-sdk': [
+                { key: 'citation',     cat: 'ai-native', name: 'Sponsored citation',      rpm: 4.50,  mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
+                { key: 'chip',         cat: 'ai-native', name: 'Suggested chip',          rpm: 4.50,  mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+                { key: 'card',         cat: 'display',   name: 'Inline sponsored card',   rpm: 6.50,  mock: 'image',  desc: 'Sponsored card rendered inline in the extension UI.' },
+                { key: 'loading',      cat: 'display',   name: 'Loading-state ad',        rpm: 7.00,  mock: 'native', desc: 'Shown while the extension is processing a query.' },
+                { key: 'popup',        cat: 'display',   name: 'Popup card',              rpm: 7.50,  mock: 'image',  desc: 'A card inside the extension popup (toolbar icon click).' },
+                { key: 'sidepanel',    cat: 'display',   name: 'Side panel slot',         rpm: 8.00,  mock: 'image',  desc: 'A slot in the extension side panel.' },
+                { key: 'newtab',       cat: 'premium',   name: 'New-tab takeover',        rpm: 16.00, mock: 'image',  desc: 'A hero unit on the extension new-tab / home screen.' },
+                { key: 'onboarding',   cat: 'display',   name: 'Install onboarding',      rpm: 9.00,  mock: 'image',  desc: 'A sponsor shown during the post-install onboarding flow.' },
+            ],
+            'rest-api': [
+                { key: 'citation',     cat: 'ai-native', name: 'Sponsored citation',      rpm: 4.50,  mock: 'native', desc: 'Compact sponsored source inside a generated answer.' },
+                { key: 'chip',         cat: 'ai-native', name: 'Suggested chip',          rpm: 4.50,  mock: 'native', desc: 'A tappable sponsored quick-reply pill.' },
+                { key: 'card',         cat: 'display',   name: 'Inline sponsored card',   rpm: 6.50,  mock: 'image',  desc: 'Sponsored card rendered inline in your mobile feed.' },
+                { key: 'loading',      cat: 'display',   name: 'Loading-state ad',        rpm: 7.00,  mock: 'native', desc: 'Shown while the app is generating its response.' },
+                { key: 'preroll',      cat: 'video',     name: 'Pre-roll video',          rpm: 11.00, mock: 'image',  desc: 'A short video before a key in-app action.' },
+                { key: 'rewarded',     cat: 'rewarded',  name: 'Rewarded video',          rpm: 35.00, mock: 'image',  desc: 'User-opted-in video — they earn an in-app reward for watching.' },
+                { key: 'bottom_banner',cat: 'display',   name: 'Bottom banner',           rpm: 6.50,  mock: 'image',  desc: 'A persistent banner anchored to the bottom of the screen.' },
+                { key: 'native_banner',cat: 'display',   name: 'Inline native banner',    rpm: 7.50,  mock: 'native', desc: 'A native-feeling banner that matches your app feed style.' },
+                { key: 'fullscreen',   cat: 'premium',   name: 'Full-screen interstitial',rpm: 18.00, mock: 'image',  desc: 'Full-screen sponsor at a natural transition point.' },
+                { key: 'splash',       cat: 'premium',   name: 'Splash sponsor',          rpm: 15.00, mock: 'image',  desc: 'A sponsor card shown on your app splash / launch screen.' },
+            ],
+        };
+
+        // Local translation helper (mirrors developer.html's _t fallback).
+        function _earnT(k, en) { return (window.dashT && window.dashT(k)) || en; }
+        function _earnEsc(s) { return (typeof escapeHtml === 'function') ? escapeHtml(s) : String(s == null ? '' : s); }
+
+        // Door tab switcher — shared by Integrations cards + Placements pills.
+        function selectDoorTab(name) {
+            document.querySelectorAll('.fw-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === name);
+            });
+            document.querySelectorAll('.fw-panel').forEach(panel => {
+                panel.style.display = panel.id === 'fw-' + name ? '' : 'none';
+            });
+            document.querySelectorAll('.placement-door-tab').forEach(btn => {
+                btn.classList.toggle('is-active', btn.dataset.door === name);
+            });
+            document.querySelectorAll('.ic-card').forEach(card => {
+                const isSel = card.dataset.door === name;
+                card.classList.toggle('ic-selected', isSel);
+                const cta = card.querySelector('.ic-cta');
+                if (cta) {
+                    if (isSel) {
+                        cta.textContent = '✓ Selected · install + code →';
+                    } else {
+                        const isActive = card.classList.contains('ic-active');
+                        cta.textContent = isActive ? 'Switch to this door' : 'View install code';
+                    }
+                }
+            });
+            try { sessionStorage.setItem('bb_dashboard_target_door', name); } catch (_) {}
+            try {
+                const panel = document.getElementById('fw-' + name);
+                if (panel && window.innerWidth < 900) {
+                    panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            } catch (_) {}
+            renderAdPlacements();
+        }
+        // Backward-compat alias for legacy inline handlers.
+        function selectFwTab(name) { selectDoorTab(name); }
+
+        // Copy-to-clipboard for install code blocks.
+        function copyCode(button, codeId) {
+            const codeElement = document.getElementById(codeId);
+            if (!codeElement) return;
+            const text = codeElement.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                setTimeout(() => {
+                    button.textContent = 'Copy';
+                    button.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Monthly income estimate for the selected door.
+        function updateEarnIncomeEstimate() {
+            const el = document.getElementById('fmtIncomeEstimate');
+            if (!el) return;
+            const _sel = document.querySelector('.ic-card.ic-selected');
+            const _door = (_sel && _sel.dataset.door) || 'mcp';
+            const enabled = (EARN_DOOR_PLACEMENTS[_door] || []).slice();
+            if (enabled.length === 0) { el.textContent = '$0'; el.style.color = '#9CA3AF'; return; }
+            const blendedRpm = enabled.reduce((s, p) => s + p.rpm, 0) / enabled.length;
+            const monthlyImpressions = Math.max(10000, (window._earnMonthlyImpressions || 0));
+            const publisherShare = (monthlyImpressions / 1000) * blendedRpm * 0.70;
+            el.textContent = '$' + publisherShare.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+            el.style.color = '#FF2D78';
+        }
+
+        // Read-only Ad Placements showcase for the selected door.
+        function renderAdPlacements() {
+            const container = document.getElementById('adPlacementsContainer');
+            if (!container) return;
+            container.className = '';
+            container.innerHTML = '';
+
+            const _sel = document.querySelector('.ic-card.ic-selected');
+            const _door = (_sel && _sel.dataset.door) || 'mcp';
+            const placements = EARN_DOOR_PLACEMENTS[_door] || [];
+            const catLookup = Object.create(null);
+            EARN_PLACEMENT_CATS.forEach(c => { catLookup[c.key] = c; });
+
+            const callout = document.createElement('div');
+            callout.style.cssText = 'background:#F5F3FF;border:1px solid #DDD6FE;border-radius:12px;padding:14px 16px;margin-bottom:18px;display:flex;gap:12px;align-items:flex-start;';
+            callout.innerHTML = `
+                <div style="font-size:20px;line-height:1;flex-shrink:0;">💡</div>
+                <div style="flex:1;font-size:12.5px;line-height:1.55;color:#4C1D95;">
+                    <strong style="color:#312E81;">${_earnT('page.placements.callout_h', 'Why no toggles?')}</strong>
+                    ${_earnT('page.placements.callout_body', ' We auto-select which placements serve in your app based on user context and inventory fill. Letting publishers turn off placements cuts impressions (and your earnings) by 20–40%. The Boost Boss auction picks the best fit per request — you just install the SDK.')}
+                </div>
+            `;
+            container.appendChild(callout);
+
+            const _doorLabel = EARN_DOOR_LABELS[_door] || _door;
+            const _ctx = document.createElement('div');
+            _ctx.style.cssText = 'font-size:13px;color:#F0F0F8;margin-bottom:14px;line-height:1.6;';
+            _ctx.innerHTML = `<strong>${_earnEsc(_doorLabel)}</strong> ships with <strong>${placements.length} placements</strong>. They're auto-enabled on install. We tune which ones serve where based on intent and real-time fill — you don't have to.`;
+            container.appendChild(_ctx);
+
+            const grid = document.createElement('div');
+            grid.className = 'bb-fmt-grid';
+            placements.forEach(p => {
+                const cat = catLookup[p.cat] || { label: 'Standard', color: '#374151', bg: '#F3F4F6', rpmBand: '' };
+                const card = document.createElement('div');
+                card.className = 'bb-fmt-card fmt-enabled';
+                card.setAttribute('data-placement', (EARN_DOOR_SURFACE_PREFIX[_door] || 'web') + '-' + p.key);
+                card.innerHTML = `
+                    <div class="bb-fmt-card-head">
+                        <span class="bb-fmt-card-name">${_earnEsc(p.name)}</span>
+                        <span class="bb-fmt-card-rpm" style="background:${cat.bg};color:${cat.color};">${_earnEsc(cat.label)}</span>
+                    </div>
+                    <div class="bb-fmt-card-preview">${formatMockup(p.mock)}</div>
+                    <div style="font-size:11px;font-weight:700;color:${cat.color};letter-spacing:0.03em;">${cat.rpmBand || ('~$' + p.rpm.toFixed(2) + ' RPM')}</div>
+                    <div class="bb-fmt-card-desc">${_earnEsc(p.desc)}</div>
+                `;
+                grid.appendChild(card);
+            });
+            container.appendChild(grid);
+            updateEarnIncomeEstimate();
+        }
+
+        // Live per-door placement analytics — 4 doors in parallel.
+        function renderEarnPlacements(placements) {
+            const host = document.getElementById('placementsContainer');
+            if (!host) return;
+            const DOORS = [
+                { key: 'mcp',       label: 'Lumi for Computer App',           accent: '#9D7AFF', dotIcon: '🖥' },
+                { key: 'js-snippet',label: 'Lumi for Browser App',            accent: '#04BEFE', dotIcon: '🌐' },
+                { key: 'npm-sdk',   label: 'Lumi for Browser Extension App',  accent: '#FFB020', dotIcon: '🧩' },
+                { key: 'rest-api',  label: 'Lumi for Mobile App',             accent: '#FF2D78', dotIcon: '📱' },
+            ];
+            const fmt$ = (n) => '$' + Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            const fmtPct = (n) => (Number(n || 0) * 100).toFixed(1) + '%';
+            const intentBadge = (s) => {
+                if (s == null) return '<span style="color:#9CA3AF;font-size:11px;">—</span>';
+                const v = Number(s);
+                const colour = v >= 1.2 ? '#059669' : (v >= 0.7 ? '#D97706' : '#9CA3AF');
+                return `<span style="color:${colour};font-weight:600;font-size:12px;">${v.toFixed(2)}</span>`;
+            };
+            const surfaceToKey = {
+                'mcp': 'mcp', 'desktop': 'mcp', 'computer': 'mcp',
+                'web': 'js-snippet', 'browser': 'js-snippet', 'js-snippet': 'js-snippet', 'snippet': 'js-snippet',
+                'ext': 'npm-sdk', 'extension': 'npm-sdk', 'npm-sdk': 'npm-sdk',
+                'bot': 'rest-api', 'mobile': 'rest-api', 'rest-api': 'rest-api', 'rest': 'rest-api', 'ios': 'rest-api', 'android': 'rest-api',
+            };
+            const placementToDoor = (p) => {
+                if (p.door && surfaceToKey[p.door]) return surfaceToKey[p.door];
+                if (p.surface && surfaceToKey[p.surface]) return surfaceToKey[p.surface];
+                const id = String(p.placement_id || '').toLowerCase();
+                for (const prefix of Object.keys(surfaceToKey)) {
+                    if (id.startsWith(prefix + '_') || id.startsWith(prefix + '-')) return surfaceToKey[prefix];
+                }
+                return 'mcp';
+            };
+            const buckets = { 'mcp': [], 'js-snippet': [], 'npm-sdk': [], 'rest-api': [] };
+            (placements || []).forEach(p => { buckets[placementToDoor(p)].push(p); });
+
+            const renderDoorPanel = (door) => {
+                const rows = buckets[door.key];
+                const bundleSize = (EARN_DOOR_PLACEMENTS[door.key] && EARN_DOOR_PLACEMENTS[door.key].length) || 0;
+                const isLive = rows.length > 0;
+                const totalEarnings = rows.reduce((s, p) => s + (Number(p.publisher_earnings) || 0), 0);
+                const headerHtml = `
+                    <div style="display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid #F3F4F6;background:linear-gradient(90deg, ${door.accent}15 0%, transparent 60%);">
+                        <span style="font-size:16px;line-height:1;">${door.dotIcon}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-weight:700;font-size:13.5px;color:#0F0F1A;letter-spacing:-0.01em;">${_earnEsc(door.label)}</div>
+                            <div style="font-size:11px;color:#6B7280;margin-top:2px;">
+                                <span style="display:inline-flex;align-items:center;gap:5px;">
+                                    <span style="width:6px;height:6px;border-radius:50%;background:${isLive ? '#10B981' : '#D1D5DB'};${isLive ? 'box-shadow:0 0 0 3px ' + door.accent + '20;' : ''}"></span>
+                                    ${isLive ? `<strong style="color:#059669;font-weight:600;">Live</strong> · ${rows.length} of ${bundleSize} placements serving` : `<span style="color:#9CA3AF;">Not yet installed · ${bundleSize} placements available</span>`}
+                                </span>
+                            </div>
+                        </div>
+                        ${isLive ? `
+                            <div style="text-align:right;flex-shrink:0;">
+                                <div style="font-size:11px;color:#9CA3AF;text-transform:uppercase;letter-spacing:0.06em;font-weight:600;">30d Earnings</div>
+                                <div style="font-size:15px;color:${door.accent};font-weight:700;font-variant-numeric:tabular-nums;margin-top:1px;">${fmt$(totalEarnings)}</div>
+                            </div>
+                        ` : ''}
+                    </div>`;
+                if (!isLive) {
+                    return `
+                        <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;min-height:220px;">
+                            ${headerHtml}
+                            <div style="flex:1;padding:24px 18px;text-align:center;color:#9CA3AF;font-size:12.5px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:8px;">
+                                <div style="font-size:24px;opacity:0.5;">📭</div>
+                                <div style="font-weight:600;color:#6B7280;font-size:13px;">No traffic from this door yet</div>
+                                <div style="font-size:12px;line-height:1.5;max-width:320px;">
+                                    Install <strong>${_earnEsc(door.label)}</strong> from the <a href="#/integrations" style="color:${door.accent};font-weight:600;text-decoration:none;">Integrations</a> tab to start earning from these ${bundleSize} placements.
+                                </div>
+                            </div>
+                        </div>`;
+                }
+                const rowsHtml = rows.map(p => `
+                    <tr style="border-top:1px solid #F3F4F6;">
+                        <td style="padding:9px 12px;">
+                            <div style="font-weight:600;font-size:12.5px;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px;" title="${_earnEsc(p.name || p.placement_id)}">${_earnEsc(p.name || p.placement_id)}</div>
+                            <div style="font-size:10px;color:#9CA3AF;font-family:'JetBrains Mono', ui-monospace, monospace;">${_earnEsc(p.placement_id)}</div>
+                        </td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px;">${(p.impressions||0).toLocaleString()}</td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px;">${fmtPct(p.ctr)}</td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-size:12.5px;">${fmt$(p.ecpm)}</td>
+                        <td style="padding:9px 12px;text-align:right;font-variant-numeric:tabular-nums;font-weight:600;color:#059669;font-size:12.5px;">${fmt$(p.publisher_earnings)}</td>
+                        <td style="padding:9px 12px;text-align:right;">${intentBadge(p.avg_intent_match)}</td>
+                    </tr>`).join('');
+                return `
+                    <div style="background:#FFFFFF;border:1px solid #E5E7EB;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;">
+                        ${headerHtml}
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%;border-collapse:collapse;">
+                                <thead>
+                                    <tr style="background:#FAFAFA;">
+                                        <th style="padding:8px 12px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">Placement</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">Imps</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">CTR</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">eCPM</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;">Earnings</th>
+                                        <th style="padding:8px 12px;text-align:right;font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#6B7280;font-weight:700;" title="Average Benna intent-match score.">Intent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${rowsHtml}</tbody>
+                            </table>
+                        </div>
+                    </div>`;
+            };
+            host.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(420px, 1fr));gap:14px;padding:0;">
+                    ${DOORS.map(renderDoorPanel).join('')}
+                </div>`;
+        }
+
+        // ── Verify-badge polling ──────────────────────────────────────────
+        let _earnVerifyPollTimer = null;
+        let _earnVerifyPollIntervalMs = 15000;
+        function _earnRelTime(iso) {
+            if (!iso) return '';
+            const ms = Date.now() - new Date(iso).getTime();
+            const s = Math.floor(ms / 1000);
+            if (s < 60)   return s + 's ago';
+            const m = Math.floor(s / 60);
+            if (m < 60)   return m + 'm ago';
+            const h = Math.floor(m / 60);
+            if (h < 24)   return h + 'h ago';
+            return Math.floor(h / 24) + 'd ago';
+        }
+        function startVerifyPolling(intervalMs) {
+            _earnVerifyPollIntervalMs = intervalMs || 15000;
+            if (_earnVerifyPollTimer) clearInterval(_earnVerifyPollTimer);
+            pollIntegrationVerify();
+            _earnVerifyPollTimer = setInterval(pollIntegrationVerify, _earnVerifyPollIntervalMs);
+        }
+        function stopVerifyPolling() {
+            if (_earnVerifyPollTimer) { clearInterval(_earnVerifyPollTimer); _earnVerifyPollTimer = null; }
+        }
+        async function pollIntegrationVerify() {
+            const devId = window._earnDeveloperId;
+            if (!devId) return;
+            try {
+                const r = await fetch(`${API_BASE}/api/billing?action=integration_verify&developer_id=${encodeURIComponent(devId)}`);
+                if (!r.ok) return;
+                const data = await r.json();
+                const DOORS = ['mcp', 'js-snippet', 'npm-sdk', 'rest-api'];
+                for (const door of DOORS) {
+                    const state = data[door] || {};
+                    const badge = document.querySelector(`.verify-badge[data-door="${door}"]`);
+                    if (!badge) continue;
+                    const iconEl   = badge.querySelector('.verify-icon');
+                    const statusEl = badge.querySelector('.verify-status');
+                    if (state.live) {
+                        badge.classList.remove('detecting', 'test-only');
+                        badge.classList.add('active');
+                        iconEl.textContent = '✓';
+                        const since = state.last_live_at ? _earnRelTime(state.last_live_at) : 'just now';
+                        const imps  = state.live_impressions_24h || 0;
+                        statusEl.textContent = `Live · ${imps} imp · ${since}`;
+                    } else if (state.active) {
+                        badge.classList.remove('detecting', 'active');
+                        badge.classList.add('test-only');
+                        iconEl.textContent = '✓';
+                        const since = state.last_seen_at ? _earnRelTime(state.last_seen_at) : 'just now';
+                        const imps  = state.synthetic_impressions_24h || state.impressions_24h || 0;
+                        statusEl.textContent = `Verified (test) · ${imps} synthetic · ${since}`;
+                    } else if (!badge.classList.contains('detecting')) {
+                        badge.classList.remove('active', 'test-only');
+                        iconEl.textContent = '○';
+                        statusEl.textContent = 'Not started';
+                    }
+                }
+            } catch (e) { /* silent — polling is best-effort */ }
+        }
+
+        // Inject the publisher's real identifier into every install snippet.
+        function injectEarnPubTokens(pubToken) {
+            const token = pubToken || 'pub_...';
+            ['js-pub-token-inline', 'mcp-pub-token-inline', 'ext-pub-token-inline',
+             'rest-pub-token-inline', 'ios-pub-token-inline', 'android-pub-token-inline']
+                .forEach(function (id) {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = token;
+                });
+        }
+
+        // 3-flavor Mobile App install tabs (RN / iOS / Android).
+        (function wireEarnMobileFlavorTabs() {
+            const init = () => {
+                const tabs = document.querySelectorAll('.mobile-flavor-tab');
+                if (!tabs.length) return false;
+                tabs.forEach(btn => {
+                    if (btn.__lumiWired) return;
+                    btn.__lumiWired = true;
+                    btn.addEventListener('click', () => {
+                        const want = btn.getAttribute('data-flavor');
+                        document.querySelectorAll('.mobile-flavor-tab').forEach(t => {
+                            const active = t.getAttribute('data-flavor') === want;
+                            t.style.background = active ? '#FF2D78' : '#F3F4F6';
+                            t.style.color      = active ? '#fff'    : '#374151';
+                            t.style.fontWeight = active ? '700'     : '600';
+                        });
+                        document.querySelectorAll('.mobile-flavor-panel').forEach(p => {
+                            p.style.display = p.getAttribute('data-flavor') === want ? '' : 'none';
+                        });
+                    });
+                });
+                return true;
+            };
+            if (!init()) {
+                window.addEventListener('hashchange', init);
+            }
+        })();
+
+        // ── Loader — fetch developer stats (JWT-resolved), fill both routes ─
+        let _earnIntegrationsLoaded = false;
+        async function loadEarnIntegrations() {
+            try {
+                const r = await fetch(`${API_BASE}/api/stats?type=developer`, {
+                    headers: { 'Authorization': `Bearer ${currentUser && currentUser.token}` }
+                });
+                const stats = r.ok ? await r.json() : {};
+                const dev = stats.developer || null;
+                if (dev && dev.id) {
+                    window._earnDeveloperId = dev.id;
+                    injectEarnPubTokens(dev.id);
+                    startVerifyPolling(15000);
+                } else {
+                    // No developer profile yet — graceful placeholder, never throw.
+                    injectEarnPubTokens('pub_...');
+                }
+                // Monthly impressions estimate feeds updateEarnIncomeEstimate().
+                const daily = Array.isArray(stats.daily) ? stats.daily : [];
+                window._earnMonthlyImpressions = daily.reduce((s, d) => s + (Number(d.impressions) || 0), 0);
+                renderEarnPlacements(Array.isArray(stats.placements) ? stats.placements : []);
+                renderAdPlacements();
+                _earnIntegrationsLoaded = true;
+            } catch (e) {
+                console.warn('Earn integrations load failed:', e && e.message);
+                injectEarnPubTokens('pub_...');
+                renderEarnPlacements([]);
+                renderAdPlacements();
+            }
+        }
+        function _maybeLoadEarnIntegrations() {
+            const h = window.location.hash || '';
+            if (h.indexOf('#/integrations') === 0 || h.indexOf('#/placements') === 0) {
+                if (!_earnIntegrationsLoaded) loadEarnIntegrations();
+            }
+        }
+        window.addEventListener('hashchange', _maybeLoadEarnIntegrations);
+        _maybeLoadEarnIntegrations();
+        // Seed the door tab state so the pills/cards aren't dead on first paint.
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () { try { selectDoorTab('mcp'); } catch (_) {} });
+        } else {
+            try { selectDoorTab('mcp'); } catch (_) {}
+        }
 
         // Deposit modal
         const depositModal = document.getElementById('depositModal');
