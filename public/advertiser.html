@@ -6763,6 +6763,12 @@
                 loadStats();
                 loadCampaigns();
                 loadBennaEngine();
+                // Earn/Boosts loaders race auth on a cold load direct to
+                // #/boosts or #/performance (currentUser wasn't set yet).
+                // Now that the session is resolved, retrigger them if the
+                // user landed on one of those routes.
+                if (typeof _maybeLoadBoosts === 'function') _maybeLoadBoosts();
+                if (typeof _maybeLoadEarnPerf === 'function') _maybeLoadEarnPerf();
                 if (!window.__bennaInterval) {
                     window.__bennaInterval = setInterval(loadBennaEngine, 30000);
                 }
@@ -6956,6 +6962,12 @@
                 loadStats();
                 loadCampaigns();
                 loadBennaEngine();
+                // Earn/Boosts loaders race auth on a cold load direct to
+                // #/boosts or #/performance (currentUser wasn't set yet).
+                // Now that the session is resolved, retrigger them if the
+                // user landed on one of those routes.
+                if (typeof _maybeLoadBoosts === 'function') _maybeLoadBoosts();
+                if (typeof _maybeLoadEarnPerf === 'function') _maybeLoadEarnPerf();
                 if (!window.__bennaInterval) {
                     window.__bennaInterval = setInterval(loadBennaEngine, 30000);
                 }

@@ -904,7 +904,8 @@ select:not(.form-select):not(.ncw-input):focus-visible {
    treatment to match the Creatives / Campaigns reference (#1B1D22 panels). */
 [data-shell-route="api"] > .section,
 [data-shell-route="billing"] > .section,
-[data-shell-route="performance"] > .section {
+[data-shell-route="performance"] > .section,
+[data-shell-route="boosts"] > .section {
   background: #13131E !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   border-radius: 16px !important;
