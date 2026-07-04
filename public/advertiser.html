@@ -2930,6 +2930,30 @@
         .shell-topbar__brand-name .bb-console-suffix { font-size: 12px; font-weight: 600; color: #9DA3A6; }
         .shell-wrap[data-shell-sidebar="collapsed"] .shell-topbar__brand-name { width: 0; }
 
+        /* Payouts + Creatives shipped with a light card palette (white cards, dark
+           text). Force the console's standard dark cards + readable text so they
+           match every other tab (Andy 2026-07-04). */
+        [data-shell-route="payouts"] [style*="background:#fff"],
+        [data-shell-route="payouts"] [style*="background: #fff"],
+        [data-shell-route="payouts"] [style*="background:#F9FAFB"],
+        [data-shell-route="creatives"] [style*="background:#fff"],
+        [data-shell-route="creatives"] [style*="background: #fff"],
+        [data-shell-route="creatives"] [style*="background:#F9FAFB"] {
+          background: #13131E !important;
+          border-color: rgba(255,255,255,0.12) !important;
+        }
+        [data-shell-route="payouts"] [style*="color:#111827"],
+        [data-shell-route="payouts"] [style*="color: #111827"],
+        [data-shell-route="payouts"] [style*="color:#374151"],
+        [data-shell-route="creatives"] [style*="color:#111827"],
+        [data-shell-route="creatives"] [style*="color:#374151"],
+        [data-shell-route="creatives"] [style*="color:#4B5563"] {
+          color: #E7E9EA !important;
+        }
+        [data-shell-route="payouts"] .form-input {
+          background: #1A1A2E !important; color: #F0F0F8 !important; border-color: rgba(255,255,255,0.14) !important;
+        }
+
         /* Scoped to the two ported Earn routes ONLY — a global .section /
            .section-title rule would regress Campaigns/Creatives/Products and
            the already-shipped Billing/Boosts/Performance section titles. */
@@ -3446,28 +3470,27 @@
             <!-- 'Home' renamed to 'Performance' 2026-06-25 — the route slug
                  stays 'home' (preserves any saved bookmarks pointing at #/home)
                  but the label + icon reflect what the page now actually shows. -->
-            <span class="shell-nav-section-label">Overview</span>
+            <span class="shell-nav-section-label">Grow</span>
             <button class="shell-nav-item is-active" data-shell-section="home">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
               <span class="shell-nav-item__label">Home</span>
             </button>
-            <span class="shell-nav-section-label">Set up</span>
             <button class="shell-nav-item" data-shell-section="creatives">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>
               <span class="shell-nav-item__label">Creatives</span>
             </button>
+            <button class="shell-nav-item" data-shell-section="boosts">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg></span>
+              <span class="shell-nav-item__label">Boosts</span>
+            </button>
+            <span class="shell-nav-section-label">Earn</span>
             <button class="shell-nav-item" data-shell-section="integrations">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg></span>
               <span class="shell-nav-item__label">Install</span>
             </button>
-            <span class="shell-nav-section-label">Performance</span>
             <button class="shell-nav-item" data-shell-section="performance">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14"/></svg></span>
               <span class="shell-nav-item__label">Analytics</span>
-            </button>
-            <button class="shell-nav-item" data-shell-section="boosts">
-              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg></span>
-              <span class="shell-nav-item__label">Boosts</span>
             </button>
             <button class="shell-nav-item" data-shell-section="payouts">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
