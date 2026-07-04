@@ -11,7 +11,7 @@
     <script src="/auth-guard.js"></script>
     <script src="/bb-modal.js"></script>
 <script src="/dashboard-darkmode.js" defer></script>
-    <title>SuperBoost — Dashboard</title>
+    <title>Boost Boss — Dashboard</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=rocket-20260421">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3371,7 +3371,7 @@
 <text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>
 <path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>
 <path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg></div>
-                <div class="auth-logo-text">SuperBoost Ads <span style="font-size:11px;font-weight:500;color:#6B7280;font-style:italic;margin-left:4px;">Powered by <em style="color:#9D7AFF;font-style:italic;font-weight:600;">Benna</em></span></div>
+                <div class="auth-logo-text">Boost Boss <span style="font-size:11px;font-weight:500;color:#6B7280;font-style:italic;margin-left:4px;">Powered by <em style="color:#9D7AFF;font-style:italic;font-weight:600;">Benna</em></span></div>
                 <div class="auth-subtitle">Dashboard · Launch and manage campaigns</div>
             </div>
 
@@ -3420,7 +3420,7 @@
         <!-- ─── Sidebar ─────────────────────────────────────────── -->
         <aside class="shell-sidebar" id="shellSidebar" aria-label="Primary navigation">
           <div class="shell-sidebar__head">
-            <a href="/ads" class="shell-sidebar__logo" title="Back to SuperBoost Ads" data-t-title="chrome.back">
+            <a href="/ads" class="shell-sidebar__logo" title="Back to Boost Boss" data-t-title="chrome.back">
               <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/><line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/><path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/><path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/><circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/><line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/><text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text><path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/><path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/></svg>
             </a>
             <span class="shell-sidebar__product">
@@ -3500,7 +3500,7 @@
               </span>
               <span class="shell-nav-item__label">
                 <span class="shell-user-name" id="companyDisplayName" data-t="chrome.account">Account</span>
-                <span class="shell-user-role" style="display:block;font-size:10.5px;font-weight:400;" data-t="shell.role.advertiser">Advertiser</span>
+                <span class="shell-user-role" style="display:block;font-size:10.5px;font-weight:400;" data-t="shell.role.advertiser">Promote + Earn</span>
               </span>
               <span class="shell-account-caret" aria-hidden="true" style="margin-left:auto;">⌄</span>
             </button>
@@ -3516,9 +3516,9 @@
         <!-- ─── Top bar ─────────────────────────────────────────── -->
         <header class="shell-topbar" role="banner">
           <!-- Brand cell — full logo + name, no divider, no collapse btn -->
-          <a href="/ads" class="shell-topbar__brand" title="Back to SuperBoost Ads" data-t-title="chrome.back">
+          <a href="/ads" class="shell-topbar__brand" title="Back to Boost Boss" data-t-title="chrome.back">
             <img src="/design-system/assets/rocket-logo.svg" class="shell-topbar__brand-logo" alt="Boost Boss" width="34" height="34">
-            <span class="shell-topbar__brand-name">Super<span style="color:#FF2D78;">Boost Ads</span></span>
+            <span class="shell-topbar__brand-name">Boost <span style="color:#FF2D78;">Boss</span></span>
           </a>
 
           <!-- breadcrumb hidden — logo is the only brand in topbar -->
@@ -7872,7 +7872,7 @@ class MyApp : Application() {
             currentUser = null;
             currentUserData = null;
 
-            // Hand the user off to the SuperBoost Ads marketing page —
+            // Hand the user off to the Boost Boss marketing page —
             // the nav pill there will revert to "Sign in / Launch a
             // campaign" now that bb_adv_* is gone.
             window.location.href = '/ads';
@@ -7947,7 +7947,7 @@ class MyApp : Application() {
                 // show the route. Falls back to "Boost Boss" if the label
                 // hasn't translated yet.
                 try {
-                    document.title = (activeLabel ? activeLabel + ' · ' : '') + 'Boost Boss Ads';
+                    document.title = (activeLabel ? activeLabel + ' · ' : '') + 'Boost Boss';
                 } catch (_) {}
                 // Reset scroll to top on route change — content swaps
                 // in place, so any prior scroll position is meaningless
@@ -10787,7 +10787,7 @@ class MyApp : Application() {
             // English is the source-of-truth + fallback.
             const DASH_T = {
                 'en': {
-                    'chrome.back': 'Back to SuperBoost Ads · Powered by Benna', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Search actions',
+                    'chrome.back': 'Back to Boost Boss · Powered by Benna', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Search actions',
                     'chrome.account': 'Account', 'chrome.notif_tip': 'Notifications', 'chrome.notif_title': 'Notifications',
                     'chrome.notif_mark_all': 'Mark all read', 'chrome.notif_recent': 'Only showing last 7 days',
                     'chrome.settings_tip': 'Account Settings', 'chrome.logout': 'Logout', 'chrome.overview': 'Overview',
@@ -11147,7 +11147,7 @@ class MyApp : Application() {
                     'shell.nav.setup': 'Setup',
                     'shell.nav.settings': 'Settings',
                     'shell.role.publisher': 'Publisher',
-                    'shell.role.advertiser': 'Advertiser',
+                    'shell.role.advertiser': 'Promote + Earn',
                     'page.home.title': 'Overview',
                     'page.home.sub': 'Account performance and balance',
                     'page.campaigns.sub': 'Manage your active campaigns, creatives, and pacing',
@@ -11247,7 +11247,7 @@ class MyApp : Application() {
                     'newc.cat_select': 'Select category (optional)',
                 },
                 'zh': {
-                    'chrome.back': '返回 SuperBoost Ads · 由 Benna 驅動', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
+                    'chrome.back': '返回 Boost Boss · 由 Benna 驅動', 'chrome.dashboard': '面板', 'chrome.search_actions': '搜索操作',
                     'chrome.account': '账户', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
                     'chrome.notif_mark_all': '全部标为已读', 'chrome.notif_recent': '仅显示最近 7 天',
                     'chrome.settings_tip': '账户设置', 'chrome.logout': '退出登录', 'chrome.overview': '概览',
@@ -11695,7 +11695,7 @@ class MyApp : Application() {
                     'newc.cat_select': '选择分类（可选）',
                 },
                 'zh-TW': {
-                    'chrome.back': '返回 SuperBoost Ads · 由 Benna 驅動', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
+                    'chrome.back': '返回 Boost Boss · 由 Benna 驅動', 'chrome.dashboard': '儀表板', 'chrome.search_actions': '搜尋動作',
                     'chrome.account': '帳號', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
                     'chrome.notif_mark_all': '全部標為已讀', 'chrome.notif_recent': '僅顯示最近 7 天',
                     'chrome.settings_tip': '帳號設定', 'chrome.logout': '登出', 'chrome.overview': '總覽',
@@ -12143,7 +12143,7 @@ class MyApp : Application() {
                     'newc.cat_select': '選擇分類（選填）',
                 },
                 'ja': {
-                    'chrome.back': 'SuperBoost Ads（Benna エンジン搭載）に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
+                    'chrome.back': 'Boost Boss（Benna エンジン搭載）に戻る', 'chrome.dashboard': 'ダッシュボード', 'chrome.search_actions': 'アクション検索',
                     'chrome.account': 'アカウント', 'chrome.notif_tip': '通知', 'chrome.notif_title': '通知',
                     'chrome.notif_mark_all': 'すべて既読にする', 'chrome.notif_recent': '過去 7 日間のみ表示',
                     'chrome.settings_tip': 'アカウント設定', 'chrome.logout': 'ログアウト', 'chrome.overview': '概要',
@@ -12591,7 +12591,7 @@ class MyApp : Application() {
                     'newc.cat_select': 'カテゴリを選択（任意）',
                 },
                 'ko': {
-                    'chrome.back': 'SuperBoost Ads · Benna 엔진으로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
+                    'chrome.back': 'Boost Boss · Benna 엔진으로 돌아가기', 'chrome.dashboard': '대시보드', 'chrome.search_actions': '작업 검색',
                     'chrome.account': '계정', 'chrome.notif_tip': '알림', 'chrome.notif_title': '알림',
                     'chrome.notif_mark_all': '모두 읽음으로 표시', 'chrome.notif_recent': '최근 7일만 표시',
                     'chrome.settings_tip': '계정 설정', 'chrome.logout': '로그아웃', 'chrome.overview': '개요',
@@ -13039,7 +13039,7 @@ class MyApp : Application() {
                     'newc.cat_select': '카테고리 선택 (선택 사항)',
                 },
                 'vi': {
-                    'chrome.back': 'Quay lại SuperBoost Ads · Sử dụng Benna', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
+                    'chrome.back': 'Quay lại Boost Boss · Sử dụng Benna', 'chrome.dashboard': 'Dashboard', 'chrome.search_actions': 'Tìm hành động',
                     'chrome.account': 'Tài khoản', 'chrome.notif_tip': 'Thông báo', 'chrome.notif_title': 'Thông báo',
                     'chrome.notif_mark_all': 'Đánh dấu tất cả đã đọc', 'chrome.notif_recent': 'Chỉ hiển thị 7 ngày gần nhất',
                     'chrome.settings_tip': 'Cài đặt tài khoản', 'chrome.logout': 'Đăng xuất', 'chrome.overview': 'Tổng quan',
@@ -13387,7 +13387,7 @@ class MyApp : Application() {
                     'shell.nav.setup': 'Thiết lập',
                     'shell.nav.settings': 'Cài đặt',
                     'shell.role.publisher': 'Publisher',
-                    'shell.role.advertiser': 'Advertiser',
+                    'shell.role.advertiser': 'Promote + Earn',
                     'page.home.title': 'Tổng quan',
                     'page.home.sub': 'Hiệu suất và số dư tài khoản',
                     'page.campaigns.sub': 'Quản lý chiến dịch đang chạy, creative và tốc độ phân phối',
@@ -14514,7 +14514,7 @@ class MyApp : Application() {
             </div>
             <div style="padding: 12px 18px; border-top: 1px solid #F3F4F6; background: #FAFAFA;">
                 <div style="font-size: 11px; color: #9CA3AF; display: flex; justify-content: space-between;">
-                    <span>SuperBoost v1.0</span>
+                    <span>Boost Boss v1.0</span>
                     <!-- Was '● All systems operational' but we don't actually
                          poll the status feed from inside the dashboard — making
                          that claim statically was misleading. Now just a neutral
