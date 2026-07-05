@@ -567,7 +567,8 @@
 /* promote route retired 2026-06-25 — balance cards moved to Payouts. */
 .shell-wrap[data-shell-active-route="usage"]           [data-shell-route="usage"],
 .shell-wrap[data-shell-active-route="api"]             [data-shell-route="api"],
-.shell-wrap[data-shell-active-route="settings"]        [data-shell-route="settings"] {
+.shell-wrap[data-shell-active-route="settings"]        [data-shell-route="settings"],
+.shell-wrap[data-shell-active-route="notifications"]   [data-shell-route="notifications"] {
     display: block;
 }
 /* Onboarding banner / full-width announcements that should appear on

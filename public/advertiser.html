@@ -3489,6 +3489,11 @@
             <!-- 'Home' renamed to 'Performance' 2026-06-25 — the route slug
                  stays 'home' (preserves any saved bookmarks pointing at #/home)
                  but the label + icon reflect what the page now actually shows. -->
+            <button class="shell-nav-item" data-shell-section="notifications">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span>
+              <span class="shell-nav-item__label">Notifications</span>
+              <span id="notifNavBadge" style="display:none;margin-left:auto;min-width:18px;height:18px;padding:0 5px;background:#FF2D78;color:#fff;font-size:11px;font-weight:700;border-radius:99px;align-items:center;justify-content:center;"></span>
+            </button>
             <span class="shell-nav-section-label">Grow</span>
             <button class="shell-nav-item is-active" data-shell-section="home">
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
@@ -3589,7 +3594,7 @@
               </div>
               <div id="notifList" style="max-height: 320px; overflow-y: auto;"></div>
               <div style="padding: 10px 18px; border-top: 1px solid #2F3336; text-align: center;">
-                <span style="font-size: 12px; color: #71767B;" data-t="chrome.notif_recent">Only showing last 7 days</span>
+                <button id="notifViewAll" style="font-size:12.5px;color:#FF2D78;background:none;border:none;cursor:pointer;font-weight:600;font-family:inherit;">View all notifications</button>
               </div>
             </div>
 
@@ -5382,6 +5387,21 @@
                  builders + renderBody() wiring into #settingsPageWrap. VALID_ROUTES
                  + dashboard-shell.css allowlist both carry 'settings'.
                  ═════════════════════════════════════════════════════════════ -->
+            <!-- ROUTE: notifications — standalone feed, synced with the topbar
+                 bell (same _notifItems + mark-all + badge). -->
+            <div data-shell-route="notifications">
+              <div class="shell-page-head">
+                <div>
+                  <h1 class="shell-page-title">Notifications</h1>
+                  <div class="shell-page-sub">Updates about your Credits, payouts, and product</div>
+                </div>
+                <button type="button" onclick="if(typeof markAllNotifsRead==='function')markAllNotifsRead();" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:#E7E9EA;border-radius:9px;padding:8px 14px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;">Mark all read</button>
+              </div>
+              <div class="section" style="padding:0;overflow:hidden;max-width:760px;">
+                <div id="notifPageList"></div>
+              </div>
+            </div><!-- /[data-shell-route="notifications"] -->
+
             <div data-shell-route="settings">
               <div class="shell-page-head">
                 <div>
@@ -5391,7 +5411,6 @@
               </div>
               <div class="bb-subtabs" role="tablist">
                 <button class="bb-subtab is-active" data-setsec="account" onclick="switchSettingsSection(this)">Account</button>
-                <button class="bb-subtab" data-setsec="notifs" onclick="switchSettingsSection(this)">Notifications</button>
                 <button class="bb-subtab" data-setsec="language" onclick="switchSettingsSection(this)">Language</button>
                 <button class="bb-subtab" data-setsec="security" onclick="switchSettingsSection(this)">Security</button>
               </div>
@@ -8035,7 +8054,7 @@ class MyApp : Application() {
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api', 'integrations', 'placements', 'settings'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api', 'integrations', 'placements', 'settings', 'notifications'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -10746,44 +10765,49 @@ class MyApp : Application() {
         const notifBadge = document.getElementById('notifBadge');
         let notifOpen = false;
 
-        function generateNotifications() {
-            const now = Date.now();
-            const items = [
-                { icon: '🟢', title: 'Campaign approved', body: 'Your campaign has been reviewed and is now live.', time: now - 3600000 * 2, unread: true },
-                { icon: '📊', title: 'Weekly performance report', body: 'Your campaigns delivered 24.3K impressions this week, up 12% from last week.', time: now - 86400000, unread: true },
-                { icon: '💰', title: 'Deposit confirmed', body: '$500.00 has been added to your account balance.', time: now - 86400000 * 2, unread: false },
-                { icon: '⚡', title: 'Benna optimization complete', body: 'Learning phase finished for "Q2 Launch". CPA target is now active.', time: now - 86400000 * 3, unread: false },
-                { icon: '⚠️', title: 'Budget alert', body: 'Campaign "Brand Awareness" has used 90% of its total budget.', time: now - 86400000 * 4, unread: false },
-                { icon: '🎯', title: 'New targeting signal', body: 'Benna detected high-conversion intent signal: "deploy fastapi".', time: now - 86400000 * 5, unread: false },
-            ];
-            return items;
+        // Single source of truth — the bell dropdown AND the standalone
+        // #/notifications page render from _notifItems, and mark-all mutates
+        // it, so both surfaces + the badge always stay in sync. Product-native
+        // (host/earn/Credits), no advertiser/Benna language.
+        const _NOW = Date.now();
+        let _notifItems = [
+            { icon: '⚡', title: 'Credits earned', body: 'You earned 1,240 Credits hosting ads on your surface today.', time: _NOW - 3600000 * 2, unread: true },
+            { icon: '🎯', title: 'Your product got clicks', body: '38 people clicked through to your product from AI-native placements this week.', time: _NOW - 86400000, unread: true },
+            { icon: '💸', title: 'Payout sent', body: 'A payout was dispatched to your PayPal — it settles this Friday.', time: _NOW - 86400000 * 2, unread: false },
+            { icon: '🔌', title: 'SDK connected', body: 'Your Browser App door is verified and serving ads. Credits are now accruing.', time: _NOW - 86400000 * 3, unread: false },
+            { icon: '🚀', title: 'Live on all 37 placements', body: 'Your creatives now cover every AI-native placement across the network.', time: _NOW - 86400000 * 4, unread: false },
+        ];
+
+        function _notifUnread() { return _notifItems.filter(n => n.unread).length; }
+        function refreshNotifBadge() {
+            const c = _notifUnread();
+            if (notifBadge) notifBadge.style.display = c > 0 ? 'block' : 'none';
+            const navBadge = document.getElementById('notifNavBadge');
+            if (navBadge) { navBadge.textContent = c; navBadge.style.display = c > 0 ? 'inline-flex' : 'none'; }
         }
-
-        function renderNotifications() {
-            const items = generateNotifications();
-            const unreadCount = items.filter(n => n.unread).length;
-            notifBadge.style.display = unreadCount > 0 ? 'block' : 'none';
-
-            notifList.innerHTML = items.map(n => {
-                const ago = formatTimeAgo(n.time);
-                return `
-                    <div style="
-                        padding: 12px 18px; border-bottom: 1px solid #F9FAFB;
-                        cursor: pointer; transition: background 0.1s;
-                        ${n.unread ? 'background: #FFF5F8;' : ''}
-                    " onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='${n.unread ? '#FFF5F8' : '#fff'}'">
-                        <div style="display: flex; gap: 10px; align-items: flex-start;">
-                            <span style="font-size: 18px; flex-shrink: 0; margin-top: 1px;">${n.icon}</span>
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-size: 13px; font-weight: ${n.unread ? '700' : '600'}; color: #111; margin-bottom: 2px;">${n.title}</div>
-                                <div style="font-size: 12px; color: #6B7280; line-height: 1.4;">${n.body}</div>
-                                <div style="font-size: 11px; color: #9CA3AF; margin-top: 4px;">${ago}</div>
-                            </div>
-                            ${n.unread ? '<span style="width: 6px; height: 6px; background: #FF2D78; border-radius: 50%; flex-shrink: 0; margin-top: 6px;"></span>' : ''}
+        function _notifEsc(s) { return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+        // Render items into any target (dropdown or page). Dark, X-style.
+        function renderNotifInto(el) {
+            if (!el) return;
+            if (!_notifItems.length) { el.innerHTML = '<div style="padding:28px;text-align:center;color:#71767B;font-size:13px;">No notifications yet.</div>'; return; }
+            el.innerHTML = _notifItems.map(n => `
+                <div style="padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.06);${n.unread ? 'background:rgba(255,45,120,0.06);' : ''}">
+                    <div style="display:flex;gap:11px;align-items:flex-start;">
+                        <span style="font-size:18px;flex-shrink:0;margin-top:1px;">${n.icon}</span>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:13.5px;font-weight:${n.unread ? '700' : '600'};color:#F0F0F8;margin-bottom:2px;">${_notifEsc(n.title)}</div>
+                            <div style="font-size:12px;color:#9DA3AE;line-height:1.45;">${_notifEsc(n.body)}</div>
+                            <div style="font-size:11px;color:#71767B;margin-top:5px;">${formatTimeAgo(n.time)}</div>
                         </div>
+                        ${n.unread ? '<span style="width:7px;height:7px;background:#FF2D78;border-radius:50%;flex-shrink:0;margin-top:6px;"></span>' : ''}
                     </div>
-                `;
-            }).join('');
+                </div>`).join('');
+        }
+        function renderNotifications() { renderNotifInto(notifList); refreshNotifBadge(); }
+        function renderNotifPage() { renderNotifInto(document.getElementById('notifPageList')); refreshNotifBadge(); }
+        function markAllNotifsRead() {
+            _notifItems.forEach(n => n.unread = false);
+            renderNotifications(); renderNotifPage();
         }
 
         function formatTimeAgo(ts) {
@@ -10803,14 +10827,9 @@ class MyApp : Application() {
             if (notifOpen) renderNotifications();
         });
 
-        document.getElementById('notifMarkAll').addEventListener('click', () => {
-            notifBadge.style.display = 'none';
-            // Re-render with all read
-            notifList.querySelectorAll('div[style*="FFF5F8"]').forEach(el => {
-                el.style.background = '#fff';
-            });
-            notifList.querySelectorAll('span[style*="6px"]').forEach(el => el.remove());
-        });
+        document.getElementById('notifMarkAll').addEventListener('click', markAllNotifsRead);
+        var _notifViewAll = document.getElementById('notifViewAll');
+        if (_notifViewAll) _notifViewAll.addEventListener('click', () => { notifOpen = false; notifDropdown.style.display = 'none'; location.hash = '#/notifications'; });
 
         document.addEventListener('click', (e) => {
             if (notifOpen && !notifDropdown.contains(e.target) && e.target !== notifBtn) {
@@ -10819,8 +10838,10 @@ class MyApp : Application() {
             }
         });
 
-        // Show badge on load
-        setTimeout(() => { notifBadge.style.display = 'block'; renderNotifications(); }, 1000);
+        // Prime badge + both surfaces on load; re-render the page on navigation.
+        function _maybeLoadNotifPage() { if ((window.location.hash || '').indexOf('#/notifications') === 0) renderNotifPage(); }
+        window.addEventListener('hashchange', _maybeLoadNotifPage);
+        setTimeout(() => { refreshNotifBadge(); renderNotifications(); _maybeLoadNotifPage(); }, 300);
 
         // ───────────── ACCOUNT SETTINGS — sectioned ─────────────
         (function initAdvSettings() {
