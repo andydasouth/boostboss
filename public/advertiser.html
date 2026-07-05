@@ -2960,6 +2960,18 @@
         [data-shell-route="payouts"] .form-input {
           background: #1A1A2E !important; color: #F0F0F8 !important; border-color: rgba(255,255,255,0.14) !important;
         }
+        /* Settings page — the reused section builders emit light form HTML.
+           Auto-darken handles backgrounds; lighten the dark text + form fields. */
+        [data-shell-route="settings"] [style*="color:#111"],
+        [data-shell-route="settings"] [style*="color: #111"],
+        [data-shell-route="settings"] [style*="color:#374151"],
+        [data-shell-route="settings"] [style*="color:#4B5563"],
+        [data-shell-route="settings"] [style*="color:#065F46"] { color: #E7E9EA !important; }
+        [data-shell-route="settings"] input,
+        [data-shell-route="settings"] select {
+          background: #1A1A2E !important; color: #F0F0F8 !important; border-color: rgba(255,255,255,0.14) !important;
+        }
+        [data-shell-route="settings"] input[disabled] { color: #9DA3AE !important; }
 
         /* Scoped to the two ported Earn routes ONLY — a global .section /
            .section-title rule would regress Campaigns/Creatives/Products and
@@ -3508,6 +3520,10 @@
               <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></span>
               <span class="shell-nav-item__label">Developer</span>
             </button>
+            <button class="shell-nav-item" data-shell-section="settings">
+              <span class="shell-nav-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
+              <span class="shell-nav-item__label">Settings</span>
+            </button>
             <!-- No advertiser side. My Product (affiliate) + Reach (campaign builder)
                  retired from nav — the loop needs only Creatives + Install; everything
                  else is data. Kept in DOM (display:none) so routes + any JS referencing
@@ -3530,7 +3546,7 @@
               <span class="shell-account-caret" aria-hidden="true" style="margin-left:auto;">⌄</span>
             </button>
             <div class="shell-account-submenu" id="shellAccountSubmenu" role="group" hidden>
-              <button class="shell-nav-subitem" type="button" onclick="if(typeof openSettingsModal==='function'){openSettingsModal();}else if(typeof openSettingsTo==='function'){openSettingsTo('account');}"><span class="shell-nav-subitem__label" data-t="shell.nav.settings">Settings</span></button>
+              <button class="shell-nav-subitem" type="button" onclick="location.hash='#/settings';"><span class="shell-nav-subitem__label" data-t="shell.nav.settings">Settings</span></button>
               <button class="shell-nav-subitem shell-nav-subitem--logout" type="button" onclick="if(typeof handleLogout==='function')handleLogout();"><span class="shell-nav-subitem__label" data-t="shell.nav.logout">Logout</span></button>
             </div>
           </div>
@@ -5359,6 +5375,30 @@
               </div>
               </div><!-- /history subpanel -->
             </div><!-- /[data-shell-route="payouts"] -->
+
+            <!-- ═════════════════════════════════════════════════════════════
+                 ROUTE: settings — Account / Notifications / Language / Security.
+                 Replaces the old modal. renderSettingsPage() reuses the section
+                 builders + renderBody() wiring into #settingsPageWrap. VALID_ROUTES
+                 + dashboard-shell.css allowlist both carry 'settings'.
+                 ═════════════════════════════════════════════════════════════ -->
+            <div data-shell-route="settings">
+              <div class="shell-page-head">
+                <div>
+                  <h1 class="shell-page-title">Settings</h1>
+                  <div class="shell-page-sub">Your account, notifications, language, and security</div>
+                </div>
+              </div>
+              <div class="bb-subtabs" role="tablist">
+                <button class="bb-subtab is-active" data-setsec="account" onclick="switchSettingsSection(this)">Account</button>
+                <button class="bb-subtab" data-setsec="notifs" onclick="switchSettingsSection(this)">Notifications</button>
+                <button class="bb-subtab" data-setsec="language" onclick="switchSettingsSection(this)">Language</button>
+                <button class="bb-subtab" data-setsec="security" onclick="switchSettingsSection(this)">Security</button>
+              </div>
+              <div class="section" id="settingsPageWrap" style="max-width:660px;">
+                <div id="aSetBody"><div style="color:#7C7E8F;font-size:13px;padding:6px 0;">Loading…</div></div>
+              </div>
+            </div><!-- /[data-shell-route="settings"] -->
 
             <!-- ═══════ ROUTE: billing (advertiser — preview, mirrors publisher) ═══════
                  JS-free static layout; live ad-credits via an isolated script before </body>. -->
@@ -7995,7 +8035,7 @@ class MyApp : Application() {
             // 'performance' removed 2026-06-25 — merged into 'home' (renamed
             //   Performance in the sidebar). Old #/performance bookmarks now
             //   fall back to #/home via routeFromHash's invalid-route guard.
-            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api', 'integrations', 'placements'];
+            const VALID_ROUTES = ['home', 'pilot', 'campaigns', 'products', 'product-orders', 'creatives', 'performance', 'boosts', 'payouts', 'billing', 'api', 'integrations', 'placements', 'settings'];
             const items = wrap.querySelectorAll('.shell-nav-item');
 
             function routeFromHash() {
@@ -10954,7 +10994,7 @@ class MyApp : Application() {
                     'account.company_hint': 'Shown on your campaigns and billing receipts.',
                     'account.email': 'Contact email',
                     'account.email_hint': 'Used for campaign and billing notifications.',
-                    'account.id': 'Advertiser ID',
+                    'account.id': 'Account ID',
                     'billing.balance_label': 'Account balance',
                     'billing.balance_hint': 'Campaign spend is deducted from this balance as your ads run.',
                     'billing.add_funds': '+ Add funds',
@@ -13950,7 +13990,14 @@ class MyApp : Application() {
                 });
             }
 
+            // Settings can render into EITHER the legacy modal or the new
+            // #/settings page. _settingsRoot points renderBody() at whichever
+            // container is active; every settingsModal.querySelector below is
+            // shadowed to that root, so all wiring (save, notif, language,
+            // password, 2FA) is reused verbatim in both surfaces.
+            var _settingsRoot = null;
             function renderBody() {
+                const settingsModal = _settingsRoot || document.getElementById('settingsModal');
                 const body = settingsModal.querySelector('#aSetBody');
                 const map = {
                     account:  sectionAccount,
@@ -14206,6 +14253,7 @@ class MyApp : Application() {
             function openModal(initialSection) {
                 const valid = sectionList().some((s) => s.key === initialSection);
                 activeSection = valid ? initialSection : 'account';
+                _settingsRoot = null;   // legacy modal path renders into #settingsModal
                 renderModalChrome();   // builds innerHTML + wires close/cancel/save buttons
                 renderNav();
                 renderBody();
@@ -14214,6 +14262,34 @@ class MyApp : Application() {
             function closeModal() { settingsModal.style.display = 'none'; }
             // Exposed for cross-module callers — 'pixel' / 'billing' / etc.
             window.openSettingsModal = openModal;
+
+            // ── Settings PAGE (#/settings) — reuses the section builders +
+            // renderBody() wiring, rendered into #settingsPageWrap instead of
+            // the modal. Only Account / Notifications / Language / Security are
+            // exposed (Billing→Payouts, Conversion pixel, API keys→Developer
+            // are dropped for this product). ──
+            function renderSettingsPage() {
+                var wrap = document.getElementById('settingsPageWrap');
+                if (!wrap) return;
+                _settingsRoot = wrap;
+                renderBody();
+            }
+            window.switchSettingsSection = function (btn) {
+                var bar = btn.closest('.bb-subtabs');
+                if (bar) bar.querySelectorAll('.bb-subtab').forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+                activeSection = btn.getAttribute('data-setsec') || 'account';
+                renderSettingsPage();
+            };
+            function _maybeLoadSettings() {
+                if ((window.location.hash || '').indexOf('#/settings') !== 0) return;
+                activeSection = 'account';
+                var bar = document.querySelector('[data-shell-route="settings"] .bb-subtabs');
+                if (bar) bar.querySelectorAll('.bb-subtab').forEach(function (b) { b.classList.toggle('is-active', b.getAttribute('data-setsec') === 'account'); });
+                if (typeof loadMfaStatus === 'function') { try { loadMfaStatus(); } catch (_) {} }
+                renderSettingsPage();
+            }
+            window.addEventListener('hashchange', _maybeLoadSettings);
+            _maybeLoadSettings();
             function handleSave() {
                 const companyInput = settingsModal.querySelector('#aSetCompany');
                 const newCompany = companyInput ? companyInput.value.trim() : '';
