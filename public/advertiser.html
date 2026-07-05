@@ -7755,6 +7755,7 @@ class MyApp : Application() {
                 // user landed on one of those routes.
                 if (typeof _maybeLoadBoosts === 'function') _maybeLoadBoosts();
                 if (typeof _maybeLoadEarnPerf === 'function') _maybeLoadEarnPerf();
+                if (typeof loadNotifs === 'function') loadNotifs();
                 if (!window.__bennaInterval) {
                     window.__bennaInterval = setInterval(loadBennaEngine, 30000);
                 }
@@ -7954,6 +7955,7 @@ class MyApp : Application() {
                 // user landed on one of those routes.
                 if (typeof _maybeLoadBoosts === 'function') _maybeLoadBoosts();
                 if (typeof _maybeLoadEarnPerf === 'function') _maybeLoadEarnPerf();
+                if (typeof loadNotifs === 'function') loadNotifs();
                 if (!window.__bennaInterval) {
                     window.__bennaInterval = setInterval(loadBennaEngine, 30000);
                 }
@@ -10813,6 +10815,32 @@ class MyApp : Application() {
         function markAllNotifsRead() {
             _notifItems.forEach(n => n.unread = false);
             renderNotifications(); renderNotifPage();
+            // Persist to the backend (optimistic — UI already updated).
+            try {
+                const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                if (tok) fetch(`${API_BASE}/api/notifications?action=mark_read`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${tok}` },
+                    body: '{}',
+                }).catch(() => {});
+            } catch (_) {}
+        }
+        // Fetch the real notification feed for the signed-in account. Falls back
+        // to the seeded sample (already in _notifItems) if the call fails.
+        async function loadNotifs() {
+            try {
+                const tok = (typeof currentUser !== 'undefined' && currentUser && currentUser.token) || null;
+                if (!tok) return;
+                const r = await fetch(`${API_BASE}/api/notifications?action=list`, {
+                    headers: { 'Authorization': `Bearer ${tok}` },
+                });
+                if (!r.ok) return;
+                const j = await r.json();
+                if (Array.isArray(j.notifications) && j.notifications.length) {
+                    _notifItems = j.notifications;
+                    renderNotifications(); renderNotifPage();
+                }
+            } catch (_) { /* keep the fallback items */ }
         }
 
         function formatTimeAgo(ts) {
