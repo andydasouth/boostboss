@@ -11016,10 +11016,10 @@ class MyApp : Application() {
                     'pixel.test_link_label': 'Test end-to-end:',
                     'pixel.hint': "Snippet uses your advertiser ID. If conversions are not firing, open your conversion page and check that pixel.js loaded — the Network tab should show a POST to /api/track.",
                     'common.copy': 'Copy',  'common.show': 'Show',  'common.hide': 'Hide',  'common.saved': '✓ Saved',
-                    'account.company': 'Company name',
-                    'account.company_hint': 'Shown on your campaigns and billing receipts.',
+                    'account.company': 'Display name',
+                    'account.company_hint': 'Shown on your billing receipts and payout statements.',
                     'account.email': 'Contact email',
-                    'account.email_hint': 'Used for campaign and billing notifications.',
+                    'account.email_hint': 'Where we send account, earnings, and payout notifications.',
                     'account.id': 'Account ID',
                     'billing.balance_label': 'Account balance',
                     'billing.balance_hint': 'Campaign spend is deducted from this balance as your ads run.',
@@ -14277,15 +14277,17 @@ class MyApp : Application() {
             // and by any cross-module caller that wants to deep-link into a
             // Settings sub-tab without a hash route.
             function openModal(initialSection) {
-                const valid = sectionList().some((s) => s.key === initialSection);
-                activeSection = valid ? initialSection : 'account';
-                _settingsRoot = null;   // legacy modal path renders into #settingsModal
-                renderModalChrome();   // builds innerHTML + wires close/cancel/save buttons
-                renderNav();
-                renderBody();
-                settingsModal.style.display = 'flex';
+                // Settings modal RETIRED — Settings is a page (#/settings) now.
+                // Every legacy caller lands on the page instead of the overlay.
+                var sec = (['account', 'language', 'security'].indexOf(initialSection) >= 0) ? initialSection : 'account';
+                activeSection = sec;
+                if ((location.hash || '').indexOf('#/settings') !== 0) {
+                    location.hash = '#/settings';
+                } else if (typeof renderSettingsPage === 'function') {
+                    renderSettingsPage();
+                }
             }
-            function closeModal() { settingsModal.style.display = 'none'; }
+            function closeModal() { var m = document.getElementById('settingsModal'); if (m) m.style.display = 'none'; }
             // Exposed for cross-module callers — 'pixel' / 'billing' / etc.
             window.openSettingsModal = openModal;
 

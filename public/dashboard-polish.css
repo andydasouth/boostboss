@@ -135,6 +135,17 @@
 
 /* ── [2] TOP CHROME ─────────────────────────────────────────────────────── */
 
+/* Kill browser autofill's white/yellow field background across the console. */
+.shell-main input:-webkit-autofill,
+.shell-main input:-webkit-autofill:hover,
+.shell-main input:-webkit-autofill:focus,
+.shell-main input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #1E2024 inset !important;
+  -webkit-text-fill-color: #F0F0F8 !important;
+  caret-color: #F0F0F8;
+  transition: background-color 9999s ease-in-out 0s;
+}
+
 /* Dark top bar — X-style. Opaque so scrolled content never bleeds through. */
 .shell-topbar {
   background: #0D0D16;
@@ -905,7 +916,8 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 [data-shell-route="api"] > .section,
 [data-shell-route="billing"] > .section,
 [data-shell-route="performance"] > .section,
-[data-shell-route="boosts"] > .section {
+[data-shell-route="boosts"] > .section,
+[data-shell-route="settings"] > .section {
   background: #13131E !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   border-radius: 16px !important;
