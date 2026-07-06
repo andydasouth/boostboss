@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Boost Boss — The ad network built for AI surfaces</title>
+<title>Boost Boss — List your AI product. Get users. Free.</title>
+<meta name="description" content="Boost Boss is the free launch network for AI products. Host ads in your AI app to earn Credits — every impression mints 1 — then spend them putting your product in front of people already using AI tools. Or skip hosting and Boost with a subscription.">
 <link rel="icon" type="image/svg+xml" href="/design-system/assets/rocket-logo.svg">
 <link rel="stylesheet" href="/design-system/styles.css">
 <style>
@@ -138,13 +139,10 @@
   .btn-ghost-d { background: rgba(255,255,255,0.05); color: #fff; border-color: rgba(255,255,255,0.18); }
   .btn-ghost-d:hover { background: rgba(255,255,255,0.10); border-color: rgba(255,255,255,0.32); transform: translateY(-2px); }
 
-  /* ────────────── ROLE-SPLIT DROPDOWN (Sign in + Start free) ──────────────
-     AppLovin-style. Hover the trigger button OR tab+enter on it → small
-     white card drops down with 3 rows (Advertise / Monetize / Earn). One
-     entry per role so a publisher / advertiser self-selects
-     their door before committing to a wizard. Pure CSS hover-open; the
-     small JS toggle below adds aria-expanded + outside-click close for
-     keyboard + touch. */
+  /* ────────────── NAV DROPDOWN (legacy, currently unused) ──────────────
+     Kept for future nav menus. Pure CSS hover-open; the small JS toggle
+     below adds aria-expanded + outside-click close for keyboard + touch.
+     JS guards on .nav-dd existing, so this is inert with no markup. */
   .nav-dd { position: relative; display: inline-block; }
   .nav-dd .nav-dd-trigger {
     /* Trigger inherits .btn / .btn-ghost-d or .btn-primary visual.
@@ -586,7 +584,7 @@
   .camp-stats strong { color: #fff; font-weight: 700; font-family: var(--font-display); }
 
   /* ════════════════════════════════════════════════════════════
-     BENNA INTENT DECODER — the moat, made visible
+     INTENT DECODER — the moat, made visible
      ════════════════════════════════════════════════════════════ */
   .decoder-wrap { max-width: 860px; margin: 0 auto; }
   .decoder {
@@ -683,6 +681,85 @@
      HOW IT WORKS — 3 steps (dark glass)
      ════════════════════════════════════════════════════════════ */
   .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .steps.four { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 1180px) { .steps.four { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 640px)  { .steps.four { grid-template-columns: 1fr; } }
+  .step-link { display: flex; flex-direction: column; cursor: pointer; }
+  .step-link p { flex: 1; }
+  .step-go {
+    display: inline-block; margin-top: 16px;
+    font-size: 13.5px; font-weight: 700; color: var(--bb-cyan);
+    transition: transform var(--dur-fast) var(--ease-snappy);
+  }
+  .step-link:hover .step-go { transform: translateX(4px); }
+  .step-badge {
+    display: inline-block; margin-top: 12px;
+    padding: 6px 11px; border-radius: var(--r-pill);
+    font-size: 11.5px; font-weight: 700; line-height: 1.35;
+    background: rgba(255,230,0,0.12); border: 1px solid rgba(255,230,0,0.35);
+    color: var(--bb-yellow);
+  }
+
+  /* ════════════════════════════════════════════════════════════
+     PRICING — free loop vs Boost subscriptions
+     ════════════════════════════════════════════════════════════ */
+  .pricing-grid { display: grid; grid-template-columns: 1.05fr 2fr; gap: 22px; align-items: stretch; }
+  @media (max-width: 1080px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .price-free {
+    position: relative; display: flex; flex-direction: column;
+    padding: 34px 30px;
+    background: linear-gradient(160deg, rgba(0,255,224,0.08), rgba(15,15,26,0.7));
+    border: 1px solid rgba(0,255,224,0.30); border-radius: var(--r-xl);
+    box-shadow: 0 0 40px rgba(0,255,224,0.06) inset;
+  }
+  .price-free .pf-tag {
+    align-self: flex-start;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;
+    color: var(--bb-cyan); background: rgba(0,255,224,0.10);
+    border: 1px solid rgba(0,255,224,0.35);
+    padding: 5px 11px; border-radius: var(--r-pill); margin-bottom: 18px;
+  }
+  .price-free h3 { font-family: var(--font-display); font-size: 30px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .price-free .pf-sub { font-size: 14.5px; color: rgba(244,244,248,0.62); margin-bottom: 20px; }
+  .price-free ul { list-style: none; display: flex; flex-direction: column; gap: 11px; margin-bottom: 24px; }
+  .price-free li { display: flex; gap: 10px; align-items: flex-start; font-size: 14.5px; color: rgba(244,244,248,0.86); }
+  .price-free li .ck { flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%; background: var(--bb-cyan-link); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; margin-top: 1px; }
+  .price-free .pf-note { margin-top: auto; font-family: var(--font-mono); font-size: 12.5px; color: var(--bb-cyan); margin-bottom: 20px; }
+  .boost-tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  @media (max-width: 720px) { .boost-tiers { grid-template-columns: 1fr; } }
+  .tier {
+    position: relative; display: flex; flex-direction: column;
+    padding: 30px 24px;
+    background: linear-gradient(160deg, rgba(28,28,43,0.72), rgba(15,15,26,0.72));
+    border: 1px solid rgba(255,255,255,0.10); border-radius: var(--r-xl);
+    transition: transform var(--dur-base) var(--ease-out), border-color var(--dur-base), box-shadow var(--dur-base);
+  }
+  .tier:hover { transform: var(--hover-lift); border-color: rgba(255,255,255,0.24); box-shadow: var(--shadow-xl); }
+  .tier.max { border-color: rgba(255,45,120,0.5); box-shadow: 0 0 44px rgba(255,45,120,0.14); }
+  .tier .t-name { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: rgba(244,244,248,0.85); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .tier .t-price { font-family: var(--font-display); font-size: 40px; font-weight: 700; color: #fff; line-height: 1; margin-bottom: 4px; }
+  .tier .t-price small { font-size: 14px; font-weight: 600; color: rgba(244,244,248,0.5); }
+  .tier .t-bundle { font-size: 13.5px; color: rgba(244,244,248,0.66); margin-bottom: 18px; }
+  .tier .t-bundle b { color: var(--bb-cyan); }
+  .tier ul { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 22px; }
+  .tier li { display: flex; gap: 9px; align-items: flex-start; font-size: 13.5px; color: rgba(244,244,248,0.82); }
+  .tier li .ck { flex-shrink: 0; width: 18px; height: 18px; border-radius: 50%; background: var(--bb-pink); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; margin-top: 2px; }
+  .tier .t-cta { margin-top: auto; }
+  .tier-flag {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.8px;
+    background: var(--grad-pink); color: #fff;
+    padding: 5px 13px; border-radius: var(--r-pill);
+    box-shadow: 0 6px 18px rgba(255,45,120,0.4);
+  }
+  .t-priority {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; font-weight: 700; color: var(--bb-yellow);
+    background: rgba(255,230,0,0.10); border: 1px solid rgba(255,230,0,0.35);
+    padding: 6px 11px; border-radius: var(--r-pill); margin-bottom: 18px;
+  }
+  .pricing-foot { text-align: center; margin-top: 26px; font-size: 13px; color: rgba(244,244,248,0.5); }
   .step {
     position: relative; padding: 30px 26px;
     background: linear-gradient(160deg, rgba(28,28,43,0.6), rgba(15,15,26,0.6));
@@ -777,78 +854,14 @@
   <div class="nav-inner">
     <a class="brand" href="#"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
     <div class="nav-links">
-      <a href="/publish">Publishers</a>
-      <a href="/ads">SuperBoost Ads</a>
-      <a href="/exchange">BBX</a>
-      <a href="/benna">Benna</a>
-      
+      <a href="#how">How it works</a>
+      <a href="#bb-demo">Placements</a>
+      <a href="#pricing">Pricing</a>
+      <a href="/docs">Docs</a>
     </div>
     <div class="nav-ctas">
-
-      <!-- ── Sign in dropdown — 3 role-segmented entries ─────────────── -->
-      <div class="nav-dd" data-nav-dd="signin">
-        <button type="button" class="btn btn-ghost-d nav-dd-trigger"
-                aria-haspopup="menu" aria-expanded="false">Sign in</button>
-        <div class="nav-dd-menu" role="menu" aria-label="Sign in">
-          <div class="nav-dd-card">
-            <span class="nav-dd-title">Sign in to</span>
-
-            <a class="nav-dd-row" role="menuitem" href="/ads/signin">
-              <span class="nav-dd-icon icon-advertise" aria-hidden="true">
-                <!-- Boost Boss rocket -->
-                <img src="/design-system/assets/rocket-logo.svg" alt="" class="nav-dd-rocket">
-              </span>
-              <span>
-                <span class="nav-dd-label">Advertise</span>
-                <span class="nav-dd-sub">with SuperBoost Ads</span>
-              </span>
-            </a>
-
-            <a class="nav-dd-row" role="menuitem" href="/publish/signin">
-              <span class="nav-dd-icon icon-monetize" aria-hidden="true">
-                <!-- Lumi shining star — same ✦ glyph used in /publish lumi-mark wordmark -->
-                <span class="nav-dd-lumi">✦</span>
-              </span>
-              <span>
-                <span class="nav-dd-label">Monetize</span>
-                <span class="nav-dd-sub">with Lumi SDK</span>
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── Start free dropdown — same 3 roles, signup destinations ── -->
-      <div class="nav-dd" data-nav-dd="signup">
-        <button type="button" class="btn btn-primary nav-dd-trigger"
-                aria-haspopup="menu" aria-expanded="false">Start free</button>
-        <div class="nav-dd-menu" role="menu" aria-label="Create an account">
-          <div class="nav-dd-card">
-            <span class="nav-dd-title">Create an account</span>
-
-            <a class="nav-dd-row" role="menuitem" href="/ads/signup">
-              <span class="nav-dd-icon icon-advertise" aria-hidden="true">
-                <img src="/design-system/assets/rocket-logo.svg" alt="" class="nav-dd-rocket">
-              </span>
-              <span>
-                <span class="nav-dd-label">Advertise</span>
-                <span class="nav-dd-sub">promote your product</span>
-              </span>
-            </a>
-
-            <a class="nav-dd-row" role="menuitem" href="/publish/signup">
-              <span class="nav-dd-icon icon-monetize" aria-hidden="true">
-                <span class="nav-dd-lumi">✦</span>
-              </span>
-              <span>
-                <span class="nav-dd-label">Monetize</span>
-                <span class="nav-dd-sub">earn from your AI app</span>
-              </span>
-            </a>
-          </div>
-        </div>
-      </div>
-
+      <a class="btn btn-ghost-d" href="/signin">Sign in</a>
+      <a class="btn btn-primary" href="/signup">List your product</a>
     </div>
   </div>
 </nav>
@@ -860,20 +873,20 @@
   <div class="hero-grid">
     <!-- LEFT -->
     <div class="hero-copy">
-      <div class="badge"><span class="dot"></span>Now live on the Model Context Protocol</div>
+      <div class="badge"><span class="dot"></span>The launch network for AI products</div>
       <h1>
-        <span class="reveal-line"><span>The ad network</span></span>
-        <span class="reveal-line"><span>built for <em style="font-style:normal" class="grad">AI surfaces</em>.</span></span>
+        <span class="reveal-line"><span>List your AI product.</span></span>
+        <span class="reveal-line"><span>Get <em style="font-style:normal" class="grad">users</em>. Free.</span></span>
       </h1>
-      <p class="sub">Boost Boss helps AI developers monetize their apps and advertisers reach AI-native users — one intent-native API, zero ops.</p>
+      <p class="sub">Host ads in your AI app to earn Credits — every impression mints 1 — then spend them putting your product in front of people already using AI tools. Or skip hosting and Boost with a subscription.</p>
       <div class="moat">
-        <span class="strike">other networks see cookies</span>
+        <span class="strike">pay to acquire users</span>
         <span class="arrow">→</span>
-        <span class="live">Boost Boss sees <b>intent</b></span>
+        <span class="live">host ads · mint <b>Credits</b> · get users</span>
       </div>
       <div class="hero-ctas">
-        <a class="btn btn-primary btn-lg" href="#">Start monetizing →</a>
-        <a class="btn btn-ghost-d btn-lg" href="#">Boost a product</a>
+        <a class="btn btn-primary btn-lg" href="/signup">List your product — free</a>
+        <a class="btn btn-ghost-d btn-lg" href="#bb-demo">See the placements ↓</a>
       </div>
       <div class="trusted">
         <p>Built for AI apps running on</p>
@@ -891,28 +904,28 @@
       </svg>
 
       <div class="float gcard pub card-pub" data-depth="22">
-        <div class="gc-label pub"><span class="d"></span>Publishers</div>
-        <div class="gc-title">Earning from your AI app</div>
-        <div class="gc-row"><span class="k">Today</span><span class="v" data-count="2483" data-pre="$">$0<span class="up">▲ 8%</span></span></div>
-        <div class="gc-row"><span class="k">eCPM</span><span class="v" data-count="4.21" data-dec="2" data-pre="$">$0<span class="up">▲ 12%</span></span></div>
+        <div class="gc-label pub"><span class="d"></span>You host</div>
+        <div class="gc-title">Credits minted by your app</div>
+        <div class="gc-row"><span class="k">Impressions today</span><span class="v" data-count="2483">0<span class="up">▲ 8%</span></span></div>
+        <div class="gc-row"><span class="k">Credits minted</span><span class="v" data-count="2483">0<span class="up">▲ 8%</span></span></div>
         <div class="gc-chart"><span style="height:32%"></span><span style="height:46%"></span><span style="height:40%"></span><span style="height:60%"></span><span style="height:54%"></span><span style="height:74%"></span><span style="height:68%"></span><span style="height:88%"></span></div>
       </div>
 
       <div class="float core" data-depth="10">
         <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
         <div class="disc"><img src="/design-system/assets/rocket-logo.svg" alt=""></div>
-        <div class="core-tag">Boost Boss<small>Benna · 5ms</small></div>
+        <div class="core-tag">Boost Boss<small>1 impression = 1 Credit</small></div>
       </div>
 
       <div class="float gcard adv card-adv" data-depth="22">
-        <div class="gc-label adv"><span class="d"></span>Advertisers</div>
-        <div class="gc-title">Reaching AI-native users</div>
+        <div class="gc-label adv"><span class="d"></span>You get</div>
+        <div class="gc-title">Your product, in front of users</div>
         <div class="gc-row"><span class="k">CTR</span><span class="v" data-count="6.2" data-dec="1" data-suf="%">0%<span class="up">▲ 3.8×</span></span></div>
-        <div class="gc-row"><span class="k">eCPA</span><span class="v" data-count="1.93" data-dec="2" data-pre="$">$0<span class="dn">▼ 11%</span></span></div>
+        <div class="gc-row"><span class="k">New signups</span><span class="v" data-count="312">0<span class="up">▲ 24%</span></span></div>
         <div class="gc-chart"><span style="height:36%"></span><span style="height:50%"></span><span style="height:62%"></span><span style="height:55%"></span><span style="height:78%"></span><span style="height:70%"></span><span style="height:86%"></span><span style="height:92%"></span></div>
       </div>
 
-      <div class="float micro m1" data-depth="34"><span class="swatch" style="background:var(--bb-cyan)"></span>bid won · $4.21</div>
+      <div class="float micro m1" data-depth="34"><span class="swatch" style="background:var(--bb-cyan)"></span>+1 Credit minted</div>
       <div class="float micro m2" data-depth="40"><span class="swatch" style="background:var(--bb-pink)"></span>intent matched</div>
     </div>
   </div>
@@ -933,85 +946,59 @@
 
 <div class="divider"></div>
 
-<!-- FEATURE 1 — PUBLISHERS -->
-<section class="section">
+<!-- HOW IT WORKS — THE FUNNEL -->
+<section class="section" id="how">
   <div class="wrap">
-    <div class="feature-grid">
-      <div class="ftext" data-reveal="left">
-        <span class="eyebrow pink">For publishers · Lumi SDK</span>
-        <h2>Monetize your AI app in one line of code.</h2>
-        <p class="lead">Drop in the Lumi SDK and turn free users into revenue without ruining UX. Native, contextual placements that fit inside AI chats, agents, and assistants — no banners, no surveillance.</p>
-        <ul class="blist">
-          <li><span class="ck">✓</span><span><strong>Native ad formats</strong> — built for conversations, not billboards.</span></li>
-          <li><span class="ck">✓</span><span><strong>Real-time credits</strong> — track impressions, clicks, and credits earned live.</span></li>
-          <li><span class="ck">✓</span><span><strong>Full creative control</strong> — decide what, when, and where ads appear.</span></li>
-        </ul>
-        <a class="btn btn-primary btn-lg" href="#">Integrate the SDK →</a>
-      </div>
-      <div class="vis-card" data-reveal="right" data-parallax data-speed="0.05" style="--reveal-delay:.1s">
-<pre class="code-block"><span class="c">// Add Boost Boss in one line</span>
-<span class="k">import</span> { BoostBoss } <span class="k">from</span> <span class="s">'@boostbossai/lumi-sdk'</span>;
-
-<span class="k">const</span> bb = <span class="f">new</span> <span class="f">BoostBoss</span>({
-  apiKey: <span class="s">'bb_sk_live_***'</span>,
-  format: <span class="s">'native'</span>
-});
-
-<span class="k">const</span> ad = <span class="k">await</span> bb.<span class="f">fetch</span>({
-  context: userMessage,
-  audience: <span class="s">'ai-native'</span>
-});
-
-<span class="f">render</span>(ad); <span class="c">// 💰</span></pre>
-      </div>
+    <div class="section-head" data-reveal>
+      <span class="eyebrow pink">How it works</span>
+      <h2>One loop. <span class="grad">Zero invoices.</span></h2>
+      <p>Impressions you host mint Credits. Credits put your product in front of users. No cash payouts, no ad budget — just the loop.</p>
+    </div>
+    <div class="steps four">
+      <a class="step step-link" href="/signup" data-reveal>
+        <div class="step-num">1</div>
+        <div class="chip-ico chip-pink">🚀</div>
+        <h3>List your product</h3>
+        <p>Sign up, upload your creatives, and tell us what you built. Your product joins the network in minutes.</p>
+        <span class="step-go">Get started →</span>
+      </a>
+      <a class="step step-link" href="/signup" data-reveal style="--reveal-delay:.08s">
+        <div class="step-num">2</div>
+        <div class="chip-ico chip-cyan">⚡</div>
+        <h3>Install the SDK</h3>
+        <p>Host ads on your surface. Every impression you serve mints 1 Credit, and Credits auto-fund your promotion.</p>
+        <span class="step-go">Start earning →</span>
+      </a>
+      <a class="step step-link" href="/signup" data-reveal style="--reveal-delay:.16s">
+        <div class="step-num">3</div>
+        <div class="chip-ico chip-yellow">💳</div>
+        <h3>Or just Boost</h3>
+        <p>No SDK? Subscribe instead — $15, $39, or $99 per month token packages.</p>
+        <span class="step-badge">Priority lane on $99 — your boosts jump the queue</span>
+        <span class="step-go">See Boost plans →</span>
+      </a>
+      <a class="step step-link" href="/signup" data-reveal style="--reveal-delay:.24s">
+        <div class="step-num">4</div>
+        <div class="chip-ico chip-pink">🔁</div>
+        <h3>Watch it compound</h3>
+        <p>Impressions done <strong>by</strong> you earn Credits. Impressions done <strong>for</strong> you get you users. The more you host, the more you grow.</p>
+        <span class="step-go">Join the loop →</span>
+      </a>
     </div>
   </div>
 </section>
 
-<!-- FEATURE 2 — ADVERTISERS -->
-<section class="section">
-  <div class="wrap">
-    <div class="feature-grid reverse">
-      <div class="ftext" data-reveal="right">
-        <span class="eyebrow cyan">For advertisers · SuperBoost</span>
-        <h2>Reach the people building the future with AI.</h2>
-        <p class="lead">Your ads run inside AI applications — where the highest-intent, highest-value audience spends its time. Upload your product, pick a goal, and Benna delivers it everywhere.</p>
-        <ul class="blist">
-          <li><span class="ck cyan">✓</span><span><strong>Intent-aware allocation</strong> — Benna sees what users are trying to do, not what they searched.</span></li>
-          <li><span class="ck cyan">✓</span><span><strong>Performance pricing</strong> — CPM, CPC, CPA. Pay for what works.</span></li>
-          <li><span class="ck cyan">✓</span><span><strong>Transparent analytics</strong> — every impression, attribution, and ROAS.</span></li>
-        </ul>
-        <a class="btn btn-primary btn-lg" href="#">Activate your boost →</a>
-      </div>
-      <div class="vis-card" data-reveal="left" data-parallax data-speed="0.05" style="--reveal-delay:.1s">
-        <div class="camp">
-          <div class="camp-row"><span class="camp-title">Q2 Dev Tool Push</span><span class="pill pill-active">Active</span></div>
-          <div class="camp-stats"><span><strong>842K</strong> impressions</span><span><strong>6.2%</strong> CTR</span><span><strong>$1.93</strong> eCPA</span></div>
-        </div>
-        <div class="camp">
-          <div class="camp-row"><span class="camp-title">Agent Launch — NA</span><span class="pill pill-active">Active</span></div>
-          <div class="camp-stats"><span><strong>1.2M</strong> impressions</span><span><strong>4.8%</strong> CTR</span><span><strong>3.1×</strong> ROAS</span></div>
-        </div>
-        <div class="camp">
-          <div class="camp-row"><span class="camp-title">Retarget — Power Users</span><span class="pill pill-paused">Paused</span></div>
-          <div class="camp-stats"><span><strong>318K</strong> impressions</span><span><strong>7.4%</strong> CTR</span><span><strong>$0.88</strong> eCPC</span></div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- BENNA INTENT DECODER (pinned, scroll-scrubbed) -->
+<!-- INTENT DECODER (pinned, scroll-scrubbed) -->
 <section class="decoder-stage" id="decStage">
   <div class="decoder-pin">
     <div class="wrap">
       <div class="section-head">
-        <span class="eyebrow yellow">The intent moat · Benna AI</span>
+        <span class="eyebrow yellow">Why your Credits convert</span>
         <h2>Other ad networks see <s>cookies</s>.<br>Boost Boss sees <span class="ig">intent</span>.</h2>
       </div>
       <div class="decoder-wrap">
         <div class="decoder" id="decoder">
-          <div class="dec-head"><span class="dot"></span><span class="t">Benna · live intent decode</span></div>
+          <div class="dec-head"><span class="dot"></span><span class="t">live intent decode</span></div>
           <div class="dec-msg">“help me deploy a Next.js app to production”<span class="cursor">│</span></div>
           <div class="dec-arrow"><span>decoding signals — scroll to watch</span><span class="line"></span></div>
           <div class="dec-chips">
@@ -1023,13 +1010,13 @@
             <span class="chip pink"><span class="key">region</span><span class="val">US-CA</span></span>
           </div>
           <div class="dec-match">
-            <span class="ml">Highest-intent match · first-price auction won</span>
+            <span class="ml">Highest-intent match · this is where your product appears</span>
             <span class="mr">
               <span class="badge-app"><span class="ico">▲</span>Vercel Pro</span>
               <span class="score">score 0.94</span>
             </span>
           </div>
-          <div class="dec-vs">A cookie network would only know <s>“last site visited”</s>. Benna knew the user was shipping to prod.</div>
+          <div class="dec-vs">A cookie network would only know <s>“last site visited”</s>. Boost Boss knew the user was shipping to prod — that's why every Credit you spend lands at the moment of intent.</div>
           <div class="dec-progress"><span id="decBar"></span></div>
         </div>
       </div>
@@ -1042,13 +1029,13 @@
 <section class="hero">
   <div class="wrap">
     <div class="eyebrow"><span class="dot"></span>37 live placements · 4 surfaces</div>
-    <h1>Every ad format.<br><span class="grad">In context.</span></h1>
-    <p class="sub">See exactly how Boost Boss ads render inside AI tools, browser extensions, desktop apps, and mobile apps — before you publish a single line of code.</p>
+    <h1>See exactly where<br><span class="grad">your product appears.</span></h1>
+    <p class="sub">Try every placement on every surface — inside AI web apps, browser extensions, desktop apps, and mobile apps. These are the same slots your Credits buy, and the same slots you host to mint them.</p>
     <div class="hero-stats">
-      <div class="hero-stat"><div class="n">37</div><div class="l">total placements</div></div>
+      <div class="hero-stat"><div class="n">37</div><div class="l">placements</div></div>
       <div class="hero-stat"><div class="n">4</div><div class="l">AI-native surfaces</div></div>
-      <div class="hero-stat"><div class="n" style="color:#00FFE0">98%</div><div class="l">peak intent match</div></div>
-      <div class="hero-stat"><div class="n">2–4×</div><div class="l">vs. display-ad CTR</div></div>
+      <div class="hero-stat"><div class="n" style="color:#00FFE0">1</div><div class="l">Credit per hosted impression</div></div>
+      <div class="hero-stat"><div class="n">10 min</div><div class="l">to live</div></div>
     </div>
   </div>
 </section>
@@ -1133,7 +1120,7 @@
           <div class="pl-tags">
             <span class="pl-tag">sidebar surface</span>
             <span class="pl-tag fmt">native</span>
-            <span class="pl-tag">floor $1.50</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1170,7 +1157,7 @@
           <div class="pl-tags">
             <span class="pl-tag">chat surface</span>
             <span class="pl-tag fmt">text_card</span>
-            <span class="pl-tag">floor $1.00</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1202,7 +1189,7 @@
           <div class="pl-tags">
             <span class="pl-tag">chat surface</span>
             <span class="pl-tag fmt">text_card</span>
-            <span class="pl-tag">floor $0.80</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1237,7 +1224,7 @@
           <div class="pl-tags">
             <span class="pl-tag">chat surface</span>
             <span class="pl-tag fmt">native</span>
-            <span class="pl-tag">floor $1.20</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1275,7 +1262,7 @@
           <div class="pl-tags">
             <span class="pl-tag">loading_screen surface</span>
             <span class="pl-tag fmt">native</span>
-            <span class="pl-tag">floor $1.40</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1299,7 +1286,7 @@
           <div class="pl-tags">
             <span class="pl-tag">loading_screen surface</span>
             <span class="pl-tag fmt">native</span>
-            <span class="pl-tag">floor $1.30</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1331,7 +1318,7 @@
           <div class="pl-tags">
             <span class="pl-tag">web surface</span>
             <span class="pl-tag fmt">native</span>
-            <span class="pl-tag">floor $1.10</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1369,7 +1356,7 @@
           <div class="pl-tags">
             <span class="pl-tag">tool_response surface</span>
             <span class="pl-tag fmt">image</span>
-            <span class="pl-tag">floor $2.00</span>
+            
           </div>
         </div>
         <div class="pl-preview">
@@ -1414,7 +1401,7 @@
             <div><div class="pl-name">Popup Card</div><div class="pl-kind">kind: popup_card</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.50</span></div>
+          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1450,7 +1437,7 @@
             <div><div class="pl-name">Side Panel Slot</div><div class="pl-kind">kind: side_panel</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$6.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.60</span></div>
+          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1482,7 +1469,7 @@
             <div><div class="pl-name">New-Tab Takeover</div><div class="pl-kind">kind: new_tab</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">web surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $2.50</span></div>
+          <div class="pl-tags"><span class="pl-tag">web surface</span><span class="pl-tag fmt">image</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1511,7 +1498,7 @@
             <div><div class="pl-name">Install Onboarding</div><div class="pl-kind">kind: install_onboarding</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$8.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">web surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.30 · once</span></div>
+          <div class="pl-tags"><span class="pl-tag">web surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">fires once</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1533,7 +1520,7 @@
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: citation</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span><span class="pl-tag">floor $1.00</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1556,7 +1543,7 @@
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: chip</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span><span class="pl-tag">floor $0.80</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1583,7 +1570,7 @@
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: card</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$6.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.20</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1614,7 +1601,7 @@
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.30</span></div>
+          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1663,7 +1650,7 @@
             <div><div class="pl-name">Corner Unit</div><div class="pl-kind">kind: corner</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.50</span></div>
+          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1693,7 +1680,7 @@
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: citation</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span><span class="pl-tag">floor $1.00</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1716,7 +1703,7 @@
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: chip</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span><span class="pl-tag">floor $0.80</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1744,7 +1731,7 @@
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: card</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$6.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.20</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="chat-win">
@@ -1775,7 +1762,7 @@
             <div><div class="pl-name">Empty-State Hero</div><div class="pl-kind">kind: hero</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$8.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.40</span></div>
+          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="win-app">
@@ -1800,7 +1787,7 @@
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.30</span></div>
+          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="win-app">
@@ -1827,7 +1814,7 @@
             <div><div class="pl-name">Settings Page Slot</div><div class="pl-kind">kind: settings</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">web surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.10</span></div>
+          <div class="pl-tags"><span class="pl-tag">web surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="win-app">
@@ -1861,7 +1848,7 @@
             <div><div class="pl-name">Page Interstitial</div><div class="pl-kind">kind: interstitial</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$18.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $2.00</span></div>
+          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">image</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1889,7 +1876,7 @@
             <div><div class="pl-name">Window Banner <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,255,224,.12);color:#00FFE0;vertical-align:middle">Desktop only</span></div><div class="pl-kind">kind: window_banner</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">status_line surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $1.40</span></div>
+          <div class="pl-tags"><span class="pl-tag">status_line surface</span><span class="pl-tag fmt">image</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1916,7 +1903,7 @@
             <div><div class="pl-name">Sidebar Slot <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,255,224,.12);color:#00FFE0;vertical-align:middle">Desktop only</span></div><div class="pl-kind">kind: sidebar</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.60</span></div>
+          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -1950,7 +1937,7 @@
             <div><div class="pl-name">System Notification <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(0,255,224,.12);color:#00FFE0;vertical-align:middle">Desktop only</span></div><div class="pl-kind">kind: system_notification</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$5.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $2.20</span></div>
+          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">image</span></div>
         </div>
         <div class="pl-preview">
           <div style="display:flex;flex-direction:column;gap:8px">
@@ -1992,7 +1979,7 @@
             <div><div class="pl-name">Bottom Banner</div><div class="pl-kind">kind: bottom_banner</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$6.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $1.50</span><span class="pl-tag" style="background:rgba(0,255,224,.08);color:#00FFE0">auto-mount</span></div>
+          <div class="pl-tags"><span class="pl-tag">sidebar surface</span><span class="pl-tag fmt">image</span><span class="pl-tag" style="background:rgba(0,255,224,.08);color:#00FFE0">auto-mount</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -2022,7 +2009,7 @@
             <div><div class="pl-name">Splash Sponsor</div><div class="pl-kind">kind: splash_sponsor</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$15.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $2.00</span><span class="pl-tag" style="background:rgba(0,255,224,.08);color:#00FFE0">auto-mount</span></div>
+          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span><span class="pl-tag" style="background:rgba(0,255,224,.08);color:#00FFE0">auto-mount</span></div>
         </div>
         <div class="pl-preview">
           <div class="mobile-frame">
@@ -2046,7 +2033,7 @@
             <div><div class="pl-name">Inline Native Banner</div><div class="pl-kind">kind: inline_native_banner</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $1.20</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">image</span></div>
         </div>
         <div class="pl-preview">
           <div class="mobile-frame">
@@ -2072,7 +2059,7 @@
             <div><div class="pl-name">Inline Sponsored Card</div><div class="pl-kind">kind: inline_sponsored_card</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$6.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.30</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="mobile-frame">
@@ -2100,7 +2087,7 @@
             <div><div class="pl-name">Sponsored Citation</div><div class="pl-kind">kind: sponsored_citation</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span><span class="pl-tag">floor $1.00</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span></div>
         </div>
         <div class="pl-preview">
           <div class="mobile-frame">
@@ -2123,7 +2110,7 @@
             <div><div class="pl-name">Suggested Chip</div><div class="pl-kind">kind: suggested_chip</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$4.50</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span><span class="pl-tag">floor $0.80</span></div>
+          <div class="pl-tags"><span class="pl-tag">chat surface</span><span class="pl-tag fmt">text_card</span></div>
         </div>
         <div class="pl-preview">
           <div class="mobile-frame">
@@ -2150,7 +2137,7 @@
             <div><div class="pl-name">Loading-State Ad</div><div class="pl-kind">kind: loading_state_ad</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$7.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span><span class="pl-tag">floor $1.30</span></div>
+          <div class="pl-tags"><span class="pl-tag">loading_screen surface</span><span class="pl-tag fmt">native</span></div>
         </div>
         <div class="pl-preview">
           <div class="mobile-frame">
@@ -2177,7 +2164,7 @@
             <div><div class="pl-name">Interstitial</div><div class="pl-kind">kind: interstitial</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$18.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">image</span><span class="pl-tag">floor $2.50</span></div>
+          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">image</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -2202,10 +2189,10 @@
       <div class="pl-card" data-scene="rewarded-mob" style="border-color:rgba(255,230,0,.18)">
         <div class="pl-header">
           <div class="pl-header-top">
-            <div><div class="pl-name">Rewarded Video <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,230,0,.1);color:#FFE600;vertical-align:middle">~$35 RPM</span></div><div class="pl-kind">kind: rewarded_video</div></div>
+            <div><div class="pl-name">Rewarded Video <span style="font-size:10px;padding:2px 6px;border-radius:4px;background:rgba(255,230,0,.1);color:#FFE600;vertical-align:middle">top RPM</span></div><div class="pl-kind">kind: rewarded_video</div></div>
             <div class="pl-rpm"><div class="rpm-val" style="color:#FFE600">~$35.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">video</span><span class="pl-tag">floor $8.00</span></div>
+          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">video</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -2232,7 +2219,7 @@
             <div><div class="pl-name">Pre-Roll Video</div><div class="pl-kind">kind: pre_roll_video</div></div>
             <div class="pl-rpm"><div class="rpm-val">~$11.00</div><div class="rpm-lbl">RPM</div></div>
           </div>
-          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">video</span><span class="pl-tag">floor $4.50</span></div>
+          <div class="pl-tags"><span class="pl-tag">tool_response surface</span><span class="pl-tag fmt">video</span></div>
         </div>
         <div class="pl-preview">
           <div class="ad-badge">Sponsored · via Boost Boss</div>
@@ -2260,15 +2247,83 @@
 
 <div class="divider"></div>
 
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section-head" data-reveal>
+      <span class="eyebrow cyan">Pricing</span>
+      <h2>Free is the whole point.<br><span class="grad">Boost if you're in a hurry.</span></h2>
+      <p>Host ads and the loop pays for itself. Prefer not to host? Pick a Boost plan — cash- and Credit-funded promotion compete equally in the same auction.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <!-- FREE — THE LOOP -->
+      <div class="price-free" data-reveal>
+        <span class="pf-tag">The loop</span>
+        <h3>Free</h3>
+        <div class="pf-sub">Everything you need to launch and grow — funded by hosting, not by your wallet.</div>
+        <ul>
+          <li><span class="ck">✓</span><span>List your product on the network</span></li>
+          <li><span class="ck">✓</span><span>Install the Lumi SDK on your surface</span></li>
+          <li><span class="ck">✓</span><span>Earn <strong>1 Credit per hosted impression</strong></span></li>
+          <li><span class="ck">✓</span><span>Spend Credits promoting across all 37 placements</span></li>
+        </ul>
+        <div class="pf-note">Most devs never pay.</div>
+        <a class="btn btn-primary btn-lg" href="/signup">List your product — free</a>
+      </div>
+
+      <!-- BOOST TIERS -->
+      <div class="boost-tiers">
+        <div class="tier" data-reveal>
+          <div class="t-name">Starter</div>
+          <div class="t-price">$15<small>/mo</small></div>
+          <div class="t-bundle"><b>20k tokens</b> / month · launch pricing</div>
+          <ul>
+            <li><span class="ck">✓</span><span>Token bundle included every month</span></li>
+            <li><span class="ck">✓</span><span>No SDK install required</span></li>
+            <li><span class="ck">✓</span><span>Same auction as Credit-funded ads</span></li>
+          </ul>
+          <a class="btn btn-ghost btn-lg t-cta" href="/signup">Start with Starter</a>
+        </div>
+        <div class="tier" data-reveal style="--reveal-delay:.08s">
+          <div class="t-name">Growth</div>
+          <div class="t-price">$39<small>/mo</small></div>
+          <div class="t-bundle"><b>60k tokens</b> / month · launch pricing</div>
+          <ul>
+            <li><span class="ck">✓</span><span>3× the Starter bundle</span></li>
+            <li><span class="ck">✓</span><span>No SDK install required</span></li>
+            <li><span class="ck">✓</span><span>Same auction as Credit-funded ads</span></li>
+          </ul>
+          <a class="btn btn-ghost btn-lg t-cta" href="/signup">Start with Growth</a>
+        </div>
+        <div class="tier max" data-reveal style="--reveal-delay:.16s">
+          <span class="tier-flag">Priority boosting</span>
+          <div class="t-name">Max</div>
+          <div class="t-price">$99<small>/mo</small></div>
+          <div class="t-bundle"><b>200k tokens</b> / month · launch pricing</div>
+          <span class="t-priority">⚡ Priority lane — your boosts jump the queue</span>
+          <ul>
+            <li><span class="ck">✓</span><span>10× the Starter bundle</span></li>
+            <li><span class="ck">✓</span><span>Priority placement in the auction line</span></li>
+            <li><span class="ck">✓</span><span>No SDK install required</span></li>
+          </ul>
+          <a class="btn btn-primary btn-lg t-cta" href="/signup">Start with Max</a>
+        </div>
+      </div>
+    </div>
+    <p class="pricing-foot">Subscriptions are handled by Boost Boss via PayPal. Credits are promotional units — they're never paid out as cash.</p>
+  </div>
+</section>
+
 <!-- CTA SECTION -->
 
 <section class="cta-section">
   <div class="wrap">
     <h2>Your AI product can own the moment of intent — starting today.</h2>
-    <p>Intent accuracy makes AI the highest-converting channel in marketing — and Boost Boss is its ad network. Publishers earn from every conversation; advertisers reach people the instant intent strikes.</p>
+    <p>List it free, host a few placements, and let every impression you serve buy you the next user. Ten minutes to live — no invoice ever required.</p>
     <div class="cta-btns">
-      <a class="btn btn-primary btn-lg" href="/publish">Become a publisher →</a>
-      <a class="btn btn-ghost btn-lg" href="/ads">Run SuperBoost ads</a>
+      <a class="btn btn-primary btn-lg" href="/signup">List your product — free</a>
+      <a class="btn btn-ghost btn-lg" href="#pricing">See Boost plans</a>
     </div>
   </div>
 </section>
@@ -2284,15 +2339,15 @@
     <div class="foot-grid">
       <div>
         <div class="foot-brand"><img src="/design-system/assets/rocket-logo.svg" alt=""><span class="brand-name" style="font-family:var(--font-display);font-size:20px;font-weight:700;letter-spacing:var(--ls-tight);">Boost Boss</span></div>
-        <p class="foot-tag">The intent-native ad network for AI. Publishers earn from every conversation; advertisers reach people the instant intent strikes.</p>
+        <p class="foot-tag">The free launch network for AI products. Host ads to mint Credits — 1 per impression — then spend them getting your product in front of people already using AI tools.</p>
       </div>
       <div class="foot-col">
         <h4>Product</h4>
-        <ul><li><a href="/publish">Publishers</a></li><li><a href="#">SuperBoost</a></li><li><a href="#">BBX Exchange</a></li><li><a href="#">Pricing</a></li><li><a href="#">Live demo</a></li></ul>
+        <ul><li><a href="#how">How it works</a></li><li><a href="#bb-demo">Placements</a></li><li><a href="#pricing">Pricing</a></li><li><a href="/publish">Host ads (Lumi SDK)</a></li><li><a href="/ads">Promote console</a></li></ul>
       </div>
       <div class="foot-col">
         <h4>Resources</h4>
-        <ul><li><a href="#">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Benna whitepaper</a></li><li><a href="#">Status</a></li></ul>
+        <ul><li><a href="/docs">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Status</a></li></ul>
       </div>
       <div class="foot-col">
         <h4>Company</h4>
@@ -2326,7 +2381,7 @@
   // Nav: frosted on scroll (page is dark end-to-end now)
   const nav = document.getElementById('nav');
   const parallaxEls = [...document.querySelectorAll('[data-parallax]')];
-  // Pinned Benna decoder — scroll-scrubbed chip reveal
+  // Pinned intent decoder — scroll-scrubbed chip reveal
   const decStage = document.getElementById('decStage');
   const decChips = decStage ? [...decStage.querySelectorAll('.chip')] : [];
   const decMatch = decStage && decStage.querySelector('.dec-match');
@@ -2609,7 +2664,7 @@ var SCENES = {
     return mobileApp('AI Chat', mChat('<div class="sc-loading"><div class="sc-think">AI is thinking…</div><div class="sc-inline" style="margin:0 auto"><div class="l">⚡</div><div><div class="hl">Cursor AI — code smarter</div><div class="bd">AI editor, free to start.</div></div><a class="cta" href="#" onclick="return false">Try</a></div>' + _spon + '</div>')); } },
   'interstitial-mob': { cap: '📱 Mobile App — Interstitial', html: function() {
     return mobileApp('AI Chat', mChat(_uMsg + aMsg('One moment…')), '<div class="sc-minter"><div class="sc-minter-card"><div class="sc-splash-logo" style="margin:0 auto 12px">⚡</div><div class="sc-splash-hl">Code faster with AI</div><div class="sc-splash-bd">Cursor — the AI editor that understands your codebase.</div><a class="sc-splash-cta" href="#" onclick="return false">Try free</a><div class="sc-splash-skip">Skip</div>' + _spon + '</div></div>'); } },
-  'rewarded-mob': { cap: '📱 Mobile App — Rewarded Video (~$35 RPM)', html: function() {
+  'rewarded-mob': { cap: '📱 Mobile App — Rewarded Video', html: function() {
     return mobileApp('AI Study App', '<div class="sc-video"><div class="sc-video-badge">Ad · Watch to earn 10 credits</div><div class="sc-video-play">▶</div><div class="sc-reward">🎁 +10 credits</div>' + _spon + '</div>'); } },
   'preroll-mob': { cap: '📱 Mobile App — Pre-Roll Video', html: function() {
     return mobileApp('AI Study App', '<div class="sc-video"><div class="sc-video-skip">Skip ad → 5s</div><div class="sc-video-play">▶</div><div class="sc-preroll">⚡ Cursor AI · Sponsored — Learn more</div>' + _spon + '</div>'); } },
@@ -2722,7 +2777,7 @@ function normalizeAdUrl(v) { v = (v || '').trim(); if (!v) return '#'; if (/^(ht
   updateLivePreview();
   applyAdToGrid();
 })();
-// ── Card metric: show effectiveness (conversion), not publisher price ──
+// ── Card metric: show effectiveness (conversion), not raw RPM price ──
 (function() {
   document.querySelectorAll('.pl-rpm').forEach(function(box, i) {
     var v = box.querySelector('.rpm-val'), l = box.querySelector('.rpm-lbl');
