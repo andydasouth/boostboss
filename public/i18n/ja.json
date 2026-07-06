@@ -156,7 +156,7 @@
       "card_nocode_p": "OpenAI Custom GPTs、Poe bots、Perplexity Pages、Voiceflow / Botpress / Stack AI — あなたが作ったがランタイムはプラットフォーム所有。ノーコード収益化を準備中です。",
       "card_nocode_arrow_html": "Custom GPT &amp; ノーコード作者向け",
       "anchor_h3": "どのドアも、1 つのパブリッシャーアカウント",
-      "anchor_p_html": "1 つの <code>publisher_id</code>、1 つの Stripe Connect アカウント、週次 1 回の支払い — どのドアから出荷しても同じ。",
+      "anchor_p_html": "1 つの <code>publisher_id</code>、1 つの Credits 残高 — どのドアから出荷しても同じ。",
       "anchor_stat1_value": "業界最高",
       "anchor_stat1_label": "レベニューシェア",
       "anchor_stat2_value": "週次",

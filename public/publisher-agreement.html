@@ -47,9 +47,9 @@
       <h4>Key Terms — At a Glance</h4>
       <ul>
         <li>You are an independent contractor (not an employee)</li>
-        <li>You receive 70% of advertiser gross spend on your inventory</li>
-        <li>Boost Boss retains 30% total, comprised of a 6.5% RTB exchange fee charged to the advertiser and a 23.5% network take</li>
-        <li>Biweekly payouts via PayPal once you reach the threshold (see Section 6); additional payout methods on the roadmap</li>
+        <li>Every valid impression served through your application earns one (1) Credit</li>
+        <li>Credits are promotional credit redeemable only for advertising services on the Boost Boss network — no cash value, non-transferable, never redeemable for money</li>
+        <li>Boost Boss does not make cash payments to publishers</li>
         <li>You are responsible for your own taxes in your jurisdiction</li>
       </ul>
     </div>
@@ -84,51 +84,30 @@
     <p>You acknowledge and agree that:</p>
     <ul>
       <li>Placement decisions are made automatically by the Lumi runtime; specific placement locations may vary across page loads, sessions, and SDK versions</li>
-      <li>You can suppress any individual placement by adding a <code>data-lumi-disable="&lt;placement&gt;"</code> attribute or, on supported surfaces, declaring an explicit slot location via <code>data-lumi-slot</code>. Disabling placements reduces your impression volume and earnings.</li>
+      <li>You can suppress any individual placement by adding a <code>data-lumi-disable="&lt;placement&gt;"</code> attribute or, on supported surfaces, declaring an explicit slot location via <code>data-lumi-slot</code>. Disabling placements reduces your impression volume and the Credits you earn.</li>
       <li>Boost Boss will not knowingly place ads inside structural risky containers (code blocks, password fields, system messages, navigation chrome, or other elements likely to break user experience)</li>
       <li>If a placement causes a genuine user‑experience or compliance issue in your application, you will notify <a href="mailto:support@boostboss.ai">support@boostboss.ai</a> and we will collaborate to suppress or relocate the placement</li>
       <li>You remain solely responsible for ensuring that automatically‑rendered Boost Boss ads, as a category, are consistent with your own user‑facing terms of service and privacy policy</li>
     </ul>
 
-    <h2>5. Revenue share</h2>
-    <p><strong>You receive 70%</strong> of advertiser gross spend attributable to impressions delivered through your applications. <strong>Boost Boss retains 30%</strong>, which is comprised of two distinct components:</p>
-    <ol>
-      <li><strong>6.5% Real‑Time Bidding (RTB) exchange fee</strong> — a demand‑side fee charged to the advertiser at the point of auction clearance. This fee covers the cost of operating the bidding infrastructure, fraud screening, brand safety scoring, and contextual matching.</li>
-      <li><strong>23.5% network take</strong> — Boost Boss's platform margin for matching demand to inventory, providing the SDK and integration tooling, ad delivery, settlement, reporting, support, and ongoing platform development.</li>
-    </ol>
-    <p>The 70% publisher share is calculated on the advertiser's gross spend before any platform fees. The following items are deducted from publisher payouts after the share calculation:</p>
-    <ul>
-      <li>Payment processing fees charged by the underlying processor (currently PayPal; additional processors may be added in future)</li>
-      <li>Refunds, chargebacks, and disputed transactions affecting the underlying transaction</li>
-      <li>Taxes withheld pursuant to applicable law (see Section 8)</li>
-      <li>Amounts attributed to invalid traffic, fraud, or violations</li>
-    </ul>
-    <p>Boost Boss may adjust the share or fee structure with at least 30 days' notice for prospective transactions.</p>
+    <h2>5. Credits</h2>
+    <h3>5.1 Accrual</h3>
+    <p>For each valid ad impression delivered through your application(s), your account accrues <strong>one (1) Credit</strong>. Credit accrual is Boost Boss's sole form of publisher compensation under this Agreement.</p>
+    <h3>5.2 Nature of Credits</h3>
+    <p>Credits are <strong>promotional credit redeemable only for advertising services on the Boost Boss network</strong>. Credits have <strong>no cash value</strong>, are <strong>non-transferable</strong>, and are <strong>not redeemable for money or any other monetary payment</strong>. Boost Boss does not make cash payments to publishers under any circumstances, including on termination of this Agreement. Credits are not property, currency, a deposit, a security, or a stored-value instrument, and confer no right other than the right to redeem them for advertising services on the network subject to this Agreement.</p>
+    <h3>5.3 Adjustments and reversals</h3>
+    <p>Credits attributable to invalid traffic, fraud, or violations of this Agreement or the <a href="/aup">Acceptable Use Policy</a> may be withheld, reversed, or forfeited. Boost Boss may adjust the accrual rate or redemption terms with at least 30 days' notice for prospective impressions.</p>
 
-    <h2>6. Payouts</h2>
-    <h3>6.1 Methods</h3>
-    <p>Payouts are currently processed via PayPal. As a Taiwan-registered business entity, Boost Boss is required to operate on a single payment provider for both inbound and outbound transactions; we have selected PayPal because it serves the majority of the global market. You must register and keep current a valid PayPal email address as your payout destination. Payouts sent to incorrect, closed, or non-compliant accounts may be returned; any fees incurred from such errors are deducted from your balance.</p>
-    <p>We recognize that PayPal is not a fit for every publisher. Additional payment and payout methods are on our roadmap; we will update this Agreement and notify publishers as new options become available. If PayPal is not available in your region or does not work for your situation, please contact <a href="mailto:support@boostboss.ai">support@boostboss.ai</a>.</p>
-    <h3>6.2 Frequency and threshold</h3>
-    <p>Payouts run on a <strong>biweekly Friday cadence</strong>. The cutoff for a given batch is <strong>Tuesday at 23:59 UTC</strong>: cashout requests submitted on or before that Tuesday are included in the immediate Friday batch; later requests are held for the next biweekly Friday (two weeks later). The minimum payout amount is <strong>US $1.00</strong>. Balances below this minimum remain in your account and accrue across cycles.</p>
-    <p>Each cashout request must be confirmed with a one-time code from your registered two-factor authentication app. Any change to your PayPal payout email also requires two-factor confirmation. We do not rely on SMS for these confirmations.</p>
-    <p>Funds typically arrive in your PayPal account within minutes of dispatch when the recipient address is also a PayPal account. PayPal may hold or delay a transfer for its own compliance, fraud, or risk review; we have no control over PayPal-side holds and recommend keeping a verified PayPal account in good standing.</p>
-    <h3>6.3 Currency</h3>
-    <p>Payouts are denominated in US Dollars (USD). Conversion to local currency, where applicable, is performed by the payment processor at their applicable exchange rate. You bear any currency conversion costs.</p>
-    <h3>6.4 Withholding and clawbacks</h3>
-    <p>We may withhold or claw back payouts in cases of suspected fraud, advertiser chargebacks affecting the underlying transaction, breach of this Agreement, or as required by law. Refer to the <a href="/refunds">Refund Policy</a> for clawback specifics.</p>
+    <h2>6. Reporting and disputes</h2>
+    <p>Impression, click, and Credit figures shown in the Boost Boss dashboard are the official record for Credit accrual. You must raise any Credit dispute within 30 days of the relevant period; later disputes are waived.</p>
 
-    <h2>7. Reporting and disputes</h2>
-    <p>Impression, click, and earnings figures shown in the Boost Boss dashboard are the official record for payout calculation. You must raise any payout dispute within 30 days of the relevant period; later disputes are waived.</p>
+    <h2>7. Taxes</h2>
+    <p>Credits are promotional credit with no cash value and are not monetary compensation. You are nonetheless solely responsible for determining and complying with any tax consequences that may apply to your participation in the Services in your jurisdiction.</p>
 
-    <h2>8. Taxes</h2>
-    <p>You are solely responsible for reporting and paying any income, value‑added, sales, or other taxes applicable to your earnings in your jurisdiction. Where required by law, we may withhold or remit taxes at source and provide you with appropriate documentation (e.g., 1099, withholding certificates).</p>
-    <p>You agree to provide accurate tax information (W‑8BEN, W‑9, or jurisdiction equivalent) upon request and to update it when your status changes.</p>
+    <h2>8. Sanctions and prohibited jurisdictions</h2>
+    <p>You may not access the Services or accrue or redeem Credits if you reside in, are located in, or are a national of a country subject to U.S. or international sanctions (including Iran, North Korea, Cuba, Crimea, Syria, and other sanctioned regions). You represent that you are not on any sanctions list.</p>
 
-    <h2>9. Sanctions and prohibited jurisdictions</h2>
-    <p>You may not access the Services or receive payouts if you reside in, are located in, or are a national of a country subject to U.S. or international sanctions (including Iran, North Korea, Cuba, Crimea, Syria, and other sanctioned regions). You represent that you are not on any sanctions list.</p>
-
-    <h2>10. Brand safety and removal</h2>
+    <h2>9. Brand safety and removal</h2>
     <p>We may remove ads from, suspend ad delivery to, or terminate inventory of any publisher application that:</p>
     <ul>
       <li>Violates our <a href="/aup">Acceptable Use Policy</a></li>
@@ -138,26 +117,26 @@
       <li>Operates in a manner inconsistent with industry standards (IAB, MRC)</li>
     </ul>
 
-    <h2>11. Use of marks</h2>
+    <h2>10. Use of marks</h2>
     <p>You may use the name "Boost Boss" and our logo solely to identify your partnership with us, subject to our brand guidelines (available on request). You may not register or use any confusingly similar name, domain, or social handle.</p>
 
-    <h2>12. Confidentiality</h2>
+    <h2>11. Confidentiality</h2>
     <p>Non‑public information about the Services, including pricing structures, traffic statistics not pertaining to your own inventory, technical interfaces, and roadmap, is confidential. You may not disclose it without our written consent.</p>
 
-    <h2>13. Termination</h2>
-    <p>Either party may terminate this Agreement at any time. On termination, your accrued balance above the minimum threshold will be paid out in the next regular payout cycle, subject to verification and clawback eligibility. Balances below the threshold may be forfeited.</p>
+    <h2>12. Termination</h2>
+    <p>Either party may terminate this Agreement at any time. On termination, accrued but unredeemed Credits are forfeited. Credits have no cash value, and no payment or other compensation is due to you on termination.</p>
     <p>We may suspend you immediately for breach, fraud, or to comply with law. Sections that by their nature survive termination (taxes, IP, confidentiality, indemnification, governing law) shall continue in effect.</p>
 
-    <h2>14. Liability</h2>
-    <p>The Services are provided "as is." Our total liability for any claim under this Agreement shall not exceed the greater of (a) amounts paid to you in the past 12 months, or (b) US $100. We are not liable for indirect, incidental, or consequential damages.</p>
+    <h2>13. Liability</h2>
+    <p>The Services are provided "as is." Our total liability for any claim under this Agreement shall not exceed US $100. We are not liable for indirect, incidental, or consequential damages.</p>
 
-    <h2>15. Governing law</h2>
+    <h2>14. Governing law</h2>
     <p>This Agreement is governed by the laws of Taiwan (R.O.C.). Disputes shall be addressed first by good‑faith negotiation; if unresolved within 60 days, by the Taipei District Court (台北地方法院). Class actions are not permitted.</p>
 
-    <h2>16. Changes</h2>
+    <h2>15. Changes</h2>
     <p>We may update this Agreement with at least 14 days' notice. Continued use of the Services after the effective date constitutes acceptance. Pricing changes apply only to prospective transactions.</p>
 
-    <h2>17. Contact</h2>
+    <h2>16. Contact</h2>
     <!-- 2026-06-08: Publisher support was publishers@; consolidated to support@ — non-material address update. -->
     <p>
       <strong>Hauler Technologies Co., Ltd.</strong><br>

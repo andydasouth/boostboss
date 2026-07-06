@@ -156,7 +156,7 @@
       "card_nocode_p": "OpenAI Custom GPTs, Poe bots, Perplexity Pages, Voiceflow / Botpress / Stack AI — nơi bạn là tác giả AI nhưng platform sở hữu runtime. Chúng tôi đang chuẩn bị monetization no-code cho nhóm này.",
       "card_nocode_arrow_html": "Dành cho tác giả Custom GPT &amp; no-code",
       "anchor_h3": "Mọi cánh cửa, một tài khoản publisher",
-      "anchor_p_html": "Một <code>publisher_id</code>, một tài khoản Stripe Connect, một lần thanh toán hàng tuần — bất kể bạn ship qua cửa nào.",
+      "anchor_p_html": "Một <code>publisher_id</code>, một số dư Credits — bất kể bạn ship qua cửa nào.",
       "anchor_stat1_value": "Hàng đầu",
       "anchor_stat1_label": "chia doanh thu",
       "anchor_stat2_value": "Hàng tuần",

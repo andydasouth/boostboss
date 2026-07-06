@@ -72,8 +72,7 @@
       <tbody>
         <tr><td>Account info</td><td>Email, password, name, role (advertiser/publisher)</td><td>Signup</td></tr>
         <tr><td>Business info</td><td>Company name, business address, tax ID, website</td><td>Onboarding</td></tr>
-        <tr><td>Payment info</td><td>Billing address, payment method tokens (we do not store full card numbers)</td><td>Checkout</td></tr>
-        <tr><td>Payout info</td><td>PayPal email address for publisher payouts (additional providers on roadmap)</td><td>Publisher setup</td></tr>
+        <tr><td>Payment info</td><td>Billing address, payment method tokens (we do not store full card numbers)</td><td>Advertiser deposit</td></tr>
         <tr><td>Identity verification</td><td>Government ID, business registration documents (where required)</td><td>KYC/KYB</td></tr>
         <tr><td>Communications</td><td>Support tickets, emails, feedback</td><td>You contact us</td></tr>
       </tbody>
@@ -84,8 +83,6 @@
       <li><strong>Device data:</strong> IP address, browser type, operating system, device identifiers</li>
       <li><strong>Performance data:</strong> Campaign metrics (impressions, clicks, conversions), publisher inventory metrics</li>
       <li><strong>Cookies:</strong> See our <a href="/cookies">Cookie Policy</a> for details</li>
-      <li><strong>Affiliate attribution identifiers (<code>bb_click</code>):</strong> When an affiliate shares a Boost Boss share-link, our redirect appends a per-click UUID (<code>bb_click</code>) to the destination URL. We log that UUID, the affiliate it belongs to, the time of the click, the referring URL, and a coarse IP-region (not the full IP) so that if a sale follows we can attribute it to the correct affiliate. The UUID is the load-bearing identifier; the equivalent first-party cookie we also set is a fallback for buyers whose browsers strip URL parameters. Attribution data is retained for the duration of the 30-day clawback window plus the longer of (a) seven years for tax records or (b) any retention required by applicable law.</li>
-      <li><strong>Voucher codes (<code>bb_token</code>):</strong> When a buyer purchases a Product through the Merchant of Record program, we issue a single-use voucher code in the format <code>BB-XXXX-XXXX-XXXX</code> and email the buyer a one-click activation link that includes the code as a URL parameter. The code is tied to the originating transaction (buyer email, product, capture timestamp), is honored only while in the <code>issued</code> state, and is consumed when the seller's signup endpoint redeems it. We retain the code, its lifecycle states (issued, redeemed, refunded, expired, revoked), the redemption IP, and any redeemer metadata the seller chooses to attach, for the purpose of supporting buyers, sellers, and auditors and for fraud prevention.</li>
       <li><strong>Publisher integration door (<code>integration_door</code>):</strong> When a publisher signs up or installs the Lumi SDK, we record which of the four doors they integrated through — <code>browser-app</code>, <code>browser-extension-app</code>, <code>computer-app</code>, or <code>mobile-app</code>. This field is used to surface door-appropriate documentation, fire the correct verification badge, scope the publisher's analytics view, and reach the right cohort for breaking-change announcements. A publisher may install more than one door; we record each one independently. The value is retained for the life of the publisher account.</li>
     </ul>
     <h3>2.3 Information from third parties</h3>
@@ -99,11 +96,11 @@
     <ul>
       <li>Provide, operate, and improve the Services</li>
       <li>Authenticate users and secure accounts</li>
-      <li>Process payments and payouts</li>
-      <li>Calculate revenue share and deliver advertiser/publisher reporting</li>
+      <li>Process advertiser payments</li>
+      <li>Calculate publisher Credit accrual and deliver advertiser/publisher reporting</li>
       <li>Detect, prevent, and respond to fraud, abuse, security, or technical issues</li>
       <li>Comply with legal obligations (tax reporting, AML, sanctions screening)</li>
-      <li>Send transactional emails (account verification, payouts, invoices)</li>
+      <li>Send transactional emails (account verification, invoices)</li>
       <li>Send marketing emails (only with consent; you can unsubscribe at any time)</li>
       <li>Respond to your inquiries and provide support</li>
     </ul>
@@ -118,7 +115,7 @@
     <h2 id="share">4. How we share information</h2>
     <p>We do not sell personal information. We share information with:</p>
     <ul>
-      <li><strong>Service providers</strong> (sub‑processors): Supabase (database), Vercel (hosting), Google Workspace (email), PayPal (payments, both inbound and outbound), monitoring and analytics tools</li>
+      <li><strong>Service providers</strong> (sub‑processors): Supabase (database), Vercel (hosting), Google Workspace (email), PayPal (advertiser payments), monitoring and analytics tools</li>
       <li><strong>Payment processors:</strong> to settle transactions and process refunds</li>
       <li><strong>Advertisers and publishers:</strong> aggregate impression/conversion data is shared; we do not share individual end‑user personal data without consent</li>
       <li><strong>Legal and regulatory authorities:</strong> when required by law or to protect rights, safety, or property</li>

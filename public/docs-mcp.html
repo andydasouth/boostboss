@@ -51,10 +51,7 @@
     </div>
     <div class="doc-sec">
       <div class="doc-sec-l">Features</div>
-      <a href="/docs/activation-link">Activation links</a>
-      <a href="/docs/payouts">Payouts</a>
       <a href="/docs/reporting">Reporting</a>
-      <a href="/docs/product-lifecycle">Product lifecycle</a>
       <a href="/docs/api-reference">API reference</a>
     </div>
   </aside>
@@ -192,7 +189,7 @@ await lumi.trackConversion(ad, {
 }</pre>
     <div class="callout info">
       <strong>Disclosure is non-negotiable.</strong>
-      <p>The "— Sponsored —" prefix is part of every block. <code>toMCPBlock()</code> bakes it in; do not remove it. Stripping the disclosure is a policy violation that suspends payouts.</p>
+      <p>The "— Sponsored —" prefix is part of every block. <code>toMCPBlock()</code> bakes it in; do not remove it. Stripping the disclosure is a policy violation that suspends Credit earning.</p>
     </div>
 
     <h2 id="event-handling">Event handling</h2>
@@ -235,7 +232,6 @@ lumi.<span class="fn">on</span>(<span class="str">'error'</span>, ({ code, messa
     <p>Production checklist before flipping to live keys:</p>
     <ul>
       <li>Replace sandbox <code>publisherId</code> and <code>apiKey</code> with the live values from your dashboard.</li>
-      <li>Confirm Stripe Connect is set up (no payouts without it).</li>
       <li>Set <code>debug: false</code> for production — avoids stderr noise on cold start.</li>
       <li>Run one live tool call end-to-end and verify the impression appears in your dashboard within 30 seconds.</li>
       <li>Optional: email <a href="mailto:info@boostboss.ai">info@boostboss.ai</a> with the MCP server's listing URL so we can add it to our supply-side allowlist — speeds up advertiser approvals. Self-serve seller submission via the dashboard is on the roadmap; for now this is a manual step.</li>

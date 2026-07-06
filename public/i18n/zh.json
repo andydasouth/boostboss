@@ -156,7 +156,7 @@
       "card_nocode_p": "OpenAI Custom GPTs、Poe bots、Perplexity Pages、Voiceflow / Botpress / Stack AI — 由你创作但运行时归平台所有。我们正在为这类产品打造无代码变现方案。",
       "card_nocode_arrow_html": "Custom GPT &amp; 无代码作者",
       "anchor_h3": "每扇门,一个发布商账号",
-      "anchor_p_html": "一个 <code>publisher_id</code>、一个 Stripe Connect 账户、每周一次打款 — 无论你接入哪几扇门。",
+      "anchor_p_html": "一个 <code>publisher_id</code>、一个 Credits 余额 — 无论你接入哪几扇门。",
       "anchor_stat1_value": "行业领先",
       "anchor_stat1_label": "分成",
       "anchor_stat2_value": "每周",

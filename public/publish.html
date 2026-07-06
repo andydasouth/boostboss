@@ -127,9 +127,9 @@
   .earn-row .k .surf { width: 24px; height: 24px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 12px; background: rgba(255,255,255,0.06); }
   .earn-row .v { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: #fff; }
 
-  /* Floating payout chip */
+  /* Floating credit chip */
   .hero-visual { position: relative; }
-  .payout-chip {
+  .credit-chip {
     position: absolute; top: -14px; right: 12px; z-index: 4;
     display: inline-flex; align-items: center; gap: 8px;
     padding: 9px 14px; border-radius: var(--r-pill);
@@ -137,7 +137,7 @@
     box-shadow: var(--glow-cyan); font-size: 12.5px; font-weight: 700; color: #fff; white-space: nowrap;
     animation: floatBob 4.5s var(--ease-in-out) infinite;
   }
-  .payout-chip .swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--bb-cyan); }
+  .credit-chip .swatch { width: 8px; height: 8px; border-radius: 50%; background: var(--bb-cyan); }
   @keyframes floatBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
 
   /* ───────── SECTION SHELL ───────── */
@@ -278,28 +278,28 @@
   <div class="wrap">
     <div class="hero-grid">
       <div class="hero-copy">
-        <div class="badge"><span class="dot"></span>Weekly PayPal payouts · no minimums after $100</div>
-        <h1>Wherever your users meet your AI,<br><span class="grad">Lumi monetizes it.</span></h1>
-        <p class="sub">One ad-serving SDK, packaged for the four surfaces publishers actually ship. Real revenue per impression — no analytics theatre, no surveillance, no cookies.</p>
+        <div class="badge"><span class="dot"></span>Every impression you host mints 1 Credit · no minimums, ever</div>
+        <h1>Wherever your users meet your AI,<br><span class="grad">Lumi turns it into Credits.</span></h1>
+        <p class="sub">One ad-serving SDK, packaged for the four surfaces publishers actually ship. Every impression you host mints 1 Credit — spend Credits to put your own product in front of AI users across the network. No surveillance, no cookies.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary btn-lg" href="#">Start earning today →</a>
           <a class="btn btn-ghost-d btn-lg" href="#">Read the docs</a>
         </div>
         <div class="hero-meta">
-          <div class="m"><b class="cyan">Majority</b>revenue share</div>
+          <div class="m"><b class="cyan">1 Credit</b>per impression</div>
           <div class="m"><b>10 min</b>to first ad</div>
-          <div class="m"><b class="pink">Weekly</b>payouts</div>
+          <div class="m"><b class="pink">Free</b>network promotion</div>
         </div>
       </div>
 
       <div class="hero-visual" data-reveal style="--reveal-delay:.15s">
-        <div class="payout-chip"><span class="swatch"></span>+$612.40 paid Friday</div>
+        <div class="credit-chip"><span class="swatch"></span>+612 Credits minted today</div>
         <div class="earn" id="earn" data-parallax data-speed="0.04">
           <div class="earn-head">
-            <span class="lbl">This week · Lumi earnings</span>
+            <span class="lbl">This week · Credits minted</span>
             <span class="live"><span class="d"></span>LIVE</span>
           </div>
-          <div class="earn-big" data-count="3148.62" data-dec="2" data-pre="$">$0</div>
+          <div class="earn-big" data-count="3149" data-dec="0" data-suf=" Cr">0</div>
           <div class="earn-sub">▲ 18% vs. last week</div>
           <div class="earn-chart">
             <span style="height:34%"></span><span style="height:48%"></span><span style="height:40%"></span>
@@ -308,10 +308,10 @@
             <span style="height:90%"></span><span style="height:84%"></span><span style="height:96%"></span>
           </div>
           <div class="earn-rows">
-            <div class="earn-row"><span class="k"><span class="surf">🖥</span>Computer App</span><span class="v">$1,284.10</span></div>
-            <div class="earn-row"><span class="k"><span class="surf">📱</span>Mobile App · rewarded</span><span class="v">$1,041.55</span></div>
-            <div class="earn-row"><span class="k"><span class="surf">🌐</span>Browser App</span><span class="v">$522.97</span></div>
-            <div class="earn-row"><span class="k"><span class="surf">🧩</span>Extension</span><span class="v">$300.00</span></div>
+            <div class="earn-row"><span class="k"><span class="surf">🖥</span>Computer App</span><span class="v">1,284 Cr</span></div>
+            <div class="earn-row"><span class="k"><span class="surf">📱</span>Mobile App · rewarded</span><span class="v">1,042 Cr</span></div>
+            <div class="earn-row"><span class="k"><span class="surf">🌐</span>Browser App</span><span class="v">523 Cr</span></div>
+            <div class="earn-row"><span class="k"><span class="surf">🧩</span>Extension</span><span class="v">300 Cr</span></div>
           </div>
         </div>
       </div>
@@ -323,7 +323,7 @@
 
 <!-- PARTNER MARQUEE -->
 <section class="marquee" aria-hidden="true">
-  <div class="marquee-label">Publishers earning with Lumi across every surface</div>
+  <div class="marquee-label">Builders minting Credits with Lumi across every surface</div>
   <div class="marquee-track">
     <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span><span>Raycast</span><span>Vercel</span><span>LM Studio</span>
     <span>Claude MCP</span><span>OpenAI</span><span>Cursor</span><span>Replit</span><span>Windsurf</span><span>Perplexity</span><span>Raycast</span><span>Vercel</span><span>LM Studio</span>
@@ -338,20 +338,20 @@
     <div class="section-head" data-reveal>
       <span class="eyebrow">Pick your install</span>
       <h2>Four packages. One publisher account.</h2>
-      <p>Lumi ships as four installable packages — one per surface you can build. Multi-surface publishers install more than one; earnings aggregate to the same account, paid the same Friday.</p>
+      <p>Lumi ships as four installable packages — one per surface you can build. Multi-surface publishers install more than one; Credits pool in the same account, ready to spend on promoting your own product.</p>
     </div>
     <div class="router-grid">
       <a class="door computer" href="/publish/computer" data-reveal>
         <div class="door-top"><div class="door-ico">🖥</div><span class="mark">Lumi for Computer App</span></div>
         <h3>I built a downloaded app</h3>
         <p>Electron, Tauri, native macOS / Windows / Linux. AI chat apps, IDE assistants, productivity tools. Full window control, video + sound ads allowed.</p>
-        <span class="arrow">10 placements · top-RPM video pre-roll</span>
+        <span class="arrow">10 placements · full video pre-roll</span>
       </a>
       <a class="door ext" href="/publish/browser-extension" data-reveal style="--reveal-delay:.06s">
         <div class="door-top"><div class="door-ico">🧩</div><span class="mark">Lumi for Browser Extension App</span></div>
         <h3>I built a browser extension</h3>
         <p>Chrome / Safari / Firefox — writing assistants, AI sidebars, summarizers. Manifest V3 native. Popup, side panel, and new-tab page are sovereign surfaces.</p>
-        <span class="arrow">8 placements · new-tab takeover at $9 RPM</span>
+        <span class="arrow">8 placements · new-tab takeover mints all day</span>
       </a>
       <a class="door browser" href="/publish/browser" data-reveal style="--reveal-delay:.12s">
         <div class="door-top"><div class="door-ico">🌐</div><span class="mark">Lumi for Browser App</span></div>
@@ -362,8 +362,8 @@
       <a class="door mobile" href="/publish/mobile" data-reveal style="--reveal-delay:.18s">
         <div class="door-top"><div class="door-ico">📱</div><span class="mark">Lumi for Mobile App</span></div>
         <h3>I built a mobile app</h3>
-        <p>iOS, Android, or React Native AI apps. Native sound, full-screen interstitials, and the highest-CPM format in adtech: opt-in rewarded video.</p>
-        <span class="arrow">10 placements · rewarded video unlocks brand budgets</span>
+        <p>iOS, Android, or React Native AI apps. Native sound, full-screen interstitials, and the format users actually choose: opt-in rewarded video.</p>
+        <span class="arrow">10 placements · rewarded video users opt into</span>
       </a>
     </div>
   </div>
@@ -379,12 +379,12 @@
       <h2>Built for AI context — not surveillance.</h2>
     </div>
     <div class="why-grid">
-      <div class="why-item" data-reveal><span class="ck">✓</span><div><h4>Industry-leading payouts</h4><p>A publisher-favorable revenue share at any scale. Full terms in the Publisher Agreement at signup.</p></div></div>
+      <div class="why-item" data-reveal><span class="ck">✓</span><div><h4>Every impression mints a Credit</h4><p>Host an ad, earn a Credit — 1:1 at any scale, spendable on promoting your own product. Full terms in the Publisher Agreement at signup.</p></div></div>
       <div class="why-item" data-reveal style="--reveal-delay:.05s"><span class="ck">✓</span><div><h4>Contextual, never creepy</h4><p>Targeting from the conversation itself — never cross-site tracking, never behavioral cookies.</p></div></div>
-      <div class="why-item" data-reveal style="--reveal-delay:.1s"><span class="ck">✓</span><div><h4>Four surfaces, one account</h4><p>Ship on more than one surface? Install more than one package. Earnings aggregate, paid the same Friday.</p></div></div>
-      <div class="why-item" data-reveal style="--reveal-delay:.15s"><span class="ck">✓</span><div><h4>Transparent reporting</h4><p>Live dashboard with impression-, click-, and revenue-level detail. Weekly PayPal payouts.</p></div></div>
-      <div class="why-item" data-reveal style="--reveal-delay:.2s"><span class="ck">✓</span><div><h4>No long-term contracts</h4><p>Integrate in minutes, leave any time. We earn the relationship every payout cycle.</p></div></div>
-      <div class="why-item" data-reveal style="--reveal-delay:.25s"><span class="ck">✓</span><div><h4>Benna-optimized fill</h4><p>Every impression scored for intent in ~5ms, so the best-matched advertiser wins — and you earn more.</p></div></div>
+      <div class="why-item" data-reveal style="--reveal-delay:.1s"><span class="ck">✓</span><div><h4>Four surfaces, one account</h4><p>Ship on more than one surface? Install more than one package. Credits pool into one balance, spendable anywhere on the network.</p></div></div>
+      <div class="why-item" data-reveal style="--reveal-delay:.15s"><span class="ck">✓</span><div><h4>Transparent reporting</h4><p>Live dashboard with impression-, click-, and Credit-level detail. Watch your balance grow in real time.</p></div></div>
+      <div class="why-item" data-reveal style="--reveal-delay:.2s"><span class="ck">✓</span><div><h4>No long-term contracts</h4><p>Integrate in minutes, leave any time. We earn the relationship every impression.</p></div></div>
+      <div class="why-item" data-reveal style="--reveal-delay:.25s"><span class="ck">✓</span><div><h4>Benna-optimized fill</h4><p>Every impression scored for intent in ~5ms, so the best-matched product wins — and every filled slot mints you a Credit.</p></div></div>
     </div>
   </div>
 </section>
@@ -428,7 +428,7 @@
         <p class="foot-tag">The intent-native ad network for AI. Publishers earn from every conversation; advertisers reach people the instant intent strikes.</p>
       </div>
       <div class="foot-col"><h4>Publishers</h4><ul><li><a href="/publish/computer">Computer App</a></li><li><a href="/publish/browser">Browser App</a></li><li><a href="/publish/browser-extension">Extension</a></li><li><a href="/publish/mobile">Mobile App</a></li></ul></div>
-      <div class="foot-col"><h4>Resources</h4><ul><li><a href="#">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Payouts</a></li><li><a href="#">Status</a></li></ul></div>
+      <div class="foot-col"><h4>Resources</h4><ul><li><a href="#">Documentation</a></li><li><a href="#">API reference</a></li><li><a href="#">Credits</a></li><li><a href="#">Status</a></li></ul></div>
       <div class="foot-col"><h4>Company</h4><ul><li><a href="#">About</a></li><li><a href="#">Trust center</a></li><li><a href="#">Contact</a></li></ul></div>
     </div>
     <div class="foot-bottom"><span>© 2026 Boost Boss · All rights reserved.</span><span>Made for the AI era.</span></div>

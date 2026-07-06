@@ -51,10 +51,7 @@
     </div>
     <div class="doc-sec">
       <div class="doc-sec-l">Features</div>
-      <a href="/docs/activation-link">Activation links</a>
-      <a href="/docs/payouts">Payouts</a>
       <a href="/docs/reporting">Reporting</a>
-      <a href="/docs/product-lifecycle">Product lifecycle</a>
       <a href="/docs/api-reference">API reference</a>
     </div>
   </aside>
@@ -63,7 +60,7 @@
   <main class="doc-main">
     <div class="doc-crumb"><a href="/docs">Docs</a><span class="sep">/</span><span style="color:var(--doc-soft)">Getting started</span><span class="sep">/</span><span style="color:var(--doc-soft)">Introduction</span></div>
     <h1 class="doc-h1">Boost Boss documentation</h1>
-    <p class="doc-sub">Boost Boss is two things at once: a <strong>Merchant of Record</strong> that handles checkout, fulfillment, and payouts for sellers, and an <strong>MCP-native ad network</strong> that runs context-aware sponsored content inside AI tools. Four roles share the same account model. Pick the one that matches what you're trying to do.</p>
+    <p class="doc-sub">Boost Boss is an <strong>MCP-native launch network</strong> that runs context-aware sponsored content inside AI tools. Every AI dev is both sides of the network: host ads to earn Credits, spend Credits to promote your own product. Two roles share the same account model. Pick the one that matches what you're trying to do.</p>
     <div class="doc-meta"><span class="doc-pill">★ Start here</span><span>Updated Jun 2026</span><span>·</span><span>4 min read</span></div>
 
     <article class="prose" id="doc-body">
@@ -73,31 +70,19 @@
       <a class="role-card role-pub" href="/publish">
         <span class="role-tag">Publisher</span>
         <h3>You run an AI app, MCP server, or bot</h3>
-        <p>You have an audience using AI tools you build. Drop a Lumi SDK in, return context, get paid 85% of the revenue your impressions generate. Four installation paths — pick the one matching what you ship. Payouts settle biweekly via PayPal.</p>
+        <p>You have an audience using AI tools you build. Drop a Lumi SDK in, return context, and every hosted impression mints <strong>1 Credit</strong>. Four installation paths — pick the one matching what you ship. Spend your Credits to promote your own product across the network.</p>
         <span class="role-cta">Get started as a publisher</span>
       </a>
       <a class="role-card role-adv" href="/ads">
         <span class="role-tag">Advertiser</span>
         <h3>You want to reach AI tool users</h3>
-        <p>Deposit a budget via PayPal, upload your product, pick a goal — Benna handles allocation across all four AI surfaces. Pay only for impressions Benna scored as relevant. Direct boosts through SuperBoost or programmatic via the BBX OpenRTB exchange.</p>
+        <p>Upload your product and creatives, pick a goal — Benna handles allocation across all four AI surfaces. Fund campaigns with the Credits you earn hosting, or add cash to amplify. Direct boosts through SuperBoost or programmatic via the BBX OpenRTB exchange.</p>
         <span class="role-cta">Get started as an advertiser</span>
-      </a>
-      <a class="role-card role-sel" href="/ads/seller">
-        <span class="role-tag">Seller (Merchant of Record)</span>
-        <h3>You sell a product and want BB to handle checkout</h3>
-        <p>BB hosts your product page, takes the payment, splits the proceeds with you and any affiliate, and emails the buyer an activation link that creates the paid account on your service. PayPal pay-in + payout, biweekly settlement.</p>
-        <span class="role-cta">Get started as a seller</span>
-      </a>
-      <a class="role-card role-aff" href="/affiliates">
-        <span class="role-tag">Affiliate</span>
-        <h3>You promote products and earn commission</h3>
-        <p>Save any approved product, get a share link, post it on social / newsletter / DM. When someone buys, 70% of the affiliate pool the seller set is yours. Attribution survives Safari ITP and ad blockers via the <code>bb_click=</code> URL parameter. Payouts settle biweekly via PayPal.</p>
-        <span class="role-cta">Get started as an affiliate</span>
       </a>
     </div>
 
-    <h2>The four roles in one account</h2>
-    <p>You sign in once. The dashboard exposes whatever role(s) you've enabled. Most people start in one role and add another later — a seller who also wants to promote a friend's product becomes an affiliate by saving it; a publisher who wants to advertise their own MCP server becomes an advertiser by depositing budget. The same Supabase user ID carries through, so your payout method, 2FA, and history follow you.</p>
+    <h2>Both roles in one account</h2>
+    <p>You sign in once. The dashboard exposes both sides — most devs start by installing an SDK to earn Credits, then spend those Credits promoting their own product; some start by adding cash to amplify first. The same Supabase user ID carries through, so your Credits balance, 2FA, and history follow you.</p>
 
     <h2 id="concepts">Common concepts</h2>
     <p>Every role touches the same primitives. Once these click, the surface area of any specific role is small.</p>
@@ -109,23 +94,14 @@
       <dt>Context signal</dt>
       <dd>Publishers pass a <strong>context</strong> string with every ad request — the user's current intent, the tool being called, the page topic, whatever describes "what would be relevant right now." Benna (our ranker) uses it for contextual matching. No cross-site tracking, no behavioral profile.</dd>
 
-      <dt><code>bb_click</code> attribution</dt>
-      <dd>When someone clicks an affiliate share link <code>/s/&lt;token&gt;</code>, BB redirects to the product page with <code>?bb_click=&lt;UUID&gt;</code> appended. That UUID is what attributes the sale to the affiliate. Survives Safari ITP, ad blockers, and email-link-stripping. Cookie is a secondary fallback only.</dd>
-
-      <dt>Voucher code (activation link)</dt>
-      <dd>When a buyer pays for a product, BB issues a single-use <code>BB-XXXX-XXXX-XXXX</code> voucher and emails the buyer a one-click activation link at <code>seller.com/signup?bb_token=&lt;code&gt;</code>. The seller's endpoint validates the code with BB's API and creates the paid account. See <a href="/docs/activation-link">Activation link integration</a>.</dd>
-
-      <dt>Commission model v2</dt>
-      <dd>The seller sets an <strong>affiliate pool</strong> as a % of the order. BB takes <strong>30% of that pool</strong>, the affiliate gets <strong>70%</strong>, the seller keeps the rest of the order. BB only earns when an affiliate drives the sale. Direct (non-affiliate) sales: seller keeps it all minus payment processor fees.</dd>
+      <dt>Credits</dt>
+      <dd>The network's only currency for publishers. Every hosted impression mints <strong>1 Credit</strong>. Credits are spent to promote your own product across the network — they are never converted to cash, and there are no cash payouts. Cash flows one way only: advertisers can add cash to amplify, which converts to Credits.</dd>
 
       <dt>Disclosure</dt>
       <dd>Every ad must be clearly labeled as sponsored. The publisher SDKs handle this automatically — the disclosure label is part of the rendered output. Hiding it is a policy violation.</dd>
 
       <dt>The Promote loop</dt>
-      <dd>Sellers can convert their MoR earnings into in-platform <strong>ad credit</strong> and use that credit to fund a product boost without ever withdrawing to PayPal. Closes a money cycle entirely inside BB: buyer pays → seller earns → converts to credit → funds boost → reaches more buyers.</dd>
-
-      <dt>Payments — PayPal end to end</dt>
-      <dd>Every money rail uses PayPal. Advertiser deposits, buyer storefront captures, publisher payouts, seller payouts, and affiliate payouts all flow through the same provider. This is a deliberate constraint of the Taiwan corporate entity that operates BB today (local law requires pay-in and payout through the same provider). When the Singapore corp move opens up multi-provider options, additional rails will appear on the dashboard's Payout method page — your existing setup carries forward.</dd>
+      <dd>Host ads → earn Credits → spend Credits to promote your own product → reach more users → grow the audience that hosts more ads. The whole cycle runs inside BB on Credits; no money ever leaves the platform.</dd>
     </dl>
 
     <h2 id="authentication">Authentication</h2>
@@ -133,9 +109,8 @@
     <pre><code>Authorization: Bearer &lt;your-jwt&gt;</code></pre>
     <p>Tokens expire — re-call <code>login</code> when you get a 401. The token format is a standard signed JWT, not an opaque API key; you can decode it client-side to read your role and user ID without making a network call.</p>
 
-    <p><strong>Two special cases</strong> use shared secrets instead of user JWTs:</p>
+    <p><strong>One special case</strong> uses a shared secret instead of user JWTs:</p>
     <ul>
-      <li><strong>Seller voucher API</strong> (<a href="/v1/vouchers/validate"><code>/v1/vouchers/validate</code></a> / <a href="/v1/vouchers/redeem"><code>/v1/vouchers/redeem</code></a>) — pass <code>seller_secret</code> in the body. The secret is the <code>fulfillment_webhook_secret</code> set on your product.</li>
       <li><strong>OpenRTB BBX</strong> (<code>/api/rtb</code>) — DSPs use a seat key issued at integration time, sent as <code>Authorization: Bearer bb_seat_&lt;key&gt;</code>.</li>
     </ul>
 
@@ -144,8 +119,8 @@
     <table>
       <thead><tr><th>Mode</th><th>How it engages</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td>Demo / in-memory</td><td>Default when Supabase env vars are not set</td><td>No real spend, no real payouts. Useful for SDK integration smoke tests against a self-hosted clone.</td></tr>
-        <tr><td>Production</td><td>The live boostboss.ai deployment</td><td>Real auctions, real spend, real earnings. The only mode that issues real <code>bb_session_token</code> JWTs and real voucher codes.</td></tr>
+        <tr><td>Demo / in-memory</td><td>Default when Supabase env vars are not set</td><td>No real spend, no real Credits minted. Useful for SDK integration smoke tests against a self-hosted clone.</td></tr>
+        <tr><td>Production</td><td>The live boostboss.ai deployment</td><td>Real auctions, real spend, real Credits. The only mode that issues real <code>bb_session_token</code> JWTs.</td></tr>
       </tbody>
     </table>
 

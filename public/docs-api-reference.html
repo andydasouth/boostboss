@@ -51,10 +51,7 @@
     </div>
     <div class="doc-sec">
       <div class="doc-sec-l">Features</div>
-      <a href="/docs/activation-link">Activation links</a>
-      <a href="/docs/payouts">Payouts</a>
       <a href="/docs/reporting">Reporting</a>
-      <a href="/docs/product-lifecycle">Product lifecycle</a>
       <a href="/docs/api-reference" class="on">API reference</a>
     </div>
   </aside>
@@ -75,7 +72,7 @@
       <p>Every shipped endpoint, organized by role. Real paths, real auth, real response shapes pulled from the live handlers.</p>
     </div>
 
-    <p>Boost Boss exposes a single REST surface at <code>https://boostboss.ai</code> covering four roles: <strong>publishers</strong> (monetizing AI tools), <strong>advertisers</strong> (boosting their products), <strong>sellers</strong> (using the MoR storefront), and <strong>affiliates</strong> (earning commission on share links). The same account model unifies all four — you sign up once, opt into whatever role(s) you need. A machine-readable spec is at <a href="/openapi.json" class="inline-link">/openapi.json</a>.</p>
+    <p>Boost Boss exposes a single REST surface at <code>https://boostboss.ai</code> covering two roles: <strong>publishers</strong> (hosting sponsored content in AI tools — every hosted impression mints 1 Credit) and <strong>advertisers</strong> (spending Credits, or cash, to promote their own product). The same account model unifies both — you sign up once, most devs are both sides at once. A machine-readable spec is at <a href="/openapi.json" class="inline-link">/openapi.json</a>.</p>
 
     <p>Jump to the role you came here for:</p>
 
@@ -86,15 +83,7 @@
       </a>
       <a class="role-jump adv" href="#advertiser-overview">
         <h3><span class="role-pill adv">Adv</span>Advertiser endpoints</h3>
-        <p>Campaigns CRUD, stats, deposits, conversion postback.</p>
-      </a>
-      <a class="role-jump sel" href="#seller-overview">
-        <h3><span class="role-pill sel">Sel</span>Seller (MoR) endpoints</h3>
-        <p>Products, pricing plans, orders, vouchers, payouts.</p>
-      </a>
-      <a class="role-jump aff" href="#affiliate-overview">
-        <h3><span class="role-pill aff">Aff</span>Affiliate endpoints</h3>
-        <p>Share-link redirect, sales report, commission state.</p>
+        <p>Campaigns CRUD, stats, Credits + deposits.</p>
       </a>
     </div>
 
@@ -133,11 +122,8 @@
 <pre><span class="k">Authorization:</span> Bearer eyJhbGciOiJIUzI1NiIs...</pre>
     </div>
 
-    <h3>Two special cases</h3>
-    <p>Two surfaces don't use the user JWT. They use shared secrets you configure once per resource:</p>
-
-    <h4>Seller voucher API (<code>seller_secret</code>)</h4>
-    <p>The voucher endpoints (<a href="#sel-vouchers-validate" class="inline-link">validate</a> / <a href="#sel-vouchers-redeem" class="inline-link">redeem</a>) authenticate via a per-product secret passed in the request body as <code>seller_secret</code>. The secret is the <code>fulfillment_webhook_secret</code> field you set on your product in the advertiser dashboard. Compared with <code>crypto.timingSafeEqual</code> server-side; mismatches return <code>401 bad_secret</code>.</p>
+    <h3>One special case</h3>
+    <p>One surface doesn't use the user JWT. It uses a shared secret you configure once:</p>
 
     <h4>OpenRTB BBX seat key</h4>
     <p>DSPs hitting <a href="#rtb-bid" class="inline-link"><code>/api/rtb</code></a> use a seat key issued at integration time, sent as a normal bearer header: <code>Authorization: Bearer bb_seat_&lt;key&gt;</code>. Contact <a href="mailto:support@boostboss.ai" class="inline-link">support@boostboss.ai</a> for seat onboarding.</p>
@@ -156,7 +142,7 @@
     <table class="params">
       <thead><tr><th>Mode</th><th>How it engages</th><th>Notes</th></tr></thead>
       <tbody>
-        <tr><td class="param-name">production</td><td class="param-desc">Default for the live deployment</td><td class="param-desc">Real campaigns, real money, real PayPal payouts. Requires Supabase env vars set.</td></tr>
+        <tr><td class="param-name">production</td><td class="param-desc">Default for the live deployment</td><td class="param-desc">Real campaigns, real spend, real Credits minted. Requires Supabase env vars set.</td></tr>
         <tr><td class="param-name">in-memory</td><td class="param-desc">When Supabase env vars are not set</td><td class="param-desc">Used by CI tests, BBX sandbox bidders, and the public exchange page. Same interface, deterministic responses. NOT a user-facing demo mode.</td></tr>
         <tr><td class="param-name">sandbox keys</td><td class="param-desc"><code>sk_test_*</code> or <code>pub_test_*</code> on the REST ad-request endpoint</td><td class="param-desc">Short-circuits through <code>api/_lib/sandbox.js</code> — returns mock ads without touching the auction. Safe for end-to-end SDK smoke tests.</td></tr>
       </tbody>
@@ -183,7 +169,7 @@
     </div>
 
     <h3>Idempotency</h3>
-    <p>Where it matters — voucher redemption, conversion postback, PayPal capture — endpoints are idempotent. Re-submitting the same operation returns the existing record with a <code>deduped: true</code> flag rather than producing duplicates. The conversion postback also accepts an <code>idempotency_key</code> field on the request body.</p>
+    <p>Where it matters — deposit capture, event tracking — endpoints are idempotent. Re-submitting the same operation returns the existing record with a <code>deduped: true</code> flag rather than producing duplicates.</p>
 
     <!-- ════════════════════════════════════════════════════════════════
          PUBLISHER
@@ -195,7 +181,7 @@
       <li><strong>Browser-side AI apps</strong> → drop in the <code>/lumi.js</code> script tag or install <code>@boostbossai/lumi-sdk</code>.</li>
       <li><strong>Server-side bots</strong> → POST to <code>/v1/ad-request</code> with a publisher Bearer key.</li>
     </ul>
-    <p>Publisher revenue settles per your signed Publisher Agreement. See <a href="/docs/payouts" class="inline-link">Payouts</a> for cycle and provider details.</p>
+    <p>Publishers earn <strong>Credits</strong>, not cash: every hosted impression mints 1 Credit, and Credits are spent to promote your own product across the network. There are no cash payouts. See <a href="/docs/reporting" class="inline-link">Reporting</a> for tracking what you've earned.</p>
 
     <h3 id="pub-mcp">MCP JSON-RPC endpoint</h3>
     <div class="endpoint"><span class="method post">POST</span><span class="path">/api/mcp</span><span class="desc">Model Context Protocol — JSON-RPC 2.0.</span></div>
@@ -255,7 +241,7 @@
 
     <h3 id="pub-track">Track event (impression / click / close / skip / video_complete)</h3>
     <div class="endpoint"><span class="method post">POST</span><span class="path">/api/track</span><span class="desc">Beacon — also accepts GET for 1×1 GIF pixel use cases.</span></div>
-    <p>Fires on every ad lifecycle event. Feeds the billing ledger (advertiser spend) and publisher revenue accrual atomically per event.</p>
+    <p>Fires on every ad lifecycle event. Feeds the billing ledger (advertiser spend) and publisher Credit accrual atomically per event — every hosted impression mints 1 Credit.</p>
 
     <h4>Request body</h4>
     <table class="params">
@@ -264,7 +250,7 @@
         <tr><td class="param-name">event_type<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">One of <code>impression</code>, <code>click</code>, <code>close</code>, <code>skip</code>, <code>video_complete</code>.</td></tr>
         <tr><td class="param-name">campaign_id<span class="required">req</span></td><td class="param-type">uuid</td><td class="param-desc">The campaign that served the ad.</td></tr>
         <tr><td class="param-name">developer_id</td><td class="param-type">uuid</td><td class="param-desc">Publisher ID (auto-resolved from the JWT when present).</td></tr>
-        <tr><td class="param-name">format</td><td class="param-type">string</td><td class="param-desc">Ad format that served. Used for revenue split bookkeeping.</td></tr>
+        <tr><td class="param-name">format</td><td class="param-type">string</td><td class="param-desc">Ad format that served. Used for reporting breakdowns.</td></tr>
         <tr><td class="param-name">integration_method</td><td class="param-type">string</td><td class="param-desc">One of <code>mcp</code>, <code>js_snippet</code>, <code>npm_sdk</code>, <code>rest</code>.</td></tr>
       </tbody>
     </table>
@@ -279,7 +265,7 @@
          ADVERTISER
          ════════════════════════════════════════════════════════════════ -->
     <h2 id="advertiser-overview"><span class="role-pill adv">Adv</span>Advertiser endpoints</h2>
-    <p>Advertisers boost their products through the SuperBoost direct path. The Pilot Console UI talks to <code>/api/products</code> (boost_* fields) and <code>/api/pilot-spend</code>. The <code>/api/campaigns</code> endpoints documented below remain functional for Advanced mode. Auth: JWT bearer obtained from <code>/api/auth?action=login</code> as role <code>advertiser</code>.</p>
+    <p>Advertisers boost their products through the SuperBoost direct path via the <code>/api/campaigns</code> endpoints documented below. Auth: JWT bearer obtained from <code>/api/auth?action=login</code> as role <code>advertiser</code>.</p>
 
     <h3 id="adv-campaigns">List campaigns</h3>
     <div class="endpoint"><span class="method get">GET</span><span class="path">/api/campaigns?advertiser_id=&lt;uuid&gt;</span><span class="desc">All campaigns for the authenticated advertiser.</span></div>
@@ -305,8 +291,7 @@
         <tr><td class="param-name">target_host_apps</td><td class="param-type">string[]</td><td class="param-desc">Specific AI apps to target.</td></tr>
         <tr><td class="param-name">target_surfaces</td><td class="param-type">string[]</td><td class="param-desc"><code>chat</code>, <code>tool_result</code>, <code>welcome</code>, etc.</td></tr>
         <tr><td class="param-name">target_integration_methods</td><td class="param-type">string[]</td><td class="param-desc">Per-door opt-in. Empty = all four doors.</td></tr>
-        <tr><td class="param-name">product_id</td><td class="param-type">uuid</td><td class="param-desc">Optional — link the campaign to a Product for affiliate attribution.</td></tr>
-        <tr><td class="param-name">use_ad_credit</td><td class="param-type">boolean</td><td class="param-desc">Fund the campaign from converted MoR earnings (Promote loop) instead of PayPal billing. Validated against your <a href="#sel-payouts" class="inline-link">ad credit balance</a>.</td></tr>
+        <tr><td class="param-name">use_ad_credit</td><td class="param-type">boolean</td><td class="param-desc">Fund the campaign from your Credits balance (the Promote loop) instead of cash billing. Validated against available Credits.</td></tr>
       </tbody>
     </table>
 
@@ -327,139 +312,19 @@
     <div class="endpoint"><span class="method get">GET</span><span class="path">/api/stats?type=advertiser&id=&lt;uuid&gt;</span><span class="desc">Aggregate spend, impressions, clicks, conversions.</span></div>
     <p>Returns daily series + totals over the time range. Break down by campaign, format, host app, integration method, or day. The publisher-side counterpart is <code>?type=developer&key=&lt;publisher_id&gt;</code>.</p>
 
-    <h3 id="adv-billing">Deposit funds</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=create_paypal_order</span><span class="desc">Start a PayPal order to add advertiser balance.</span></div>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=capture_paypal_order</span><span class="desc">Capture the order after the buyer approves on PayPal.</span></div>
+    <h3 id="adv-billing">Deposit funds (add cash to amplify)</h3>
+    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/billing?action=create_checkout</span><span class="desc">Start a hosted checkout to add advertiser balance.</span></div>
     <div class="endpoint"><span class="method get">GET</span><span class="path">/api/billing?action=balance&id=&lt;uuid&gt;</span><span class="desc">Current advertiser balance.</span></div>
     <div class="endpoint"><span class="method get">GET</span><span class="path">/api/billing?action=history&id=&lt;uuid&gt;</span><span class="desc">Paginated transaction history.</span></div>
 
-    <p>Advertiser deposits run through <strong>PayPal end-to-end</strong>, matching publisher and seller payouts. The single-provider rule (PayPal pay-in + payout, both rails) ships from a Taiwan corporate entity, where local law requires pay-in and payout to flow through the same provider. See <a href="/docs/payouts" class="inline-link">Payouts</a> for the symmetric payout side.</p>
+    <p>Cash flows <strong>one way</strong>: deposits amplify your promotion budget on top of the Credits you earn hosting. There is no cash-out — nothing ever flows back out of the platform.</p>
 
     <h4>Flow</h4>
     <ol>
-      <li>Frontend POSTs <code>create_paypal_order</code> with the deposit amount. Backend creates a PayPal order and returns an <code>approval_url</code>.</li>
-      <li>Frontend redirects the advertiser to <code>approval_url</code>. PayPal returns them to your configured return URL with the order ID echoed back.</li>
-      <li>Return URL handler POSTs <code>capture_paypal_order</code> with the order ID. Backend calls PayPal Capture, credits the advertiser balance, and returns the new balance.</li>
-      <li>The <a href="#webhooks" class="inline-link">PayPal webhook</a> reconciles asynchronously so dropped captures self-heal.</li>
+      <li>Frontend POSTs <code>create_checkout</code> with the deposit amount. Backend creates a hosted checkout session and returns its URL.</li>
+      <li>Frontend redirects the advertiser to the checkout URL; the provider returns them to your configured return URL after approval.</li>
+      <li>The provider webhook reconciles asynchronously — the balance updates within seconds; poll <code>action=balance</code> after return.</li>
     </ol>
-
-    <div class="callout info">
-      <span class="icon">i</span>
-      <div><strong>Legacy Stripe fallback.</strong> The codebase still contains a Stripe deposit path behind <code>PAYIN_PROVIDER=stripe</code> for development convenience. It will be removed once the Singapore corp move opens up multi-provider options. Don't integrate against it in production.</div>
-    </div>
-
-    <h3 id="adv-conversions">Conversion postback</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/conversion</span><span class="desc">Tell BB a conversion fired against a campaign click.</span></div>
-    <p>Used by advertisers who want CPA bidding or affiliate attribution to work. Aliased at <code>/api/conversions/postback</code>.</p>
-
-    <h4>Request body</h4>
-    <table class="params">
-      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">bb_click<span class="required">req</span></td><td class="param-type">uuid</td><td class="param-desc">The click ID from the URL the user landed with. Load-bearing identifier — cookie is fallback only.</td></tr>
-        <tr><td class="param-name">event_type</td><td class="param-type">string</td><td class="param-desc"><code>signup</code>, <code>purchase</code>, <code>trial</code>, or custom string.</td></tr>
-        <tr><td class="param-name">amount</td><td class="param-type">number</td><td class="param-desc">Gross purchase value in USD. Used for ROAS-based bidding.</td></tr>
-        <tr><td class="param-name">currency</td><td class="param-type">string</td><td class="param-desc">ISO 4217 — defaults to <code>USD</code>.</td></tr>
-        <tr><td class="param-name">idempotency_key</td><td class="param-type">string</td><td class="param-desc">Prevents double-credit on retries.</td></tr>
-        <tr><td class="param-name">metadata</td><td class="param-type">object</td><td class="param-desc">Free-form, capped at 2KB JSON.</td></tr>
-      </tbody>
-    </table>
-
-    <!-- ════════════════════════════════════════════════════════════════
-         SELLER (MoR)
-         ════════════════════════════════════════════════════════════════ -->
-    <h2 id="seller-overview"><span class="role-pill sel">Sel</span>Seller endpoints (Merchant of Record)</h2>
-    <p>Sellers register products in BB, BB hosts the checkout, splits the proceeds per <a href="/docs#concepts" class="inline-link">Commission model v2</a>, and emails buyers an activation link. The seller's job is to configure their product once and accept an inbound webhook (or call the voucher API on signup) when a buyer activates.</p>
-
-    <p>For the full activation-link integration walk-through with code samples in Node / Python / PHP and a Zapier no-code path, see <a href="/docs/activation-link" class="inline-link">Activation link integration</a>. This section is the API reference; that page is the integration guide.</p>
-
-    <h3 id="sel-products">Products CRUD</h3>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/products</span><span class="desc">List your products.</span></div>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/products?action=create</span><span class="desc">Register a new product (enters audit).</span></div>
-    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/api/products?action=update</span><span class="desc">Update an unapproved product.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/products?action=browse</span><span class="desc">Affiliate-facing list of approved products.</span></div>
-
-    <p>Products are the parent entity for campaigns + affiliate saves. Once a product's <code>audit_status</code> is <code>approved</code>, the product is locked — further changes require duplicating as a new draft.</p>
-
-    <h4>Key fields on create / update</h4>
-    <table class="params">
-      <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
-      <tbody>
-        <tr><td class="param-name">name<span class="required">req</span></td><td class="param-type">string</td><td class="param-desc">Display name on the buyer page.</td></tr>
-        <tr><td class="param-name">tagline</td><td class="param-type">string</td><td class="param-desc">One-line TL;DR.</td></tr>
-        <tr><td class="param-name">hero_images</td><td class="param-type">string[]</td><td class="param-desc">Carousel images at the top of the buyer page.</td></tr>
-        <tr><td class="param-name">hero_video_url</td><td class="param-type">string</td><td class="param-desc">Optional autoplay-muted-loop hero video.</td></tr>
-        <tr><td class="param-name">feature_blocks</td><td class="param-type">object[]</td><td class="param-desc">AppSumo-style zigzag feature sections.</td></tr>
-        <tr><td class="param-name">affiliate_pool_pct</td><td class="param-type">number</td><td class="param-desc">% of each order put into the affiliate pool. BB takes 30% of pool, affiliate gets 70%.</td></tr>
-        <tr><td class="param-name">fulfillment_redirect_url</td><td class="param-type">string</td><td class="param-desc">Your signup page. BB appends <code>?bb_token=&lt;code&gt;</code> when the buyer clicks the activation email.</td></tr>
-        <tr><td class="param-name">fulfillment_webhook_url</td><td class="param-type">string</td><td class="param-desc">Optional S2S notification fired on capture.</td></tr>
-        <tr><td class="param-name">fulfillment_webhook_secret</td><td class="param-type">string</td><td class="param-desc">Random ≥32 char string — also doubles as your <code>seller_secret</code> for the voucher API.</td></tr>
-      </tbody>
-    </table>
-
-    <h3 id="sel-pricing-plans">Pricing plans</h3>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/pricing-plans?action=list&product_id=&lt;uuid&gt;</span><span class="desc">Plans for one product.</span></div>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/pricing-plans?action=create</span><span class="desc">Add a plan (enters audit).</span></div>
-    <div class="endpoint"><span class="method patch">PATCH</span><span class="path">/api/pricing-plans?action=update</span><span class="desc">Edit a plan.</span></div>
-
-    <p>One product can have many plans. Each plan independently audit-gated — see <a href="/docs#concepts" class="inline-link">pricing plans audit policy</a>: every plan needs an <code>original_price_proof_url</code> pointing to the seller's own site before going live (backfilled legacy plans auto-approve).</p>
-
-    <h3 id="sel-product-orders">Product orders + analytics</h3>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/product-orders?action=summary&product_id=&lt;uuid&gt;</span><span class="desc">Top-line numbers for one product.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/product-orders?action=orders&product_id=&lt;uuid&gt;</span><span class="desc">Paginated orders list.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/product-orders?action=timeseries&product_id=&lt;uuid&gt;&days=30</span><span class="desc">Daily click + purchase series.</span></div>
-
-    <p>Returns full buyer email — the advertiser owns the order so the affiliate-facing privacy mask doesn't apply. <code>days</code> defaults to 30, max 90.</p>
-
-    <h3 id="sel-vouchers-validate">Validate voucher</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/vouchers/validate</span><span class="desc">Read-only check before granting access.</span></div>
-    <p>Call from your signup endpoint when a buyer lands with <code>?bb_token=&lt;code&gt;</code>. Returns the voucher state + product context + buyer email. The <code>valid</code> boolean is <code>true</code> only when status is <code>issued</code>.</p>
-
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">cURL</span><span class="copy">Copy</span></div>
-<pre><span class="f">curl</span> https://boostboss.ai/v1/vouchers/validate \
-  -H <span class="s">"Content-Type: application/json"</span> \
-  -d <span class="s">'{
-    "code":          "BB-A8X3-92K4-7QM2",
-    "seller_secret": "your-fulfillment_webhook_secret"
-  }'</span></pre>
-    </div>
-
-    <h3 id="sel-vouchers-redeem">Redeem voucher</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/v1/vouchers/redeem</span><span class="desc">Mark the voucher consumed (idempotent).</span></div>
-    <p>Call after you've created the paid account on your side. Flips status <code>issued → redeemed</code> and stamps <code>redeemed_at</code>. Re-submitting returns <code>deduped: true</code> without changing state — safe to retry. Refunded / expired / revoked vouchers return 409 with a <code>reason</code> field.</p>
-
-    <p>The optional <code>buyer_metadata</code> field (≤2KB JSON) is stored against the voucher for your audit trail.</p>
-
-    <h3 id="sel-payouts">Seller payouts + ad credit</h3>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=balance</span><span class="desc">Unsettled + lifetime totals.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=method</span><span class="desc">Current PayPal payout email.</span></div>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/seller-payouts?action=set_method</span><span class="desc">Update PayPal email + display name.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=history</span><span class="desc">Paginated dispatched payouts.</span></div>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/seller-payouts?action=convert_to_ad_credit</span><span class="desc">Convert MoR earnings to in-platform ad credit.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/seller-payouts?action=ad_credit_balance</span><span class="desc">Available ad credit + conversion history.</span></div>
-
-    <p>The <strong>Promote loop</strong>: seller's MoR earnings can be converted into in-platform ad credit (instead of cashing out to PayPal), and that credit can then fund campaigns directly via <code>use_ad_credit: true</code> on <a href="#adv-create-campaign" class="inline-link">campaign create</a>. Money cycles entirely inside BB.</p>
-
-    <p>Convert accepts an optional <code>amount</code> field — pass nothing to convert the full unsettled balance, or pass a partial amount which FIFO-walks the captured transactions and rounds up to the nearest one (the response includes a <code>rounded_up</code> flag).</p>
-
-    <!-- ════════════════════════════════════════════════════════════════
-         AFFILIATE
-         ════════════════════════════════════════════════════════════════ -->
-    <h2 id="affiliate-overview"><span class="role-pill aff">Aff</span>Affiliate endpoints</h2>
-    <p>Affiliates save approved products, get a share link, post it anywhere — when someone buys, the affiliate earns 70% of the affiliate pool the seller set. Attribution rides on a <code>bb_click=&lt;uuid&gt;</code> URL parameter that survives Safari ITP and ad blockers.</p>
-
-    <h3 id="aff-redirect">Share link redirect</h3>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/s/:token</span><span class="desc">302 to product page with bb_click appended.</span></div>
-    <p>Reached via the <code>vercel.json</code> rewrite from <code>/s/:token → /api/affiliate-redirect?token=:token</code>. The handler atomically increments the share link's click counters, fires a best-effort click row into <code>affiliate_clicks</code>, sets the <code>bb_aff_&lt;saved_ad_id&gt;</code> cookie (30-day window — fallback only), and 302-redirects to the product page with <code>?bb_click=&lt;uuid&gt;</code> appended along with UTM parameters.</p>
-
-    <p>This is the entire affiliate-side API for the redirect path — there's no JSON response, just the 302. The <code>bb_click</code> UUID in the URL is the load-bearing attribution identifier, not the cookie.</p>
-
-    <h3 id="aff-sales">Sales report</h3>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/affiliate-sales?action=summary</span><span class="desc">Captured count, lifetime revenue, lifetime commission, pending settlement.</span></div>
-    <div class="endpoint"><span class="method get">GET</span><span class="path">/api/affiliate-sales</span><span class="desc">Paginated sales list (MoR captures attributed to you).</span></div>
-
-    <p>Auth: affiliate JWT. Returns rows from <code>storefront_transactions</code> attributed to this affiliate via <code>bb_click</code>. This is the real money trail — captures BB actually processed on the affiliate's behalf — distinct from the legacy <code>/api/conversions</code> postback flow which records attribution before money has settled.</p>
 
     <!-- ════════════════════════════════════════════════════════════════
          BENNA
@@ -628,38 +493,18 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
          WEBHOOKS
          ════════════════════════════════════════════════════════════════ -->
     <h2 id="webhooks">Webhooks</h2>
-    <p>There is no unified webhook subscription system today. Three concrete webhook surfaces ship:</p>
+    <p>There is no unified webhook subscription system today. Money-in events are handled by two inbound webhooks:</p>
 
-    <h3>Outbound: per-product fulfillment webhook</h3>
-    <p>When a buyer's PayPal capture succeeds, BB fires an HTTPS POST to your product's <code>fulfillment_webhook_url</code> (if set). Use this for non-API server-side provisioning. Payload includes the transaction ID, buyer email, product ID, captured amount, and the voucher code.</p>
-    <p>Verify the <code>X-BB-Signature</code> header against the <code>fulfillment_webhook_secret</code> you set on the product:</p>
-    <div class="code-block with-head">
-      <div class="code-head"><span class="lang">Node</span><span class="copy">Copy</span></div>
-<pre><span class="k">import</span> crypto <span class="k">from</span> <span class="s">'crypto'</span>;
-<span class="k">const</span> sig = req.headers[<span class="s">'x-bb-signature'</span>];
-<span class="k">const</span> expected = crypto.<span class="f">createHmac</span>(<span class="s">'sha256'</span>, SECRET).<span class="f">update</span>(req.rawBody).<span class="f">digest</span>(<span class="s">'hex'</span>);
-<span class="k">if</span> (crypto.<span class="f">timingSafeEqual</span>(<span class="n">Buffer</span>.<span class="f">from</span>(sig), <span class="n">Buffer</span>.<span class="f">from</span>(expected))) { <span class="c">// verified</span> }</pre>
-    </div>
-
-    <h3>Inbound: PayPal webhook (every money event)</h3>
-    <div class="endpoint"><span class="method post">POST</span><span class="path">/api/paypal-webhook</span><span class="desc">Single inbound webhook for the entire money flow.</span></div>
-    <p>PayPal is the only payment provider — both rails (advertiser deposits + storefront buyer captures going in, publisher + seller payouts going out) flow through PayPal under the Taiwan-entity single-provider rule. This webhook handles every related event:</p>
+    <h3>Inbound: payment webhooks (deposits)</h3>
+    <p>Cash flows one way on Boost Boss: in. Deposits credit your account balance; publishers earn Credits (never cash) by hosting ads. Two inbound handlers process deposit events server-side — there is nothing for you to integrate here:</p>
     <ul>
-      <li><code>PAYMENT.CAPTURE.COMPLETED</code> — credits the advertiser balance (deposit) or kicks off the MoR split + voucher issuance (storefront purchase).</li>
-      <li><code>PAYMENT.CAPTURE.REFUNDED</code> — reverses the corresponding ledger row.</li>
-      <li><code>PAYMENT.PAYOUTSBATCH.SUCCESS</code> / <code>DENIED</code> — marks publisher and seller payout batches completed or failed.</li>
-      <li><code>PAYMENT.PAYOUTS-ITEM.SUCCEEDED</code> / <code>FAILED</code> / <code>UNCLAIMED</code> — per-recipient outcome for each payout in a batch.</li>
+      <li><code>/api/paypal-webhook</code> equivalent handling lives inside <code>/api/billing</code> — <code>PAYMENT.CAPTURE.COMPLETED</code> credits the advertiser balance (deposit); <code>PAYMENT.CAPTURE.REFUNDED</code> reverses the corresponding ledger row.</li>
+      <li><code>/api/stripe-webhook</code> — Stripe checkout deposits (<code>checkout.session.completed</code>, <code>charge.refunded</code>).</li>
     </ul>
-    <p>Verifies the <code>PAYPAL-AUTH-ALGO</code> / <code>PAYPAL-TRANSMISSION-SIG</code> / <code>PAYPAL-TRANSMISSION-ID</code> headers against the configured PayPal webhook ID server-side. Replays are deduped by transmission ID.</p>
 
     <div class="callout info">
       <span class="icon">i</span>
-      <div><strong>Legacy Stripe webhook.</strong> A <code>/api/stripe-webhook</code> handler still exists for the legacy Stripe pay-in fallback. It's not part of the supported integration surface; expect it to be removed once the Singapore corp move opens up multi-provider options.</div>
-    </div>
-
-    <div class="callout info">
-      <span class="icon">i</span>
-      <div><strong>Roadmap.</strong> A unified event-bus model (subscribe to events like <code>ad.served</code>, <code>campaign.approved</code>, <code>voucher.redeemed</code>) is on the longer-term plan but not shipped. Today the dashboard is the canonical surface for these state changes.</div>
+      <div><strong>Roadmap.</strong> A unified event-bus model (subscribe to events like <code>ad.served</code>, <code>campaign.approved</code>) is on the longer-term plan but not shipped. Today the dashboard is the canonical surface for these state changes.</div>
     </div>
 
     <!-- ════════════════════════════════════════════════════════════════
@@ -680,13 +525,8 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
         <tr><td class="param-type">400</td><td class="param-name">invalid_request</td><td class="param-desc">Malformed body or missing required field.</td></tr>
         <tr><td class="param-type">400</td><td class="param-name">insufficient_credit</td><td class="param-desc">Tried to fund a campaign with <code>use_ad_credit</code> but balance &lt; budget. Response includes <code>available</code> + <code>requested</code>.</td></tr>
         <tr><td class="param-type">401</td><td class="param-name">invalid_token</td><td class="param-desc">JWT missing, expired, or malformed.</td></tr>
-        <tr><td class="param-type">401</td><td class="param-name">bad_secret</td><td class="param-desc">Voucher API: <code>seller_secret</code> doesn't match the product's <code>fulfillment_webhook_secret</code>.</td></tr>
-        <tr><td class="param-type">401</td><td class="param-name">no_secret</td><td class="param-desc">Voucher API: no secret configured on the product.</td></tr>
-        <tr><td class="param-type">403</td><td class="param-name">forbidden</td><td class="param-desc">Authenticated but not authorized for this resource (e.g. another seller's product).</td></tr>
-        <tr><td class="param-type">404</td><td class="param-name">voucher_not_found</td><td class="param-desc">Voucher code doesn't exist.</td></tr>
-        <tr><td class="param-type">404</td><td class="param-name">product_missing</td><td class="param-desc">Voucher references a product that's been deleted.</td></tr>
+        <tr><td class="param-type">403</td><td class="param-name">forbidden</td><td class="param-desc">Authenticated but not authorized for this resource (e.g. another account's campaign).</td></tr>
         <tr><td class="param-type">405</td><td class="param-name">—</td><td class="param-desc">Wrong HTTP method. Body usually names the allowed method.</td></tr>
-        <tr><td class="param-type">409</td><td class="param-name">refunded / expired / revoked</td><td class="param-desc">Voucher in a non-redeemable state. The <code>reason</code> field names which.</td></tr>
         <tr><td class="param-type">429</td><td class="param-name">rate_limited</td><td class="param-desc">Too many requests. Back off and retry with jitter.</td></tr>
         <tr><td class="param-type">500</td><td class="param-name">—</td><td class="param-desc">Server error. Auto-retry safe.</td></tr>
         <tr><td class="param-type">503</td><td class="param-name">demo_mode</td><td class="param-desc">Operation requires Supabase mode (e.g. ad credit funding) but the deployment is in in-memory mode.</td></tr>
@@ -699,28 +539,13 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
     <h2 id="changelog">Changelog</h2>
 
     <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
+      <h4 style="margin-top:0">2026-07-06 — Credits-only model</h4>
+      <p>No cash payouts, ever. Publishers earn <strong>Credits</strong> (1 per hosted impression), spendable only on promoting their own product across the network. Cash- and Credit-funded campaigns compete at equal priority in the auction. The MoR storefront, affiliate program, voucher API, and all payout endpoints are retired.</p>
+    </div>
+
+    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
       <h4 style="margin-top:0">2026-06-14 — Promote loop (Phase 3)</h4>
-      <p>Campaign create accepts <code>use_ad_credit: true</code> — validates available credit, writes deduction row, stamps <code>credit_funded</code> on the campaign. Closes the MoR earnings → ad credit → campaign funding loop entirely inside BB.</p>
-    </div>
-
-    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
-      <h4 style="margin-top:0">2026-06-13 — Activation link fulfillment is default</h4>
-      <p>Buyer activation now uses one-click links (<code>?bb_token=&lt;code&gt;</code>) into the seller's signup URL by default, replacing the multi-step "paste this code" UX. Voucher API unchanged; only the fulfillment ergonomics improved. <a href="/docs/activation-link" class="inline-link">Integration guide</a>.</p>
-    </div>
-
-    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
-      <h4 style="margin-top:0">2026-06-11 — Seller payouts + admin dispatch</h4>
-      <p>Sellers configure a PayPal payout email via <code>/api/seller-payouts</code>. Admin dispatch endpoint + Saturday cron settle eligible sellers via PayPal Payouts API. Single-provider rule (PayPal pay-in + payout) per the Taiwan-entity setup.</p>
-    </div>
-
-    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
-      <h4 style="margin-top:0">2026 — Commission Model v2</h4>
-      <p>Replaces the legacy 15% top-line take with a per-product affiliate pool model: seller sets <code>affiliate_pool_pct</code>, BB takes 30% of the pool, affiliate gets 70%, seller keeps the rest. BB only earns when an affiliate drives the sale. Direct (non-affiliate) sales are seller-only minus processor fees.</p>
-    </div>
-
-    <div style="border-left:3px solid var(--pink);padding-left:18px;margin-bottom:24px;">
-      <h4 style="margin-top:0">2026 — MoR storefront live</h4>
-      <p>Buyer-facing product pages at <code>/p/&lt;uuid&gt;</code> with BB-hosted PayPal checkout. Vouchers issued on capture, fulfillment webhook fires to seller. <code>bb_click=&lt;uuid&gt;</code> attribution survives Safari ITP and ad blockers.</p>
+      <p>Campaign create accepts <code>use_ad_credit: true</code> — validates available credit, writes deduction row, stamps <code>credit_funded</code> on the campaign. Earnings → credit → campaign funding, entirely inside BB.</p>
     </div>
 
     <div class="foot-nav">
@@ -728,9 +553,9 @@ GET /api/rtb?op=loss&amp;imp=1&amp;bid=bbx_b1f42a6c3d9e&amp;reason=2</pre>
         <div class="dir">← Back</div>
         <div class="ttl">Documentation overview</div>
       </a>
-      <a href="/docs/activation-link" class="next">
+      <a href="/docs/reporting" class="next">
         <div class="dir">Next →</div>
-        <div class="ttl">Activation link integration</div>
+        <div class="ttl">Reporting</div>
       </a>
     </div>
     </article>
