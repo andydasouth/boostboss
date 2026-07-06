@@ -27,7 +27,6 @@ const {
 
 const campaigns      = require("./campaigns.js");
 const stats          = require("./stats.js");
-const products       = require("./products.js");
 const billing        = require("./billing.js");
 const creativeAssets = require("./creative-assets.js");
 
@@ -133,19 +132,6 @@ const TOOLS = [
     inputSchema: { type: "object", properties: {} },
   },
   {
-    name: "list_products",
-    description: "List the advertiser's affiliate products.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "create_product",
-    description: "Create an affiliate product. Pass at least name + landing/destination fields per your product model.",
-    inputSchema: { type: "object", properties: {
-      name: { type: "string" }, description: { type: "string" },
-      price: { type: "number" }, url: { type: "string" },
-    }, required: ["name"] },
-  },
-  {
     name: "get_creative_library",
     description: "Read the account creative library (brand kit, headlines, body, CTAs, images, videos, voucher).",
     inputSchema: { type: "object", properties: {} },
@@ -189,10 +175,6 @@ async function callTool(name, args, bearer, advertiserId) {
       // In production the handler derives the advertiser from the Bearer key
       // and ignores id; the fallback only matters for demo mode (no Supabase).
       return invoke(stats, { method: "GET", query: { type: "advertiser", id: advertiserId || "adv_demo" }, bearer });
-    case "list_products":
-      return invoke(products, { method: "GET", query: {}, bearer });
-    case "create_product":
-      return invoke(products, { method: "POST", query: { action: "create" }, body: args, bearer });
     case "get_creative_library":
       return invoke(creativeAssets, { method: "GET", query: {}, bearer });
     case "set_creative_assets":

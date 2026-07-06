@@ -551,21 +551,9 @@
    distinct route on the publisher dashboard (Mediation & Waterfall). Keep it
    in the allowlist — inert where no such section exists. */
 .shell-wrap[data-shell-active-route="performance"]     [data-shell-route="performance"],
-.shell-wrap[data-shell-active-route="pilot"]           [data-shell-route="pilot"],
-.shell-wrap[data-shell-active-route="campaigns"]       [data-shell-route="campaigns"],
-.shell-wrap[data-shell-active-route="products"]        [data-shell-route="products"],
-.shell-wrap[data-shell-active-route="product-orders"]  [data-shell-route="product-orders"],
 .shell-wrap[data-shell-active-route="creatives"]       [data-shell-route="creatives"],
 .shell-wrap[data-shell-active-route="boosts"]          [data-shell-route="boosts"],
-.shell-wrap[data-shell-active-route="billing"]         [data-shell-route="billing"],
-.shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],
-/* setup route retired 2026-06-25 — pixel moved into Settings,
-   Automated Rules deleted, Advanced mode deleted. */
 .shell-wrap[data-shell-active-route="integrations"]    [data-shell-route="integrations"],
-.shell-wrap[data-shell-active-route="placements"]      [data-shell-route="placements"],
-.shell-wrap[data-shell-active-route="payouts"]         [data-shell-route="payouts"],
-/* promote route retired 2026-06-25 — balance cards moved to Payouts. */
-.shell-wrap[data-shell-active-route="usage"]           [data-shell-route="usage"],
 .shell-wrap[data-shell-active-route="api"]             [data-shell-route="api"],
 .shell-wrap[data-shell-active-route="settings"]        [data-shell-route="settings"],
 .shell-wrap[data-shell-active-route="notifications"]   [data-shell-route="notifications"] {

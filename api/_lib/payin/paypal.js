@@ -222,101 +222,6 @@ async function createOrder(opts) {
 }
 
 /**
- * Create a PayPal Order for the MoR Storefront flow (buyer purchasing
- * a product, NOT an advertiser depositing ad credit).
- *
- * Differs from createOrder() above in three ways:
- *   1. invoice_id is BB's storefront_transactions UUID (the source-of-
- *      truth pointer PayPal stores forever — see [[commission-attribution-model]])
- *   2. custom_id is compact affiliate attribution metadata so we can
- *      reconstruct (affiliate, click) from PayPal's records alone
- *   3. description names the product the buyer is purchasing
- *
- * Required opts:
- *   transactionId   — BB's storefront_transactions UUID (becomes invoice_id)
- *   productName     — buyer-facing line on the PayPal receipt
- *   amountUsd       — purchase price
- * Optional opts:
- *   bbClick, affiliateId, productId — encoded into custom_id for audit
- *   buyerEmail     — populates payer.email_address (PayPal pre-fills login)
- *   returnUrl, cancelUrl — post-approval redirects
- *   requestId      — for PayPal idempotency on retries
- */
-async function createCheckoutOrder(opts) {
-  const {
-    transactionId, productName, amountUsd,
-    bbClick, affiliateId, productId,
-    buyerEmail, returnUrl, cancelUrl, requestId,
-  } = opts || {};
-
-  if (!transactionId) throw new Error("createCheckoutOrder: transactionId required");
-  if (!productName)   throw new Error("createCheckoutOrder: productName required");
-  const amount = Number(amountUsd);
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("createCheckoutOrder: amountUsd must be a positive number");
-  }
-  const amountStr = amount.toFixed(2);
-
-  if (!hasCreds()) {
-    const orderId = _demoOrderId();
-    return {
-      mode:         "demo",
-      order_id:     orderId,
-      approval_url: _demoApprovalUrl(orderId),
-      raw:          { id: orderId, status: "CREATED", _demo: true },
-    };
-  }
-
-  // Compact attribution metadata. PayPal caps custom_id at 127 chars so
-  // we encode the first 8 chars of each UUID — enough to reconstruct
-  // attribution if BB's DB ever loses the row, since we can join back
-  // to storefront_transactions via invoice_id (full UUID).
-  const customParts = [];
-  if (affiliateId) customParts.push("aff:" + String(affiliateId).slice(0, 8));
-  if (bbClick)     customParts.push("clk:" + String(bbClick).slice(0, 8));
-  if (productId)   customParts.push("prd:" + String(productId).slice(0, 8));
-  const customId = customParts.join(";").slice(0, 127);
-
-  const body = {
-    intent: "CAPTURE",
-    purchase_units: [{
-      // BB's transaction UUID. PayPal enforces uniqueness per merchant
-      // account so the same transactionId can't be paid twice — built-in
-      // dedupe at the payment-processor layer.
-      invoice_id:   transactionId,
-      custom_id:    customId || undefined,
-      description:  `${productName.slice(0, 100)} via Boost Boss`,
-      amount:       { currency_code: "USD", value: amountStr },
-      payee:        process.env.BOOSTBOSS_PAYPAL_MERCHANT_ID
-                    ? { merchant_id: process.env.BOOSTBOSS_PAYPAL_MERCHANT_ID }
-                    : undefined,
-    }],
-    application_context: {
-      brand_name:           "Boost Boss",
-      shipping_preference:  "NO_SHIPPING",  // digital goods only
-      user_action:          "PAY_NOW",
-      return_url:           returnUrl || undefined,
-      cancel_url:           cancelUrl || undefined,
-    },
-  };
-  if (buyerEmail) body.payer = { email_address: buyerEmail };
-
-  const order = await _paypalFetch("/v2/checkout/orders", {
-    method:    "POST",
-    body,
-    requestId: requestId || undefined,
-  });
-
-  const approval = (order.links || []).find((l) => l.rel === "approve") || {};
-  return {
-    mode:         "paypal",
-    order_id:     order.id,
-    approval_url: approval.href || null,
-    raw:          order,
-  };
-}
-
-/**
  * Capture funds on an approved order. Called from the advertiser's
  * post-approval return URL with the order id PayPal sends back.
  *
@@ -500,8 +405,7 @@ async function verifyWebhook({ headers, rawBody, webhookId } = {}) {
 // ────────────────────────────────────────────────────────────────────
 module.exports = {
   // public API
-  createOrder,           // advertiser deposit flow (existing)
-  createCheckoutOrder,   // MoR storefront flow (buyer purchasing product)
+  createOrder,           // advertiser deposit flow
   captureOrder,
   refundCapture,
   getOrder,

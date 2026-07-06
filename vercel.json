@@ -30,47 +30,6 @@
     { "source": "/test/lumi-snippet-test", "destination": "/admin/qa/lumi-snippet-test", "permanent": true }
   ],
   "rewrites": [
-    {
-      "source": "/help/article",
-      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
-      "destination": "/affiliate-help-article.html"
-    },
-    {
-      "source": "/help",
-      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
-      "destination": "/affiliate-help.html"
-    },
-    {
-      "source": "/signin",
-      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
-      "destination": "/affiliate-signin.html"
-    },
-    {
-      "source": "/signup",
-      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
-      "destination": "/affiliate-signup.html"
-    },
-    {
-      "source": "/((?!api/).*)",
-      "has": [{ "type": "host", "value": "affiliate.boostboss.ai" }],
-      "destination": "/affiliate.html"
-    },
-    { "source": "/affiliate", "destination": "/affiliate.html" },
-    { "source": "/affiliate/signin", "destination": "/affiliate-signin.html" },
-    { "source": "/affiliate/signup", "destination": "/affiliate-signup.html" },
-    { "source": "/affiliate/help", "destination": "/affiliate-help.html" },
-    { "source": "/affiliate/help/article", "destination": "/affiliate-help-article.html" },
-    { "source": "/help", "destination": "/affiliate-help.html" },
-    { "source": "/help/article", "destination": "/affiliate-help-article.html" },
-    { "source": "/s/:token", "destination": "/api/affiliate-redirect?token=:token" },
-    { "source": "/p/:token", "destination": "/product.html?id=:token" },
-    { "source": "/buy/:token", "destination": "/checkout.html?id=:token" },
-    { "source": "/buy/:token/success", "destination": "/checkout-success.html?id=:token" },
-    { "source": "/buy/:token/cancelled", "destination": "/checkout-cancelled.html?id=:token" },
-    { "source": "/v1/vouchers/validate", "destination": "/api/vouchers?action=validate" },
-    { "source": "/v1/vouchers/redeem",   "destination": "/api/vouchers?action=redeem" },
-    { "source": "/api/conversions/postback", "destination": "/api/conversions?action=postback" },
-    { "source": "/v1/conversion", "destination": "/api/conversions?action=postback" },
     { "source": "/en", "destination": "/index.html" },
     { "source": "/zh", "destination": "/index.html" },
     { "source": "/zh-TW", "destination": "/index.html" },
@@ -95,7 +54,6 @@
     { "source": "/publish/reset-password",  "destination": "/auth-flow.html" },
 
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/admin/payouts", "destination": "/admin-payouts.html" },
     { "source": "/admin/qa/lumi-snippet-test", "destination": "/admin-qa-lumi-snippet-test.html" },
     { "source": "/status", "destination": "/status.html" },
     { "source": "/playground", "destination": "/playground.html" },
@@ -103,8 +61,6 @@
     { "source": "/lumi/v1.js", "destination": "/lumi-v1.js" },
     { "source": "/docs", "destination": "/docs.html" },
     { "source": "/docs/quickstart", "destination": "/docs-quickstart.html" },
-    { "source": "/docs/activation-link", "destination": "/docs-activation-link.html" },
-    { "source": "/docs/product-lifecycle", "destination": "/docs-product-lifecycle.html" },
     { "source": "/docs/api-reference", "destination": "/docs-api-reference.html" },
     { "source": "/docs/browser", "destination": "/docs-browser.html" },
     { "source": "/docs/browser/react", "destination": "/docs-browser-react.html" },
@@ -115,7 +71,6 @@
     { "source": "/docs/js-snippet", "destination": "/docs-js-snippet.html" },
     { "source": "/docs/npm-sdk", "destination": "/docs-npm-sdk.html" },
     { "source": "/docs/rest-api", "destination": "/docs-rest-api.html" },
-    { "source": "/docs/payouts", "destination": "/docs-payouts.html" },
     { "source": "/docs/reporting", "destination": "/docs-reporting.html" },
     { "source": "/exchange", "destination": "/exchange.html" },
     { "source": "/publish", "destination": "/publish.html" },
@@ -235,22 +190,6 @@
     {
       "path": "/api/stats?type=recon",
       "schedule": "0 2 * * *"
-    },
-    {
-      "path": "/api/billing?action=run_payout_cron",
-      "schedule": "0 12 * * 5"
-    },
-    {
-      "path": "/api/billing?action=run_payout_retry_sweep",
-      "schedule": "0 12 * * 6"
-    },
-    {
-      "path": "/api/admin-seller-payouts?action=dispatch_batch",
-      "schedule": "30 12 * * 6"
-    },
-    {
-      "path": "/api/conversions?action=auto_confirm",
-      "schedule": "30 12 * * *"
     }
   ]
 }

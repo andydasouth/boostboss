@@ -40,7 +40,7 @@
     ],
     publisher: [
       'How do I tag placements?',
-      'When is my next payout?',
+      'How do I spend my earned credits?',
       'How is my RPM calculated?',
       'What does the intent score mean?',
     ],

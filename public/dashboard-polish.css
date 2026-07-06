@@ -23,7 +23,6 @@
    (card / button / table / modal / form passes land in later sections)
    ========================================================================== */
 
-
 /* ── [0] TOKEN BRIDGE ───────────────────────────────────────────────────────
    Same hex in most cases — this just routes the shell through the BB system so
    later passes inherit one source of truth. Values that intentionally shift are
@@ -40,7 +39,6 @@
   /* polish-local vars (scoped names, won't collide with --shell-*) */
   --polish-ease: cubic-bezier(0.22, 1, 0.36, 1);
 }
-
 
 /* ── [1] SIDEBAR CHROME ─────────────────────────────────────────────────── */
 
@@ -132,7 +130,6 @@
   color: var(--bb-pink, #FF2D78);
 }
 
-
 /* ── [2] TOP CHROME ─────────────────────────────────────────────────────── */
 
 /* Kill browser autofill's white/yellow field background across the console. */
@@ -186,7 +183,6 @@
 .shell-topbar__breadcrumb {
   color: #E7E9EA;
 }
-
 
 /* ── [3] CARDS ──────────────────────────────────────────────────────────────
    Refines surface only: shadow, radius, border, hover smoothness.
@@ -242,20 +238,8 @@
 /* ── [3B] INLINE-STYLED CONTENT PANELS (target by ID) ──
    Add each white inline-styled panel's ID to this list as we go.
    The three surface props use !important ONLY to beat the inline border/radius. */
-#pilotProductPicker {
-  border: 1px solid var(--bb-line, #EAEAEF) !important;
-  border-radius: var(--polish-card-radius) !important;
-  box-shadow: var(--polish-card-shadow);          /* not inline → no !important */
-  transition: box-shadow 0.22s var(--polish-ease),
-              border-color 0.22s var(--polish-ease);
-}
 
 /* shared help-text hint pattern ("Click a row to open…") — consistent quiet style */
-#pilotProductPicker span[style*="11px"] {
-  color: var(--bb-muted, #9CA3AF);
-  letter-spacing: 0.01em;
-}
-
 
 /* ── [4] BUTTONS ────────────────────────────────────────────────────────────
    Override-only. PROTECTS every hit area: no padding, height, font-size, or
@@ -274,12 +258,7 @@
    · added :focus-visible pink ring to all variants (a11y)                    */
 
 /* shared focus ring — applies to every button variant */
-.new-campaign-btn:focus-visible,
 .action-btn:focus-visible,
-.ncw-next:focus-visible,
-.ncw-launch:focus-visible,
-.ncw-back:focus-visible,
-.ncw-link:focus-visible,
 .launch-btn:focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.40);
@@ -288,22 +267,7 @@
 /* ── [4A] PRIMARY CTA (.new-campaign-btn) ──
    Gradient + pink glow apply ONLY to true primaries. The inline "Cancel"
    variant (style="background:#fff;…") is excluded so it keeps its ghost look. */
-.new-campaign-btn:not([style*="#fff"]) {
-  background: linear-gradient(135deg, #FF2D78 0%, #E01E65 100%);
-  box-shadow: 0 2px 8px rgba(255, 45, 120, 0.22);
-  transition: filter 0.15s ease, box-shadow 0.18s ease, transform 0.12s ease;
-}
-.new-campaign-btn:not([style*="#fff"]):hover {
-  filter: brightness(1.04);
-  box-shadow: 0 6px 16px rgba(255, 45, 120, 0.30);   /* pink, was orange */
-  transform: translateY(-1px);
-}
-.new-campaign-btn:not([style*="#fff"]):active {
-  transform: translateY(0);
-  box-shadow: 0 2px 8px rgba(255, 45, 120, 0.22);
-}
 /* the inline-white "Cancel" variant: give it a calm ghost hover */
-.new-campaign-btn[style*="#fff"]:hover { background: #F9FAFB !important; }
 
 /* ── [4A] ROW ACTION BUTTONS (.action-btn) ──
    Hit area (6px 12px) untouched. Hover goes soft-pink instead of orange. */
@@ -315,32 +279,9 @@
   color: #E01E65;
 }
 
-/* ── [4A] WIZARD PRIMARY (.ncw-next, .ncw-launch) ──
    Already the cleanest pattern — just gradient parity + smoother glow. */
-.ncw-next, .ncw-launch {
-  background: linear-gradient(135deg, #FF2D78 0%, #E01E65 100%);
-  box-shadow: 0 2px 8px rgba(255, 45, 120, 0.25);
-  transition: filter 0.14s ease, box-shadow 0.18s ease, transform 0.12s ease;
-}
-.ncw-next:hover, .ncw-launch:hover {
-  filter: brightness(1.05);
-  box-shadow: 0 6px 16px rgba(255, 45, 120, 0.30);
-  transform: translateY(-1px);
-}
-.ncw-next:active, .ncw-launch:active { transform: translateY(0); }
 
-/* ── [4A] WIZARD GHOST (.ncw-back) ── */
-.ncw-back {
-  transition: background-color 0.16s ease, border-color 0.16s ease, color 0.16s ease;
-}
-.ncw-back:hover {
-  background: #FFF5F8;                 /* faint pink wash, not flat gray */
-  border-color: rgba(255, 45, 120, 0.30);
-  color: #E01E65;
-}
 
-/* ── [4A] WIZARD TEXT-LINK (.ncw-link) ── already correct; just smooth it */
-.ncw-link { transition: color 0.14s ease; }
 
 /* ── [4A] LEGACY .launch-btn — refine, don't break (may be off-screen) ── */
 .launch-btn {
@@ -350,7 +291,6 @@
   filter: brightness(1.04);
   box-shadow: 0 6px 16px rgba(255, 45, 120, 0.28);
 }
-
 
 /* ── [5] FORMS ───────────────────────────────────────────────────────────────
    Override-only. Touches color / focus-ring / hover-border / radius parity.
@@ -385,22 +325,14 @@
    already-styled .form-*/.ncw-* controls (they own their :focus) and native
    checks/radios (they use accent-color). border-color is !important because
    these inputs carry an inline border that would otherwise win. */
-input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.form-input):not(.ncw-input):focus-visible,
-textarea:not(.form-textarea):not(.ncw-input):focus-visible,
-select:not(.form-select):not(.ncw-input):focus-visible {
+input:not([type=checkbox]):not([type=radio]):not([type=range]):not(.form-input):focus-visible,
+textarea:not(.form-textarea):focus-visible,
+select:not(.form-select):focus-visible {
   outline: none;
   border-color: var(--bb-pink, #FF2D78) !important;
-  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.12);
+  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.18);
 }
 
-/* [5d] Wizard radio/check — keep the :has(input:checked) pink-tint exactly as
-   is; just add a focus-within ring so keyboard users can see the active option.
-   This layers a shadow only; the checked bg/border state is untouched. */
-.ncw-radio:focus-within,
-.ncw-check:focus-within {
-  border-color: var(--bb-pink, #FF2D78);
-  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.10);
-}
 
 /* [5e] TOGGLE (#settingsNotify) — the track is the first <span> after the
    native input; the knob (#settingsToggleKnob) is the second span and is
@@ -454,26 +386,13 @@ select:not(.form-select):not(.ncw-input):focus-visible {
    borderBottomColor, so active styling needs !important to win. We also add
    the hover state it was missing (with !important to beat the inline gray)
    and a transition so the JS color flip animates instead of snapping.       */
-.pilot-tab {
-  transition: color 0.16s var(--polish-ease),
-              border-bottom-color 0.16s var(--polish-ease);
-}
-.pilot-tab.pilot-tab-active {
-  color: var(--bb-pink, #FF2D78) !important;
-  border-bottom-color: var(--bb-pink, #FF2D78) !important;
-  box-shadow: 0 6px 12px -9px rgba(255, 45, 120, 0.55);
-}
 /* hover affordance on inactive tabs — !important to override the inline #6B7280;
    :not(.pilot-tab-active) keeps the active tab pink on hover */
-.pilot-tab:hover:not(.pilot-tab-active) {
-  color: #374151 !important;
-}
 
 /* [6C] Shared tab a11y — focus-visible ring on every tab. outline+offset adds
    no layout box and won't shift the -1px overlap. Keyboard-only (focus-visible
    excludes mouse clicks) so it never flashes on pointer use.                 */
-.pf-tab:focus-visible,
-.pilot-tab:focus-visible {
+.pf-tab:focus-visible{
   outline: 2px solid var(--bb-pink, #FF2D78);
   outline-offset: 2px;
   border-radius: 5px;
@@ -486,20 +405,7 @@ select:not(.form-select):not(.ncw-input):focus-visible {
    NOTE: depends on the JS writing the exact hex "#FF2D78". If the JS ever
    switches to rgb() or a CSS token, the halo silently no-ops (dot still
    works); revisit this selector then. */
-.ncw-dot {
-  transition: box-shadow 0.22s var(--polish-ease),
-              transform 0.22s var(--polish-ease);
-}
-.ncw-dot[style*="FF2D78"],
-.ncw-dot[style*="ff2d78"] {
-  box-shadow: 0 0 0 3px rgba(255, 45, 120, 0.16),
-              0 0 8px rgba(255, 45, 120, 0.45);
-}
 /* upcoming (gray) dots stay flat — explicit reset in case a dot flips back */
-.ncw-dot[style*="E5E7EB"],
-.ncw-dot[style*="e5e7eb"] {
-  box-shadow: none;
-}
 
 /* ── [7] TABLES ──────────────────────────────────────────────────────────────
    Two flavors: one class table (.campaigns-table) + ~5 inline tables. This pass
@@ -512,22 +418,12 @@ select:not(.form-select):not(.ncw-input):focus-visible {
    !important so it wins even if the page's inline <style> loads after this
    sheet. Only the hover *color* changes; the 0.15s transition already exists
    and the 64px row height / fixed widths are never referenced here.          */
-.campaigns-table tbody tr:hover {
-  background-color: rgba(255, 45, 120, 0.05) !important;
-}
 
 /* [7B] Inline clickable table — Pilot "Active boosts" picker. Rows route to a
    boost on click but had no hover affordance. The <tr> carries no inline
    background, so a stylesheet rule paints cleanly; JS-owned *selection* writes
    an inline background that (correctly) outranks this hover, so selected rows
    keep their marker. cursor:pointer signals the rows are clickable.          */
-#pilotProductPills tr {
-  transition: background-color 0.15s var(--polish-ease);
-  cursor: pointer;
-}
-#pilotProductPills tr:hover {
-  background-color: rgba(255, 45, 120, 0.05);
-}
 
 /* [7C] Inline read-back tables — Settings billing + Compare results. Not
    clickable, so a *quiet* neutral hover for row-tracking only (no cursor
@@ -565,12 +461,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 .modal-close:hover {
   color: var(--bb-pink, #FF2D78) !important;
 }
-#convertModalClose {
-  transition: color 0.16s var(--polish-ease);
-}
-#convertModalClose:hover {
-  color: var(--bb-pink, #FF2D78) !important;
-}
 
 /* [8B] Pattern-B gray-square closes (compare + settings) — keep the distinct
    "quick-read modal" treatment, just add the missing hover. Inline bg #F3F4F6
@@ -593,7 +483,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
    dwell) — intentionally NOT touched here. !important overrides the inline
    background/filter on each overlay root.                                     */
 #depositModal,
-#convertModal,
 #compareModal,
 #settingsModal {
   background: rgba(0, 0, 0, 0.55) !important;
@@ -662,7 +551,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
   background: #FEF2F2;
   color: #991B1B;
 }
-
 
 /* ── [11] PHASE 2 — 2-COLUMN HOME LAYOUT + NOTIFICATION BANNER ───────────────
 
@@ -863,7 +751,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
   color-scheme: dark;
 }
 
-
 /* ── [10] DARK CONTENT AREA — card / page-head / table / pill overrides ──────
    Phase 1: all content surfaces flip to dark. Scoped to dashboard shell only. */
 
@@ -904,7 +791,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 
 /* Chart / section containers — X-style surface */
 .chart-section,
-.campaigns-section,
 .section {
   background: #13131E !important;
   border-color: rgba(255,255,255,0.08) !important;
@@ -914,7 +800,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
    strips instead of cards. Give the top-level route sections real card
    treatment to match the Creatives / Campaigns reference (#1B1D22 panels). */
 [data-shell-route="api"] > .section,
-[data-shell-route="billing"] > .section,
 [data-shell-route="performance"] > .section,
 [data-shell-route="boosts"] > .section,
 [data-shell-route="settings"] > .section {
@@ -925,8 +810,7 @@ select:not(.form-select):not(.ncw-input):focus-visible {
   margin-bottom: 16px !important;
 }
 .chart-title,
-.section-title,
-.campaigns-title {
+.section-title{
   color: #F0F0F8 !important;
 }
 .chart-summary {
@@ -937,22 +821,6 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 }
 
 /* Tables — dark row hover */
-.campaigns-table thead tr {
-  background: #181828 !important;
-}
-.campaigns-table thead th {
-  color: #7C7E8F !important;
-  border-bottom-color: rgba(255,255,255,0.07) !important;
-}
-.campaigns-table tbody tr {
-  border-bottom-color: rgba(255,255,255,0.05) !important;
-}
-.campaigns-table tbody tr:hover {
-  background-color: rgba(255,45,120,0.06) !important;
-}
-.campaigns-table tbody td {
-  color: #D0D0DC !important;
-}
 
 /* Status pills — dark-friendly pastel tints */
 .badge.live     { background: rgba(16,185,129,0.15); color: #34D399; }
@@ -982,15 +850,10 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 }
 
 /* Inline panel overrides for dark bg */
-#pilotProductPicker {
-  background: #13131E !important;
-  border-color: rgba(255,255,255,0.08) !important;
-}
 #aSetBillingTableBody tr:hover,
 #compareTableBody tr:hover {
   background-color: rgba(255,255,255,0.03) !important;
 }
-
 
 /* ── [12] PHASE 3 — COMPREHENSIVE DARK COMPLETION ────────────────────────────
    Catches every remaining white/light inline-styled surface.
@@ -1109,9 +972,7 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 
 /* ── AUCTION INTELLIGENCE + BENNA ENGINE PANELS ── */
 #bbxAuctionSummary,
-.benna-engine,
-.performance-group,
-[id="bennaEnginePanel"] {
+.performance-group{
   background: #13131E !important;
   border-color: rgba(255,255,255,0.08) !important;
   color: #D0D0DC !important;
@@ -1120,18 +981,8 @@ select:not(.form-select):not(.ncw-input):focus-visible {
 #bbxAuctionSummary [style*="color: #9CA3AF"] {
   color: #5A5C6E !important;
 }
-.benna-engine-head, .benna-engine-grid > * {
-  background: transparent !important;
-  color: #D0D0DC !important;
-}
 
 /* ── CAMPAIGNS PAGE — filter pills + search ── */
-#campaignSearch {
-  background: #1E1E2E !important;
-  color: #F0F0F8 !important;
-  border-color: rgba(255,255,255,0.10) !important;
-}
-#campaignSearch::placeholder { color: #5A5C6E !important; }
 /* Filter tab buttons (All / Live / Paused / In Review) */
 button[style*="border-radius: 100px"],
 button[style*="border-radius:100px"] {
@@ -1141,9 +992,7 @@ button[style*="border-radius:100px"] {
 }
 /* Active filter pill — pink */
 button.active[style*="border-radius: 100px"],
-button.active[style*="border-radius:100px"],
-#campaignFilterAll.active, #campaignFilterLive.active,
-#campaignFilterPaused.active, #campaignFilterReview.active {
+button.active[style*="border-radius:100px"]{
   background: #FF2D78 !important;
   color: #fff !important;
   border-color: #FF2D78 !important;
@@ -1184,15 +1033,6 @@ div[style*="box-shadow"] span:not(.badge) {
 }
 
 /* ── PILOT / BOOST ADS TABLE ── */
-#pilotProductPills th {
-  background: #181828 !important;
-  color: #7C7E8F !important;
-  border-color: rgba(255,255,255,0.07) !important;
-}
-#pilotProductPills td {
-  color: #D0D0DC !important;
-  border-color: rgba(255,255,255,0.05) !important;
-}
 /* Active boosts container */
 [style*="Active boosts"],
 div[style*="border-radius:12px"][style*="border:1px solid"] {
@@ -1201,7 +1041,6 @@ div[style*="border-radius:12px"][style*="border:1px solid"] {
 }
 
 /* ── PUBLISHER: CREDENTIALS PANELS + PAYOUT MODAL ── */
-#promoteCashoutHistory,
 [id*="Credential"], [id*="credential"],
 div[style*="background:#FFFFFF"][style*="border-radius"] {
   background: #13131E !important;
@@ -1283,7 +1122,6 @@ div[style*="Updated just now"] * {
   border-color: rgba(255,255,255,0.08) !important;
 }
 
-
 /* ── [13] INTEGRATIONS PAGE — FULL DARK COMPLETION ───────────────────────────  */
 
 /* Integration door cards (ic-card — JS-rendered) */
@@ -1327,10 +1165,6 @@ div[style*="Updated just now"] * {
 .verify-badge.active .verify-status { color: #34D399 !important; }
 
 /* Placements door nav tab strip */
-#placementsDoorNav {
-  background: #13131E !important;
-  border-color: rgba(255,255,255,0.08) !important;
-}
 .placement-door-tab {
   color: #7C7E8F !important;
 }
@@ -1381,20 +1215,7 @@ div[style*="Updated just now"] * {
 #integrationVerifyPanel [style*="color:#1E1E2E"] { color: #F0F0F8 !important; }
 #integrationVerifyPanel [style*="color:#6B7280"] { color: #7C7E8F !important; }
 
-/* Placeholders loading panel (white card inside placementsContainer) */
-#placementsContainer div[style*="background:#fff"],
-#placementsContainer div[style*="background: #fff"] {
-  background: #13131E !important;
-  border-color: rgba(255,255,255,0.08) !important;
-  color: #5A5C6E !important;
-}
 
-/* Format gallery cards */
-.format-card {
-  background: #13131E !important;
-  border-color: rgba(255,255,255,0.08) !important;
-  color: #D0D0DC !important;
-}
 
 /* Onboarding banner (ob-step items) */
 .ob-step {
@@ -1439,7 +1260,6 @@ div[style*="Updated just now"] * {
   border: 1px solid rgba(255,255,255,0.10) !important;
   color: #04BEFE !important;
 }
-
 
 /* ── [14] LANGUAGE PICKER + COLLAPSIBLE ACCOUNT SECTION ─────────────────────*/
 
@@ -1650,7 +1470,6 @@ div[style*="Updated just now"] * {
 .shell-account-item--danger:hover { color: #F87171; background: rgba(239,68,68,0.06); }
 .shell-account-item--danger svg { color: #EF4444; }
 
-
 /* ── FLAT ACCOUNT ROW (X Dev style) ── */
 .shell-account-row {
   display: flex;
@@ -1715,14 +1534,13 @@ div[style*="Updated just now"] * {
 .shell-main [style*="#E5E7EB" i], .shell-main [style*="rgb(229, 231, 235)"],
 .shell-main [style*="#E2E8F0" i], .shell-main [style*="#EEEEEE" i]{ border-color:rgba(255,255,255,.10) !important; }
 /* --- known advertiser content classes --- */
-.ca-section,.ca-summary,.ca-variant-row,.draft-row,.door-card,.tier-option,
-.ftg-group,.ftg-head,.b-chip,.target-pill,.ncw-affiliate-row,.pilot-cs-toggle{
+.ca-section,.ca-summary,.ca-variant-row{
   background:#13131E !important; border-color:rgba(255,255,255,.10) !important; color:#E7E9EA !important;
 }
 /* --- form fields --- */
 .shell-main input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 .shell-main select, .shell-main textarea,
-.ca-input,.ca-image-add,.ca-upload-btn,.ncw-radio,.wf-input{
+.ca-input,.ca-image-add,.ca-upload-btn,.wf-input{
   background:#1E2024 !important; color:#E7E9EA !important; border-color:rgba(255,255,255,.10) !important;
 }
 .shell-main input::placeholder, .shell-main textarea::placeholder{ color:#9DA3A6 !important; }

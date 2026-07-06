@@ -19,7 +19,7 @@
  * v1 will add: MutationObserver-based auto-detection of insertion points,
  * the 8 placement renderers (citation / chip / inline card / loading-state
  * / corner unit / page interstitial / empty-state hero / settings slot),
- * the impression/click beacon pipeline, and bb_click attribution.
+ * the impression/click beacon pipeline.
  *
  * PRIVACY POSTURE
  * ---------------

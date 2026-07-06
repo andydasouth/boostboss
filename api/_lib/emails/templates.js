@@ -204,109 +204,6 @@ function depositSuccessEmail({ amountUsd, balanceAfterUsd, companyName, dashboar
   };
 }
 
-function payoutSentEmail({ amountUsd, payoutMethod, payoutId, dashboardUrl, expectedDeliveryDays, paypalEmail }) {
-  // Post-pivot: default method + delivery window assume PayPal Payouts rail.
-  // PayPal moves money near-realtime when the recipient is also on PayPal
-  // (which is required to receive — we collect paypal_email at payout-method
-  // setup). For most recipients funds show up in their PayPal balance within
-  // a few minutes; "up to 30 minutes" gives PayPal's batch processor wiggle
-  // room without overpromising. If the caller still passes the legacy
-  // "Bank transfer" + "1-3 business days" combo (admin_export CSV escape
-  // hatch path), the email respects those values verbatim — so legacy rows
-  // shipped through the manual rail still get the right copy.
-  const method = payoutMethod || "PayPal";
-  const isPaypal = /paypal/i.test(method);
-  const arrivalWindow = expectedDeliveryDays || (isPaypal ? "within 30 minutes" : "1-3 business days");
-  const destinationLabel = isPaypal ? "PayPal account" : "bank account";
-  const maskedRecipient = paypalEmail ? (function maskEmail(e) {
-    const at = e.indexOf("@");
-    if (at <= 0) return e;
-    if (at <= 3) return e[0] + "•••" + e.slice(at);
-    return e.slice(0, 3) + "•••" + e.slice(at);
-  })(paypalEmail) : null;
-
-  return {
-    subject: `Your Boost Boss payout of $${formatUsd(amountUsd)} is on its way`,
-    html: renderEmail({
-      title: "Payout sent",
-      preheader: `$${formatUsd(amountUsd)} is heading your way via ${escapeHtml(method)}.`,
-      bodyHtml: `
-        <p>Your payout request has been processed. Funds are on their way to your ${escapeHtml(destinationLabel)}.</p>
-        <table class="stats-table" role="presentation">
-          <tr><td>Amount</td><td style="color:${BRAND.primary};">$${formatUsd(amountUsd)}</td></tr>
-          <tr><td>Method</td><td>${escapeHtml(method)}</td></tr>
-          ${maskedRecipient ? `<tr><td>Recipient</td><td><code style="font-size:12.5px;color:${BRAND.muted};">${escapeHtml(maskedRecipient)}</code></td></tr>` : ""}
-          <tr><td>Expected arrival</td><td>${escapeHtml(arrivalWindow)}</td></tr>
-          <tr><td>Reference</td><td><code style="font-size:12.5px;color:${BRAND.muted};">${escapeHtml(payoutId || "—")}</code></td></tr>
-        </table>
-        <div class="panel success"><strong>Heads up:</strong> Funds typically arrive ${escapeHtml(arrivalWindow)}. If you don't see them in your ${escapeHtml(destinationLabel)} after that, reply to this email and we'll trace it.</div>
-      `,
-      cta: { label: "View payout history", url: dashboardUrl },
-    }),
-  };
-}
-
-// MoR Storefront — purchase confirmation. Shows the voucher code in a big
-// highlighted card, the redemption link, and the permanent affiliate-attribution
-// link for repeat purchases. See [[mor-product-page-model]].
-// Activation-link model (default since 2026-06-13). The buyer clicks the
-// primary CTA → lands on the seller's activation/signup page with the
-// voucher embedded in the URL as `?bb_token=<code>`. The seller's signup
-// endpoint validates the token via BB's API at form-submit time and
-// creates the account already-paid. The voucher code is also shown as
-// fallback text for buyers who hit problems with the link.
-function purchaseConfirmationEmail({
-  productName, voucherCode, redemptionUrl, repeatPurchaseUrl,
-  amountUsd, currency, transactionId, redemptionWindowDays,
-  packageDurationDays, skuType,
-}) {
-  const curr = (currency || "USD").toUpperCase();
-  const amountDisplay = curr === "USD" ? `$${formatUsd(amountUsd)}` : `${formatUsd(amountUsd)} ${curr}`;
-  const skuLabel = ({
-    one_time: "One-time purchase",
-    bundle: "Bundle",
-    lifetime: "Lifetime access",
-    subscription_pack: packageDurationDays
-      ? `${Math.round(packageDurationDays / 30)}-month pack`
-      : "Subscription pack",
-  })[skuType] || "Purchase";
-  const window = redemptionWindowDays
-    ? `Activate within ${redemptionWindowDays} days of purchase.`
-    : "Activate at your convenience.";
-
-  return {
-    subject: `Your ${productName} is ready — click to activate`,
-    html: renderEmail({
-      title: "Payment received",
-      preheader: `Click to activate your ${productName} account — paid plan is already set up.`,
-      bodyHtml: `
-        <p>Thanks for your purchase! Boost Boss processed your payment securely via PayPal. Click the button below to activate your <strong>${escapeHtml(productName)}</strong> — you'll create your account and your paid plan will be active immediately.</p>
-
-        <table class="stats-table" role="presentation" style="margin-top:14px;">
-          <tr><td>Product</td><td>${escapeHtml(productName)}</td></tr>
-          <tr><td>Type</td><td>${escapeHtml(skuLabel)}</td></tr>
-          <tr><td>Amount paid</td><td style="color:${BRAND.primary};">${escapeHtml(amountDisplay)}</td></tr>
-          <tr><td>Payment</td><td>PayPal</td></tr>
-          <tr><td>Order reference</td><td><code style="font-size:12.5px;color:${BRAND.muted};">${escapeHtml(transactionId || "—")}</code></td></tr>
-        </table>
-
-        <div class="panel success" style="margin-top:18px;"><strong>How activation works:</strong> Click the button below — you'll land on the seller's signup form with your purchase already linked. Create your account (or sign in if you have one) and your paid plan turns on. ${escapeHtml(window)}</div>
-
-        <!-- Fallback: voucher code shown as text for buyers who can't use the button -->
-        <div style="background:${BRAND.bg};border:1px dashed ${BRAND.line};border-radius:12px;padding:16px 18px;text-align:center;margin:20px 0 0;">
-          <div style="font-size:11px;font-weight:700;color:${BRAND.muted};text-transform:uppercase;letter-spacing:0.6px;margin-bottom:6px;">Activation code (backup)</div>
-          <div style="font-family:'Courier New',monospace;font-size:18px;font-weight:700;color:${BRAND.ink};letter-spacing:1px;word-break:break-all;">${escapeHtml(voucherCode)}</div>
-          <div style="font-size:11px;color:${BRAND.muted};margin-top:6px;">If the button above doesn't work, sign up at the seller's site and paste this code when asked.</div>
-        </div>
-      `,
-      cta: { label: `Activate your ${productName} account →`, url: redemptionUrl || "#" },
-      footerNote: repeatPurchaseUrl
-        ? `<strong>Want to buy this again or upgrade later?</strong><br>Use this link to come back via the same affiliate (supports them at no extra cost):<br><a href="${repeatPurchaseUrl}" style="color:${BRAND.primary};font-weight:600;word-break:break-all;">${repeatPurchaseUrl}</a><br><br>14-day refund window. Reply to this email or contact support@boostboss.ai if anything goes wrong. Boost Boss is the Merchant of Record for this transaction.`
-        : `14-day refund window. Reply to this email or contact support@boostboss.ai if anything goes wrong. Boost Boss is the Merchant of Record for this transaction.`,
-    }),
-  };
-}
-
 // ─── Helpers ─────────────────────────────────────────────────────────
 function formatUsd(n) {
   const num = Number(n) || 0;
@@ -327,7 +224,5 @@ module.exports = {
   renderEmail,
   welcomeEmail,
   depositSuccessEmail,
-  payoutSentEmail,
-  purchaseConfirmationEmail,
   BRAND,
 };

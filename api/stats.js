@@ -170,8 +170,7 @@ module.exports = async function handler(req, res) {
 
     // ── Money Flow (Phase H Panel 2 — full financial picture) ──
     // Multi-window financial dashboard: advertiser deposits, spend, BB
-    // take, publisher accrual, payouts paid, pending clawbacks, balance
-    // health, eligible-for-next-payout. Admin-gated.
+    // take, publisher accrual (credits), balance health. Admin-gated.
     if (type === "money_flow" && req.method === "GET") {
       return await handleMoneyFlow(req, res);
     }
@@ -1125,10 +1124,10 @@ async function handleRecon(req, res) {
   // Phase E Day 2 — publisher balance health check. Flags any developer
   // whose (lifetime_earned − lifetime_paid) differs from balance by more
   // than 1%, surfacing accrual integrity drift (e.g., a credit RPC that
-  // silently failed; a clawback that satisfied wrongly).
+  // silently failed).
   //
   // The math:
-  //   expected_balance = lifetime_earned − lifetime_paid − pending_clawbacks_remaining
+  //   expected_balance = lifetime_earned − lifetime_paid
   //   drift            = abs(balance − expected_balance)
   //   pct              = drift / max(balance, expected_balance)
   //   flag             = pct > 0.01 AND drift > $0.50
@@ -1141,25 +1140,12 @@ async function handleRecon(req, res) {
       .gt("lifetime_earned", 0)        // ignore brand-new developers
       .limit(500);                     // cap so recon doesn't time out at scale
     if (Array.isArray(balances) && balances.length > 0) {
-      const devIds = balances.map((b) => b.developer_id);
-      // Pull pending clawbacks per developer in one query.
-      const { data: pendingClaws } = await sb.from("payout_clawbacks")
-        .select("developer_id, remaining_usd")
-        .in("developer_id", devIds)
-        .eq("status", "pending");
-      const pendingByDev = new Map();
-      for (const c of (pendingClaws || [])) {
-        const cur = pendingByDev.get(c.developer_id) || 0;
-        pendingByDev.set(c.developer_id, cur + (parseFloat(c.remaining_usd) || 0));
-      }
-
       for (const b of balances) {
         balanceHealth.checked++;
         const balance        = parseFloat(b.balance) || 0;
         const lifetimeEarned = parseFloat(b.lifetime_earned) || 0;
         const lifetimePaid   = parseFloat(b.lifetime_paid) || 0;
-        const pendingClaw    = pendingByDev.get(b.developer_id) || 0;
-        const expected       = lifetimeEarned - lifetimePaid - pendingClaw;
+        const expected       = lifetimeEarned - lifetimePaid;
         const drift          = Math.abs(balance - expected);
         const denom          = Math.max(Math.abs(balance), Math.abs(expected), 1);
         const pct            = drift / denom;
@@ -1170,7 +1156,6 @@ async function handleRecon(req, res) {
               developer_id:    b.developer_id,
               balance, lifetime_earned: lifetimeEarned,
               lifetime_paid:   lifetimePaid,
-              pending_clawback_remaining: +pendingClaw.toFixed(2),
               expected_balance: +expected.toFixed(2),
               drift_usd:       +drift.toFixed(2),
               drift_pct:       +(pct * 100).toFixed(2),
@@ -1193,80 +1178,11 @@ async function handleRecon(req, res) {
     }));
   }
 
-  // Phase E Day 4 — payout cron health summary. Surfaces the most recent
-  // run's outcome plus aggregate counters so an operator can scan a
-  // single recon endpoint and know whether anything needs attention.
-  let payoutHealth = {
-    last_run_at: null,
-    last_run_status: null,            // 'paid' | 'pending' | 'failed' | null
-    last_run_amount_usd: 0,
-    pending_count: 0,
-    failed_tier1_count: 0,
-    failed_tier2_count: 0,
-    blocked_publishers_count: 0,
-    eligible_for_next_payout: 0,
-  };
-  try {
-    // Most recent payout row
-    const { data: lastRow } = await sb.from("payouts")
-      .select("created_at, status, amount, completed_at")
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    if (lastRow) {
-      payoutHealth.last_run_at        = lastRow.completed_at || lastRow.created_at;
-      payoutHealth.last_run_status    = lastRow.status;
-      payoutHealth.last_run_amount_usd = parseFloat(lastRow.amount) || 0;
-    }
-
-    // Pending count
-    const { count: pendingC } = await sb.from("payouts")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "pending");
-    payoutHealth.pending_count = pendingC || 0;
-
-    // Tier breakdown of failed
-    const { count: t1 } = await sb.from("payouts")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "failed").eq("failure_tier", 1);
-    payoutHealth.failed_tier1_count = t1 || 0;
-    const { count: t2 } = await sb.from("payouts")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "failed").eq("failure_tier", 2);
-    payoutHealth.failed_tier2_count = t2 || 0;
-
-    // Blocked publishers
-    const { count: blocked } = await sb.from("developers")
-      .select("*", { count: "exact", head: true })
-      .eq("payout_blocked", true);
-    payoutHealth.blocked_publishers_count = blocked || 0;
-
-    // Eligible-for-next-payout: payouts_enabled, !blocked, balance ≥ $25.
-    // Two queries; supabase-js doesn't expose the join cleanly.
-    const { data: eligibleDevs } = await sb.from("developers")
-      .select("id")
-      .eq("payouts_enabled", true)
-      .eq("payout_blocked",  false)
-      .not("stripe_account_id", "is", null);
-    const eligibleIds = (eligibleDevs || []).map((d) => d.id);
-    if (eligibleIds.length > 0) {
-      const { count: ec } = await sb.from("publisher_balance")
-        .select("*", { count: "exact", head: true })
-        .in("developer_id", eligibleIds)
-        .gte("balance", 25);
-      payoutHealth.eligible_for_next_payout = ec || 0;
-    }
-  } catch (e) {
-    console.error("bbx:recon:payout_health_fail",
-      JSON.stringify({ message: e && e.message }));
-  }
-
   return res.status(200).json({
     window_hours: 24,
     production, sandbox,
     orphan_wins: orphanWins,
     publisher_balance_health: balanceHealth,
-    payout_cron_health: payoutHealth,
     thresholds: {
       ratio_floor:           RATIO_FLOOR,
       min_wins_for_alert:    MIN_WINS_FOR_ALERT,
@@ -1488,7 +1404,7 @@ async function handleLiveActivity(req, res) {
     // UI test render without crashing while we're offline.
     return res.status(200).json({
       mode, generated_at: new Date().toISOString(), demo: true,
-      health: { status: "healthy", fill_rate_24h: null, tier2_24h: 0, tier3_alerts_24h: 0, blocked_publishers: 0 },
+      health: { status: "healthy", fill_rate_24h: null, blocked_publishers: 0 },
       volume: { auctions_5m: 0, auctions_1h: 0, auctions_24h: 0, trend_pct: 0 },
       money:  { advertiser_spend_24h: 0, bb_revenue_24h: 0, publisher_accrued_24h: 0 },
       top_publishers: [], top_campaigns: [],
@@ -1531,26 +1447,10 @@ async function handleLiveActivity(req, res) {
     ? +(((auctions_1h - trailing24hAvgPerHour) / trailing24hAvgPerHour) * 100).toFixed(1)
     : 0;
 
-  // ── 2. Health: fill rate + payout failures + blocked publishers ──
+  // ── 2. Health: fill rate + blocked publishers ──
   const totalNonSandbox = isSandbox ? auctions_24h : auctions_24h; // both modes use is_sandbox filter
   const fill_rate_24h = totalNonSandbox > 0 ? +(wins_24h / totalNonSandbox).toFixed(3) : null;
 
-  async function countPayouts(failureTier) {
-    const { count } = await sb.from("payouts")
-      .select("*", { count: "exact", head: true })
-      .eq("failure_tier", failureTier).gte("created_at", since24h);
-    return count || 0;
-  }
-  // Tier-3 is an "alert" rather than a payout-row attribute — we surface
-  // recent payout rows with failure_tier=3 to drive both the count and
-  // the recent_alerts feed below. Same query, two consumers.
-  async function recentTier3Failures() {
-    const { data } = await sb.from("payouts")
-      .select("id, developer_id, failure_reason, created_at")
-      .eq("failure_tier", 3).gte("created_at", since24h)
-      .order("created_at", { ascending: false }).limit(10);
-    return data || [];
-  }
   // blocked_publishers — count of developers in 'blocked' status.
   async function countBlockedPublishers() {
     const { count } = await sb.from("developers")
@@ -1558,23 +1458,16 @@ async function handleLiveActivity(req, res) {
     return count || 0;
   }
 
-  const [tier2_24h, tier3Failures, blocked_publishers] = await Promise.all([
-    countPayouts(2).catch(() => 0),
-    recentTier3Failures().catch(() => []),
-    countBlockedPublishers().catch(() => 0),
-  ]);
-  const tier3_24h = tier3Failures.length;
+  const blocked_publishers = await countBlockedPublishers().catch(() => 0);
 
   // Status calc per design doc Q1 (defaults).
   let status = "healthy";
   if (
     (fill_rate_24h !== null && fill_rate_24h < 0.30) ||
-    tier3_24h > 0 ||
     blocked_publishers >= 5
   ) status = "action_required";
   else if (
     (fill_rate_24h !== null && fill_rate_24h < 0.60) ||
-    tier2_24h > 0 ||
     blocked_publishers > 0
   ) status = "watch";
 
@@ -1779,33 +1672,11 @@ async function handleLiveActivity(req, res) {
   }
 
   // ── 7. Recent alerts feed ──
-  // Tier-2 + Tier-3 payout failures, fill-rate dips, blocked-publisher
-  // counts. Capped at 10 most-recent. Each carries a deep link the UI
-  // wires to a switchPanel call.
+  // Fill-rate dips (more alert types can hook in here later). Capped at
+  // 10 most-recent. Each carries a deep link the UI wires to a
+  // switchPanel call.
   async function loadRecentAlerts() {
     const out = [];
-    // Tier-3 (already loaded above)
-    for (const t3 of tier3Failures.slice(0, 5)) {
-      out.push({
-        ts: t3.created_at,
-        tag: "payout.tier3",
-        message: "Tier-3 payout failure" + (t3.failure_reason ? ` — ${t3.failure_reason}` : ""),
-        link: "payouts",
-      });
-    }
-    // Recent Tier-2 (separate query, capped)
-    const { data: t2 } = await sb.from("payouts")
-      .select("id, developer_id, failure_reason, created_at")
-      .eq("failure_tier", 2).gte("created_at", since24h)
-      .order("created_at", { ascending: false }).limit(5);
-    for (const r of (t2 || [])) {
-      out.push({
-        ts: r.created_at,
-        tag: "payout.tier2",
-        message: "Tier-2 payout failure" + (r.failure_reason ? ` — ${r.failure_reason}` : ""),
-        link: "payouts",
-      });
-    }
     // Fill-rate dip alert (derived; not stored)
     if (fill_rate_24h !== null && fill_rate_24h < 0.30) {
       out.push({
@@ -1831,8 +1702,6 @@ async function handleLiveActivity(req, res) {
     health: {
       status,
       fill_rate_24h,
-      tier2_24h,
-      tier3_alerts_24h: tier3_24h,
       blocked_publishers,
     },
     volume: { auctions_5m, auctions_1h, auctions_24h, trend_pct },
@@ -1857,18 +1726,14 @@ async function handleLiveActivity(req, res) {
 //   {
 //     mode, generated_at,
 //     windows: {
-//       "24h": { advertiser_spend, bb_revenue, publisher_accrued, payouts_paid },
+//       "24h": { advertiser_spend, bb_revenue, publisher_accrued },
 //       "7d":  { ... },
 //       "30d": { ... },
 //     },
 //     advertiser_deposits_24h, advertiser_deposits_7d, advertiser_deposits_30d,
 //     top_advertisers_by_spend_24h: [{ id, company_name, email, spend }],
 //     top_publishers_by_balance:    [{ developer_id, email, balance, lifetime_earned, lifetime_paid }],
-//     pending_clawbacks_total,
-//     payout_health: { ...payout_cron_health from recon },
 //     balance_drift: { checked, drifted, sample[] },          // from recon
-//     eligible_for_next_payout: { count, total_usd_ready },
-//     stripe_balance_available_usd,                            // for "can cron pay?" check
 //   }
 
 async function handleMoneyFlow(req, res) {
@@ -1882,9 +1747,9 @@ async function handleMoneyFlow(req, res) {
     return res.status(200).json({
       mode, demo: true, generated_at: new Date().toISOString(),
       windows: {
-        "24h": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
-        "7d":  { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
-        "30d": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0, payouts_paid: 0 },
+        "24h": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0 },
+        "7d":  { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0 },
+        "30d": { advertiser_spend: 0, bb_revenue: 0, publisher_accrued: 0 },
       },
       by_door: [
         { door: "mcp",        advertiser_spend: 0, publisher_accrued: 0, bb_revenue: 0, impressions: 0 },
@@ -1895,11 +1760,7 @@ async function handleMoneyFlow(req, res) {
       advertiser_deposits_24h: 0, advertiser_deposits_7d: 0, advertiser_deposits_30d: 0,
       top_advertisers_by_spend_24h: [],
       top_publishers_by_balance: [],
-      pending_clawbacks_total: 0,
-      payout_health: null,
       balance_drift: { checked: 0, drifted: 0, sample: [] },
-      eligible_for_next_payout: { count: 0, total_usd_ready: 0 },
-      stripe_balance_available_usd: null,
     });
   }
 
@@ -1929,15 +1790,6 @@ async function handleMoneyFlow(req, res) {
     }
     return { spend: +spend.toFixed(4), accrued: +accrued.toFixed(4), rows };
   }
-  async function sumPayouts(sinceIso) {
-    let paid = 0;
-    const { data } = await sb.from("payouts")
-      .select("amount, status, completed_at, created_at")
-      .eq("status", "paid")
-      .gte("completed_at", sinceIso);
-    for (const p of (data || [])) paid += Number(p.amount) || 0;
-    return +paid.toFixed(2);
-  }
   async function sumDeposits(sinceIso) {
     // Advertiser deposits come from transactions table where type=deposit.
     const { data } = await sb.from("transactions")
@@ -1949,22 +1801,19 @@ async function handleMoneyFlow(req, res) {
     return +dep.toFixed(2);
   }
 
-  const [w24, w7, w30, p24, p7, p30, d24, d7, d30] = await Promise.all([
+  const [w24, w7, w30, d24, d7, d30] = await Promise.all([
     sumEvents(since24h).catch(() => ({ spend: 0, accrued: 0 })),
     sumEvents(since7d ).catch(() => ({ spend: 0, accrued: 0 })),
     sumEvents(since30d).catch(() => ({ spend: 0, accrued: 0 })),
-    sumPayouts(since24h).catch(() => 0),
-    sumPayouts(since7d ).catch(() => 0),
-    sumPayouts(since30d).catch(() => 0),
     sumDeposits(since24h).catch(() => 0),
     sumDeposits(since7d ).catch(() => 0),
     sumDeposits(since30d).catch(() => 0),
   ]);
 
   const windowsOut = {
-    "24h": { advertiser_spend: w24.spend, bb_revenue: +(w24.spend - w24.accrued).toFixed(4), publisher_accrued: w24.accrued, payouts_paid: p24 },
-    "7d":  { advertiser_spend: w7.spend,  bb_revenue: +(w7.spend  - w7.accrued ).toFixed(4), publisher_accrued: w7.accrued,  payouts_paid: p7  },
-    "30d": { advertiser_spend: w30.spend, bb_revenue: +(w30.spend - w30.accrued).toFixed(4), publisher_accrued: w30.accrued, payouts_paid: p30 },
+    "24h": { advertiser_spend: w24.spend, bb_revenue: +(w24.spend - w24.accrued).toFixed(4), publisher_accrued: w24.accrued },
+    "7d":  { advertiser_spend: w7.spend,  bb_revenue: +(w7.spend  - w7.accrued ).toFixed(4), publisher_accrued: w7.accrued  },
+    "30d": { advertiser_spend: w30.spend, bb_revenue: +(w30.spend - w30.accrued).toFixed(4), publisher_accrued: w30.accrued },
   };
 
   // Top advertisers by 24h spend.
@@ -2025,30 +1874,6 @@ async function handleMoneyFlow(req, res) {
     })).slice(0, 5);
   }
 
-  // Pending clawbacks total.
-  async function sumPendingClawbacks() {
-    const { data } = await sb.from("payout_clawbacks")
-      .select("remaining_usd").eq("status", "pending");
-    let s = 0;
-    for (const c of (data || [])) s += Number(c.remaining_usd) || 0;
-    return +s.toFixed(2);
-  }
-
-  // Eligible-for-next-payout: developers w/ payouts enabled, not blocked,
-  // stripe account set, balance ≥ $25. Returns {count, total_usd_ready}.
-  async function loadEligibleForNextPayout() {
-    const { data: devs } = await sb.from("developers")
-      .select("id").eq("payouts_enabled", true).eq("payout_blocked", false)
-      .not("stripe_account_id", "is", null);
-    const ids = (devs || []).map((d) => d.id);
-    if (ids.length === 0) return { count: 0, total_usd_ready: 0 };
-    const { data: balances } = await sb.from("publisher_balance")
-      .select("developer_id, balance").in("developer_id", ids).gte("balance", 25);
-    let total = 0;
-    for (const b of (balances || [])) total += Number(b.balance) || 0;
-    return { count: (balances || []).length, total_usd_ready: +total.toFixed(2) };
-  }
-
   // Per-door money breakdown (24h) — answers "which door earns?".
   // Aggregates events.cost + developer_payout grouped by integration_method.
   // bb_revenue per door = spend − publisher_accrued for that door.
@@ -2087,30 +1912,13 @@ async function handleMoneyFlow(req, res) {
     });
   }
 
-  // Stripe available balance (so we can warn the operator if cron would
-  // fail for "insufficient platform balance"). Best-effort; never blocks
-  // the response. Cached for 60s to avoid hammering the Stripe API.
-  let stripeBalanceUsd = null;
-  if (process.env.STRIPE_SECRET_KEY) {
-    try {
-      stripeBalanceUsd = await _cachedStripeBalance(60_000);
-    } catch (e) {
-      console.error("bbx:money_flow:stripe_balance_fail", e && e.message);
-    }
-  }
-
-  // Reuse the heavier-lift recon pieces directly (cheaper than re-running
-  // their query mass; we already pay for them via the cron call). For
-  // now we re-do them inline so this endpoint is callable on its own.
-  const payoutHealth = await _loadPayoutHealthInline(sb).catch(() => null);
+  // Balance drift — inline so this endpoint is callable on its own.
   const balanceDrift = await _loadBalanceDriftInline(sb).catch(() => ({ checked: 0, drifted: 0, sample: [] }));
 
-  const [top_advertisers_by_spend_24h, top_publishers_by_balance, pending_clawbacks_total, eligible_for_next_payout, by_door] =
+  const [top_advertisers_by_spend_24h, top_publishers_by_balance, by_door] =
     await Promise.all([
       loadTopAdvertisersBySpend().catch(() => []),
       loadTopPublishersByBalance().catch(() => []),
-      sumPendingClawbacks().catch(() => 0),
-      loadEligibleForNextPayout().catch(() => ({ count: 0, total_usd_ready: 0 })),
       loadMoneyByDoor().catch(() => []),
     ]);
 
@@ -2124,58 +1932,8 @@ async function handleMoneyFlow(req, res) {
     advertiser_deposits_30d: d30,
     top_advertisers_by_spend_24h,
     top_publishers_by_balance,
-    pending_clawbacks_total,
-    payout_health: payoutHealth,
     balance_drift: balanceDrift,
-    eligible_for_next_payout,
-    stripe_balance_available_usd: stripeBalanceUsd,
   });
-}
-
-// Stripe balance — cached so concurrent admin tabs don't hammer the API.
-let _stripeBalanceCache = { until: 0, value: null };
-async function _cachedStripeBalance(ttlMs) {
-  const now = Date.now();
-  if (_stripeBalanceCache.until > now) return _stripeBalanceCache.value;
-  if (!process.env.STRIPE_SECRET_KEY) return null;
-  // Tiny REST call instead of pulling the full stripe SDK just for one
-  // balance retrieve. Bonus: matches the lightweight pattern we use in
-  // api/billing.js for currency detection.
-  const r = await fetch("https://api.stripe.com/v1/balance", {
-    headers: { Authorization: `Bearer ${process.env.STRIPE_SECRET_KEY}` },
-  });
-  if (!r.ok) return null;
-  const j = await r.json();
-  // available[0].amount is in cents.
-  const usd = j && j.available && j.available[0] ? j.available[0].amount / 100 : null;
-  _stripeBalanceCache = { until: now + ttlMs, value: usd };
-  return usd;
-}
-
-// Inline payout-health summary (mirrors recon's payout_cron_health).
-async function _loadPayoutHealthInline(sb) {
-  const out = {
-    last_run_at: null, last_run_status: null, last_run_amount_usd: 0,
-    pending_count: 0, failed_tier1_count: 0, failed_tier2_count: 0,
-    blocked_publishers_count: 0,
-  };
-  const { data: lastRow } = await sb.from("payouts")
-    .select("created_at, status, amount, completed_at")
-    .order("created_at", { ascending: false }).limit(1).maybeSingle();
-  if (lastRow) {
-    out.last_run_at         = lastRow.completed_at || lastRow.created_at;
-    out.last_run_status     = lastRow.status;
-    out.last_run_amount_usd = Number(lastRow.amount) || 0;
-  }
-  const { count: pendingC } = await sb.from("payouts").select("*", { count: "exact", head: true }).eq("status", "pending");
-  out.pending_count = pendingC || 0;
-  const { count: t1 } = await sb.from("payouts").select("*", { count: "exact", head: true }).eq("status", "failed").eq("failure_tier", 1);
-  out.failed_tier1_count = t1 || 0;
-  const { count: t2 } = await sb.from("payouts").select("*", { count: "exact", head: true }).eq("status", "failed").eq("failure_tier", 2);
-  out.failed_tier2_count = t2 || 0;
-  const { count: blocked } = await sb.from("developers").select("*", { count: "exact", head: true }).eq("payout_blocked", true);
-  out.blocked_publishers_count = blocked || 0;
-  return out;
 }
 
 // Inline balance-drift summary (mirrors recon's publisher_balance_health).
@@ -2184,20 +1942,12 @@ async function _loadBalanceDriftInline(sb) {
   const { data: balances } = await sb.from("publisher_balance")
     .select("developer_id, balance, lifetime_earned, lifetime_paid");
   if (!balances || balances.length === 0) return out;
-  const devIds = balances.map((b) => b.developer_id);
-  const { data: pendingClaws } = await sb.from("payout_clawbacks")
-    .select("developer_id, remaining_usd").in("developer_id", devIds).eq("status", "pending");
-  const pendingByDev = new Map();
-  for (const c of (pendingClaws || [])) {
-    pendingByDev.set(c.developer_id, (pendingByDev.get(c.developer_id) || 0) + (Number(c.remaining_usd) || 0));
-  }
   for (const b of balances) {
     out.checked++;
     const balance        = Number(b.balance) || 0;
     const lifetimeEarned = Number(b.lifetime_earned) || 0;
     const lifetimePaid   = Number(b.lifetime_paid) || 0;
-    const pendingClaw    = pendingByDev.get(b.developer_id) || 0;
-    const expected       = lifetimeEarned - lifetimePaid - pendingClaw;
+    const expected       = lifetimeEarned - lifetimePaid;
     const drift          = Math.abs(balance - expected);
     const denom          = Math.max(Math.abs(balance), Math.abs(expected), 1);
     const pct            = drift / denom;
@@ -2207,7 +1957,6 @@ async function _loadBalanceDriftInline(sb) {
         out.sample.push({
           developer_id: b.developer_id,
           balance, lifetime_earned: lifetimeEarned, lifetime_paid: lifetimePaid,
-          pending_clawback_remaining: +pendingClaw.toFixed(2),
           expected_balance: +expected.toFixed(2),
           drift_usd: +drift.toFixed(2),
           drift_pct: +(pct * 100).toFixed(2),
@@ -2341,7 +2090,7 @@ async function handleAuctionInspect(req, res) {
       } else if (!data.publisher_id) {
         publisher_credit.reason_not_credited = "No publisher_id on auction — payout not attributable to any developer.";
       } else {
-        publisher_credit.reason_not_credited = "Impression fired but developer_payout was zero. Possible causes: campaign in clawback, publisher in pending status, revenue_share_pct = 0.";
+        publisher_credit.reason_not_credited = "Impression fired but developer_payout was zero. Possible causes: publisher in pending status, revenue_share_pct = 0.";
       }
     } else if (data.publisher_id) {
       publisher_credit.reason_not_credited = "Impression beacon never fired — there is nothing to credit.";

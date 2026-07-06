@@ -263,10 +263,6 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
     <button class="nav-item" data-panel="campaigns"><span class="icon">📣</span> All Campaigns <span class="kbd">3</span></button>
     <button class="nav-item" data-panel="seats"><span class="icon">🏢</span> DSP Seats <span class="kbd">4</span></button>
     <button class="nav-item" data-panel="users"><span class="icon">👥</span> Users <span class="kbd">5</span></button>
-    <button class="nav-item" data-panel="payouts"><span class="icon">💸</span> Payouts <span class="badge-count" id="payout-pending-count">0</span></button>
-    <button class="nav-item" data-panel="audits"><span class="icon">🛡️</span> Audit Queue <span class="badge-count" id="audit-pending-count">0</span></button>
-    <button class="nav-item" data-panel="affiliate-program"><span class="icon">🤝</span> Affiliate Program</button>
-    <button class="nav-item" data-panel="seller-payouts"><span class="icon">💵</span> Seller Payouts <span class="badge-count" id="seller-payouts-eligible-count">0</span></button>
 
     <div class="sidebar-footer">
       <p class="meta">Mode: <span id="auth-mode-badge" class="mono">—</span></p>
@@ -371,7 +367,6 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
           </div>
           <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
             Fill rate: <span id="live-fill-rate" class="mono">—</span><br>
-            Tier-2 / Tier-3: <span id="live-tier-counts" class="mono">—</span><br>
             Blocked publishers: <span id="live-blocked" class="mono">—</span>
           </div>
         </div>
@@ -480,15 +475,14 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
               <th style="text-align:right;">Advertiser spend</th>
               <th style="text-align:right;">BB take</th>
               <th style="text-align:right;">Publisher accrued</th>
-              <th style="text-align:right;">Payouts paid</th>
             </tr></thead>
             <tbody id="money-windows-body">
-              <tr><td colspan="6" class="empty-state">—</td></tr>
+              <tr><td colspan="5" class="empty-state">—</td></tr>
             </tbody>
           </table>
         </div>
         <p style="font-size:11px;color:var(--muted);margin-top:8px;">
-          Deposits = advertiser top-ups via PayPal. Spend = events.cost (advertiser side). Publisher accrued = events.developer_payout. BB take = spend - accrued. Payouts paid = transferred via PayPal Payouts API.
+          Deposits = advertiser top-ups via PayPal. Spend = events.cost (advertiser side). Publisher accrued = events.developer_payout (credits — publishers earn credits, never cash). BB take = spend - accrued.
         </p>
       </div>
 
@@ -514,42 +508,11 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
         </p>
       </div>
 
-      <!-- Mid-row: balance health + payout health -->
-      <div class="section">
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div>
-            <div class="section-header"><h2 style="font-size:14px;">Eligible for Next Payout Cron</h2></div>
-            <div class="stat-card">
-              <div class="label">Publishers ready</div>
-              <div class="value pink"><span id="money-eligible-count">—</span></div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
-                Total ready: <span id="money-eligible-total" class="mono">—</span><br>
-                Stripe platform balance <span style="font-size:10px;color:#9CA3AF;font-style:italic;">(legacy)</span>: <span id="money-stripe-balance" class="mono">—</span><br>
-                Pending clawbacks: <span id="money-clawbacks" class="mono">—</span>
-              </div>
-            </div>
-          </div>
-          <div>
-            <div class="section-header"><h2 style="font-size:14px;">Payout Cron Health</h2></div>
-            <div class="stat-card">
-              <div class="label">Last payout run</div>
-              <div class="value" id="money-last-status">—</div>
-              <div style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;">
-                When: <span id="money-last-when" class="mono">—</span><br>
-                Amount: <span id="money-last-amount" class="mono">—</span><br>
-                Tier-1 / Tier-2 failed: <span id="money-tier-failed" class="mono">—</span><br>
-                Blocked publishers: <span id="money-blocked" class="mono">—</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- Balance drift -->
       <div class="section">
         <div class="section-header"><h2 style="font-size:14px;">Publisher Balance Drift</h2></div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:8px;">
-          Drift = |publisher_balance.balance − (lifetime_earned − lifetime_paid − pending_clawbacks)|. We flag >$0.50 AND >1%. Any non-zero drifted count is worth investigating.
+          Drift = |publisher_balance.balance − (lifetime_earned − lifetime_paid)|. We flag >$0.50 AND >1%. Any non-zero drifted count is worth investigating.
         </p>
         <div class="table-wrap">
           <table>
@@ -783,240 +746,6 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
       </div>
     </div>
 
-    <!-- ── PAYOUTS (Phase E Day 4) ── -->
-    <div class="panel" id="panel-payouts">
-      <div class="section-header">
-        <h1>Payouts</h1>
-        <div style="display:flex;gap:10px;">
-          <button class="btn-sm btn-action" onclick="loadPayoutsPanel()">Refresh</button>
-          <button class="btn-sm btn-action" onclick="manualTriggerPayoutCron()"
-            title="Manually fires the Friday payout cron now (auth: ADMIN_TOKEN)">
-            ▶ Run cron now
-          </button>
-          <button class="btn-sm btn-action" onclick="manualTriggerRetrySweep()"
-            title="Manually fires the Saturday retry sweep now">
-            ↻ Run retry sweep
-          </button>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
-        Last cron run summary, recent payouts, blocked publishers, manual controls.
-        Real money flows through these tables every Friday at 12:00 UTC.
-      </p>
-
-      <!-- Recon health summary cards -->
-      <div class="stats-row" style="margin-bottom:20px;">
-        <div class="stat-card">
-          <div class="label">Pending</div>
-          <div class="value yellow" id="po-pending">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Tier-1 failed</div>
-          <div class="value pink" id="po-tier1">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Tier-2 failed</div>
-          <div class="value pink" id="po-tier2">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Blocked publishers</div>
-          <div class="value pink" id="po-blocked">—</div>
-        </div>
-        <div class="stat-card">
-          <div class="label">Eligible next run</div>
-          <div class="value cyan" id="po-eligible">—</div>
-        </div>
-      </div>
-
-      <!-- Blocked publishers (action-required panel) -->
-      <div style="margin-bottom:24px;">
-        <div class="section-header"><h2>Blocked publishers</h2></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Email</th><th>Stripe Account</th><th>Reason</th><th>Blocked At</th><th>Action</th></tr>
-            </thead>
-            <tbody id="blocked-publishers-body">
-              <tr><td colspan="5" class="empty-state">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Recent payouts table -->
-      <div>
-        <div class="section-header">
-          <h2>Recent payouts</h2>
-          <select id="payout-status-filter" onchange="loadPayoutsPanel()" style="padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--ink);">
-            <option value="">All statuses</option>
-            <option value="pending">Pending</option>
-            <option value="paid">Paid</option>
-            <option value="failed">Failed</option>
-            <option value="held">Held</option>
-          </select>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Created</th><th>Email</th><th>Amount</th><th>Fee</th><th>Method</th>
-                <th>Status</th><th>Retries</th><th>Failure</th><th>Action</th>
-              </tr>
-            </thead>
-            <tbody id="payouts-body">
-              <tr><td colspan="9" class="empty-state">Loading...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── AUDIT QUEUE ── Pass 4: pricing-plan audits ─────────────────── -->
-    <div class="panel" id="panel-audits">
-      <div class="section-header">
-        <h1>Pricing-plan audit queue</h1>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <select id="audit-filter" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg-soft);color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;">
-            <option value="queue" selected>Queue (pending + changes requested)</option>
-            <option value="pending">Pending only</option>
-            <option value="changes_requested">Changes requested</option>
-            <option value="approved">Approved (history)</option>
-            <option value="rejected">Rejected (history)</option>
-            <option value="all">All (recent first)</option>
-          </select>
-          <button class="btn-sm btn-action" onclick="loadAuditsPanel()">Refresh</button>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
-        Every pricing plan needs an audited discount before it can sell to affiliates. The seller lists the same package on their own site at <code>original_price</code> + attaches proof. You verify the discount is real before approving. See <a href="https://docs.claude.com" style="color:var(--pink);">audit policy</a>.
-      </p>
-
-      <div class="stats-row" style="margin-bottom:20px;">
-        <div class="stat-card"><div class="label">In queue</div><div class="value" style="color:var(--orange)" id="audit-stat-queue">—</div></div>
-        <div class="stat-card"><div class="label">Pending</div><div class="value yellow" id="audit-stat-pending">—</div></div>
-        <div class="stat-card"><div class="label">Changes requested</div><div class="value pink" id="audit-stat-changes">—</div></div>
-        <div class="stat-card"><div class="label">Approved (total)</div><div class="value green" id="audit-stat-approved">—</div></div>
-        <div class="stat-card"><div class="label">Rejected (total)</div><div class="value pink" id="audit-stat-rejected">—</div></div>
-      </div>
-
-      <div class="section">
-        <div id="audits-list">
-          <div class="empty-state" style="padding:48px 16px;text-align:center;color:var(--muted);">Loading…</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── AFFILIATE PROGRAM ── Pass 4: platform-wide affiliate metrics ── -->
-    <div class="panel" id="panel-affiliate-program">
-      <div class="section-header">
-        <h1>Affiliate program</h1>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <select id="aff-range" style="padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg-soft);color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;">
-            <option value="7">Last 7 days</option>
-            <option value="30" selected>Last 30 days</option>
-            <option value="90">Last 90 days</option>
-            <option value="all">All time</option>
-          </select>
-          <button class="btn-sm btn-action" onclick="loadAffiliateProgramPanel()">Refresh</button>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
-        Platform-wide affiliate program performance under the new commission model: <strong>seller picks <code>affiliate_pool_pct</code> · BB takes 30% of that pool · affiliate gets 70%</strong>. BB only earns when an affiliate drives the sale.
-      </p>
-
-      <!-- Top-line metrics — the four numbers Andy wants -->
-      <div class="stats-row" style="margin-bottom:20px;">
-        <div class="stat-card"><div class="label">Total affiliate sales</div><div class="value cyan" id="aff-stat-sales">—</div></div>
-        <div class="stat-card"><div class="label">Total gross revenue</div><div class="value green" id="aff-stat-gross">—</div></div>
-        <div class="stat-card"><div class="label">Total affiliate rewards paid</div><div class="value pink" id="aff-stat-payout">—</div></div>
-        <div class="stat-card"><div class="label">Total BB take (from pool)</div><div class="value" style="color:#7C3AED" id="aff-stat-take">—</div></div>
-      </div>
-      <div class="stats-row" style="margin-bottom:20px;">
-        <div class="stat-card"><div class="label">Total seller net</div><div class="value" id="aff-stat-seller">—</div></div>
-        <div class="stat-card"><div class="label">Total marketing pool</div><div class="value" style="color:#0EA5E9" id="aff-stat-pool">—</div></div>
-        <div class="stat-card"><div class="label">Refunded sales</div><div class="value pink" id="aff-stat-refunds">—</div></div>
-        <div class="stat-card"><div class="label">Pending (abandoned)</div><div class="value yellow" id="aff-stat-pending">—</div></div>
-      </div>
-
-      <!-- Top 10 products + top 10 affiliates side-by-side -->
-      <div class="section">
-        <div class="section-header"><h2>Top 10 products by gross</h2></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Product</th><th>Sales</th><th>Gross</th><th>Pool</th><th>Affiliate paid</th><th>BB take</th></tr>
-            </thead>
-            <tbody id="aff-products-body">
-              <tr><td colspan="6" class="empty-state">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-header"><h2>Top 10 affiliates by earnings</h2></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Affiliate</th><th>Sales driven</th><th>Gross</th><th>Earned (70% of pool)</th><th>BB share (30%)</th></tr>
-            </thead>
-            <tbody id="aff-affiliates-body">
-              <tr><td colspan="5" class="empty-state">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── SELLER PAYOUTS ── MoR settlement to advertisers ─────────────── -->
-    <div class="panel" id="panel-seller-payouts">
-      <div class="section-header">
-        <h1>Seller Payouts</h1>
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <button class="btn-sm btn-action" onclick="loadSellerPayoutsPanel()">↻ Refresh</button>
-          <button class="btn-sm btn-action" id="seller-payouts-dispatch-all" onclick="dispatchAllEligibleSellers()" style="background:#059669;color:#fff;border-color:#059669;">▶ Dispatch all eligible</button>
-        </div>
-      </div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:20px;">
-        Sellers settle biweekly Friday + Saturday catch-up via PayPal Payouts API. Eligible = unsettled balance ≥ $1 AND payout method configured. Manual dispatch button + the Saturday cron both call the same endpoint.
-      </p>
-
-      <div class="stats-row" style="margin-bottom:20px;">
-        <div class="stat-card"><div class="label">Eligible (ready to pay)</div><div class="value green" id="sp-stat-eligible">—</div></div>
-        <div class="stat-card"><div class="label">Total due</div><div class="value pink" id="sp-stat-total">—</div></div>
-        <div class="stat-card"><div class="label">No payout method</div><div class="value yellow" id="sp-stat-no-method">—</div></div>
-        <div class="stat-card"><div class="label">Below min ($1)</div><div class="value" style="color:var(--muted);" id="sp-stat-below-min">—</div></div>
-      </div>
-
-      <div class="section">
-        <div class="section-header"><h2>Eligible sellers</h2></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Seller</th><th>PayPal email</th><th>Sales</th><th>Amount</th><th>Earliest</th><th>Action</th></tr>
-            </thead>
-            <tbody id="sp-eligible-body">
-              <tr><td colspan="6" class="empty-state">Loading…</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="section">
-        <div class="section-header"><h2>Held — no PayPal email configured</h2></div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr><th>Seller</th><th>Sales</th><th>Amount</th><th>Earliest captured</th></tr>
-            </thead>
-            <tbody id="sp-held-body">
-              <tr><td colspan="4" class="empty-state">—</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
   </main>
 </div>
 
@@ -1069,9 +798,6 @@ function showDashboard() {
   loadReviewQueue();
   renderAuditLog();
   detectModes();
-  // Phase E Day 4 — poll payout health on login so the sidebar pending
-  // count is accurate even before the admin opens the Payouts panel.
-  loadPayoutHealth();
 }
 
 function logout() {
@@ -1117,20 +843,16 @@ function switchPanel(name) {
   if (name === "campaigns") loadAllCampaigns();
   if (name === "seats") loadSeats();
   if (name === "review") loadReviewQueue();
-  if (name === "payouts") loadPayoutsPanel();
   if (name === "users") loadUsersPanel();
   if (name === "live") startLiveActivity();
   else stopLiveActivity();
   if (name === "money") loadMoneyFlow();
   if (name === "inspector") loadAuctionInspector();
-  if (name === "audits") loadAuditsPanel();
-  if (name === "affiliate-program") loadAffiliateProgramPanel();
-  if (name === "seller-payouts") loadSellerPayoutsPanel();
 }
 
 // ── Users panel ─────────────────────────────────────────────────────
 // Lists every advertiser + publisher with their onboarding answers and
-// lifetime performance (spend for advertisers, paid-out for publishers).
+// lifetime performance (spend for advertisers, credit balance for publishers).
 // Server side: GET /api/auth?action=admin_list_users with admin bearer.
 // Click a row to expand a detail panel below it.
 let _usersSearchTimer = null;
@@ -1184,8 +906,8 @@ function renderUserRow(u) {
   const perfCell = u.role === "advertiser"
     ? '<div style="font-weight:600;color:#F5F5F7;">$' + fmt(u.performance.lifetime_spend_usd || 0) + ' spent</div>'
       + '<div style="font-size:11.5px;color:var(--muted);">' + (u.performance.campaign_count || 0) + ' campaign' + (u.performance.campaign_count === 1 ? '' : 's') + '</div>'
-    : '<div style="font-weight:600;color:#F5F5F7;">$' + fmt(u.performance.lifetime_paid_usd || 0) + ' paid out</div>'
-      + '<div style="font-size:11.5px;color:var(--muted);">' + (u.performance.payout_count || 0) + ' payout' + (u.performance.payout_count === 1 ? '' : 's') + '</div>';
+    : '<div style="font-weight:600;color:#F5F5F7;">$' + fmt(u.performance.credit_balance || 0) + ' credit balance</div>'
+      + '<div style="font-size:11.5px;color:var(--muted);">earned as credits</div>';
   const onbBadge = u.onboarding_completed
     ? '<span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#064E3B;color:#86EFAC;">DONE</span>'
     : '<span style="display:inline-block;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:700;background:#7C2D12;color:#FED7AA;">PENDING</span>';
@@ -1357,8 +1079,6 @@ function renderLiveActivity(j) {
   if (dot) dot.style.background = colors[s] || '#9CA3AF';
   if (txt) txt.textContent = labels[s] || s;
   document.getElementById('live-fill-rate').textContent = _fmtPct(j.health && j.health.fill_rate_24h);
-  document.getElementById('live-tier-counts').textContent =
-    (j.health.tier2_24h || 0) + ' / ' + (j.health.tier3_alerts_24h || 0);
   document.getElementById('live-blocked').textContent = _fmtN(j.health.blocked_publishers || 0);
 
   // Volume card
@@ -1435,7 +1155,7 @@ function renderLiveActivity(j) {
   } else {
     alertsBody.innerHTML = '<div style="display:flex;flex-direction:column;gap:6px;">' + j.recent_alerts.map(a => {
       const when = a.ts ? new Date(a.ts).toLocaleTimeString() : '';
-      return `<div style="padding:8px 12px;background:var(--bg-soft);border-radius:6px;border-left:3px solid var(--pink);font-size:13px;display:flex;justify-content:space-between;gap:12px;cursor:pointer;" onclick="switchPanel('${a.link || 'payouts'}')">
+      return `<div style="padding:8px 12px;background:var(--bg-soft);border-radius:6px;border-left:3px solid var(--pink);font-size:13px;display:flex;justify-content:space-between;gap:12px;cursor:pointer;" onclick="switchPanel('${a.link || 'overview'}')">
         <span><span class="mono" style="color:var(--muted);">${when}</span> · ${(a.message || '').replace(/</g,'&lt;')}</span>
         <span class="mono" style="color:var(--muted);">${a.tag || ''}</span>
       </div>`;
@@ -1533,7 +1253,6 @@ function renderMoneyFlow(j) {
       <td style="text-align:right;" class="mono">${_money(w.advertiser_spend)}</td>
       <td style="text-align:right;" class="mono">${_money(w.bb_revenue)}</td>
       <td style="text-align:right;" class="mono">${_money(w.publisher_accrued)}</td>
-      <td style="text-align:right;" class="mono">${_money(w.payouts_paid)}</td>
     </tr>`;
   }).join('');
 
@@ -1554,39 +1273,6 @@ function renderMoneyFlow(j) {
       `).join('');
     }
   }
-
-  // Eligible card
-  const elig = j.eligible_for_next_payout || { count: 0, total_usd_ready: 0 };
-  document.getElementById('money-eligible-count').textContent = (elig.count || 0).toLocaleString();
-  document.getElementById('money-eligible-total').textContent = _money(elig.total_usd_ready);
-  const stripeBal = j.stripe_balance_available_usd;
-  const stripeEl = document.getElementById('money-stripe-balance');
-  if (stripeBal == null) {
-    stripeEl.textContent = '— (not configured)';
-  } else {
-    stripeEl.textContent = _money(stripeBal);
-    // Warn if stripe balance < total ready
-    if (Number(stripeBal) < Number(elig.total_usd_ready || 0)) {
-      stripeEl.style.color = '#EF4444';
-      stripeEl.title = 'Stripe platform balance < total ready — cron will fail at Tier-1.';
-    } else {
-      stripeEl.style.color = '';
-      stripeEl.title = '';
-    }
-  }
-  document.getElementById('money-clawbacks').textContent = _money(j.pending_clawbacks_total);
-
-  // Payout health card
-  const ph = j.payout_health || {};
-  const lastStatus = (ph.last_run_status || '—');
-  const statusColor = lastStatus === 'paid' ? '#10B981' : lastStatus === 'failed' ? '#EF4444' : lastStatus === 'pending' ? '#F59E0B' : '#9CA3AF';
-  const ls = document.getElementById('money-last-status');
-  ls.textContent = lastStatus;
-  ls.style.color = statusColor;
-  document.getElementById('money-last-when').textContent = ph.last_run_at ? new Date(ph.last_run_at).toLocaleString() : '—';
-  document.getElementById('money-last-amount').textContent = _money(ph.last_run_amount_usd);
-  document.getElementById('money-tier-failed').textContent = (ph.failed_tier1_count || 0) + ' / ' + (ph.failed_tier2_count || 0);
-  document.getElementById('money-blocked').textContent = (ph.blocked_publishers_count || 0).toLocaleString();
 
   // Balance drift table
   const driftBody = document.getElementById('money-drift-body');
@@ -1771,7 +1457,7 @@ function renderAuctionDetail(j) {
 
   const impTile = tile('Impression', timeline.impression, timeline.impression && [
     `Cost charged: $${Number(timeline.impression.cost_usd || 0).toFixed(4)}`,
-    `Publisher payout (70%): $${Number(timeline.impression.developer_payout_usd || 0).toFixed(4)}`,
+    `Publisher earnings (70%): $${Number(timeline.impression.developer_payout_usd || 0).toFixed(4)}`,
     timeline.impression.integration_method ? `Door: <span class="mono">${timeline.impression.integration_method}</span>` : '',
     timeline.impression.geo ? `Geo: ${timeline.impression.geo}` : '',
     timeline.impression.is_sandbox ? `<span style="color:#06B6D4;">⚠ Sandbox traffic — no real money moved</span>` : '',
@@ -2099,191 +1785,8 @@ function toast(msg, type) {
   setTimeout(() => el.classList.remove("show"), 3000);
 }
 
-// ── Phase E Day 4 — Payouts panel ─────────────────────────────────────
-// All requests authenticate via Authorization: Bearer ${ADMIN_TOKEN}.
-// The admin login already populates `token` from /api/auth?action=login;
-// we send it on every admin_* call. If the env var ADMIN_TOKEN is not
-// configured the backend returns 401 — which we surface in the UI.
-
-async function loadPayoutsPanel() {
-  await Promise.all([
-    loadPayoutHealth(),
-    loadBlockedPublishers(),
-    loadPayoutsList(),
-  ]);
-}
-
-async function loadPayoutHealth() {
-  try {
-    const r = await fetch(API + "/api/stats?type=recon");
-    if (!r.ok) return;
-    const data = await r.json();
-    const ph = data.payout_cron_health || {};
-    document.getElementById("po-pending").textContent  = ph.pending_count ?? 0;
-    document.getElementById("po-tier1").textContent    = ph.failed_tier1_count ?? 0;
-    document.getElementById("po-tier2").textContent    = ph.failed_tier2_count ?? 0;
-    document.getElementById("po-blocked").textContent  = ph.blocked_publishers_count ?? 0;
-    document.getElementById("po-eligible").textContent = ph.eligible_for_next_payout ?? 0;
-    // Mirror the pending count into the sidebar nav badge.
-    const navBadge = document.getElementById("payout-pending-count");
-    if (navBadge) {
-      const total = (ph.pending_count || 0) + (ph.failed_tier2_count || 0);
-      navBadge.textContent = total;
-      navBadge.style.display = total > 0 ? "inline-flex" : "none";
-    }
-  } catch (e) { console.error("payout health", e); }
-}
-
-async function loadBlockedPublishers() {
-  try {
-    const r = await fetch(API + "/api/billing?action=admin_blocked_publishers", {
-      headers: { "Authorization": "Bearer " + (token || "") },
-    });
-    if (r.status === 401) {
-      document.getElementById("blocked-publishers-body").innerHTML =
-        `<tr><td colspan="5" class="empty-state">Unauthorized — set ADMIN_TOKEN env var on Vercel.</td></tr>`;
-      return;
-    }
-    const data = await r.json();
-    const rows = data.blocked || [];
-    if (rows.length === 0) {
-      document.getElementById("blocked-publishers-body").innerHTML =
-        `<tr><td colspan="5" class="empty-state">No blocked publishers. 🎉</td></tr>`;
-      return;
-    }
-    document.getElementById("blocked-publishers-body").innerHTML = rows.map(p => `
-      <tr>
-        <td>${esc(p.email || "—")}</td>
-        <td><code style="font-size:11px;">${esc(p.stripe_account_id || "—")}</code></td>
-        <td>${esc((p.payout_blocked_reason || "").slice(0, 80))}</td>
-        <td title="${esc(p.payout_blocked_at || "")}">${relTime(p.payout_blocked_at)}</td>
-        <td>
-          <button class="btn-sm btn-action" onclick="adminUnblockPublisher('${esc(p.developer_id)}')">Unblock</button>
-        </td>
-      </tr>
-    `).join("");
-  } catch (e) { console.error("blocked publishers", e); }
-}
-
-async function loadPayoutsList() {
-  try {
-    const status = document.getElementById("payout-status-filter").value;
-    const qs = "limit=50" + (status ? "&status=" + encodeURIComponent(status) : "");
-    const r = await fetch(API + "/api/billing?action=admin_payouts_list&" + qs, {
-      headers: { "Authorization": "Bearer " + (token || "") },
-    });
-    if (r.status === 401) {
-      document.getElementById("payouts-body").innerHTML =
-        `<tr><td colspan="9" class="empty-state">Unauthorized — set ADMIN_TOKEN env var on Vercel.</td></tr>`;
-      return;
-    }
-    const data = await r.json();
-    const rows = data.payouts || [];
-    if (rows.length === 0) {
-      document.getElementById("payouts-body").innerHTML =
-        `<tr><td colspan="9" class="empty-state">No payouts yet${status ? " matching '" + status + "'" : ""}.</td></tr>`;
-      return;
-    }
-    document.getElementById("payouts-body").innerHTML = rows.map(p => {
-      const statusColor = {
-        paid: "color:#10B981;font-weight:600",
-        pending: "color:#F59E0B;font-weight:600",
-        failed: "color:#EF4444;font-weight:600",
-        held: "color:#6B7280;font-weight:600",
-      }[p.status] || "";
-      const canRetry = p.status === "failed" || p.status === "pending";
-      return `
-        <tr>
-          <td title="${esc(p.created_at || "")}">${relTime(p.created_at)}</td>
-          <td>${esc(p.developer_email || p.developer_id || "—")}</td>
-          <td>$${Number(p.amount || 0).toFixed(2)}</td>
-          <td>$${Number(p.fee_usd || 0).toFixed(2)}</td>
-          <td><code style="font-size:11px;">${esc(p.method || "—")}</code></td>
-          <td style="${statusColor}">${esc(p.status)}${p.failure_tier ? " T" + p.failure_tier : ""}</td>
-          <td>${p.retry_count ?? 0}</td>
-          <td style="max-width:280px;">${esc((p.failure_reason || "").slice(0, 100))}</td>
-          <td>${canRetry
-            ? `<button class="btn-sm btn-action" onclick="adminForceRetry('${esc(p.id)}')">Retry</button>`
-            : ""}</td>
-        </tr>
-      `;
-    }).join("");
-  } catch (e) { console.error("payouts list", e); }
-}
-
-async function adminForceRetry(payoutId) {
-  if (!confirm("Reset this payout to pending and queue it for retry?")) return;
-  try {
-    const r = await fetch(API + "/api/billing?action=admin_force_retry", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (token || "") },
-      body: JSON.stringify({ payout_id: payoutId }),
-    });
-    const data = await r.json();
-    if (r.ok) {
-      toast("Queued for retry. Run retry sweep to fire now.", "success");
-      loadPayoutsPanel();
-    } else {
-      toast(data.error || "Retry failed", "error");
-    }
-  } catch (e) { toast("Retry failed: " + e.message, "error"); }
-}
-
-async function adminUnblockPublisher(developerId) {
-  const reason = prompt("Operator reason for unblock (logged in audit trail):", "Manually resolved out-of-band");
-  if (reason === null) return;
-  try {
-    const r = await fetch(API + "/api/billing?action=admin_unblock_publisher", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + (token || "") },
-      body: JSON.stringify({ developer_id: developerId, reason }),
-    });
-    const data = await r.json();
-    if (r.ok) {
-      toast("Publisher unblocked.", "success");
-      loadPayoutsPanel();
-    } else {
-      toast(data.error || "Unblock failed", "error");
-    }
-  } catch (e) { toast("Unblock failed: " + e.message, "error"); }
-}
-
-async function manualTriggerPayoutCron() {
-  if (!confirm("Fire the Friday payout cron NOW? Real money will move if eligible publishers exist.")) return;
-  try {
-    const r = await fetch(API + "/api/billing?action=run_payout_cron", {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + (window.prompt("Paste CRON_SECRET (different from admin token):") || "") },
-    });
-    const data = await r.json();
-    if (r.ok) {
-      toast(`Cron ran. ${data.succeeded || 0} paid, ${data.tier1_failed || 0} retry, ${data.tier2_failed || 0} blocked.`, "success");
-      loadPayoutsPanel();
-    } else {
-      toast(data.error || "Cron failed", "error");
-    }
-  } catch (e) { toast("Cron failed: " + e.message, "error"); }
-}
-
-async function manualTriggerRetrySweep() {
-  if (!confirm("Fire the Saturday retry sweep NOW?")) return;
-  try {
-    const r = await fetch(API + "/api/billing?action=run_payout_retry_sweep", {
-      method: "POST",
-      headers: { "Authorization": "Bearer " + (window.prompt("Paste CRON_SECRET:") || "") },
-    });
-    const data = await r.json();
-    if (r.ok) {
-      toast(`Retry done. ${data.succeeded || 0} succeeded, ${data.final_failed || 0} exhausted.`, "success");
-      loadPayoutsPanel();
-    } else {
-      toast(data.error || "Retry sweep failed", "error");
-    }
-  } catch (e) { toast("Retry sweep failed: " + e.message, "error"); }
-}
-
 // ── Keyboard shortcuts ──
-const panels = ['overview','review','campaigns','seats','users','payouts'];
+const panels = ['overview','review','campaigns','seats','users'];
 document.addEventListener('keydown', e => {
   // Don't fire in inputs
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
@@ -2295,7 +1798,7 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeSearch(); return; }
   // Number keys for panels
   const n = parseInt(e.key);
-  if (n >= 1 && n <= 6 && !document.getElementById('searchOverlay').classList.contains('open')) {
+  if (n >= 1 && n <= 5 && !document.getElementById('searchOverlay').classList.contains('open')) {
     switchPanel(panels[n - 1]);
   }
   // R to refresh current panel
@@ -2305,7 +1808,6 @@ document.addEventListener('keydown', e => {
     else if (active?.id === 'panel-review') loadReviewQueue();
     else if (active?.id === 'panel-campaigns') loadAllCampaigns();
     else if (active?.id === 'panel-seats') loadSeats();
-    else if (active?.id === 'panel-payouts') loadPayoutsPanel();
     toast('Refreshed', 'success');
   }
 });
@@ -2317,10 +1819,6 @@ const searchItems = [
   { label: 'All Campaigns', panel: 'campaigns' },
   { label: 'DSP Seats', panel: 'seats' },
   { label: 'Users', panel: 'users' },
-  { label: 'Payouts — Cron health, blocked publishers, manual controls', panel: 'payouts' },
-  { label: 'Audit Queue — Pricing-plan discount verification', panel: 'audits' },
-  { label: 'Affiliate Program — Platform-wide commission metrics', panel: 'affiliate-program' },
-  { label: 'Seller Payouts — Dispatch MoR settlements via PayPal', panel: 'seller-payouts' },
   { label: 'Benna Playground', href: '/playground.html' },
   { label: 'System Status', href: '/status.html' },
   { label: 'API Docs', href: '/docs' },
@@ -2373,479 +1871,6 @@ document.getElementById('searchInput').addEventListener('keydown', function(e) {
   }
 });
 
-// ═══════════════════════════════════════════════════════════════════════
-// PASS 4 — Audit Queue + Affiliate Program panels
-// ═══════════════════════════════════════════════════════════════════════
-
-function adminFetch(path, opts = {}) {
-  const headers = Object.assign({}, opts.headers || {}, {
-    "Authorization": "Bearer " + (token || localStorage.getItem("bb_admin_token") || ""),
-  });
-  if (opts.body && !headers["Content-Type"]) headers["Content-Type"] = "application/json";
-  return fetch(path, Object.assign({}, opts, { headers }));
-}
-
-function fmtUsd(n) {
-  const v = Number(n) || 0;
-  try { return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(v); }
-  catch (_) { return "$" + v.toFixed(2); }
-}
-function fmtInt(n) {
-  const v = Number(n) || 0;
-  try { return new Intl.NumberFormat().format(v); } catch (_) { return String(v); }
-}
-function escHtml(s) {
-  return String(s == null ? "" : s)
-    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-}
-
-// ─── Audit Queue ───────────────────────────────────────────────────────
-
-const AUDIT_BADGE_STYLES = {
-  pending:            "background:#FEF3C7;color:#92400E;",
-  approved:           "background:#ECFDF5;color:#059669;",
-  rejected:           "background:#FEF2F2;color:#DC2626;",
-  changes_requested:  "background:#FFF7ED;color:#C2410C;",
-};
-function auditBadge(status) {
-  const s = AUDIT_BADGE_STYLES[status] || "background:#F3F4F6;color:#6B7280;";
-  const label = (status || "—").replace(/_/g, " ").toUpperCase();
-  return `<span style="${s}padding:3px 9px;border-radius:11px;font-size:10px;font-weight:700;letter-spacing:0.04em;">${escHtml(label)}</span>`;
-}
-
-async function loadAuditsPanel() {
-  await Promise.all([loadAuditSummary(), loadAuditList()]);
-}
-
-async function loadAuditSummary() {
-  try {
-    const r = await adminFetch("/api/admin-audits?action=summary");
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const j = await r.json();
-    const c = j.counts || {};
-    document.getElementById("audit-stat-queue").textContent     = fmtInt(c.queue);
-    document.getElementById("audit-stat-pending").textContent   = fmtInt(c.pending);
-    document.getElementById("audit-stat-changes").textContent   = fmtInt(c.changes_requested);
-    document.getElementById("audit-stat-approved").textContent  = fmtInt(c.approved);
-    document.getElementById("audit-stat-rejected").textContent  = fmtInt(c.rejected);
-    const badge = document.getElementById("audit-pending-count");
-    if (badge) badge.textContent = String(c.queue || 0);
-  } catch (e) {
-    console.warn("[admin] audit summary failed:", e.message);
-  }
-}
-
-async function loadAuditList() {
-  const listEl = document.getElementById("audits-list");
-  const filter = document.getElementById("audit-filter")?.value || "queue";
-  listEl.innerHTML = `<div class="empty-state" style="padding:48px 16px;text-align:center;color:var(--muted);">Loading…</div>`;
-  try {
-    const r = await adminFetch("/api/admin-audits?action=list&status=" + encodeURIComponent(filter));
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const j = await r.json();
-    renderAuditList(j.audits || []);
-  } catch (e) {
-    listEl.innerHTML = `<div class="empty-state" style="padding:48px 16px;text-align:center;color:var(--pink);">Failed to load: ${escHtml(e.message)}</div>`;
-  }
-}
-
-function renderAuditList(items) {
-  const listEl = document.getElementById("audits-list");
-  if (!items.length) {
-    listEl.innerHTML = `
-      <div class="empty-state" style="padding:64px 16px;text-align:center;color:var(--muted);">
-        <div style="font-size:36px;margin-bottom:12px;">🎉</div>
-        <div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px;">Queue is empty</div>
-        <div style="font-size:13px;color:var(--muted);max-width:420px;margin:0 auto;line-height:1.55;">No product pages waiting for review. New seller submissions land here automatically.</div>
-      </div>`;
-    return;
-  }
-  listEl.innerHTML = items.map((a) => {
-    const sellerName  = (a.advertiser && (a.advertiser.company_name || a.advertiser.display_name || a.advertiser.email)) || "—";
-    const sellerEmail = (a.advertiser && a.advertiser.email) || "";
-    const isQueue     = (a.audit_status === "pending" || a.audit_status === "changes_requested");
-    const reviewNotes = a.audit_review_notes ? `<div style="font-size:12px;background:var(--bg-soft);border-left:3px solid var(--orange);padding:8px 10px;margin-top:8px;border-radius:0 6px 6px 0;color:var(--text);"><strong>Prior reviewer notes:</strong> ${escHtml(a.audit_review_notes)}</div>` : "";
-
-    // Plans table — each tier on its own row with proof URL
-    const plansHtml = (a.plans || []).map((pl) => {
-      const dpct = pl.discount_pct ? `<span style="background:#FEE2E2;color:#B91C1C;padding:1px 7px;border-radius:8px;font-size:10.5px;font-weight:700;">-${pl.discount_pct}%</span>` : "";
-      const proof = pl.original_price_proof_url
-        ? `<a href="${escHtml(pl.original_price_proof_url)}" target="_blank" rel="noopener" style="color:var(--pink);font-size:11.5px;text-decoration:none;">${escHtml(pl.original_price_proof_url.length > 70 ? pl.original_price_proof_url.slice(0,70) + "…" : pl.original_price_proof_url)} ↗</a>`
-        : `<span style="color:var(--pink);font-size:11.5px;">⚠ No proof URL</span>`;
-      const proofNotes = pl.original_price_proof_notes ? `<div style="font-size:11px;color:var(--muted);margin-top:3px;font-style:italic;">"${escHtml(pl.original_price_proof_notes)}"</div>` : "";
-      return `
-        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;margin-bottom:8px;">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap;">
-            <div style="flex:1;min-width:220px;">
-              <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px;">
-                <span style="font-size:13px;font-weight:700;color:var(--text);">${escHtml(pl.plan_name)}</span>
-                ${pl.is_recommended ? '<span style="background:var(--pink);color:#fff;padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;letter-spacing:0.04em;">★ Recommended</span>' : ""}
-                ${!pl.is_active ? '<span style="background:var(--bg-soft);color:var(--muted);padding:2px 7px;border-radius:8px;font-size:9.5px;font-weight:700;letter-spacing:0.04em;">Inactive</span>' : ""}
-              </div>
-              <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;">
-                <span style="font-size:16px;font-weight:700;color:var(--text);">${escHtml(fmtUsd(pl.price))}</span>
-                ${pl.original_price ? `<span style="font-size:12px;color:var(--muted);text-decoration:line-through;">${escHtml(fmtUsd(pl.original_price))}</span>` : ""}
-                ${dpct}
-                <span style="font-size:10.5px;color:var(--muted);">${escHtml(pl.billing_period || "one_time")}</span>
-              </div>
-              ${pl.description ? `<div style="font-size:11.5px;color:var(--muted);margin-top:4px;">${escHtml(pl.description)}</div>` : ""}
-            </div>
-            <div style="text-align:right;min-width:200px;">${proof}${proofNotes}</div>
-          </div>
-        </div>`;
-    }).join("") || `<div style="font-size:12px;color:var(--pink);padding:8px;">⚠ No pricing plans attached</div>`;
-
-    // Marketing content surface — TL;DR, at-a-glance, founder card, etc.
-    const tagOr = (xs, color) => (xs && xs.length) ? `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">${xs.map((s) => `<span style="font-size:11px;background:${color};color:var(--text);padding:2px 8px;border-radius:8px;">${escHtml(s)}</span>`).join("")}</div>` : `<div style="font-size:11px;color:var(--muted);font-style:italic;margin-top:4px;">—</div>`;
-    const marketingHtml = `
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:10px;">
-        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
-          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">TL;DR</div>
-          ${a.tldr_bullets.length ? `<ul style="margin:0;padding-left:18px;font-size:11.5px;color:var(--text);">${a.tldr_bullets.map((b) => `<li>${escHtml(b)}</li>`).join("")}</ul>` : `<div style="font-size:11px;color:var(--muted);font-style:italic;">—</div>`}
-        </div>
-        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
-          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Alternative to</div>
-          ${tagOr(a.alternative_to, "var(--bg-soft)")}
-        </div>
-        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
-          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Integrations</div>
-          ${tagOr(a.integrations, "var(--bg-soft)")}
-        </div>
-        <div style="padding:10px 12px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
-          <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;">Best for</div>
-          ${tagOr(a.best_for, "var(--bg-soft)")}
-        </div>
-      </div>`;
-
-    const founderHtml = (a.founder_name || a.company_tagline || a.company_about) ? `
-      <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
-        <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">Company &amp; founder</div>
-        ${a.company_tagline ? `<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">${escHtml(a.company_tagline)}</div>` : ""}
-        ${a.company_about ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5;">${escHtml(a.company_about)}</div>` : ""}
-        <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:11.5px;color:var(--text);">
-          ${a.founder_name ? `<div>👤 ${escHtml(a.founder_name)}${a.founder_role ? ` · ${escHtml(a.founder_role)}` : ""}</div>` : ""}
-          ${a.founder_linkedin_url ? `<a href="${escHtml(a.founder_linkedin_url)}" target="_blank" rel="noopener" style="color:var(--pink);text-decoration:none;">LinkedIn ↗</a>` : ""}
-          ${a.company_website_url ? `<a href="${escHtml(a.company_website_url)}" target="_blank" rel="noopener" style="color:var(--pink);text-decoration:none;">Website ↗</a>` : ""}
-          ${a.company_city ? `<div>📍 ${escHtml(a.company_city)}${a.company_country_code ? `, ${escHtml(a.company_country_code)}` : ""}</div>` : ""}
-          ${a.company_size ? `<div>👥 ${escHtml(a.company_size)}</div>` : ""}
-          ${a.company_growth_stage ? `<div>📈 ${escHtml(a.company_growth_stage)}</div>` : ""}
-          ${a.company_funding_status ? `<div>💰 ${escHtml(a.company_funding_status)}</div>` : ""}
-        </div>
-      </div>` : "";
-
-    const dealTermsHtml = (a.deal_terms && a.deal_terms.length) ? `
-      <div style="margin-top:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--line);border-radius:8px;">
-        <div style="font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;margin-bottom:6px;">Deal terms</div>
-        <ul style="margin:0;padding-left:18px;font-size:11.5px;color:var(--text);">${a.deal_terms.map((t) => `<li>${escHtml(t)}</li>`).join("")}</ul>
-      </div>` : "";
-
-    const trustHtml = (a.refund_window_days != null || a.guarantee_label) ? `
-      <div style="margin-top:8px;font-size:11.5px;color:var(--muted);">
-        ${a.refund_window_days != null ? `🛡 Refundable up to ${a.refund_window_days} days` : ""}
-        ${a.guarantee_label ? ` · ${escHtml(a.guarantee_label)}` : ""}
-      </div>` : "";
-
-    return `
-      <div data-audit-id="${escHtml(a.id)}" class="audit-card" style="background:var(--bg-soft);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:14px;">
-        <!-- Header: product identity + audit status + seller -->
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:12px;">
-          <div style="flex:1;min-width:280px;">
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;">
-              ${a.image_url ? `<img src="${escHtml(a.image_url)}" style="width:36px;height:36px;border-radius:8px;object-fit:cover;background:var(--bg);" onerror="this.style.display='none'">` : ""}
-              <div>
-                <div style="font-size:17px;font-weight:700;color:var(--text);">${escHtml(a.name)}</div>
-                ${a.description ? `<div style="font-size:12px;color:var(--muted);">${escHtml(a.description)}</div>` : ""}
-              </div>
-              ${auditBadge(a.audit_status)}
-            </div>
-            ${trustHtml}
-            <a href="${escHtml(a.live_page_url)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:8px;font-size:11.5px;color:var(--pink);text-decoration:none;">↗ Open live page</a>
-          </div>
-          <div style="text-align:right;min-width:200px;">
-            <div style="font-size:12px;font-weight:600;color:var(--text);">${escHtml(sellerName)}</div>
-            ${sellerEmail && sellerEmail !== sellerName ? `<div style="font-size:11px;color:var(--muted);">${escHtml(sellerEmail)}</div>` : ""}
-            <div style="font-size:11px;color:var(--muted);margin-top:6px;">Created ${new Date(a.created_at).toLocaleString()}</div>
-            ${a.audit_reviewed_at ? `<div style="font-size:11px;color:var(--muted);">Last reviewed ${new Date(a.audit_reviewed_at).toLocaleString()}</div>` : ""}
-          </div>
-        </div>
-
-        <!-- Pricing tiers section -->
-        <div style="margin:14px 0 6px;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase;">Pricing tiers (${(a.plans || []).length}) — verify each proof URL matches the price</div>
-        ${plansHtml}
-
-        <!-- Marketing content -->
-        ${marketingHtml}
-        ${founderHtml}
-        ${dealTermsHtml}
-
-        ${reviewNotes}
-
-        ${isQueue ? `
-          <div data-notes-row style="margin-top:14px;display:none;">
-            <textarea data-notes-input rows="2" placeholder="Notes to the seller (required when rejecting or requesting changes)…" style="width:100%;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font-size:13px;font-family:inherit;resize:vertical;"></textarea>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
-            <button class="btn-sm btn-action" data-action="approve" data-audit-id="${escHtml(a.id)}" style="background:#059669;color:#fff;border-color:#059669;">✓ Approve product</button>
-            <button class="btn-sm btn-action" data-action="request_changes" data-audit-id="${escHtml(a.id)}" style="background:#F59E0B;color:#fff;border-color:#F59E0B;">✎ Request changes</button>
-            <button class="btn-sm btn-action" data-action="reject" data-audit-id="${escHtml(a.id)}" style="background:#DC2626;color:#fff;border-color:#DC2626;">✕ Reject</button>
-          </div>
-        ` : ""}
-      </div>`;
-  }).join("");
-
-  // Delegated handler
-  listEl.onclick = async (e) => {
-    const btn = e.target.closest("button[data-action]");
-    if (!btn) return;
-    const action = btn.dataset.action;
-    const id = btn.dataset.auditId;
-    const card = btn.closest(".audit-card");
-    const notesRow = card.querySelector("[data-notes-row]");
-    const notesInput = card.querySelector("[data-notes-input]");
-    const needsNotes = action === "reject" || action === "request_changes";
-
-    if (needsNotes && notesRow.style.display === "none") {
-      notesRow.style.display = "block";
-      notesInput.focus();
-      return;
-    }
-    const notes = (notesInput && notesInput.value || "").trim();
-    if (needsNotes && !notes) {
-      toast("Notes are required when rejecting or requesting changes", "error");
-      notesInput.focus();
-      return;
-    }
-    if (!confirm(`${action.replace(/_/g, " ")} this product page?`)) return;
-    btn.disabled = true;
-    btn.textContent = "Submitting…";
-    try {
-      const r = await adminFetch("/api/admin-audits?action=" + action, {
-        method: "POST",
-        body: JSON.stringify({ product_id: id, notes }),
-      });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
-      // Surface plan-cascade count from the response so it's obvious
-      // whether plans came along (post Task #150 fix).
-      const planCount = (typeof j.plans_updated === "number") ? j.plans_updated : 0;
-      const planSuffix = planCount > 0
-        ? ` (+${planCount} ${planCount === 1 ? "plan" : "plans"})`
-        : "";
-      toast(`Product ${action.replace(/_/g, " ")}d${planSuffix}`, "success");
-      await loadAuditsPanel();
-    } catch (err) {
-      toast("Failed: " + err.message, "error");
-      btn.disabled = false;
-      btn.textContent = action === "approve" ? "✓ Approve product" : action === "reject" ? "✕ Reject" : "✎ Request changes";
-    }
-  };
-}
-
-// Wire the filter dropdown
-document.getElementById("audit-filter")?.addEventListener("change", () => loadAuditList());
-
-// ─── Affiliate Program metrics ─────────────────────────────────────────
-
-async function loadAffiliateProgramPanel() {
-  const range = document.getElementById("aff-range")?.value || "30";
-  document.getElementById("aff-products-body").innerHTML = `<tr><td colspan="6" class="empty-state">Loading…</td></tr>`;
-  document.getElementById("aff-affiliates-body").innerHTML = `<tr><td colspan="5" class="empty-state">Loading…</td></tr>`;
-  try {
-    const r = await adminFetch("/api/admin-metrics?action=affiliate_program&range=" + encodeURIComponent(range));
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const j = await r.json();
-    renderAffiliateProgram(j);
-  } catch (e) {
-    document.getElementById("aff-products-body").innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
-    document.getElementById("aff-affiliates-body").innerHTML = `<tr><td colspan="5" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
-  }
-}
-
-function renderAffiliateProgram(data) {
-  const t = data.totals || {};
-  document.getElementById("aff-stat-sales").textContent   = fmtInt(t.sales);
-  document.getElementById("aff-stat-gross").textContent   = fmtUsd(t.gross);
-  document.getElementById("aff-stat-payout").textContent  = fmtUsd(t.affiliate_payout);
-  document.getElementById("aff-stat-take").textContent    = fmtUsd(t.bb_take);
-  document.getElementById("aff-stat-seller").textContent  = fmtUsd(t.seller_net);
-  document.getElementById("aff-stat-pool").textContent    = fmtUsd(t.pool);
-  document.getElementById("aff-stat-refunds").textContent = fmtInt(t.refunded_count) + " · " + fmtUsd(t.refunded_amount);
-  document.getElementById("aff-stat-pending").textContent = fmtInt(t.pending_count);
-
-  const prodBody = document.getElementById("aff-products-body");
-  if (!data.by_product || !data.by_product.length) {
-    prodBody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--muted);">No sales in this window yet.</td></tr>`;
-  } else {
-    prodBody.innerHTML = data.by_product.map((p) => `
-      <tr>
-        <td><div style="display:flex;align-items:center;gap:10px;">${p.image_url ? `<img src="${escHtml(p.image_url)}" style="width:24px;height:24px;border-radius:4px;object-fit:cover;" onerror="this.style.display='none'">` : ""}<span>${escHtml(p.name || "—")}</span></div></td>
-        <td>${fmtInt(p.sales)}</td>
-        <td>${fmtUsd(p.gross)}</td>
-        <td>${fmtUsd(p.pool)}</td>
-        <td style="color:var(--pink);font-weight:600;">${fmtUsd(p.payout)}</td>
-        <td style="color:#7C3AED;font-weight:600;">${fmtUsd(p.take)}</td>
-      </tr>`).join("");
-  }
-
-  const affBody = document.getElementById("aff-affiliates-body");
-  if (!data.by_affiliate || !data.by_affiliate.length) {
-    affBody.innerHTML = `<tr><td colspan="5" class="empty-state" style="color:var(--muted);">No attributed sales in this window yet.</td></tr>`;
-  } else {
-    affBody.innerHTML = data.by_affiliate.map((a) => {
-      const ident = a.display_name || a.email || (a.affiliate_id || "").slice(0, 8) + "…";
-      return `
-        <tr>
-          <td><div style="font-weight:600;">${escHtml(ident)}</div>${a.email && a.email !== ident ? `<div style="font-size:11px;color:var(--muted);">${escHtml(a.email)}</div>` : ""}</td>
-          <td>${fmtInt(a.sales)}</td>
-          <td>${fmtUsd(a.gross)}</td>
-          <td style="color:var(--pink);font-weight:600;">${fmtUsd(a.payout)}</td>
-          <td style="color:#7C3AED;font-weight:600;">${fmtUsd(a.take)}</td>
-        </tr>`;
-    }).join("");
-  }
-}
-
-document.getElementById("aff-range")?.addEventListener("change", () => loadAffiliateProgramPanel());
-
-// ─── Seller Payouts ────────────────────────────────────────────────────
-
-let _sellerPayoutsCache = null;
-
-async function loadSellerPayoutsPanel() {
-  const tbody = document.getElementById("sp-eligible-body");
-  const held  = document.getElementById("sp-held-body");
-  tbody.innerHTML = `<tr><td colspan="6" class="empty-state">Loading…</td></tr>`;
-  held.innerHTML  = `<tr><td colspan="4" class="empty-state">Loading…</td></tr>`;
-  try {
-    const r = await adminFetch("/api/admin-seller-payouts?action=eligible_sellers");
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const j = await r.json();
-    _sellerPayoutsCache = j;
-    renderSellerPayouts(j);
-  } catch (e) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
-    held.innerHTML  = `<tr><td colspan="4" class="empty-state" style="color:var(--pink);">Failed: ${escHtml(e.message)}</td></tr>`;
-  }
-}
-
-function renderSellerPayouts(data) {
-  const eligible = (data && data.eligible) || [];
-  const noMethod = (data && data.not_eligible_no_method) || [];
-  const belowMin = (data && data.not_eligible_below_min) || [];
-
-  // Stat cards
-  document.getElementById("sp-stat-eligible").textContent  = fmtInt(eligible.length);
-  const totalDue = eligible.reduce((a, e) => a + Number(e.total_usd || 0), 0);
-  document.getElementById("sp-stat-total").textContent      = fmtUsd(totalDue);
-  document.getElementById("sp-stat-no-method").textContent = fmtInt(noMethod.length);
-  document.getElementById("sp-stat-below-min").textContent = fmtInt(belowMin.length);
-
-  // Sidebar badge — eligible count
-  const badge = document.getElementById("seller-payouts-eligible-count");
-  if (badge) badge.textContent = String(eligible.length);
-
-  // Eligible table
-  const tbody = document.getElementById("sp-eligible-body");
-  if (!eligible.length) {
-    tbody.innerHTML = `<tr><td colspan="6" class="empty-state" style="color:var(--muted);">No sellers eligible right now. Either no captured sales, or all sellers below \$1 min, or no PayPal email configured.</td></tr>`;
-  } else {
-    tbody.innerHTML = eligible.map((e) => `
-      <tr>
-        <td>
-          <div style="font-weight:600;">${escHtml(e.seller_name)}</div>
-          ${e.seller_email ? `<div style="font-size:11px;color:var(--muted);">${escHtml(e.seller_email)}</div>` : ""}
-          <div style="font-size:10.5px;color:var(--muted);font-family:monospace;">${escHtml(e.advertiser_id.slice(0,8))}…</div>
-        </td>
-        <td><code style="font-size:12px;">${escHtml(e.paypal_email)}</code></td>
-        <td>${fmtInt(e.sales)}</td>
-        <td style="color:var(--pink);font-weight:700;">${fmtUsd(e.total_usd)}</td>
-        <td style="font-size:11px;color:var(--muted);">${escHtml(new Date(e.earliest_captured).toLocaleDateString())}</td>
-        <td>
-          <button class="btn-sm btn-action" data-action="dispatch-one" data-advertiser-id="${escHtml(e.advertiser_id)}" style="background:#059669;color:#fff;border-color:#059669;">▶ Pay now</button>
-        </td>
-      </tr>`).join("");
-    tbody.onclick = async (ev) => {
-      const btn = ev.target.closest("button[data-action='dispatch-one']");
-      if (!btn) return;
-      const advId = btn.dataset.advertiserId;
-      await dispatchSellers([advId], btn);
-    };
-  }
-
-  // Held — no method
-  const heldBody = document.getElementById("sp-held-body");
-  if (!noMethod.length) {
-    heldBody.innerHTML = `<tr><td colspan="4" class="empty-state" style="color:var(--muted);">No sellers held. Everyone with captured sales has a PayPal email on file.</td></tr>`;
-  } else {
-    heldBody.innerHTML = noMethod.map((e) => `
-      <tr>
-        <td>
-          <div style="font-weight:600;">${escHtml(e.seller_name)}</div>
-          ${e.seller_email ? `<div style="font-size:11px;color:var(--muted);">${escHtml(e.seller_email)}</div>` : ""}
-        </td>
-        <td>${fmtInt(e.sales)}</td>
-        <td style="color:var(--pink);font-weight:700;">${fmtUsd(e.total_usd)}</td>
-        <td style="font-size:11px;color:var(--muted);">${escHtml(new Date(e.earliest_captured).toLocaleDateString())}</td>
-      </tr>`).join("");
-  }
-}
-
-async function dispatchSellers(advertiserIds, btn) {
-  const label = (advertiserIds && advertiserIds.length === 1) ? "this seller" : "all eligible sellers";
-  if (!confirm(`Dispatch payouts to ${label}?\n\nThis sends real money via PayPal Payouts API. Cannot be undone.`)) return;
-  if (btn) { btn.disabled = true; btn.textContent = "Dispatching…"; }
-  try {
-    const r = await adminFetch("/api/admin-seller-payouts?action=dispatch_batch", {
-      method: "POST",
-      body: JSON.stringify(advertiserIds ? { advertiser_ids: advertiserIds } : {}),
-    });
-    const j = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(j.error || "HTTP " + r.status);
-    toast(`Dispatched ${j.dispatched_count} payout(s) totalling ${fmtUsd(j.total_usd || 0)}${j.mode === "demo" ? " (demo mode — no real money sent)" : ""}`, "success");
-    await loadSellerPayoutsPanel();
-  } catch (e) {
-    toast("Dispatch failed: " + e.message, "error");
-    if (btn) { btn.disabled = false; btn.textContent = "▶ Pay now"; }
-  }
-}
-
-async function dispatchAllEligibleSellers() {
-  await dispatchSellers(null, document.getElementById("seller-payouts-dispatch-all"));
-}
-
-// Refresh the eligible-sellers badge count on login
-(function bootSellerPayoutsBadge() {
-  let tries = 0;
-  const iv = setInterval(() => {
-    tries += 1;
-    if (token || tries > 30) {
-      clearInterval(iv);
-      if (token) {
-        adminFetch("/api/admin-seller-payouts?action=eligible_sellers")
-          .then((r) => r.ok ? r.json() : null)
-          .then((j) => {
-            const badge = document.getElementById("seller-payouts-eligible-count");
-            if (badge && j) badge.textContent = String((j.eligible || []).length);
-          })
-          .catch(() => {});
-      }
-    }
-  }, 500);
-})();
-
-// Refresh the audit-queue badge count on login so the sidebar reflects
-// reality even before the operator opens the panel.
-(function bootAuditBadge() {
-  let tries = 0;
-  const iv = setInterval(() => {
-    tries += 1;
-    if (token || tries > 30) {
-      clearInterval(iv);
-      if (token) loadAuditSummary().catch(() => {});
-    }
-  }, 500);
-})();
 
 </script>
 </body>

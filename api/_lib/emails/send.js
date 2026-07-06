@@ -5,15 +5,15 @@
  *   - Graceful "no-op in dev / demo" if RESEND_API_KEY is missing
  *     (so local tests don't fail and so api/auth.js demo mode doesn't
  *     send real emails)
- *   - Per-email-type sender address (billing@, payouts@, hello@, etc)
+ *   - Per-email-type sender address (billing@, hello@, etc)
  *     so users can mentally bucket emails by sender
  *   - Reply-To headers routing replies to support@boostboss.ai (since the
  *     individual sender aliases like noreply@ shouldn't accept inbound mail)
  *   - Structured error logging (Vercel logs surface these in the dashboard)
  *
- * Each email type gets its own helper function (sendWelcome, sendDepositSuccess,
- * sendPayoutSent) so callers don't have to know about subject lines, templates,
- * or sender aliases.
+ * Each email type gets its own helper function (sendWelcome, sendDepositSuccess)
+ * so callers don't have to know about subject lines, templates, or sender
+ * aliases.
  *
  * Resend account: admin@boostboss.ai
  * Resend domain: boostboss.ai (verified 2026-06-11)
@@ -23,8 +23,6 @@
 const {
   welcomeEmail,
   depositSuccessEmail,
-  payoutSentEmail,
-  purchaseConfirmationEmail,
 } = require("./templates");
 
 const PUBLIC_BASE =
@@ -38,10 +36,8 @@ const PUBLIC_BASE =
 const SENDERS = {
   welcome:        { name: "Boost Boss",          alias: "hello"    },
   billing:        { name: "Boost Boss Billing",  alias: "billing"  },
-  payouts:        { name: "Boost Boss Payouts",  alias: "payouts"  },
   alerts:         { name: "Boost Boss Alerts",   alias: "alerts"   },
   support:        { name: "Boost Boss Support",  alias: "support"  },
-  receipts:       { name: "Boost Boss Store",    alias: "receipts" },
 };
 
 const REPLY_TO = "support@boostboss.ai";
@@ -125,35 +121,9 @@ async function sendDepositSuccess({ to, amountUsd, balanceAfterUsd, companyName 
   return send({ kind: "billing", to, subject, html });
 }
 
-async function sendPayoutSent({ to, amountUsd, payoutMethod, payoutId, expectedDeliveryDays, paypalEmail }) {
-  const dashboardUrl = `${PUBLIC_BASE}/publish/dashboard#/payouts`;
-  const { subject, html } = payoutSentEmail({
-    amountUsd, payoutMethod, payoutId, dashboardUrl, expectedDeliveryDays, paypalEmail,
-  });
-  return send({ kind: "payouts", to, subject, html });
-}
-
-// MoR Storefront — purchase confirmation. Buyer receives this immediately
-// after PayPal capture. Contains the voucher code, the seller's redemption
-// link, and the permanent affiliate-attribution link for repeat purchases.
-// See [[mor-product-page-model]] "Receipt-attribution trick".
-async function sendPurchaseConfirmation({
-  to, productName, voucherCode, redemptionUrl, repeatPurchaseUrl,
-  amountUsd, currency, transactionId, redemptionWindowDays, packageDurationDays, skuType,
-}) {
-  const { subject, html } = purchaseConfirmationEmail({
-    productName, voucherCode, redemptionUrl, repeatPurchaseUrl,
-    amountUsd, currency, transactionId, redemptionWindowDays,
-    packageDurationDays, skuType,
-  });
-  return send({ kind: "receipts", to, subject, html });
-}
-
 module.exports = {
   sendWelcome,
   sendDepositSuccess,
-  sendPayoutSent,
-  sendPurchaseConfirmation,
   // Lower-level API in case future code needs custom emails:
   send,
   SENDERS,

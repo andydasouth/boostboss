@@ -124,10 +124,9 @@ async function test(name, fn) {
     assert.strictEqual(typeof b.windows["24h"].advertiser_spend, "number");
     assert.strictEqual(typeof b.windows["24h"].bb_revenue, "number");
     assert.strictEqual(typeof b.windows["24h"].publisher_accrued, "number");
-    assert.strictEqual(typeof b.windows["24h"].payouts_paid, "number");
     assert(Array.isArray(b.top_advertisers_by_spend_24h));
     assert(Array.isArray(b.top_publishers_by_balance));
-    assert(b.eligible_for_next_payout, "should include eligible_for_next_payout");
+    assert(b.balance_drift, "should include balance_drift");
   });
 
   await test("money_flow respects mode=sandbox", async () => {
@@ -143,8 +142,8 @@ async function test(name, fn) {
     assert.strictEqual(b.windows["7d"].advertiser_spend,  0);
     assert.strictEqual(b.windows["30d"].advertiser_spend, 0);
     assert.strictEqual(b.advertiser_deposits_24h, 0);
-    assert.strictEqual(b.pending_clawbacks_total, 0);
-    assert.strictEqual(b.eligible_for_next_payout.count, 0);
+    assert.strictEqual(b.balance_drift.checked, 0);
+    assert.strictEqual(b.balance_drift.drifted, 0);
   });
 
   await test("money_flow exposes per-door breakdown with full shape", async () => {

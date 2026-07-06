@@ -77,32 +77,6 @@ function makeApiKey(prefix, userId) {
   return `bb_${prefix}_live_${seed.slice(0, 32)}`;
 }
 
-// ── Affiliate share-link helpers ───────────────────────────────────────
-// makeToken: 8-char base62 → ~218 trillion possibilities. Collision risk
-// at any reasonable scale is negligible; the affiliate_share_links table
-// has a UNIQUE constraint on token so a collision throws and the caller
-// retries with a fresh value.
-const TOKEN_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789"; // skip 0/O/1/l/I for legibility
-function makeToken(len = 8) {
-  const bytes = crypto.randomBytes(len);
-  let out = "";
-  for (let i = 0; i < len; i++) {
-    out += TOKEN_ALPHABET[bytes[i] % TOKEN_ALPHABET.length];
-  }
-  return out;
-}
-
-// buildShareUrl: assemble the public-facing share URL for a token. Uses
-// PUBLIC_BASE if set (production = https://boostboss.ai), falls back to
-// the request's own origin so dev / preview deploys work without env vars.
-function buildShareUrl(req, token) {
-  const fromEnv = process.env.PUBLIC_BASE || process.env.PUBLIC_BASE_URL;
-  if (fromEnv) return fromEnv.replace(/\/$/, "") + "/s/" + token;
-  const host = (req && req.headers && req.headers.host) || "boostboss.ai";
-  const proto = (req && req.headers && req.headers["x-forwarded-proto"]) || "https";
-  return proto + "://" + host + "/s/" + token;
-}
-
 // ── demo-mode in-process user store (resets on cold start; that's fine) ──
 const DEMO_USERS = new Map(); // userId → user row
 
@@ -251,12 +225,8 @@ module.exports = async function handler(req, res) {
   // no side effects; pagination params go in the query string. Everything
   // else still requires POST.
   //   - me_cors: benna.ai logged-in lockup (legacy)
-  //   - affiliate_list_saved: affiliate dashboard saved-ads list
-  //   - affiliate_list_share_links: affiliate dashboard share-links list
   const GET_ALLOWED = new Set([
     "me_cors",
-    "affiliate_list_saved",
-    "affiliate_list_share_links",
   ]);
   if (req.method === "GET" && !GET_ALLOWED.has(action)) {
     return res.status(405).json({ error: "GET not allowed for this action" });
@@ -664,7 +634,7 @@ async function supabaseHandler(action, body, req, res) {
     }
 
     // Insert the new role's profile row. Defaults mirror the original
-    // signup path so downstream surfaces (campaign create, payouts) find
+    // signup path so downstream surfaces (campaign create, earnings) find
     // the columns they expect.
     let inserted = null;
     if (role === "advertiser") {
@@ -1261,123 +1231,6 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  // ── Payout method (PayPal email) ───────────────────────────────────────
-  // Two actions: read the current method, and save (insert or replace) the
-  // method with a step-up password + TOTP verification. The frontend calls
-  // get to populate the read-only summary or to pre-fill the edit form, and
-  // save to commit changes after the publisher re-enters their password and
-  // a fresh authenticator code in the inline confirm step.
-  //
-  // Provider revision 2026-06-11: pivoted from bank-transfer (Payoneer-era)
-  // to PayPal email (single field). Taiwan-entity legal constraint forces
-  // single-provider pay-in + payout; PayPal handles both until Singapore
-  // corp. The publisher_payout_methods table gains a `paypal_email` column;
-  // old bank columns stay in schema for now but are no longer written or
-  // validated. The bank_snapshot jsonb on payout_requests still keys off
-  // `bank_snapshot` (column name preserved to avoid migration), but contents
-  // change to { paypal_email, currency, captured_at } instead of full bank
-  // fields. See taiwan_entity_single_provider memory for rationale.
-  if (action === "get_payout_method" || action === "save_payout_method") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error: authErr } = await supabaseAnon.auth.getUser(token);
-    if (authErr || !user) return res.status(401).json({ error: "Invalid token" });
-
-    if (action === "get_payout_method") {
-      const { data, error } = await supabaseAdmin
-        .from("publisher_payout_methods")
-        .select("paypal_email, currency, created_at, updated_at")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (error) return res.status(500).json({ error: error.message });
-      // Only treat the row as "having a method" if paypal_email is populated.
-      // A legacy bank-only row from before the pivot looks identical to no
-      // row here because we don't select bank fields anymore — explicit
-      // shape lets the frontend decide cleanly.
-      const method = (data && data.paypal_email) ? data : null;
-      return res.json({ method });
-    }
-
-    if (action === "save_payout_method") {
-      const {
-        current_password, totp_code,
-        paypal_email,
-      } = body || {};
-
-      // Validate required fields before doing any auth work — fail-fast.
-      const required = { current_password, totp_code, paypal_email };
-      for (const k of Object.keys(required)) {
-        if (!required[k] || String(required[k]).trim() === "") {
-          return res.status(400).json({ error: `Missing required field: ${k}` });
-        }
-      }
-
-      // Loose RFC-5322-ish email validation. PayPal will do the strict check
-      // when we dispatch the payout (and reject with INVALID_FIELD_NAME if
-      // the address can't receive money) — our job here is just to filter
-      // obvious typos before saving.
-      const emailClean = String(paypal_email).trim().toLowerCase();
-      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailClean)) {
-        return res.status(400).json({ error: "That doesn't look like a valid email address." });
-      }
-      if (emailClean.length > 254) {
-        return res.status(400).json({ error: "Email address is too long." });
-      }
-
-      // Step-up: re-verify the password against Supabase, then verify the TOTP
-      // code against user_mfa. Both must succeed — this is the single highest-
-      // impact write a publisher can make, since it rewrites where their money
-      // goes.
-      const { error: pwErr } = await supabaseAnon.auth.signInWithPassword({
-        email: user.email, password: current_password,
-      });
-      if (pwErr) return res.status(401).json({ error: "Your password is incorrect." });
-
-      const { data: mfaRow, error: mfaReadErr } = await supabaseAdmin
-        .from("user_mfa")
-        .select("totp_secret, failed_attempts")
-        .eq("user_id", user.id)
-        .maybeSingle();
-      if (mfaReadErr) return res.status(500).json({ error: mfaReadErr.message });
-      if (!mfaRow) {
-        return res.status(412).json({
-          error: "Enable two-factor authentication first (Settings → Security → Two-factor authentication).",
-          code: "mfa_required",
-        });
-      }
-      if ((mfaRow.failed_attempts || 0) >= 10) {
-        return res.status(429).json({ error: "Too many failed attempts. Email support@boostboss.ai to recover access." });
-      }
-      const totp = require("./_lib/totp.js");
-      if (!totp.verifyCode(mfaRow.totp_secret, totp_code, 1)) {
-        await supabaseAdmin
-          .from("user_mfa")
-          .update({ failed_attempts: (mfaRow.failed_attempts || 0) + 1 })
-          .eq("user_id", user.id);
-        return res.status(401).json({ error: "That authenticator code doesn't match. Use the latest one." });
-      }
-
-      const nowIso = new Date().toISOString();
-      // Reset MFA failure counter on success + mark step-up.
-      await supabaseAdmin
-        .from("user_mfa")
-        .update({ last_used_at: nowIso, last_step_up_at: nowIso, failed_attempts: 0 })
-        .eq("user_id", user.id);
-
-      const row = {
-        user_id:      user.id,
-        paypal_email: emailClean,
-        currency:     "USD",
-        updated_at:   nowIso,
-      };
-      const { error: upErr } = await supabaseAdmin
-        .from("publisher_payout_methods")
-        .upsert(row, { onConflict: "user_id" });
-      if (upErr) return res.status(500).json({ error: upErr.message });
-      return res.json({ success: true, saved_at: nowIso });
-    }
-  }
-
   // ── Onboarding questionnaire ───────────────────────────────────────────
   // Required for every new signup before they can interact with the
   // dashboard. The frontend gates the dashboard with a modal that posts
@@ -1470,8 +1323,7 @@ async function supabaseHandler(action, body, req, res) {
   // the admin can spot active accounts, big spenders, top earners, and
   // anyone stuck in onboarding without opening Supabase directly.
   //
-  // Auth: BBX_ADMIN_KEY or ADMIN_TOKEN bearer (same pattern as
-  // api/payouts.js requireAdmin).
+  // Auth: BBX_ADMIN_KEY or ADMIN_TOKEN bearer.
   //
   // Query params (all optional, via JSON body or query string):
   //   role       — "advertiser" | "developer" | "all" (default: "all")
@@ -1523,10 +1375,9 @@ async function supabaseHandler(action, body, req, res) {
       ]);
 
       // Compute performance per row. Keep cheap: aggregate from campaigns
-      // (advertisers) and payout_requests (publishers). Best-effort — if
-      // a table column is missing, fall through with zeros.
+      // (advertisers). Publishers earn credits only (no cash payouts), so
+      // their performance is just the credit balance already on the row.
       const advIds = advResult.rows.map((r) => r.id);
-      const devIds = devResult.rows.map((r) => r.id);
 
       let spendByAdv = new Map();
       let campaignsByAdv = new Map();
@@ -1542,23 +1393,6 @@ async function supabaseHandler(action, body, req, res) {
             campaignsByAdv.set(adv, (campaignsByAdv.get(adv) || 0) + 1);
           });
         } catch (_) { /* column may not exist on every env — best effort */ }
-      }
-
-      let paidByDev = new Map();
-      let payoutCountByDev = new Map();
-      if (devIds.length > 0) {
-        try {
-          const { data: payouts } = await supabaseAdmin
-            .from("payout_requests")
-            .select("publisher_id, amount_usd, status")
-            .in("publisher_id", devIds)
-            .eq("status", "paid");
-          (payouts || []).forEach((p) => {
-            const d = p.publisher_id;
-            paidByDev.set(d, (paidByDev.get(d) || 0) + Number(p.amount_usd || 0));
-            payoutCountByDev.set(d, (payoutCountByDev.get(d) || 0) + 1);
-          });
-        } catch (_) { /* best effort */ }
       }
 
       const users = [];
@@ -1599,8 +1433,7 @@ async function supabaseHandler(action, body, req, res) {
             monetization_model: r.monetization_model || null,
           },
           performance: {
-            lifetime_paid_usd: paidByDev.get(r.id) || 0,
-            payout_count:      payoutCountByDev.get(r.id) || 0,
+            credit_balance: Number(r.balance) || 0,
           },
         });
       }
@@ -1624,550 +1457,7 @@ async function supabaseHandler(action, body, req, res) {
     }
   }
 
-  // ════════════════════════════════════════════════════════════════════
-  //          AFFILIATE — third role alongside advertiser + publisher
-  // ════════════════════════════════════════════════════════════════════
-  //
-  // MVP scope: an affiliate can sign up, log in, and view a dashboard
-  // listing ads they've "saved" via the SDK's save-to-affiliate button
-  // (the SDK button itself ships in a follow-up). Future scope: share
-  // links, commission tracking, payouts.
-  //
-  // Backed by:
-  //   public.affiliates           — profile keyed by auth.users.id
-  //   public.affiliate_saved_ads  — saved ad impressions
-  //
-  // Auth: same Supabase auth as advertiser + publisher. user_metadata
-  // gets role: "affiliate" so the same email can be all three roles.
-
-  // ── Strict role separation ──
-  // Affiliate is its own role. Having a Supabase auth user (from being an
-  // advertiser/publisher) does NOT grant affiliate access. To use the
-  // affiliate dashboard you must explicitly sign up via affiliate_signup,
-  // which creates a row in public.affiliates. The login + me + save
-  // endpoints all check for that row and return 403 if it's missing.
-  //
-  // Why this matters: an attacker with a leaked advertiser password
-  // shouldn't automatically gain affiliate access; a publisher shouldn't
-  // see affiliate data they didn't sign up for; the role audit trail
-  // stays accurate.
-  if (action === "affiliate_signup") {
-    const {
-      email, password, display_name,
-      // v2 onboarding fields — collected in the multi-step signup. All
-      // optional from the API's perspective (the dashboard surfaces them
-      // via Settings later), but the frontend form requires them.
-      account_type, primary_platform, platform_handle, followers_range,
-      audience_topic, phone, referral_code_used,
-    } = body || {};
-    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
-    if (String(password).length < 8) return res.status(400).json({ error: "Password must be at least 8 characters" });
-
-    // Task #142 — IP-keyed rate limit. Mirrors the main signup's 20/hour
-    // ceiling. The affiliate signup is just as much a spam vector as the
-    // primary signup — and arguably more, since the prize (affiliate
-    // commissions) is more direct than impression revenue.
-    try {
-      const rl = require("./_lib/rate_limit.js");
-      const ip = rl.getClientIp(req);
-      const decision = rl.check(ip, "signup", {
-        limit: Number(process.env.BBX_SIGNUP_RATE_LIMIT) || 20,
-        windowMs: 60 * 60 * 1000,
-        errorMessage:
-          "Too many signups from this network. Please wait an hour and try again, or contact support@boostboss.ai if you believe this is in error.",
-      });
-      if (!decision.allowed) {
-        res.setHeader && res.setHeader("Retry-After", String(decision.retryAfter));
-        return res.status(429).json({
-          error: decision.error,
-          retry_after_seconds: decision.retryAfter,
-        });
-      }
-    } catch (_e) { /* rate-limit module not available — fail open */ }
-
-    // Validate enum-like fields against the same vocabulary as the DB
-    // CHECK constraints. Belt-and-suspenders so we return a friendlier
-    // error than the raw Postgres constraint violation.
-    const ALLOWED_ACCOUNT_TYPES   = ["individual", "enterprise"];
-    const ALLOWED_PLATFORMS       = ["twitter", "tiktok", "youtube", "instagram", "reddit", "discord", "telegram", "linkedin", "newsletter", "blog", "podcast", "twitch", "other"];
-    const ALLOWED_FOLLOWERS_RANGES = ["under_1k", "1k_10k", "10k_100k", "100k_1m", "over_1m", "other"];
-    if (account_type && !ALLOWED_ACCOUNT_TYPES.includes(account_type)) {
-      return res.status(400).json({ error: "Invalid account_type" });
-    }
-    if (primary_platform && !ALLOWED_PLATFORMS.includes(primary_platform)) {
-      return res.status(400).json({ error: "Invalid primary_platform" });
-    }
-    if (followers_range && !ALLOWED_FOLLOWERS_RANGES.includes(followers_range)) {
-      return res.status(400).json({ error: "Invalid followers_range" });
-    }
-
-    const cleanEmail = String(email).trim().toLowerCase();
-    let userId = null;
-    // Track whether this signup landed on a freshly-created (unconfirmed)
-    // Supabase auth user OR an existing one that the caller authenticated
-    // into. Drives whether we return a session or "check your email".
-    let isNewUnconfirmedUser = false;
-
-    // Task #142 — switched from supabaseAdmin.auth.admin.createUser({
-    // email_confirm: true }) to supabaseAnon.auth.signUp() so the
-    // affiliate signup path requires email ownership verification,
-    // matching the main signup flow (Phase 3A change, 2026-06-10). Any
-    // ad-network role that handles money must verify the email actually
-    // belongs to the registering user — otherwise an attacker can claim
-    // arbitrary emails and collect affiliate commissions.
-    const { data: signUpData, error: signUpErr } = await supabaseAnon.auth.signUp({
-      email:    cleanEmail,
-      password: String(password),
-      options: {
-        data: { role: "affiliate" },
-        emailRedirectTo: confirmRedirectFor("affiliate"),
-      },
-    });
-
-    if (signUpErr) {
-      // Common case: email already exists in Supabase auth (advertiser
-      // or publisher signup elsewhere). The affiliate signup can still
-      // proceed for this user — BUT only if they can prove they own the
-      // existing account by providing the correct password. This stops
-      // an attacker from "registering" with a known email + arbitrary
-      // password and gaining affiliate access. The existing user is
-      // already confirmed (they confirmed for the other role), so we
-      // can session-mint immediately for them.
-      if (/already.*registered|already.*exists|duplicate/i.test(signUpErr.message || "")) {
-        const { data: existSignin, error: existErr } = await supabaseAnon.auth.signInWithPassword({
-          email:    cleanEmail,
-          password: String(password),
-        });
-        if (existErr || !existSignin || !existSignin.user) {
-          return res.status(401).json({
-            error: "This email already has a Boost Boss account. Use that account’s password to sign up for the affiliate dashboard, or reset the password first.",
-          });
-        }
-        userId = existSignin.user.id;
-      } else {
-        return res.status(400).json({ error: signUpErr.message });
-      }
-    } else if (signUpData && signUpData.user) {
-      userId = signUpData.user.id;
-      // signUp() returns session=null when email confirmation is required
-      // by the Supabase project (which is the correct production config).
-      // When that's the case, we treat the signup as pending and ask the
-      // frontend to show a check-your-email screen instead of logging in.
-      isNewUnconfirmedUser = !signUpData.session;
-    } else {
-      return res.status(500).json({ error: "Signup failed" });
-    }
-
-    // Reject if affiliates row already exists — they should LOG IN, not sign up.
-    const { data: existingAff } = await supabaseAdmin
-      .from("affiliates").select("id").eq("id", userId).maybeSingle();
-    if (existingAff) {
-      return res.status(409).json({
-        error: "You already have an affiliate account on this email. Try signing in instead.",
-      });
-    }
-
-    // Create the affiliates row — this is what gates affiliate access from
-    // here on out. The v2 onboarding fields are captured here too so the
-    // dashboard Settings + future marketplace targeting has them from
-    // signup onward.
-    const nowIso = new Date().toISOString();
-    const { error: insErr } = await supabaseAdmin.from("affiliates").insert({
-      id:                        userId,
-      email:                     cleanEmail,
-      display_name:              display_name ? String(display_name).slice(0, 80) : null,
-      account_type:              account_type || null,
-      primary_platform:          primary_platform || null,
-      platform_handle:           platform_handle ? String(platform_handle).trim().slice(0, 120) : null,
-      followers_range:           followers_range || null,
-      audience_topic:            audience_topic ? String(audience_topic).trim().slice(0, 120) : null,
-      phone:                     phone ? String(phone).trim().slice(0, 40) : null,
-      referral_code_used:        referral_code_used ? String(referral_code_used).trim().slice(0, 40) : null,
-      // Mark onboarding complete only if the new structured fields were
-      // provided. If a legacy caller passes only email+password, leave the
-      // timestamp null so we know to prompt for the rest on first dashboard
-      // load.
-      onboarding_completed_at:   (account_type && primary_platform && followers_range) ? nowIso : null,
-    });
-    if (insErr) return res.status(500).json({ error: insErr.message });
-
-    // Task #142 — new unconfirmed users have no session to return; ask
-    // the frontend to show a check-your-email screen. The affiliates row
-    // is already inserted above, so it's ready the moment they confirm
-    // the email and sign in normally.
-    if (isNewUnconfirmedUser) {
-      return res.json({
-        success: true,
-        requires_confirmation: true,
-        email: cleanEmail,
-        message: "Check your email to confirm your account.",
-      });
-    }
-
-    // Existing user path — they signed in above with valid credentials,
-    // so their email is already confirmed. Mint a session as before.
-    const { data: sessData, error: sessErr } = await supabaseAnon.auth.signInWithPassword({
-      email:    cleanEmail,
-      password: String(password),
-    });
-    if (sessErr || !sessData || !sessData.session) {
-      return res.status(500).json({ error: "Created but sign-in failed: " + (sessErr && sessErr.message) });
-    }
-    return res.json({
-      success: true,
-      token: sessData.session.access_token,
-      user:  { id: userId, email: cleanEmail, role: "affiliate" },
-    });
-  }
-
-  if (action === "affiliate_login") {
-    const { email, password } = body || {};
-    if (!email || !password) return res.status(400).json({ error: "Email and password are required" });
-    const { data, error } = await supabaseAnon.auth.signInWithPassword({
-      email:    String(email).trim().toLowerCase(),
-      password: String(password),
-    });
-    if (error || !data || !data.session) {
-      return res.status(401).json({ error: error ? error.message : "Invalid email or password" });
-    }
-    // STRICT: require affiliates row. Don't auto-create. If the user
-    // exists in Supabase auth but has no affiliates row, they have not
-    // signed up for the affiliate dashboard yet — bounce them to signup.
-    const { data: aff } = await supabaseAdmin
-      .from("affiliates").select("id").eq("id", data.user.id).maybeSingle();
-    if (!aff) {
-      return res.status(403).json({
-        error: "No affiliate account on this email. Sign up to create one.",
-        code:  "not_affiliate",
-      });
-    }
-    return res.json({
-      success: true,
-      token: data.session.access_token,
-      user:  { id: data.user.id, email: data.user.email, role: "affiliate" },
-    });
-  }
-
-  if (action === "affiliate_me") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: "Invalid token" });
-    const { data: profile, error: pErr } = await supabaseAdmin
-      .from("affiliates")
-      .select("*")
-      .eq("id", user.id)
-      .maybeSingle();
-    if (pErr) return res.status(500).json({ error: pErr.message });
-    // STRICT: no auto-create. If they don't have an affiliates row, they
-    // haven't signed up for the affiliate role yet — return 403 with a
-    // code the frontend can detect and route to signup view.
-    if (!profile) {
-      return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
-    }
-    const { count } = await supabaseAdmin
-      .from("affiliate_saved_ads")
-      .select("id", { count: "exact", head: true })
-      .eq("affiliate_id", user.id);
-    return res.json({
-      user: { id: user.id, email: user.email, role: "affiliate" },
-      profile,
-      saved_count: count || 0,
-    });
-  }
-
-  // SDK calls this when an affiliate clicks "save to affiliate" on an ad
-  // render. STRICT: requires affiliates row — without one the user is
-  // not an affiliate and can't save, even if they have a valid Supabase
-  // JWT from another role.
-  if (action === "affiliate_save_ad") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: "Invalid token" });
-
-    const { data: aff } = await supabaseAdmin
-      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
-    if (!aff) {
-      return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
-    }
-
-    const {
-      campaign_id, advertiser_id, headline, body: adBody, image_url,
-      target_url, source_placement_id, source_surface, notes,
-    } = body || {};
-
-    // Resolve the campaign's parent product (if any) at save time so the
-    // affiliate's saved list groups by product. See [[products-as-parent]].
-    // Failure is non-fatal — we still save the ad, just without the
-    // product_id linkage. Stale/missing campaign_id is treated as "no
-    // product attached" rather than 404'ing the save.
-    let resolvedProductId = null;
-    if (campaign_id) {
-      try {
-        const { data: camp } = await supabaseAdmin
-          .from("campaigns")
-          .select("product_id")
-          .eq("id", campaign_id)
-          .maybeSingle();
-        if (camp && camp.product_id) resolvedProductId = camp.product_id;
-      } catch (_) { /* swallow — save proceeds without product link */ }
-    }
-
-    // If the affiliate has already saved this product, return the existing
-    // row instead of inserting a duplicate. Dedupe is per (affiliate,
-    // product) — one product = one card in My Saves regardless of how many
-    // different campaign renders they've seen for it.
-    if (resolvedProductId) {
-      const { data: existing } = await supabaseAdmin
-        .from("affiliate_saved_ads")
-        .select("*")
-        .eq("affiliate_id", user.id)
-        .eq("product_id", resolvedProductId)
-        .maybeSingle();
-      if (existing) {
-        return res.json({ success: true, saved: existing, deduped: true });
-      }
-    }
-
-    const row = {
-      affiliate_id:         user.id,
-      campaign_id:          campaign_id || null,
-      advertiser_id:        advertiser_id || null,
-      product_id:           resolvedProductId,
-      headline:             headline ? String(headline).slice(0, 240) : null,
-      body:                 adBody ? String(adBody).slice(0, 2000) : null,
-      image_url:            image_url ? String(image_url).slice(0, 2000) : null,
-      target_url:           target_url ? String(target_url).slice(0, 2000) : null,
-      source_placement_id:  source_placement_id ? String(source_placement_id).slice(0, 120) : null,
-      source_surface:       source_surface || null,
-      notes:                notes ? String(notes).slice(0, 1000) : null,
-    };
-    const { data, error: insErr } = await supabaseAdmin
-      .from("affiliate_saved_ads")
-      .insert(row)
-      .select()
-      .maybeSingle();
-    if (insErr) return res.status(500).json({ error: insErr.message });
-    return res.json({ success: true, saved: data });
-  }
-
-  // ── Share-links (affiliate #2) ─────────────────────────────────────
-  // affiliate_create_share_link
-  //   Idempotent. Mints a tokenized URL for an affiliate's saved ad.
-  //   If a share_link already exists for (affiliate_id, saved_ad_id),
-  //   returns the existing token. The token is what appears in the
-  //   boostboss.ai/s/<token> URL the affiliate pastes everywhere.
-  if (action === "affiliate_create_share_link") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: "Invalid token" });
-
-    const { data: aff } = await supabaseAdmin
-      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
-    if (!aff) return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
-
-    // Three mint paths supported (in priority order):
-    //  1) saved_ad_id     — legacy SDK-save flow, idempotent per saved_ad
-    //  2) product_id      — catalog "Get Link" flow, idempotent per product
-    //  3) target_url      — Custom Link flow, accepts any URL (non-idempotent
-    //                        across re-submits unless the URL matches exactly)
-    // At least one MUST be supplied.
-    const savedAdId  = (body && body.saved_ad_id)  || null;
-    const productId  = (body && body.product_id)   || null;
-    const rawUrl     = (body && body.target_url)   || null;
-    if (!savedAdId && !productId && !rawUrl) {
-      return res.status(400).json({ error: "Provide saved_ad_id, product_id, or target_url" });
-    }
-
-    // Resolve the target URL the redirect will use. Priority:
-    //  - saved_ad_id: pulled from the saved_ads row
-    //  - product_id:  pulled from the products row
-    //  - target_url:  used as-is after http(s):// validation
-    let resolvedTargetUrl = null;
-    if (savedAdId) {
-      // Verify the saved_ad belongs to THIS affiliate. Stops one affiliate
-      // from minting share-links over another affiliate's saved ads.
-      const { data: sa } = await supabaseAdmin
-        .from("affiliate_saved_ads")
-        .select("id, affiliate_id, target_url")
-        .eq("id", savedAdId)
-        .maybeSingle();
-      if (!sa || sa.affiliate_id !== user.id) {
-        return res.status(404).json({ error: "Saved ad not found" });
-      }
-      resolvedTargetUrl = sa.target_url || null;
-    } else if (productId) {
-      const { data: prod } = await supabaseAdmin
-        .from("products")
-        .select("id, default_url, status")
-        .eq("id", productId)
-        .maybeSingle();
-      if (!prod || prod.status !== "active") {
-        return res.status(404).json({ error: "Product not found or archived" });
-      }
-      resolvedTargetUrl = prod.default_url || null;
-    } else if (rawUrl) {
-      const u = String(rawUrl).trim();
-      if (!/^https?:\/\//i.test(u)) {
-        return res.status(400).json({ error: "target_url must start with http:// or https://" });
-      }
-      resolvedTargetUrl = u.slice(0, 2000);
-    }
-
-    // Idempotency lookup. We only dedupe when we have a stable parent key
-    // (saved_ad_id or product_id). Pure target_url mints always create a
-    // new row — re-submitting the same URL is treated as a new link request
-    // because the affiliate may want different sub_ids attached.
-    if (savedAdId || productId) {
-      let q = supabaseAdmin
-        .from("affiliate_share_links")
-        .select("*")
-        .eq("affiliate_id", user.id);
-      if (savedAdId) q = q.eq("saved_ad_id", savedAdId);
-      else           q = q.eq("product_id",  productId);
-      const { data: existing } = await q.maybeSingle();
-      if (existing) {
-        return res.json({
-          share_link: existing,
-          url: buildShareUrl(req, existing.token),
-          new: false,
-        });
-      }
-    }
-
-    // Mint a new one. Token is 8 chars of base62 — collision risk at
-    // 62^8 ≈ 2e14 is negligible at any scale we'll hit. If it collides
-    // anyway, the unique index throws and we retry with a fresh token.
-    let newToken = null;
-    let lastErr = null;
-    for (let attempt = 0; attempt < 4; attempt++) {
-      const candidate = makeToken(8);
-      const { data: created, error: insErr } = await supabaseAdmin
-        .from("affiliate_share_links")
-        .insert({
-          affiliate_id: user.id,
-          saved_ad_id:  savedAdId  || null,
-          product_id:   productId  || null,
-          token:        candidate,
-          target_url:   resolvedTargetUrl,
-        })
-        .select()
-        .maybeSingle();
-      if (!insErr) {
-        return res.json({
-          share_link: created,
-          url: buildShareUrl(req, candidate),
-          new: true,
-        });
-      }
-      lastErr = insErr;
-      // Only retry on unique-violation; bail on other errors.
-      if (!/duplicate|unique/i.test(insErr.message || "")) break;
-    }
-    return res.status(500).json({ error: (lastErr && lastErr.message) || "Could not mint token" });
-  }
-
-  if (action === "affiliate_list_share_links") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: "Invalid token" });
-
-    const { data: aff } = await supabaseAdmin
-      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
-    if (!aff) return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
-
-    const params = Object.assign({}, req.query || {}, body || {});
-    const limit  = Math.min(parseInt(params.limit, 10) || 50, 200);
-    const offset = Math.max(parseInt(params.offset, 10) || 0, 0);
-
-    // Join saved_ad headline for the dashboard display (avoid a second
-    // round-trip from the frontend).
-    const { data, error: listErr } = await supabaseAdmin
-      .from("affiliate_share_links")
-      .select("id, token, target_url, created_at, click_count, last_click_at, revoked_at, saved_ad_id, affiliate_saved_ads(headline, image_url)")
-      .eq("affiliate_id", user.id)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
-    if (listErr) return res.status(500).json({ error: listErr.message });
-
-    // Aggregate total clicks for the dashboard home stat.
-    const totalClicks = (data || []).reduce((a, r) => a + (r.click_count || 0), 0);
-
-    // Flatten the joined headline so the frontend has a simple shape.
-    const links = (data || []).map((r) => ({
-      id:           r.id,
-      token:        r.token,
-      url:          buildShareUrl(req, r.token),
-      target_url:   r.target_url,
-      created_at:   r.created_at,
-      click_count:  r.click_count,
-      last_click_at: r.last_click_at,
-      revoked_at:   r.revoked_at,
-      saved_ad_id:  r.saved_ad_id,
-      headline:     r.affiliate_saved_ads ? r.affiliate_saved_ads.headline : null,
-      image_url:    r.affiliate_saved_ads ? r.affiliate_saved_ads.image_url : null,
-    }));
-    return res.json({ links, total_clicks: totalClicks });
-  }
-
-  if (action === "affiliate_revoke_share_link") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: "Invalid token" });
-
-    const linkId = (body && body.id) || null;
-    if (!linkId) return res.status(400).json({ error: "id is required" });
-
-    // Scoped by affiliate_id so an affiliate can only revoke their own.
-    const { data, error: upErr } = await supabaseAdmin
-      .from("affiliate_share_links")
-      .update({ revoked_at: new Date().toISOString() })
-      .eq("id", linkId)
-      .eq("affiliate_id", user.id)
-      .select()
-      .maybeSingle();
-    if (upErr) return res.status(500).json({ error: upErr.message });
-    if (!data) return res.status(404).json({ error: "Share link not found" });
-    return res.json({ success: true, share_link: data });
-  }
-
-  if (action === "affiliate_list_saved") {
-    const token = (req.headers.authorization || "").replace(/^Bearer\s+/i, "");
-    if (!token) return res.status(401).json({ error: "No token" });
-    const { data: { user }, error } = await supabaseAnon.auth.getUser(token);
-    if (error || !user) return res.status(401).json({ error: "Invalid token" });
-
-    // STRICT: require affiliates row, no leak across roles.
-    const { data: aff } = await supabaseAdmin
-      .from("affiliates").select("id").eq("id", user.id).maybeSingle();
-    if (!aff) {
-      return res.status(403).json({ error: "Not an affiliate", code: "not_affiliate" });
-    }
-
-    const params = Object.assign({}, req.query || {}, body || {});
-    const limit  = Math.min(parseInt(params.limit, 10) || 50, 200);
-    const offset = Math.max(parseInt(params.offset, 10) || 0, 0);
-    const status = params.status && ["active", "shared", "archived"].includes(params.status)
-      ? params.status : null;
-
-    let q = supabaseAdmin
-      .from("affiliate_saved_ads")
-      .select("*", { count: "exact" })
-      .eq("affiliate_id", user.id)
-      .order("saved_at", { ascending: false })
-      .range(offset, offset + limit - 1);
-    if (status) q = q.eq("status", status);
-
-    const { data, count, error: listErr } = await q;
-    if (listErr) return res.status(500).json({ error: listErr.message });
-    return res.json({ saved: data || [], total: count || 0 });
-  }
-
-  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, complete_role_profile, refresh, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, get_payout_method, save_payout_method, save_onboarding, admin_list_users, affiliate_signup, affiliate_login, affiliate_me, affiliate_save_ad, affiliate_list_saved, affiliate_create_share_link, affiliate_list_share_links, affiliate_revoke_share_link" });
+  return res.status(400).json({ error: "Unknown action. Use: signup, login, oauth_sync, complete_role_profile, refresh, me, me_cors, logout, resend_confirmation, request_password_reset, update_password, update_formats, update_placements, update_notif_prefs, update_brand_safety, change_password, mfa_status, mfa_enroll_init, mfa_enroll_verify, mfa_disable, verify_totp, save_onboarding, admin_list_users" });
 }
 
 // ── helper: build the email confirmation redirect URL for a given role ──
@@ -2177,21 +1467,11 @@ async function supabaseHandler(action, body, req, res) {
 function confirmRedirectFor(role) {
   const base = process.env.PUBLIC_BASE || "https://boostboss.ai";
   if (role === "developer") return `${base}/publish/confirm`;
-  if (role === "affiliate") {
-    // Affiliate dashboard lives on its own subdomain (affiliate.boostboss.ai),
-    // overridable via PUBLIC_AFFILIATE_BASE for local/preview deploys.
-    const aff = process.env.PUBLIC_AFFILIATE_BASE || "https://affiliate.boostboss.ai";
-    return `${aff}/confirm`;
-  }
   return `${base}/ads/confirm`;
 }
 function resetRedirectFor(role) {
   const base = process.env.PUBLIC_BASE || "https://boostboss.ai";
   if (role === "developer") return `${base}/publish/reset-password`;
-  if (role === "affiliate") {
-    const aff = process.env.PUBLIC_AFFILIATE_BASE || "https://affiliate.boostboss.ai";
-    return `${aff}/reset-password`;
-  }
   return `${base}/ads/reset-password`;
 }
 
