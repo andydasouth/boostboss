@@ -37,6 +37,7 @@
     { "source": "/ads", "destination": "/ads.html" },
     { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/ads", "destination": "/ads.html" },
     { "source": "/console", "destination": "/advertiser.html" },
+    { "source": "/launch", "destination": "/launch.html" },
     { "source": "/signup", "destination": "/signup.html" },
     { "source": "/signin", "destination": "/signup.html" },
     { "source": "/login",  "destination": "/signup.html" },
