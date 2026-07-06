@@ -25,8 +25,6 @@
     { "source": "/advertiser", "destination": "/console", "permanent": false },
     { "source": "/ads/dashboard",     "destination": "/console", "permanent": false },
     { "source": "/publish/dashboard", "destination": "/console", "permanent": false },
-    { "source": "/signup",     "destination": "/",                  "permanent": false },
-    { "source": "/login",      "destination": "/",                  "permanent": false },
     { "source": "/test/lumi-snippet-test", "destination": "/admin/qa/lumi-snippet-test", "permanent": true }
   ],
   "rewrites": [
@@ -39,6 +37,9 @@
     { "source": "/ads", "destination": "/ads.html" },
     { "source": "/:lang(en|zh|zh-TW|ja|ko|vi)/ads", "destination": "/ads.html" },
     { "source": "/console", "destination": "/advertiser.html" },
+    { "source": "/signup", "destination": "/signup.html" },
+    { "source": "/signin", "destination": "/signup.html" },
+    { "source": "/login",  "destination": "/signup.html" },
     { "source": "/publish/signup", "destination": "/signup.html" },
     { "source": "/publish/signin", "destination": "/signup.html" },
     { "source": "/ads/signup", "destination": "/signup.html" },

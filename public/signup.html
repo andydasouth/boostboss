@@ -155,7 +155,7 @@ a{color:inherit;text-decoration:none}svg{display:block}
 <div class="page-fx"></div>
 <div class="topbar">
   <a class="brand" href="/"><img class="brand-mark" src="/design-system/assets/rocket-logo.svg" alt="Boost Boss"><span class="brand-name">Boost Boss</span></a>
-  <a class="back" href="/ads" id="back-link">← Back to SuperBoost</a>
+  <a class="back" href="/" id="back-link">← Back to boostboss.ai</a>
 </div>
 
 <!-- ── Cross-role onboarding modal — moved out of the card so its
@@ -198,17 +198,17 @@ a{color:inherit;text-decoration:none}svg{display:block}
 
 <main class="auth">
   <div class="card">
-    <!-- LEFT brand panel — adaptive content swapped by JS based on role -->
+    <!-- LEFT brand panel — one loop, one story (credits-only model 2026-07-06) -->
     <aside class="bp">
-      <div class="eyebrow" id="bp-eyebrow">SuperBoost · for advertisers</div>
-      <h2 id="bp-headline">Reach intent,<br>not <span class="acc">cookies</span>.</h2>
-      <p class="lead" id="bp-lead">Put your product in front of the highest-intent audience in software — inside the AI apps people build with every day.</p>
+      <div class="eyebrow" id="bp-eyebrow">Boost Boss · launch network for AI products</div>
+      <h2 id="bp-headline">List your AI product.<br>Get <span class="acc">users</span>. Free.</h2>
+      <p class="lead" id="bp-lead">Host ads in your AI app to earn Credits — every impression mints 1 — then spend them putting your product in front of people already using AI tools. Add cash to amplify.</p>
       <ul class="bl" id="bp-bullets">
-        <li><span class="ck">✓</span><span><b>3.8×</b> CTR vs. legacy networks</span></li>
-        <li><span class="ck">✓</span><span><b>Brand-safe</b> inventory by default</span></li>
-        <li><span class="ck">✓</span><span>Pay for <b>outcomes</b> — CPM, CPC, CPA</span></li>
+        <li><span class="ck">✓</span><span><b>1 Credit</b> per hosted impression</span></li>
+        <li><span class="ck">✓</span><span><b>Credits fund</b> your own promotion — no cash needed</span></li>
+        <li><span class="ck">✓</span><span><b>10 min</b> from signup to live</span></li>
       </ul>
-      <div class="statcard" id="bp-statcard"><div class="big">$1.93</div><div class="lbl">avg eCPA across live campaigns</div><div class="live"><span class="d"></span>LIVE</div></div>
+      <div class="statcard" id="bp-statcard"><div class="big">3,148</div><div class="lbl">Credits minted by one publisher this week</div><div class="live"><span class="d"></span>LIVE</div></div>
     </aside>
 
     <!-- RIGHT form panel — wraps the existing signup/login/welcome panels
@@ -222,8 +222,8 @@ a{color:inherit;text-decoration:none}svg{display:block}
 
     <!-- Signup form -->
     <div id="signup-panel">
-      <h1>Get started with Boost Boss</h1>
-      <p class="sub">Choose your role to begin</p>
+      <h1>List your AI product</h1>
+      <p class="sub">One account: get discovered, and earn Credits hosting ads. Free.</p>
 
       <div id="error" class="error-msg"></div>
       <div id="success" class="success-msg"></div>
@@ -239,9 +239,8 @@ a{color:inherit;text-decoration:none}svg{display:block}
       </button>
       <div class="divider-small">or with email</div>
 
-      <!-- Role picker removed 2026-06-04: the only entry points are now
-           /publish/signup and /ads/signup, which lockRoleFromPath() resolves
-           to `selectedRole` from the URL. No unified /signup exists. -->
+      <!-- One-loop signup (2026-07-06): no roles. /signup, /signin, and the
+           legacy /publish/* + /ads/* entry URLs all serve this same flow. -->
 
       <form id="signup-form" autocomplete="off">
         <!-- autocomplete hints: `email` is the proper semantic for the
@@ -264,19 +263,15 @@ a{color:inherit;text-decoration:none}svg{display:block}
           <div class="pw-label" id="pw-label"></div>
         </div>
         <div class="form-group" id="company-group">
-          <label for="company_name">Company name</label>
-          <input type="text" id="company_name" name="company_name" placeholder="Acme Inc.">
-        </div>
-        <div class="form-group hidden" id="app-group">
-          <label for="app_name">App or product name</label>
-          <input type="text" id="app_name" name="app_name" placeholder="My AI Assistant">
+          <label for="company_name">Product name</label>
+          <input type="text" id="company_name" name="company_name" placeholder="The AI product you're launching">
         </div>
         <!-- Door-selection Layer 1 (2026-05-16): intent-first signup capture.
              Asked only for publishers (role=developer). Answer routes them
              to a recommended starting door in the dashboard. Stored in
              localStorage as bb_primary_door — no DB change, server doesn't
              need to know. UX-only; not the full plug-and-play upgrade. -->
-        <div class="form-group hidden" id="app-type-group">
+        <div class="form-group" id="app-type-group">
           <label for="app_type">What are you building?</label>
           <select id="app_type" name="app_type">
             <option value="">Select…</option>
@@ -413,47 +408,13 @@ a{color:inherit;text-decoration:none}svg{display:block}
 // sets selectedRole. Reads window.selectedRole and swaps the
 // left-panel content + the body's data-role attribute so the
 // --acc CSS variable flips (cyan for advertiser, pink for publisher).
-(function adaptBrandPanel(){
-  function apply(){
-    var role = (window.selectedRole === 'developer') ? 'developer' : 'advertiser';
-    document.body.setAttribute('data-role', role);
-    var eyebrow = document.getElementById('bp-eyebrow');
-    var headline = document.getElementById('bp-headline');
-    var lead = document.getElementById('bp-lead');
-    var bullets = document.getElementById('bp-bullets');
-    var statcard = document.getElementById('bp-statcard');
-    if (!eyebrow) return;
-    if (role === 'developer') {
-      eyebrow.textContent = 'Lumi SDK · for publishers';
-      headline.innerHTML = 'Monetize your<br>AI app in <span class="acc">minutes</span>.';
-      lead.textContent = 'Drop in Lumi, serve native ads that fit the conversation, and earn ad credits on every impression — no surveillance, no cookies.';
-      bullets.innerHTML = '<li><span class="ck">✓</span><span><b>1 Credit</b> per hosted impression</span></li>' +
-                         '<li><span class="ck">✓</span><span><b>Credits</b> fund your own promotion</span></li>' +
-                         '<li><span class="ck">✓</span><span><b>10 min</b> from signup to live</span></li>';
-      statcard.innerHTML = '<div class="big">3,148</div><div class="lbl">credits earned by a publisher this week</div><div class="live"><span class="d"></span>LIVE</div>';
-    } else {
-      eyebrow.textContent = 'SuperBoost · for advertisers';
-      headline.innerHTML = 'Reach intent,<br>not <span class="acc">cookies</span>.';
-      lead.textContent = 'Put your product in front of the highest-intent audience in software — inside the AI apps people build with every day.';
-      bullets.innerHTML = '<li><span class="ck">✓</span><span><b>3.8×</b> CTR vs. legacy networks</span></li>' +
-                         '<li><span class="ck">✓</span><span><b>Brand-safe</b> inventory by default</span></li>' +
-                         '<li><span class="ck">✓</span><span>Pay for <b>outcomes</b> — CPM, CPC, CPA</span></li>';
-      statcard.innerHTML = '<div class="big">$1.93</div><div class="lbl">avg eCPA across live campaigns</div><div class="live"><span class="d"></span>LIVE</div>';
-    }
-    // Update topbar back-link: text + href both adapt per role to
-    // match the Claude Design copy exactly:
-    //   advertiser  → '← Back to SuperBoost' -> /ads
-    //   developer   → '← Back to Publishers' -> /publish
-    var back = document.getElementById('back-link');
-    if (back) {
-      back.setAttribute('href', role === 'developer' ? '/publish' : '/ads');
-      back.textContent = role === 'developer' ? '← Back to Publishers' : '← Back to SuperBoost';
-    }
-  }
-  // Run once now and again on next tick (after lockRoleFromPath sets selectedRole)
+// One loop, one brand (credits-only model 2026-07-06): the left panel is
+// static HTML now — every entry URL gets the same launch-network story.
+// The body keeps the pink accent to match the console.
+(function fixBrandAccent(){
+  function apply(){ document.body.setAttribute('data-role', 'developer'); }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
   else apply();
-  setTimeout(apply, 50);
 })();
 </script>
 <script>
@@ -529,142 +490,33 @@ const sb = window.supabase && window.supabase.createClient
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
-// ── Role lock based on URL path ──────────────────────────────────
-// /publish/signup and /publish/signin → publisher-only flow
-// /ads/signup  and /ads/signin         → advertiser-only flow
-// The unified /signup (and /login) entry was REMOVED 2026-06-04
-// (vercel.json now 301-redirects them to /). Every reachable URL
-// is role-specific, so this function ALWAYS resolves a role.
-// We still remove the Create/Sign-in tab bar — each URL is its own
-// dedicated page — and re-route the "switch" anchors to the sibling URL.
-(function lockRoleFromPath() {
+// ── One-loop signup (2026-07-06) ─────────────────────────────────
+// The role concept is gone from the UX: every entry URL (/signup,
+// /signin, /publish/signup, /publish/signin, /ads/signup, /ads/signin)
+// serves the same product-first flow. The account signs up as
+// 'advertiser' (the console's primary auth role); the developer
+// profile lazy-creates via the existing needs_profile machinery when
+// they reach Install SDK. Only thing the path decides: which panel
+// (signup vs signin) shows first. Tab switching stays in-page.
+(function unifiedEntry() {
   var path = window.location.pathname;
-  var role = null;
-  var base = null;  // base of the role-specific URL family
-  var brand = null;
 
-  var LUMI = '<span class="lumi-mark">Lumi SDK <span class="spark">✦</span></span>';
-  var SUPERBOOST = '<span class="superboost-mark">Super<span class="bb">Boost Ads</span></span>' +
-    '<span class="powered-by-inline"> · <em>Powered by <span class="benna-accent">Benna</span></em></span>';
-  // Primary rocket logo SVG — shared across the landing / publish / ads navs
-  var ROCKET_SVG = '<svg class="brand-mark" width="36" height="36" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-    '<path d="M 66 8 L 68.5 3 L 71 8 L 76 10.5 L 71 13 L 68.5 18 L 66 13 L 61 10.5 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="1.5" stroke-linejoin="round"/>' +
-    '<line x1="14" y1="28" x2="24" y2="28" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>' +
-    '<line x1="8" y1="40" x2="24" y2="40" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>' +
-    '<line x1="16" y1="52" x2="24" y2="52" stroke="#1A1A2E" stroke-width="3" stroke-linecap="round"/>' +
-    '<path d="M 30 50 L 21 67 L 32 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>' +
-    '<path d="M 52 50 L 61 67 L 50 62 Z" fill="#04BEFE" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>' +
-    '<rect x="30" y="26" width="22" height="36" fill="#FF2D78" stroke="#1A1A2E" stroke-width="3"/>' +
-    '<path d="M 30 26 L 41 7 L 52 26 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="3" stroke-linejoin="round"/>' +
-    '<circle cx="41" cy="35" r="5.5" fill="#04BEFE" stroke="#1A1A2E" stroke-width="2.5"/>' +
-    '<line x1="30" y1="44" x2="52" y2="44" stroke="#1A1A2E" stroke-width="2"/>' +
-    '<text x="41" y="58" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="13" font-weight="900" fill="white" letter-spacing="-0.5">BB</text>' +
-    '<path d="M 31 62 L 36 77 L 41 66 L 46 77 L 51 62 Z" fill="#FFE600" stroke="#1A1A2E" stroke-width="2.5" stroke-linejoin="round"/>' +
-    '<path d="M 36 62 L 41 72 L 46 62 Z" fill="#FF2D78"/>' +
-  '</svg>';
-
-  if (path.startsWith("/publish/")) {
-    role = "developer";
-    base = "/publish";
-    brand = {
-      signupH: "Start earning as a Publisher",
-      signupS: "Monetize your AI app with the " + LUMI,
-      loginH:  "Welcome back",
-      loginS:  "Sign in to your " + LUMI + " dashboard",
-      logoSvg: ROCKET_SVG,
-      wordmark: "Boost Boss",
-      brandHref: "/publish"
-    };
-  } else if (path.startsWith("/ads/")) {
-    role = "advertiser";
-    base = "/ads";
-    brand = {
-      signupH: "Launch your first ad campaign",
-      signupS: "Reach AI-native users via " + SUPERBOOST,
-      loginH:  "Welcome back",
-      loginS:  "Sign in to your " + SUPERBOOST + " dashboard",
-      logoSvg: ROCKET_SVG,
-      wordmark: '<span class="superboost-wordmark">' +
-                  '<span class="superboost-name">Super<span style="color: var(--pink);">Boost Ads</span></span>' +
-                  '<span class="powered-by-stack">Powered by <em>Benna</em></span>' +
-                '</span>',
-      brandHref: "/ads"
-    };
-  }
-  if (!role) return;
-
-  selectedRole = role;
-  // Hide the role picker — this page is role-specific
+  // Hide the legacy role picker if present
   var picker = document.querySelector(".role-picker");
   if (picker) picker.style.display = "none";
-  // Remove the Create/Sign-in tab bar — dedicated URLs handle each
-  var tabRow = document.querySelector(".tab-row");
-  if (tabRow) tabRow.style.display = "none";
 
-  // Phase 3B: point the Forgot Password link at the right product surface
-  // so the email-link callback uses the matching role's redirect URL and
-  // the post-reset success page sends them back to the right signin URL.
+  // Forgot-password flows through the shared auth-flow page
   var fp = document.getElementById("forgot-password-link");
-  if (fp) fp.href = (role === "developer" ? "/publish" : "/ads") + "/forgot-password";
-  // Toggle field visibility to match the locked role
-  var companyG = document.getElementById("company-group");
-  var appG     = document.getElementById("app-group");
-  var appTypeG = document.getElementById("app-type-group");
-  if (companyG) companyG.classList.toggle("hidden", role !== "advertiser");
-  if (appG)     appG.classList.toggle("hidden", role !== "developer");
-  if (appTypeG) appTypeG.classList.toggle("hidden", role !== "developer");
-
-  // Customize panel copy for the role
-  var suH  = document.querySelector("#signup-panel h1");
-  var suS  = document.querySelector("#signup-panel .sub");
-  var liH  = document.querySelector("#login-panel h1");
-  var liS  = document.querySelector("#login-panel .sub");
-  if (suH) suH.textContent = brand.signupH;
-  if (suS) suS.innerHTML   = brand.signupS;   // innerHTML — embeds wordmark markup
-  if (liH) liH.textContent = brand.loginH;
-  if (liS) liS.innerHTML   = brand.loginS;    // innerHTML — embeds wordmark markup
-
-  // Swap the nav brand: rocket logo + role-appropriate wordmark
-  var navBrand     = document.querySelector("nav .brand");
-  var navBrandMark = navBrand && navBrand.querySelector(".brand-mark");
-  var navBrandName = navBrand && navBrand.querySelector(".brand-name");
-  if (navBrand)     navBrand.setAttribute("href", brand.brandHref);
-  if (navBrandMark) navBrandMark.outerHTML = brand.logoSvg;
-  if (navBrandName) navBrandName.innerHTML = brand.wordmark;
-
-  // Append the rainbow Lumi SDK mark when this is a publisher route.
-  // Skipped on /ads/* — the advertiser side uses SuperBoost, not Lumi.
-  if (role === "developer" && navBrand && !navBrand.querySelector(".lumi-mark")) {
-    var lm = document.createElement("span");
-    lm.className = "lumi-mark";
-    lm.setAttribute("aria-hidden", "true");
-    lm.innerHTML = 'Lumi SDK<span class="sparkle">✦</span>';
-    navBrand.appendChild(lm);
-  }
+  if (fp) fp.href = "/ads/forgot-password";
 
   // Show the correct panel for this URL
-  var isSignin = /\/signin$/.test(path);
+  var isSignin = /\/(signin|login)$/.test(path);
   document.getElementById("signup-panel").classList.toggle("hidden", isSignin);
   document.getElementById("login-panel").classList.toggle("hidden", !isSignin);
-
-  // Re-route the cross-link anchors to the sibling URL. We use a
-  // capture-phase listener with stopImmediatePropagation so the bubble
-  // handler attached later in this file (which toggles panels in place)
-  // never fires — the browser follows the new href instead.
-  var signinHref = base + "/signin";
-  var signupHref = base + "/signup";
-  var switchLogin  = document.getElementById("switch-login");
-  var switchSignup = document.getElementById("switch-signup");
-  if (switchLogin)  switchLogin.setAttribute("href", signinHref);
-  if (switchSignup) switchSignup.setAttribute("href", signupHref);
-  var redirect = function (href) {
-    return function (e) {
-      e.stopImmediatePropagation();
-      window.location.href = href;
-    };
-  };
-  if (switchLogin)  switchLogin.addEventListener("click",  redirect(signinHref), true);
-  if (switchSignup) switchSignup.addEventListener("click", redirect(signupHref), true);
+  var tabs = document.querySelectorAll(".tab-btn");
+  tabs.forEach(function (b) {
+    b.classList.toggle("active", (b.dataset.tab === "login") === isSignin);
+  });
 })();
 
 // ── Tab switching ──
@@ -975,21 +827,20 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
         page_url: window.location.href,
       },
     };
-    if (selectedRole === "advertiser") payload.company_name = document.getElementById("company_name").value.trim() || undefined;
-    if (selectedRole === "developer") payload.app_name = document.getElementById("app_name").value.trim() || undefined;
+    // One-loop model: the single "Product name" field feeds both profile
+    // names — company_name for the advertiser row created at signup, and
+    // app_name so the lazy developer-profile creation reuses it later.
+    const productName = document.getElementById("company_name").value.trim() || undefined;
+    payload.company_name = productName;
+    payload.app_name = productName;
 
-    // Task #144 — the primary signup form's "what are you building?" answer
-    // now flows to BOTH localStorage (for dashboard UI cues) AND the server
-    // (developers.integration_door column). Backend whitelist accepts the
-    // canonical 4-door taxonomy (mcp / js-snippet / npm-sdk / rest-api) plus
-    // "multiple" and "other" catch-alls. Anything else is silently nulled
-    // server-side, so the column never holds garbage.
-    if (selectedRole === "developer") {
-      const appType = (document.getElementById("app_type") || {}).value || "";
-      if (appType) {
-        try { localStorage.setItem("bb_primary_door", appType); } catch (_) {}
-        payload.integration_door = appType;
-      }
+    // "What are you building?" — captured for everyone now. Flows to
+    // localStorage (dashboard door recommendation) and rides the payload
+    // for the developer profile when it lazy-creates.
+    const appType = (document.getElementById("app_type") || {}).value || "";
+    if (appType) {
+      try { localStorage.setItem("bb_primary_door", appType); } catch (_) {}
+      payload.integration_door = appType;
     }
 
     const r = await fetch(API + "?action=signup", {
@@ -1014,7 +865,7 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
       const hasInlineSigninBtn = !!document.querySelector(signinSelector);
       const linkTarget = hasInlineSigninBtn
         ? '#switch-to-signin" data-switch="1'
-        : (selectedRole === "developer" ? "/publish/signin" : "/ads/signin");
+        : "/signin";
       errEl.innerHTML = msg +
         ' <a href="' + linkTarget + '" id="switch-to-signin" ' +
         'style="color:var(--pink);text-decoration:underline;font-weight:600;">Sign in instead →</a>';
@@ -1041,8 +892,7 @@ document.getElementById("signup-form").addEventListener("submit", async e => {
     // tells the user what to do next.
     if (j.requires_confirmation) {
       const email = (payload.email || "").trim();
-      const dest = (selectedRole === "developer" ? "/publish" : "/ads") +
-                   "/check-email?email=" + encodeURIComponent(email);
+      const dest = "/ads/check-email?email=" + encodeURIComponent(email);
       showToast('Account created — check your email', 'success');
       setTimeout(() => window.location.href = dest, 400);
       return;
@@ -1082,8 +932,7 @@ document.getElementById("login-form").addEventListener("submit", async e => {
     // Phase 3A: if the backend says email is unconfirmed, route the user
     // to the check-email page so they can resend the confirmation link.
     if (!r.ok && j.requires_confirmation) {
-      const dest = (selectedRole === "developer" ? "/publish" : "/ads") +
-                   "/check-email?email=" + encodeURIComponent(loginEmail);
+      const dest = "/ads/check-email?email=" + encodeURIComponent(loginEmail);
       showToast('Please confirm your email first', 'info');
       setTimeout(() => window.location.href = dest, 400);
       return;
