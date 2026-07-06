@@ -29,12 +29,13 @@ alter table public.developers drop column if exists instant_payouts_enabled;
 alter table public.developers drop column if exists stripe_requirements_due;
 alter table public.developers drop column if exists stripe_account_id;
 
--- MoR storefront + affiliate program
-drop table if exists public.storefront_transactions;
-drop table if exists public.paypal_transactions;
-drop table if exists public.affiliate_saved_ads;
-drop table if exists public.affiliate_share_links;
-drop table if exists public.affiliates;
-drop table if exists public.vouchers;
-drop table if exists public.pricing_plans;
-drop table if exists public.product_orders;
+-- MoR storefront + affiliate program (CASCADE: interdependent FKs, e.g.
+-- vouchers.transaction_id → storefront_transactions; whole domain is retired)
+drop table if exists public.vouchers cascade;
+drop table if exists public.storefront_transactions cascade;
+drop table if exists public.paypal_transactions cascade;
+drop table if exists public.affiliate_saved_ads cascade;
+drop table if exists public.affiliate_share_links cascade;
+drop table if exists public.affiliates cascade;
+drop table if exists public.pricing_plans cascade;
+drop table if exists public.product_orders cascade;
